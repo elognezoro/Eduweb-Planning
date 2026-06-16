@@ -708,7 +708,143 @@
     },
     "vieScolaireNotesBulletins": {
       "title": "Оценки и табели",
-      "description": "Вносите оценки по классу и периоду, затем формируйте официальные табели."
+      "description": "Вносите оценки по классу и периоду, затем формируйте официальные табели.",
+      "sections": {
+        "saisie": "Добавить оценку",
+        "notes": "Оценки класса",
+        "bulletins": "Табели"
+      },
+      "filters": {
+        "class": "Класс",
+        "period": "Триместр / период",
+        "defaultPeriod": "Триместр 1"
+      },
+      "tableHeaders": {
+        "student": "Ученик",
+        "discipline": "Предмет",
+        "type": "Тип",
+        "note": "Оценка",
+        "scale": "Шкала",
+        "coeff": "Коэф."
+      },
+      "tableActions": {
+        "delete": "Удалить"
+      },
+      "noteForm": {
+        "title": "Добавить оценку",
+        "importTitle": "Импорт оценок",
+        "importDescription": "Одна строка на оценку: Фамилия Имя; Предмет; Тип; Оценка; Шкала; Коэффициент.",
+        "importButton": "Импортировать CSV",
+        "student": "Ученик",
+        "studentPlaceholder": "Введите фамилию или имя…",
+        "studentsGroup": "Ученики класса",
+        "discipline": "Предмет",
+        "evaluationType": "Тип оценивания",
+        "note": "Оценка",
+        "notePlaceholder": "Прим.: 14",
+        "scale": "Шкала (всего баллов)",
+        "coefficient": "Коэффициент",
+        "csvFormat": "Ожидаемый формат CSV",
+        "csvHeader": "Фамилия Имя ; Предмет ; Тип ; Оценка ; Шкала ; Коэффициент",
+        "csvExample": "Куадио Айя ; Математика ; Контрольная ; 14 ; 20 ; 3",
+        "save": "Сохранить оценку"
+      },
+      "notesSection": {
+        "title": "Оценки класса ({class} — {period})"
+      },
+      "bulletinsSection": {
+        "title": "Табели ({class} — {period})",
+        "notesCount": "Оценок",
+        "average": "Средний балл",
+        "details": "Подробнее",
+        "downloadPdf": "Скачать PDF"
+      },
+      "toasts": {
+        "selectStudentAndNote": "Выберите ученика и введите оценку",
+        "noteSaved": "Оценка сохранена"
+      },
+      "modal": {
+        "title": "Табель оценок",
+        "downloadPdf": "Скачать PDF",
+        "close": "Закрыть"
+      },
+      "bulletin": {
+        "header": "ТАБЕЛЬ ОЦЕНОК",
+        "schoolYear": "Учебный год {year}",
+        "defaultDirection": "Региональная дирекция",
+        "institution": "Учреждение:",
+        "code": "Код:",
+        "statusLabel": "Статус:",
+        "class": "Класс:",
+        "regime": "Система:",
+        "enrolment": "Численность:",
+        "logoFallback": "Логотип",
+        "tableHeaders": {
+          "disciplines": "ПРЕДМЕТЫ",
+          "average": "СРЕД./20",
+          "coeff": "КОЭФ.",
+          "weighted": "СРЕД",
+          "weighted2": "КОЭФ",
+          "rank": "МЕСТО",
+          "appreciation": "ОЦЕНКА",
+          "teacher": "УЧИТЕЛЬ"
+        },
+        "domains": {
+          "lettres": "ЯЗЫКИ",
+          "sciences": "НАУКИ",
+          "autres": "ДРУГИЕ"
+        },
+        "balance": "ИТОГ {domain}",
+        "totals": "ИТОГО",
+        "attendance": "Посещаемость",
+        "totalHours": "Всего часов отсутствия: {n}",
+        "justified": "Оправдано: {n}",
+        "unjustified": "Неоправдано: {n}",
+        "councilMentions": "Замечания совета класса",
+        "distinctions": "ОТЛИЧИЯ",
+        "moyTitleTerm": "Средний балл за триместр",
+        "moyTitleSemester": "Средний балл за семестр",
+        "moyTitleSequence": "Средний балл за период",
+        "rankLabel": "Место: {n}",
+        "councilAppreciations": "Оценки совета класса",
+        "aiSuggestion": "AI-подсказка",
+        "classResults": "Результаты класса",
+        "classAverage": "Средний балл класса: {n}",
+        "lowestAverage": "Наименьший средний: {n}",
+        "highestAverage": "Наибольший средний: {n}",
+        "teacherSignature": "Имя/подпись главного учителя",
+        "headSignature": "Имя/подпись и печать директора",
+        "doneAt": "Составлено в {place}, {date}",
+        "headTitle": "Директор",
+        "emblemAlt": "Национальный герб",
+        "signatureAlt": "Подпись",
+        "stampAlt": "Печать",
+        "tagline": "Образование ради лучшего будущего — EduWeb Planner © {year}",
+        "placeFallback": "__________"
+      },
+      "appreciation": {
+        "excellent": "Отлично",
+        "veryGood": "Очень хорошо",
+        "good": "Хорошо",
+        "fairlyGood": "Достаточно хорошо",
+        "passable": "Удовлетворительно",
+        "mediocre": "Посредственно",
+        "insufficient": "Недостаточно"
+      },
+      "distinctions": {
+        "honor": "Доска почёта",
+        "congrats": "Поздравления Совета",
+        "encouragement": "Поощрения"
+      },
+      "rankOrdinal": {
+        "first": "1-й",
+        "other": "{n}-й"
+      },
+      "regimes": {
+        "term": "Триместровый",
+        "semester": "Семестровый",
+        "sequence": "Последовательный"
+      }
     },
     "vieScolaireLivretScolaire": {
       "title": "Школьное дело",

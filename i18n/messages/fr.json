@@ -708,7 +708,143 @@
     },
     "vieScolaireNotesBulletins": {
       "title": "Notes & Bulletins",
-      "description": "Saisissez les notes par classe et période, puis générez les bulletins officiels."
+      "description": "Saisissez les notes par classe et période, puis générez les bulletins officiels.",
+      "sections": {
+        "saisie": "Ajouter une note",
+        "notes": "Notes de la classe",
+        "bulletins": "Bulletins"
+      },
+      "filters": {
+        "class": "Classe pédagogique",
+        "period": "Trimestre / Période",
+        "defaultPeriod": "Trimestre 1"
+      },
+      "tableHeaders": {
+        "student": "Élève",
+        "discipline": "Discipline",
+        "type": "Type",
+        "note": "Note",
+        "scale": "Barème",
+        "coeff": "Coef."
+      },
+      "tableActions": {
+        "delete": "Supprimer"
+      },
+      "noteForm": {
+        "title": "Ajouter une note",
+        "importTitle": "Importer des notes",
+        "importDescription": "Une ligne par note : Nom Prénom ; Discipline ; Type ; Note ; Barème ; Coefficient.",
+        "importButton": "Importer un CSV",
+        "student": "Élève",
+        "studentPlaceholder": "Tapez un nom ou prénom…",
+        "studentsGroup": "Élèves de la classe",
+        "discipline": "Discipline (matière)",
+        "evaluationType": "Type d'évaluation",
+        "note": "Note",
+        "notePlaceholder": "Ex : 14",
+        "scale": "Barème (total points)",
+        "coefficient": "Coefficient",
+        "csvFormat": "Format CSV attendu",
+        "csvHeader": "Nom Prénom ; Discipline ; Type ; Note ; Barème ; Coefficient",
+        "csvExample": "Kouadio Aya ; Mathématiques ; Devoir surveillé ; 14 ; 20 ; 3",
+        "save": "Enregistrer la note"
+      },
+      "notesSection": {
+        "title": "Notes de la classe ({class} — {period})"
+      },
+      "bulletinsSection": {
+        "title": "Bulletins ({class} — {period})",
+        "notesCount": "Notes",
+        "average": "Moyenne",
+        "details": "Voir détails",
+        "downloadPdf": "Télécharger PDF"
+      },
+      "toasts": {
+        "selectStudentAndNote": "Sélectionnez l'élève et saisissez la note",
+        "noteSaved": "Note enregistrée"
+      },
+      "modal": {
+        "title": "Bulletin de notes",
+        "downloadPdf": "Télécharger PDF",
+        "close": "Fermer"
+      },
+      "bulletin": {
+        "header": "BULLETIN DE NOTES",
+        "schoolYear": "Année Scolaire {year}",
+        "defaultDirection": "Direction Régionale",
+        "institution": "Établissement :",
+        "code": "Code :",
+        "statusLabel": "Statut :",
+        "class": "Classe :",
+        "regime": "Régime :",
+        "enrolment": "Effectif :",
+        "logoFallback": "Logo",
+        "tableHeaders": {
+          "disciplines": "DISCIPLINES",
+          "average": "MOY./20",
+          "coeff": "COEF.",
+          "weighted": "MOY",
+          "weighted2": "COEF",
+          "rank": "RANG",
+          "appreciation": "APPRECIATION",
+          "teacher": "PROFESSEUR"
+        },
+        "domains": {
+          "lettres": "LETTRES",
+          "sciences": "SCIENCES",
+          "autres": "AUTRES"
+        },
+        "balance": "BILAN {domain}",
+        "totals": "TOTAUX",
+        "attendance": "Assiduité",
+        "totalHours": "Total d'heures d'absence : {n}",
+        "justified": "Justifiées : {n}",
+        "unjustified": "Non justifiées : {n}",
+        "councilMentions": "Mentions du Conseil de classe",
+        "distinctions": "DISTINCTIONS",
+        "moyTitleTerm": "Moyenne trimestrielle",
+        "moyTitleSemester": "Moyenne semestrielle",
+        "moyTitleSequence": "Moyenne séquentielle",
+        "rankLabel": "Rang : {n}",
+        "councilAppreciations": "Appréciations du Conseil de classe",
+        "aiSuggestion": "Suggestion IA",
+        "classResults": "Résultats de la classe",
+        "classAverage": "Moyenne générale de la classe : {n}",
+        "lowestAverage": "Moyenne la plus basse : {n}",
+        "highestAverage": "Moyenne la plus élevée : {n}",
+        "teacherSignature": "Nom/Signature du professeur principal",
+        "headSignature": "Nom/Signature et Cachet du Chef d'Établissement",
+        "doneAt": "Fait à {place}, le {date}",
+        "headTitle": "Le Chef d'Établissement",
+        "emblemAlt": "Emblème national",
+        "signatureAlt": "Signature",
+        "stampAlt": "Cachet",
+        "tagline": "S'instruire pour mieux espérer — EduWeb Planner © {year}",
+        "placeFallback": "__________"
+      },
+      "appreciation": {
+        "excellent": "Excellent",
+        "veryGood": "Très Bien",
+        "good": "Bien",
+        "fairlyGood": "Assez Bien",
+        "passable": "Passable",
+        "mediocre": "Médiocre",
+        "insufficient": "Insuffisant"
+      },
+      "distinctions": {
+        "honor": "Tableau d'Honneur",
+        "congrats": "Félicitations du Conseil",
+        "encouragement": "Encouragements"
+      },
+      "rankOrdinal": {
+        "first": "1er",
+        "other": "{n}e"
+      },
+      "regimes": {
+        "term": "Trimestriel",
+        "semester": "Semestriel",
+        "sequence": "Séquentiel"
+      }
     },
     "vieScolaireLivretScolaire": {
       "title": "Livret scolaire",

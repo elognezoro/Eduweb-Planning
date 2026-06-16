@@ -88,7 +88,7 @@ export default function NotesBulletinsPage() {
 
   const [bulletin, setBulletin] = React.useState<{ student: Eleve; autoPrint: boolean } | null>(null);
 
-  const periodLabel = periods[Number(period)]?.label ?? periods[0]?.label ?? "Trimestre 1";
+  const periodLabel = periods[Number(period)]?.label ?? periods[0]?.label ?? t("pages.vieScolaireNotesBulletins.filters.defaultPeriod");
 
   // moyennes
   const discMoy = (sid: string, disc: string) => {
@@ -118,14 +118,14 @@ export default function NotesBulletinsPage() {
       icon={ClipboardList}
       permission="grades:view"
       sections={[
-        { id: "saisie", label: "Ajouter une note" },
-        { id: "notes", label: "Notes de la classe" },
-        { id: "bulletins", label: "Bulletins" },
+        { id: "saisie", label: t("pages.vieScolaireNotesBulletins.sections.saisie") },
+        { id: "notes", label: t("pages.vieScolaireNotesBulletins.sections.notes") },
+        { id: "bulletins", label: t("pages.vieScolaireNotesBulletins.sections.bulletins") },
       ]}
     >
       {/* Sélecteurs */}
       <div className="grid gap-3 rounded-xl border border-border bg-card p-3 sm:grid-cols-2">
-        <Field label="Classe pédagogique">
+        <Field label={t("pages.vieScolaireNotesBulletins.filters.class")}>
           <Select value={cls} onValueChange={setCls}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -135,7 +135,7 @@ export default function NotesBulletinsPage() {
             </SelectContent>
           </Select>
         </Field>
-        <Field label="Trimestre / Période">
+        <Field label={t("pages.vieScolaireNotesBulletins.filters.period")}>
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -151,17 +151,17 @@ export default function NotesBulletinsPage() {
         <NoteForm classStudents={classStudents} onAdd={(n) => setNotes((ns) => [n, ...ns])} />
       </div>
 
-      <SectionCard id="notes" title={`Notes de la classe (${cls} — ${periodLabel})`} contentClassName="p-0 overflow-x-auto">
+      <SectionCard id="notes" title={t("pages.vieScolaireNotesBulletins.notesSection.title", { class: cls, period: periodLabel })} contentClassName="p-0 overflow-x-auto">
         <div className="max-h-[420px] overflow-y-auto">
           <table className="w-full min-w-[760px] text-sm">
             <thead className="sticky top-0 border-b border-border bg-muted/60">
               <tr className="text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="px-4 py-2.5 text-left">Élève</th>
-                <th className="px-4 py-2.5 text-left">Discipline</th>
-                <th className="px-4 py-2.5 text-left">Type</th>
-                <th className="px-4 py-2.5 text-center">Note</th>
-                <th className="px-4 py-2.5 text-center">Barème</th>
-                <th className="px-4 py-2.5 text-center">Coef.</th>
+                <th className="px-4 py-2.5 text-left">{t("pages.vieScolaireNotesBulletins.tableHeaders.student")}</th>
+                <th className="px-4 py-2.5 text-left">{t("pages.vieScolaireNotesBulletins.tableHeaders.discipline")}</th>
+                <th className="px-4 py-2.5 text-left">{t("pages.vieScolaireNotesBulletins.tableHeaders.type")}</th>
+                <th className="px-4 py-2.5 text-center">{t("pages.vieScolaireNotesBulletins.tableHeaders.note")}</th>
+                <th className="px-4 py-2.5 text-center">{t("pages.vieScolaireNotesBulletins.tableHeaders.scale")}</th>
+                <th className="px-4 py-2.5 text-center">{t("pages.vieScolaireNotesBulletins.tableHeaders.coeff")}</th>
                 <th className="px-4 py-2.5"></th>
               </tr>
             </thead>
@@ -177,7 +177,7 @@ export default function NotesBulletinsPage() {
                     <td className="px-4 py-2 text-center text-muted-foreground">/{n.bareme}</td>
                     <td className="px-4 py-2 text-center">{n.coeff}</td>
                     <td className="px-4 py-2 text-center">
-                      <button onClick={() => removeNote(n.id)} className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-600" aria-label="Supprimer">
+                      <button onClick={() => removeNote(n.id)} className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-600" aria-label={t("pages.vieScolaireNotesBulletins.tableActions.delete")}>
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </td>
@@ -189,7 +189,7 @@ export default function NotesBulletinsPage() {
         </div>
       </SectionCard>
 
-      <SectionCard id="bulletins" title={`Bulletins (${cls} — ${periodLabel})`}>
+      <SectionCard id="bulletins" title={t("pages.vieScolaireNotesBulletins.bulletinsSection.title", { class: cls, period: periodLabel })}>
         <div className="space-y-2">
           {ranked.map((s) => {
             const moy = generalAvg(s.id);
@@ -204,18 +204,18 @@ export default function NotesBulletinsPage() {
                 </div>
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="text-center">
-                    <p className="text-[11px] uppercase text-muted-foreground">Notes</p>
+                    <p className="text-[11px] uppercase text-muted-foreground">{t("pages.vieScolaireNotesBulletins.bulletinsSection.notesCount")}</p>
                     <p className="font-bold text-foreground">{notesOf(s.id)}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-[11px] uppercase text-muted-foreground">Moyenne</p>
+                    <p className="text-[11px] uppercase text-muted-foreground">{t("pages.vieScolaireNotesBulletins.bulletinsSection.average")}</p>
                     <p className="font-extrabold text-ew-green-700">{moy.toFixed(2)}<span className="text-xs font-bold text-muted-foreground">/20</span></p>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => setBulletin({ student: s, autoPrint: false })}>
-                    <Eye className="h-4 w-4" /> Voir détails
+                    <Eye className="h-4 w-4" /> {t("pages.vieScolaireNotesBulletins.bulletinsSection.details")}
                   </Button>
                   <Button size="sm" onClick={() => setBulletin({ student: s, autoPrint: true })}>
-                    <Download className="h-4 w-4" /> Télécharger PDF
+                    <Download className="h-4 w-4" /> {t("pages.vieScolaireNotesBulletins.bulletinsSection.downloadPdf")}
                   </Button>
                 </div>
               </div>
@@ -252,6 +252,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 /* ------------------------------- Ajouter une note ------------------------------- */
 function NoteForm({ classStudents, onAdd }: { classStudents: Eleve[]; onAdd: (n: NoteEntry) => void }) {
+  const t = useTranslations();
   const [studentId, setStudentId] = React.useState("");
   const [discipline, setDiscipline] = React.useState(DISCIPLINES[0].name);
   const [type, setType] = React.useState(TYPES[0]);
@@ -261,39 +262,39 @@ function NoteForm({ classStudents, onAdd }: { classStudents: Eleve[]; onAdd: (n:
 
   const save = () => {
     if (!studentId || note === "") {
-      toast.error("Sélectionnez l'élève et saisissez la note");
+      toast.error(t("pages.vieScolaireNotesBulletins.toasts.selectStudentAndNote"));
       return;
     }
     onAdd({ id: `${studentId}-${discipline}-${Date.now().toString(36)}`, studentId, discipline, type, note: Number(note), bareme: Number(bareme) || 20, coeff: Number(coeff) || 1 });
-    toast.success("Note enregistrée");
+    toast.success(t("pages.vieScolaireNotesBulletins.toasts.noteSaved"));
     setNote("");
   };
 
   return (
     <SectionCard
-      title="Ajouter une note"
+      title={t("pages.vieScolaireNotesBulletins.noteForm.title")}
       action={
         <ImportCsvDialog
-          title="Importer des notes"
-          description="Une ligne par note : Nom Prénom ; Discipline ; Type ; Note ; Barème ; Coefficient."
+          title={t("pages.vieScolaireNotesBulletins.noteForm.importTitle")}
+          description={t("pages.vieScolaireNotesBulletins.noteForm.importDescription")}
           expectedColumns={["eleve", "discipline", "type", "note", "bareme", "coefficient"]}
           sampleRow={["Kouadio Aya", "Mathématiques", "Devoir surveillé", "14", "20", "3"]}
           templateFilename="modele-notes.csv"
           trigger={(open) => (
             <Button variant="outline" size="sm" onClick={open}>
-              <UploadCloud className="h-4 w-4" /> Importer un CSV
+              <UploadCloud className="h-4 w-4" /> {t("pages.vieScolaireNotesBulletins.noteForm.importButton")}
             </Button>
           )}
         />
       }
     >
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <Field label="Élève">
+        <Field label={t("pages.vieScolaireNotesBulletins.noteForm.student")}>
           <Select value={studentId} onValueChange={setStudentId}>
-            <SelectTrigger><SelectValue placeholder="Tapez un nom ou prénom…" /></SelectTrigger>
+            <SelectTrigger><SelectValue placeholder={t("pages.vieScolaireNotesBulletins.noteForm.studentPlaceholder")} /></SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Élèves de la classe</SelectLabel>
+                <SelectLabel>{t("pages.vieScolaireNotesBulletins.noteForm.studentsGroup")}</SelectLabel>
                 {classStudents.map((s) => (
                   <SelectItem key={s.id} value={s.id}>{toNomCase(s.lastName)} {toPrenomCase(s.firstName)}</SelectItem>
                 ))}
@@ -301,7 +302,7 @@ function NoteForm({ classStudents, onAdd }: { classStudents: Eleve[]; onAdd: (n:
             </SelectContent>
           </Select>
         </Field>
-        <Field label="Discipline (matière)">
+        <Field label={t("pages.vieScolaireNotesBulletins.noteForm.discipline")}>
           <Select value={discipline} onValueChange={(v) => { setDiscipline(v); setCoeff(String(COEFF_OF[v] ?? 1)); }}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -311,7 +312,7 @@ function NoteForm({ classStudents, onAdd }: { classStudents: Eleve[]; onAdd: (n:
             </SelectContent>
           </Select>
         </Field>
-        <Field label="Type d'évaluation">
+        <Field label={t("pages.vieScolaireNotesBulletins.noteForm.evaluationType")}>
           <Select value={type} onValueChange={setType}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -321,24 +322,24 @@ function NoteForm({ classStudents, onAdd }: { classStudents: Eleve[]; onAdd: (n:
             </SelectContent>
           </Select>
         </Field>
-        <Field label="Note">
-          <Input type="number" min={0} max={Number(bareme) || 20} step={0.25} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ex : 14" />
+        <Field label={t("pages.vieScolaireNotesBulletins.noteForm.note")}>
+          <Input type="number" min={0} max={Number(bareme) || 20} step={0.25} value={note} onChange={(e) => setNote(e.target.value)} placeholder={t("pages.vieScolaireNotesBulletins.noteForm.notePlaceholder")} />
         </Field>
-        <Field label="Barème (total points)">
+        <Field label={t("pages.vieScolaireNotesBulletins.noteForm.scale")}>
           <Input type="number" min={1} value={bareme} onChange={(e) => setBareme(e.target.value)} />
         </Field>
-        <Field label="Coefficient">
+        <Field label={t("pages.vieScolaireNotesBulletins.noteForm.coefficient")}>
           <Input type="number" min={1} value={coeff} onChange={(e) => setCoeff(e.target.value)} />
         </Field>
       </div>
       <div className="mt-3 rounded-lg border border-dashed border-border bg-muted/30 p-3 text-[11px] text-muted-foreground">
-        <p className="font-bold uppercase tracking-wide">Format CSV attendu</p>
-        <p className="font-mono">Nom Prénom ; Discipline ; Type ; Note ; Barème ; Coefficient</p>
-        <p className="font-mono">Kouadio Aya ; Mathématiques ; Devoir surveillé ; 14 ; 20 ; 3</p>
+        <p className="font-bold uppercase tracking-wide">{t("pages.vieScolaireNotesBulletins.noteForm.csvFormat")}</p>
+        <p className="font-mono">{t("pages.vieScolaireNotesBulletins.noteForm.csvHeader")}</p>
+        <p className="font-mono">{t("pages.vieScolaireNotesBulletins.noteForm.csvExample")}</p>
       </div>
       <div className="mt-3 flex justify-end">
         <Button onClick={save}>
-          <Plus className="h-4 w-4" /> Enregistrer la note
+          <Plus className="h-4 w-4" /> {t("pages.vieScolaireNotesBulletins.noteForm.save")}
         </Button>
       </div>
     </SectionCard>
@@ -347,29 +348,38 @@ function NoteForm({ classStudents, onAdd }: { classStudents: Eleve[]; onAdd: (n:
 
 /* --------------------------------- Bulletin --------------------------------- */
 /** Regroupement officiel des disciplines par domaine (avec bilans intermédiaires). */
-const DOMAINS: { name: string; items: string[] }[] = [
-  { name: "LETTRES", items: ["Français", "Histoire-Géographie", "Anglais"] },
-  { name: "SCIENCES", items: ["Mathématiques", "Physique-Chimie", "SVT"] },
-  { name: "AUTRES", items: ["EDHC", "EPS", "TICE", "Conduite"] },
+/** Domaines du bulletin — clé i18n pour le nom du domaine, items en français (données). */
+const DOMAINS: { key: "lettres" | "sciences" | "autres"; items: string[] }[] = [
+  { key: "lettres", items: ["Français", "Histoire-Géographie", "Anglais"] },
+  { key: "sciences", items: ["Mathématiques", "Physique-Chimie", "SVT"] },
+  { key: "autres", items: ["EDHC", "EPS", "TICE", "Conduite"] },
 ];
 
-const apprecDisc = (m: number) =>
-  m >= 18 ? "Excellent" : m >= 16 ? "Très Bien" : m >= 14 ? "Bien" : m >= 12 ? "Assez Bien" : m >= 10 ? "Passable" : m >= 8 ? "Médiocre" : "Insuffisant";
+/** Bandes d'appréciation — clés sémantiques traduites via i18n (cf. appreciation.*). */
+type AppreciationKey = "excellent" | "veryGood" | "good" | "fairlyGood" | "passable" | "mediocre" | "insufficient";
 
-const travailBand = (m: number) =>
-  m >= 16 ? "Excellent" : m >= 14 ? "Bien" : m >= 12 ? "Assez Bien" : m >= 10 ? "Passable" : m >= 8 ? "Médiocre" : "Insuffisant";
+const apprecDiscKey = (m: number): AppreciationKey =>
+  m >= 18 ? "excellent" : m >= 16 ? "veryGood" : m >= 14 ? "good" : m >= 12 ? "fairlyGood" : m >= 10 ? "passable" : m >= 8 ? "mediocre" : "insufficient";
 
-const AI_PHRASES: Record<string, string[]> = {
-  Excellent: ["Travail Excellent", "Excellent trimestre — vives félicitations du conseil de classe.", "Élève brillant(e), continue ainsi !"],
-  Bien: ["Travail Bien", "Bon trimestre — encouragements du conseil de classe.", "Ensemble solide, poursuis tes efforts."],
-  "Assez Bien": ["Travail Assez Bien", "Des efforts encourageants — continue sur cette voie.", "Trimestre correct ; vise plus haut au prochain."],
-  Passable: ["Travail Passable", "Résultats justes — une mobilisation est attendue.", "Doit travailler avec plus de régularité."],
-  "Médiocre": ["Travail Médiocre", "Trimestre difficile — un sursaut est nécessaire.", "Travail insuffisant ; ressaisis-toi."],
-  Insuffisant: ["Travail Insuffisant", "Résultats très faibles — réaction urgente attendue.", "Doit redoubler d'efforts dès maintenant."],
+const travailBandKey = (m: number): AppreciationKey =>
+  m >= 16 ? "excellent" : m >= 14 ? "good" : m >= 12 ? "fairlyGood" : m >= 10 ? "passable" : m >= 8 ? "mediocre" : "insufficient";
+
+/**
+ * Phrases d'appréciation par bande — restent en français pour la version actuelle
+ * (l'éditeur du bulletin peut modifier librement avant impression).
+ */
+const AI_PHRASES: Record<AppreciationKey, string[]> = {
+  excellent: ["Travail Excellent", "Excellent trimestre — vives félicitations du conseil de classe.", "Élève brillant(e), continue ainsi !"],
+  veryGood: ["Travail Très Bien", "Très bon trimestre — encouragements du conseil de classe.", "Excellents résultats, garde le cap."],
+  good: ["Travail Bien", "Bon trimestre — encouragements du conseil de classe.", "Ensemble solide, poursuis tes efforts."],
+  fairlyGood: ["Travail Assez Bien", "Des efforts encourageants — continue sur cette voie.", "Trimestre correct ; vise plus haut au prochain."],
+  passable: ["Travail Passable", "Résultats justes — une mobilisation est attendue.", "Doit travailler avec plus de régularité."],
+  mediocre: ["Travail Médiocre", "Trimestre difficile — un sursaut est nécessaire.", "Travail insuffisant ; ressaisis-toi."],
+  insufficient: ["Travail Insuffisant", "Résultats très faibles — réaction urgente attendue.", "Doit redoubler d'efforts dès maintenant."],
 };
 
 function aiAppreciation(m: number, variant: number): string {
-  const arr = AI_PHRASES[travailBand(m)] ?? ["Travail Assez Bien"];
+  const arr = AI_PHRASES[travailBandKey(m)] ?? AI_PHRASES.fairlyGood;
   return arr[variant % arr.length];
 }
 
@@ -394,14 +404,21 @@ function BulletinModal({
   rank: number;
   onClose: () => void;
 }) {
+  const t = useTranslations("pages.vieScolaireNotesBulletins");
   const moy = generalAvg(student.id);
   const [variant, setVariant] = React.useState(0);
   const [appreciation, setAppreciation] = React.useState(() => aiAppreciation(moy, 0));
 
   const effectif = classStudents.length;
   const regimeShort = meta.regimeLabel.replace(/\s*\(.*\)/, "");
+  // Libellé de la moyenne selon le régime (trimestriel/semestriel/séquentiel) — i18n.
   const moyTitle =
-    regimeShort === "Semestriel" ? "Moyenne semestrielle" : regimeShort === "Séquentiel" ? "Moyenne séquentielle" : "Moyenne trimestrielle";
+    regimeShort === "Semestriel" ? t("bulletin.moyTitleSemester")
+      : regimeShort === "Séquentiel" ? t("bulletin.moyTitleSequence")
+      : t("bulletin.moyTitleTerm");
+
+  // Format ordinal (1er/Ne) — locale-aware via i18n.
+  const ordinal = (n: number) => (n === 1 ? t("rankOrdinal.first") : t("rankOrdinal.other", { n }));
 
   // Rang de l'élève dans la classe pour une discipline donnée.
   const discRank = (disc: string) => {
@@ -411,11 +428,12 @@ function BulletinModal({
       .sort((a, b) => b.m - a.m);
     const i = arr.findIndex((x) => x.id === student.id);
     if (i < 0) return "";
-    return `${i === 0 ? "1er" : `${i + 1}e`}/${arr.length}`;
+    return `${ordinal(i + 1)}/${arr.length}`;
   };
 
   // Disciplines regroupées par domaine, avec bilan par domaine.
   const domainBlocks = DOMAINS.map((dom) => {
+    const domainName = t(`bulletin.domains.${dom.key}` as const);
     const rows = dom.items.map((name) => {
       const m = discMoy(student.id, name);
       const coeff = COEFF_OF[name] ?? null;
@@ -426,7 +444,7 @@ function BulletinModal({
         coeff,
         moyCoef: hasNote ? (m as number) * (coeff as number) : null,
         rang: hasNote ? discRank(name) : "",
-        appr: hasNote ? apprecDisc(m as number) : "",
+        appr: hasNote ? t(`appreciation.${apprecDiscKey(m as number)}` as const) : "",
         prof: PROF_OF[name] ?? "",
         hasNote,
       };
@@ -434,7 +452,7 @@ function BulletinModal({
     const graded = rows.filter((r) => r.hasNote);
     const bCoeff = graded.reduce((a, r) => a + (r.coeff as number), 0);
     const bPoints = graded.reduce((a, r) => a + (r.moyCoef as number), 0);
-    return { name: dom.name, rows, bCoeff, bPoints, bMoy: bCoeff ? bPoints / bCoeff : 0 };
+    return { name: domainName, rows, bCoeff, bPoints, bMoy: bCoeff ? bPoints / bCoeff : 0 };
   });
   const totalCoeff = domainBlocks.reduce((a, d) => a + d.bCoeff, 0);
   const totalPoints = domainBlocks.reduce((a, d) => a + d.bPoints, 0);
@@ -454,11 +472,11 @@ function BulletinModal({
 
   // Tableau d'Honneur : coché automatiquement dès que la moyenne générale ≥ 12/20.
   const distinctions = [
-    ...(moy >= 12 ? ["Tableau d'Honneur"] : []),
-    ...(moy >= 16 ? ["Félicitations du Conseil"] : []),
-    ...(moy >= 10 && moy < 12 ? ["Encouragements"] : []),
+    ...(moy >= 12 ? [t("distinctions.honor")] : []),
+    ...(moy >= 16 ? [t("distinctions.congrats")] : []),
+    ...(moy >= 10 && moy < 12 ? [t("distinctions.encouragement")] : []),
   ];
-  const rankLabel = `${rank === 1 ? "1er" : `${rank}e`}/${effectif}`;
+  const rankLabel = `${ordinal(rank)}/${effectif}`;
   const today = new Date().toLocaleDateString("fr-FR");
 
   React.useEffect(() => {
@@ -472,10 +490,10 @@ function BulletinModal({
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[94vh] max-w-[860px] overflow-y-auto p-0">
         <div className="no-print flex items-center justify-between gap-2 border-b border-border bg-muted/40 px-4 py-2">
-          <span className="text-sm font-semibold text-foreground">Bulletin de notes</span>
+          <span className="text-sm font-semibold text-foreground">{t("modal.title")}</span>
           <div className="flex gap-2">
-            <Button size="sm" onClick={() => window.print()}><Download className="h-4 w-4" /> Télécharger PDF</Button>
-            <Button size="sm" variant="outline" onClick={onClose}>Fermer</Button>
+            <Button size="sm" onClick={() => window.print()}><Download className="h-4 w-4" /> {t("modal.downloadPdf")}</Button>
+            <Button size="sm" variant="outline" onClick={onClose}>{t("modal.close")}</Button>
           </div>
         </div>
 
@@ -484,18 +502,18 @@ function BulletinModal({
           <div className="grid grid-cols-3 items-start gap-3 text-center">
             <div className="text-[9px] leading-tight">
               <p className="font-bold uppercase">{meta.ministry}</p>
-              <p className="mt-1 italic">{meta.regionalDirection || "Direction Régionale"}</p>
+              <p className="mt-1 italic">{meta.regionalDirection || t("bulletin.defaultDirection")}</p>
             </div>
             <div>
-              <p className="text-[17px] font-extrabold tracking-wide">BULLETIN DE NOTES</p>
+              <p className="text-[17px] font-extrabold tracking-wide">{t("bulletin.header")}</p>
               <p className="text-[11px] font-bold">{regimeShort}</p>
               <p className="text-[11px]">{periodLabel}</p>
             </div>
             <div className="text-[9px] leading-tight">
               <p className="font-bold uppercase">{meta.official}</p>
-              {meta.nationalEmblem && <img src={meta.nationalEmblem} alt="Emblème national" className="mx-auto my-0.5 h-9 w-auto object-contain" />}
+              {meta.nationalEmblem && <img src={meta.nationalEmblem} alt={t("bulletin.emblemAlt")} className="mx-auto my-0.5 h-9 w-auto object-contain" />}
               {meta.slogan && <p className="italic">{meta.slogan}</p>}
-              <p className="mt-1">Année Scolaire {meta.schoolYear}</p>
+              <p className="mt-1">{t("bulletin.schoolYear", { year: meta.schoolYear })}</p>
             </div>
           </div>
           <div className="mt-2 border-t-2 border-black" />
@@ -503,12 +521,12 @@ function BulletinModal({
           {/* Établissement / Code / Statut */}
           <div className="mt-2 flex items-stretch border border-black">
             <div className="flex-1 p-2">
-              <span className="font-bold">Établissement :</span>{" "}
+              <span className="font-bold">{t("bulletin.institution")}</span>{" "}
               <span className="inline-block min-w-[200px] border-b border-black/50">{meta.institution !== "Établissement" ? meta.institution : " "}</span>
             </div>
             <div className="border-l border-black p-2 text-[10px]">
-              <p><span className="font-bold">Code :</span> <span className="inline-block min-w-[64px] border-b border-black/50">{meta.code || " "}</span></p>
-              <p className="mt-1"><span className="font-bold">Statut :</span> <span className="inline-block min-w-[64px] border-b border-black/50">{meta.type || " "}</span></p>
+              <p><span className="font-bold">{t("bulletin.code")}</span> <span className="inline-block min-w-[64px] border-b border-black/50">{meta.code || " "}</span></p>
+              <p className="mt-1"><span className="font-bold">{t("bulletin.statusLabel")}</span> <span className="inline-block min-w-[64px] border-b border-black/50">{meta.type || " "}</span></p>
             </div>
           </div>
 
@@ -516,11 +534,11 @@ function BulletinModal({
           <div className="mt-2 flex items-start justify-between border border-black p-2">
             <div>
               <p className="text-[13px] font-bold">{toNomCase(student.lastName)} {toPrenomCase(student.firstName)}</p>
-              <p className="mt-1"><span className="font-bold">Classe :</span> {student.className} <span className="ml-5 font-bold">Régime :</span> {regimeShort}</p>
-              <p><span className="font-bold">Effectif :</span> {effectif}</p>
+              <p className="mt-1"><span className="font-bold">{t("bulletin.class")}</span> {student.className} <span className="ml-5 font-bold">{t("bulletin.regime")}</span> {regimeShort}</p>
+              <p><span className="font-bold">{t("bulletin.enrolment")}</span> {effectif}</p>
             </div>
             <div className="flex h-14 w-20 shrink-0 items-center justify-center border border-black/40 text-[9px] text-gray-400">
-              {meta.logo ? <img src={meta.logo} alt="Logo" className="h-full w-full object-contain p-0.5" /> : "Logo"}
+              {meta.logo ? <img src={meta.logo} alt={t("bulletin.logoFallback")} className="h-full w-full object-contain p-0.5" /> : t("bulletin.logoFallback")}
             </div>
           </div>
 
@@ -528,13 +546,13 @@ function BulletinModal({
           <table className="mt-2 w-full border-collapse text-[10px]">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-black px-1.5 py-1 text-left">DISCIPLINES</th>
-                <th className="border border-black px-1 py-1 text-center">MOY./20</th>
-                <th className="border border-black px-1 py-1 text-center">COEF.</th>
-                <th className="border border-black px-1 py-1 text-center">MOY<br />COEF</th>
-                <th className="border border-black px-1 py-1 text-center">RANG</th>
-                <th className="border border-black px-1 py-1 text-center">APPRECIATION</th>
-                <th className="border border-black px-1 py-1 text-left">PROFESSEUR</th>
+                <th className="border border-black px-1.5 py-1 text-left">{t("bulletin.tableHeaders.disciplines")}</th>
+                <th className="border border-black px-1 py-1 text-center">{t("bulletin.tableHeaders.average")}</th>
+                <th className="border border-black px-1 py-1 text-center">{t("bulletin.tableHeaders.coeff")}</th>
+                <th className="border border-black px-1 py-1 text-center">{t("bulletin.tableHeaders.weighted")}<br />{t("bulletin.tableHeaders.weighted2")}</th>
+                <th className="border border-black px-1 py-1 text-center">{t("bulletin.tableHeaders.rank")}</th>
+                <th className="border border-black px-1 py-1 text-center">{t("bulletin.tableHeaders.appreciation")}</th>
+                <th className="border border-black px-1 py-1 text-left">{t("bulletin.tableHeaders.teacher")}</th>
               </tr>
             </thead>
             <tbody>
@@ -552,7 +570,7 @@ function BulletinModal({
                     </tr>
                   ))}
                   <tr className="bg-gray-100 font-bold">
-                    <td className="border border-black px-1.5 py-0.5">BILAN {dom.name}</td>
+                    <td className="border border-black px-1.5 py-0.5">{t("bulletin.balance", { domain: dom.name })}</td>
                     <td className="border border-black px-1 py-0.5 text-center">{dom.bCoeff ? dom.bMoy.toFixed(2) : ""}</td>
                     <td className="border border-black px-1 py-0.5 text-center">{dom.bCoeff || ""}</td>
                     <td className="border border-black px-1 py-0.5 text-center">{dom.bPoints ? dom.bPoints.toFixed(2) : ""}</td>
@@ -563,7 +581,7 @@ function BulletinModal({
                 </React.Fragment>
               ))}
               <tr className="bg-gray-200 font-bold">
-                <td className="border border-black px-1.5 py-1">TOTAUX</td>
+                <td className="border border-black px-1.5 py-1">{t("bulletin.totals")}</td>
                 <td className="border border-black px-1 py-1" />
                 <td className="border border-black px-1 py-1 text-center">{totalCoeff}</td>
                 <td className="border border-black px-1 py-1 text-center">{totalPoints.toFixed(2)}</td>
@@ -577,19 +595,19 @@ function BulletinModal({
           {/* Bandeau : Assiduité | Moyenne | Résultats de la classe */}
           <div className="mt-2 grid grid-cols-3 border border-black text-[10px]">
             <div className="border-r border-black p-2">
-              <p className="font-bold underline">Assiduité</p>
-              <p className="mt-1">Total d&apos;heures d&apos;absence : <b>{pad2(absTotal)}</b></p>
-              <p>Justifiées : <b>{pad2(absJust)}</b>  Non justifiées : <b>{pad2(absNon)}</b></p>
-              <p className="mt-2 font-bold underline">Mentions du Conseil de classe</p>
-              <p className="mt-1 font-bold">DISTINCTIONS</p>
+              <p className="font-bold underline">{t("bulletin.attendance")}</p>
+              <p className="mt-1">{t("bulletin.totalHours", { n: pad2(absTotal) })}</p>
+              <p>{t("bulletin.justified", { n: pad2(absJust) })}  {t("bulletin.unjustified", { n: pad2(absNon) })}</p>
+              <p className="mt-2 font-bold underline">{t("bulletin.councilMentions")}</p>
+              <p className="mt-1 font-bold">{t("bulletin.distinctions")}</p>
               {distinctions.map((d) => (
                 <p key={d}>✓ {d}</p>
               ))}
             </div>
             <div className="border-r border-black p-2 text-center">
               <p className="font-bold underline">{moyTitle}</p>
-              <p className="mt-1"><span className="text-[15px] font-extrabold">{moy.toFixed(2)}</span> <span className="text-[9px]">/20</span>   <b>Rang : {rankLabel}</b></p>
-              <p className="mt-2 font-bold underline">Appréciations du Conseil de classe</p>
+              <p className="mt-1"><span className="text-[15px] font-extrabold">{moy.toFixed(2)}</span> <span className="text-[9px]">/20</span>   <b>{t("bulletin.rankLabel", { n: rankLabel })}</b></p>
+              <p className="mt-2 font-bold underline">{t("bulletin.councilAppreciations")}</p>
               <p className="mt-1 hidden whitespace-pre-line italic print:block">{appreciation}</p>
               <div className="no-print mt-1">
                 <Textarea value={appreciation} onChange={(e) => setAppreciation(e.target.value)} rows={2} className="border-black/20 bg-white text-center text-[11px] text-black" />
@@ -597,36 +615,36 @@ function BulletinModal({
                   onClick={() => { const v = variant + 1; setVariant(v); setAppreciation(aiAppreciation(moy, v)); }}
                   className="mx-auto mt-1 flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-semibold text-purple-700 hover:bg-purple-200"
                 >
-                  <Sparkles className="h-3 w-3" /> Suggestion IA
+                  <Sparkles className="h-3 w-3" /> {t("bulletin.aiSuggestion")}
                 </button>
               </div>
             </div>
             <div className="p-2">
-              <p className="font-bold underline">Résultats de la classe</p>
-              <p className="mt-1">Moyenne générale de la classe : <b>{classMoy.toFixed(2)}</b></p>
-              <p>Moyenne la plus basse : <b>{classMin.toFixed(2)}</b></p>
-              <p>Moyenne la plus élevée : <b>{classMax.toFixed(2)}</b></p>
+              <p className="font-bold underline">{t("bulletin.classResults")}</p>
+              <p className="mt-1">{t("bulletin.classAverage", { n: classMoy.toFixed(2) })}</p>
+              <p>{t("bulletin.lowestAverage", { n: classMin.toFixed(2) })}</p>
+              <p>{t("bulletin.highestAverage", { n: classMax.toFixed(2) })}</p>
             </div>
           </div>
 
           {/* Signatures */}
           <div className="mt-6 grid grid-cols-2 gap-8 text-[10px]">
             <div>
-              <p className="italic">Nom/Signature du professeur principal</p>
+              <p className="italic">{t("bulletin.teacherSignature")}</p>
               <div className="mt-10 w-3/4 border-t border-black/60" />
             </div>
             <div className="relative text-right">
-              <p className="italic">Nom/Signature et Cachet du Chef d&apos;Établissement</p>
-              <p className="mt-1">Fait à {meta.locality || "__________"}, le {today}</p>
-              <p className="mt-0.5 font-bold uppercase">Le Chef d&apos;Établissement</p>
-              {meta.signature && <img src={meta.signature} alt="Signature" className="ml-auto mt-1 h-10 object-contain" />}
-              {meta.stamp && <img src={meta.stamp} alt="Cachet" className="pointer-events-none absolute bottom-0 right-2 h-20 w-20 object-contain opacity-80" />}
+              <p className="italic">{t("bulletin.headSignature")}</p>
+              <p className="mt-1">{t("bulletin.doneAt", { place: meta.locality || t("bulletin.placeFallback"), date: today })}</p>
+              <p className="mt-0.5 font-bold uppercase">{t("bulletin.headTitle")}</p>
+              {meta.signature && <img src={meta.signature} alt={t("bulletin.signatureAlt")} className="ml-auto mt-1 h-10 object-contain" />}
+              {meta.stamp && <img src={meta.stamp} alt={t("bulletin.stampAlt")} className="pointer-events-none absolute bottom-0 right-2 h-20 w-20 object-contain opacity-80" />}
               {meta.headName && <p className="mt-1 font-semibold">{meta.headName}</p>}
               <div className="ml-auto mt-2 w-3/4 border-t border-black/60" />
             </div>
           </div>
 
-          <p className="mt-5 text-center text-[9px] italic text-gray-500">S&apos;instruire pour mieux espérer — EduWeb Planner © {new Date().getFullYear()}</p>
+          <p className="mt-5 text-center text-[9px] italic text-gray-500">{t("bulletin.tagline", { year: new Date().getFullYear() })}</p>
         </div>
       </DialogContent>
     </Dialog>

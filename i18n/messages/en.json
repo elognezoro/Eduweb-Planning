@@ -708,7 +708,143 @@
     },
     "vieScolaireNotesBulletins": {
       "title": "Grades & report cards",
-      "description": "Enter grades by class and period, then generate official report cards."
+      "description": "Enter grades by class and period, then generate official report cards.",
+      "sections": {
+        "saisie": "Add a grade",
+        "notes": "Class grades",
+        "bulletins": "Report cards"
+      },
+      "filters": {
+        "class": "Class",
+        "period": "Term / Period",
+        "defaultPeriod": "Term 1"
+      },
+      "tableHeaders": {
+        "student": "Student",
+        "discipline": "Subject",
+        "type": "Type",
+        "note": "Grade",
+        "scale": "Scale",
+        "coeff": "Coef."
+      },
+      "tableActions": {
+        "delete": "Delete"
+      },
+      "noteForm": {
+        "title": "Add a grade",
+        "importTitle": "Import grades",
+        "importDescription": "One row per grade: Last First; Subject; Type; Grade; Scale; Coefficient.",
+        "importButton": "Import a CSV",
+        "student": "Student",
+        "studentPlaceholder": "Type a first or last name…",
+        "studentsGroup": "Students in this class",
+        "discipline": "Subject",
+        "evaluationType": "Evaluation type",
+        "note": "Grade",
+        "notePlaceholder": "E.g.: 14",
+        "scale": "Scale (total points)",
+        "coefficient": "Coefficient",
+        "csvFormat": "Expected CSV format",
+        "csvHeader": "Last First ; Subject ; Type ; Grade ; Scale ; Coefficient",
+        "csvExample": "Kouadio Aya ; Mathematics ; Supervised test ; 14 ; 20 ; 3",
+        "save": "Save grade"
+      },
+      "notesSection": {
+        "title": "Class grades ({class} — {period})"
+      },
+      "bulletinsSection": {
+        "title": "Report cards ({class} — {period})",
+        "notesCount": "Grades",
+        "average": "Average",
+        "details": "View details",
+        "downloadPdf": "Download PDF"
+      },
+      "toasts": {
+        "selectStudentAndNote": "Select the student and enter the grade",
+        "noteSaved": "Grade saved"
+      },
+      "modal": {
+        "title": "Report card",
+        "downloadPdf": "Download PDF",
+        "close": "Close"
+      },
+      "bulletin": {
+        "header": "REPORT CARD",
+        "schoolYear": "School Year {year}",
+        "defaultDirection": "Regional Directorate",
+        "institution": "Institution:",
+        "code": "Code:",
+        "statusLabel": "Status:",
+        "class": "Class:",
+        "regime": "System:",
+        "enrolment": "Enrolment:",
+        "logoFallback": "Logo",
+        "tableHeaders": {
+          "disciplines": "SUBJECTS",
+          "average": "AVG./20",
+          "coeff": "COEF.",
+          "weighted": "AVG",
+          "weighted2": "COEF",
+          "rank": "RANK",
+          "appreciation": "APPRECIATION",
+          "teacher": "TEACHER"
+        },
+        "domains": {
+          "lettres": "LANGUAGES",
+          "sciences": "SCIENCES",
+          "autres": "OTHERS"
+        },
+        "balance": "{domain} SUMMARY",
+        "totals": "TOTALS",
+        "attendance": "Attendance",
+        "totalHours": "Total absence hours: {n}",
+        "justified": "Justified: {n}",
+        "unjustified": "Unjustified: {n}",
+        "councilMentions": "Class Council mentions",
+        "distinctions": "DISTINCTIONS",
+        "moyTitleTerm": "Term average",
+        "moyTitleSemester": "Semester average",
+        "moyTitleSequence": "Sequence average",
+        "rankLabel": "Rank: {n}",
+        "councilAppreciations": "Class Council appreciations",
+        "aiSuggestion": "AI suggestion",
+        "classResults": "Class results",
+        "classAverage": "Class average: {n}",
+        "lowestAverage": "Lowest average: {n}",
+        "highestAverage": "Highest average: {n}",
+        "teacherSignature": "Name/Signature of the head teacher",
+        "headSignature": "Name/Signature and Stamp of the Principal",
+        "doneAt": "Done at {place}, on {date}",
+        "headTitle": "The Principal",
+        "emblemAlt": "National emblem",
+        "signatureAlt": "Signature",
+        "stampAlt": "Stamp",
+        "tagline": "Learning for a brighter future — EduWeb Planner © {year}",
+        "placeFallback": "__________"
+      },
+      "appreciation": {
+        "excellent": "Excellent",
+        "veryGood": "Very Good",
+        "good": "Good",
+        "fairlyGood": "Fairly Good",
+        "passable": "Passable",
+        "mediocre": "Mediocre",
+        "insufficient": "Insufficient"
+      },
+      "distinctions": {
+        "honor": "Honor Roll",
+        "congrats": "Council's Congratulations",
+        "encouragement": "Encouragements"
+      },
+      "rankOrdinal": {
+        "first": "1st",
+        "other": "{n}th"
+      },
+      "regimes": {
+        "term": "Termly",
+        "semester": "Semesterly",
+        "sequence": "Sequential"
+      }
     },
     "vieScolaireLivretScolaire": {
       "title": "School record",

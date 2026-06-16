@@ -708,7 +708,143 @@
     },
     "vieScolaireNotesBulletins": {
       "title": "Noten & Zeugnisse",
-      "description": "Noten pro Klasse und Periode eingeben und offizielle Zeugnisse erzeugen."
+      "description": "Noten pro Klasse und Periode eingeben und offizielle Zeugnisse erzeugen.",
+      "sections": {
+        "saisie": "Note hinzufügen",
+        "notes": "Klassennoten",
+        "bulletins": "Zeugnisse"
+      },
+      "filters": {
+        "class": "Klasse",
+        "period": "Trimester / Periode",
+        "defaultPeriod": "Trimester 1"
+      },
+      "tableHeaders": {
+        "student": "Schüler",
+        "discipline": "Fach",
+        "type": "Typ",
+        "note": "Note",
+        "scale": "Maximum",
+        "coeff": "Koeff."
+      },
+      "tableActions": {
+        "delete": "Löschen"
+      },
+      "noteForm": {
+        "title": "Note hinzufügen",
+        "importTitle": "Noten importieren",
+        "importDescription": "Eine Zeile pro Note: Nachname Vorname; Fach; Typ; Note; Maximum; Koeffizient.",
+        "importButton": "CSV importieren",
+        "student": "Schüler",
+        "studentPlaceholder": "Vor- oder Nachname eingeben…",
+        "studentsGroup": "Schüler der Klasse",
+        "discipline": "Fach",
+        "evaluationType": "Bewertungstyp",
+        "note": "Note",
+        "notePlaceholder": "Bsp.: 14",
+        "scale": "Maximum (Gesamtpunkte)",
+        "coefficient": "Koeffizient",
+        "csvFormat": "Erwartetes CSV-Format",
+        "csvHeader": "Nachname Vorname ; Fach ; Typ ; Note ; Maximum ; Koeffizient",
+        "csvExample": "Kouadio Aya ; Mathematik ; Klassenarbeit ; 14 ; 20 ; 3",
+        "save": "Note speichern"
+      },
+      "notesSection": {
+        "title": "Klassennoten ({class} — {period})"
+      },
+      "bulletinsSection": {
+        "title": "Zeugnisse ({class} — {period})",
+        "notesCount": "Noten",
+        "average": "Durchschnitt",
+        "details": "Details ansehen",
+        "downloadPdf": "PDF herunterladen"
+      },
+      "toasts": {
+        "selectStudentAndNote": "Schüler auswählen und Note eingeben",
+        "noteSaved": "Note gespeichert"
+      },
+      "modal": {
+        "title": "Zeugnis",
+        "downloadPdf": "PDF herunterladen",
+        "close": "Schließen"
+      },
+      "bulletin": {
+        "header": "ZEUGNIS",
+        "schoolYear": "Schuljahr {year}",
+        "defaultDirection": "Regionaldirektion",
+        "institution": "Einrichtung:",
+        "code": "Code:",
+        "statusLabel": "Status:",
+        "class": "Klasse:",
+        "regime": "System:",
+        "enrolment": "Anzahl:",
+        "logoFallback": "Logo",
+        "tableHeaders": {
+          "disciplines": "FÄCHER",
+          "average": "DURCH./20",
+          "coeff": "KOEF.",
+          "weighted": "DURCH",
+          "weighted2": "KOEF",
+          "rank": "RANG",
+          "appreciation": "BEWERTUNG",
+          "teacher": "LEHRER"
+        },
+        "domains": {
+          "lettres": "SPRACHEN",
+          "sciences": "WISSENSCHAFTEN",
+          "autres": "SONSTIGE"
+        },
+        "balance": "BILANZ {domain}",
+        "totals": "SUMMEN",
+        "attendance": "Anwesenheit",
+        "totalHours": "Gesamtfehlstunden: {n}",
+        "justified": "Entschuldigt: {n}",
+        "unjustified": "Unentschuldigt: {n}",
+        "councilMentions": "Hinweise des Klassenrates",
+        "distinctions": "AUSZEICHNUNGEN",
+        "moyTitleTerm": "Trimesterdurchschnitt",
+        "moyTitleSemester": "Semesterdurchschnitt",
+        "moyTitleSequence": "Sequenzdurchschnitt",
+        "rankLabel": "Rang: {n}",
+        "councilAppreciations": "Bewertungen des Klassenrates",
+        "aiSuggestion": "KI-Vorschlag",
+        "classResults": "Klassenergebnisse",
+        "classAverage": "Klassendurchschnitt: {n}",
+        "lowestAverage": "Niedrigster Durchschnitt: {n}",
+        "highestAverage": "Höchster Durchschnitt: {n}",
+        "teacherSignature": "Name/Unterschrift des Klassenlehrers",
+        "headSignature": "Name/Unterschrift und Stempel der Schulleitung",
+        "doneAt": "Ausgestellt in {place} am {date}",
+        "headTitle": "Die Schulleitung",
+        "emblemAlt": "Nationalwappen",
+        "signatureAlt": "Unterschrift",
+        "stampAlt": "Stempel",
+        "tagline": "Lernen für eine bessere Zukunft — EduWeb Planner © {year}",
+        "placeFallback": "__________"
+      },
+      "appreciation": {
+        "excellent": "Ausgezeichnet",
+        "veryGood": "Sehr gut",
+        "good": "Gut",
+        "fairlyGood": "Befriedigend",
+        "passable": "Ausreichend",
+        "mediocre": "Mangelhaft",
+        "insufficient": "Ungenügend"
+      },
+      "distinctions": {
+        "honor": "Ehrentafel",
+        "congrats": "Glückwünsche des Rates",
+        "encouragement": "Ermutigungen"
+      },
+      "rankOrdinal": {
+        "first": "1.",
+        "other": "{n}."
+      },
+      "regimes": {
+        "term": "Trimester",
+        "semester": "Semester",
+        "sequence": "Sequenz"
+      }
     },
     "vieScolaireLivretScolaire": {
       "title": "Schülerakte",

@@ -708,7 +708,143 @@
     },
     "vieScolaireNotesBulletins": {
       "title": "الدرجات وكشوف العلامات",
-      "description": "إدخال الدرجات حسب الصف والفترة، ثم توليد كشوف العلامات الرسمية."
+      "description": "إدخال الدرجات حسب الصف والفترة، ثم توليد كشوف العلامات الرسمية.",
+      "sections": {
+        "saisie": "إضافة درجة",
+        "notes": "درجات الصف",
+        "bulletins": "كشوف العلامات"
+      },
+      "filters": {
+        "class": "الصف",
+        "period": "الفصل / الفترة",
+        "defaultPeriod": "الفصل 1"
+      },
+      "tableHeaders": {
+        "student": "التلميذ",
+        "discipline": "المادة",
+        "type": "النوع",
+        "note": "الدرجة",
+        "scale": "السلم",
+        "coeff": "المعامل"
+      },
+      "tableActions": {
+        "delete": "حذف"
+      },
+      "noteForm": {
+        "title": "إضافة درجة",
+        "importTitle": "استيراد الدرجات",
+        "importDescription": "سطر لكل درجة: الاسم اللقب ؛ المادة ؛ النوع ؛ الدرجة ؛ السلم ؛ المعامل.",
+        "importButton": "استيراد CSV",
+        "student": "التلميذ",
+        "studentPlaceholder": "اكتب اسمًا أو لقبًا…",
+        "studentsGroup": "تلاميذ الصف",
+        "discipline": "المادة",
+        "evaluationType": "نوع التقييم",
+        "note": "الدرجة",
+        "notePlaceholder": "مثال: 14",
+        "scale": "السلم (مجموع النقاط)",
+        "coefficient": "المعامل",
+        "csvFormat": "تنسيق CSV المتوقع",
+        "csvHeader": "الاسم اللقب ؛ المادة ؛ النوع ؛ الدرجة ؛ السلم ؛ المعامل",
+        "csvExample": "كوادو آيا ؛ الرياضيات ؛ فرض مراقب ؛ 14 ؛ 20 ؛ 3",
+        "save": "حفظ الدرجة"
+      },
+      "notesSection": {
+        "title": "درجات الصف ({class} — {period})"
+      },
+      "bulletinsSection": {
+        "title": "كشوف العلامات ({class} — {period})",
+        "notesCount": "الدرجات",
+        "average": "المعدل",
+        "details": "عرض التفاصيل",
+        "downloadPdf": "تحميل PDF"
+      },
+      "toasts": {
+        "selectStudentAndNote": "اختر التلميذ وأدخل الدرجة",
+        "noteSaved": "تم حفظ الدرجة"
+      },
+      "modal": {
+        "title": "كشف العلامات",
+        "downloadPdf": "تحميل PDF",
+        "close": "إغلاق"
+      },
+      "bulletin": {
+        "header": "كشف العلامات",
+        "schoolYear": "السنة الدراسية {year}",
+        "defaultDirection": "المديرية الإقليمية",
+        "institution": "المؤسسة:",
+        "code": "الرمز:",
+        "statusLabel": "الوضعية:",
+        "class": "الصف:",
+        "regime": "النظام:",
+        "enrolment": "العدد:",
+        "logoFallback": "شعار",
+        "tableHeaders": {
+          "disciplines": "المواد",
+          "average": "المعدل/20",
+          "coeff": "المعامل",
+          "weighted": "المعدل",
+          "weighted2": "المعامل",
+          "rank": "الترتيب",
+          "appreciation": "التقدير",
+          "teacher": "الأستاذ"
+        },
+        "domains": {
+          "lettres": "اللغات",
+          "sciences": "العلوم",
+          "autres": "أخرى"
+        },
+        "balance": "حصيلة {domain}",
+        "totals": "المجاميع",
+        "attendance": "المواظبة",
+        "totalHours": "مجموع ساعات الغياب: {n}",
+        "justified": "مبررة: {n}",
+        "unjustified": "غير مبررة: {n}",
+        "councilMentions": "ملاحظات مجلس الصف",
+        "distinctions": "التميزات",
+        "moyTitleTerm": "معدل الفصل",
+        "moyTitleSemester": "معدل السداسي",
+        "moyTitleSequence": "معدل المتتالية",
+        "rankLabel": "الترتيب: {n}",
+        "councilAppreciations": "تقديرات مجلس الصف",
+        "aiSuggestion": "اقتراح ذكي",
+        "classResults": "نتائج الصف",
+        "classAverage": "المعدل العام للصف: {n}",
+        "lowestAverage": "أدنى معدل: {n}",
+        "highestAverage": "أعلى معدل: {n}",
+        "teacherSignature": "اسم/توقيع الأستاذ المسؤول",
+        "headSignature": "اسم/توقيع وختم مدير المؤسسة",
+        "doneAt": "حُرر في {place}، بتاريخ {date}",
+        "headTitle": "مدير المؤسسة",
+        "emblemAlt": "الشعار الوطني",
+        "signatureAlt": "التوقيع",
+        "stampAlt": "الختم",
+        "tagline": "التعليم لأمل أفضل — EduWeb Planner © {year}",
+        "placeFallback": "__________"
+      },
+      "appreciation": {
+        "excellent": "ممتاز",
+        "veryGood": "جيد جدًا",
+        "good": "جيد",
+        "fairlyGood": "حسن",
+        "passable": "مقبول",
+        "mediocre": "ضعيف",
+        "insufficient": "غير كافٍ"
+      },
+      "distinctions": {
+        "honor": "لوحة الشرف",
+        "congrats": "تهانئ مجلس الصف",
+        "encouragement": "تشجيعات"
+      },
+      "rankOrdinal": {
+        "first": "الأول",
+        "other": "{n}"
+      },
+      "regimes": {
+        "term": "فصلي",
+        "semester": "سداسي",
+        "sequence": "متتالي"
+      }
     },
     "vieScolaireLivretScolaire": {
       "title": "السجل المدرسي",

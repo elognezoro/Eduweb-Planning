@@ -708,7 +708,143 @@
     },
     "vieScolaireNotesBulletins": {
       "title": "Alama na kadi za ripoti",
-      "description": "Ingiza alama kwa darasa na kipindi, kisha tengeneza kadi za ripoti rasmi."
+      "description": "Ingiza alama kwa darasa na kipindi, kisha tengeneza kadi za ripoti rasmi.",
+      "sections": {
+        "saisie": "Ongeza alama",
+        "notes": "Alama za darasa",
+        "bulletins": "Kadi za ripoti"
+      },
+      "filters": {
+        "class": "Darasa",
+        "period": "Muhula / Kipindi",
+        "defaultPeriod": "Muhula 1"
+      },
+      "tableHeaders": {
+        "student": "Mwanafunzi",
+        "discipline": "Somo",
+        "type": "Aina",
+        "note": "Alama",
+        "scale": "Kiwango",
+        "coeff": "Mgawo"
+      },
+      "tableActions": {
+        "delete": "Futa"
+      },
+      "noteForm": {
+        "title": "Ongeza alama",
+        "importTitle": "Ingiza alama",
+        "importDescription": "Mstari mmoja kwa alama: Jina la ukoo Jina; Somo; Aina; Alama; Kiwango; Mgawo.",
+        "importButton": "Ingiza CSV",
+        "student": "Mwanafunzi",
+        "studentPlaceholder": "Andika jina au jina la ukoo…",
+        "studentsGroup": "Wanafunzi wa darasa",
+        "discipline": "Somo",
+        "evaluationType": "Aina ya tathmini",
+        "note": "Alama",
+        "notePlaceholder": "Mfano: 14",
+        "scale": "Kiwango (jumla ya pointi)",
+        "coefficient": "Mgawo",
+        "csvFormat": "Muundo wa CSV unaotarajiwa",
+        "csvHeader": "Jina la ukoo Jina ; Somo ; Aina ; Alama ; Kiwango ; Mgawo",
+        "csvExample": "Kouadio Aya ; Hisabati ; Mtihani wa kusimamiwa ; 14 ; 20 ; 3",
+        "save": "Hifadhi alama"
+      },
+      "notesSection": {
+        "title": "Alama za darasa ({class} — {period})"
+      },
+      "bulletinsSection": {
+        "title": "Kadi za ripoti ({class} — {period})",
+        "notesCount": "Alama",
+        "average": "Wastani",
+        "details": "Tazama maelezo",
+        "downloadPdf": "Pakua PDF"
+      },
+      "toasts": {
+        "selectStudentAndNote": "Chagua mwanafunzi na ingiza alama",
+        "noteSaved": "Alama imehifadhiwa"
+      },
+      "modal": {
+        "title": "Kadi ya ripoti",
+        "downloadPdf": "Pakua PDF",
+        "close": "Funga"
+      },
+      "bulletin": {
+        "header": "KADI YA RIPOTI",
+        "schoolYear": "Mwaka wa shule {year}",
+        "defaultDirection": "Kurugenzi ya kanda",
+        "institution": "Taasisi:",
+        "code": "Msimbo:",
+        "statusLabel": "Hali:",
+        "class": "Darasa:",
+        "regime": "Mfumo:",
+        "enrolment": "Idadi:",
+        "logoFallback": "Nembo",
+        "tableHeaders": {
+          "disciplines": "MASOMO",
+          "average": "WASTANI/20",
+          "coeff": "MGAWO",
+          "weighted": "WASTANI",
+          "weighted2": "MGAWO",
+          "rank": "NAFASI",
+          "appreciation": "TATHMINI",
+          "teacher": "MWALIMU"
+        },
+        "domains": {
+          "lettres": "LUGHA",
+          "sciences": "SAYANSI",
+          "autres": "NYINGINEYO"
+        },
+        "balance": "MUHTASARI {domain}",
+        "totals": "JUMLA",
+        "attendance": "Mahudhurio",
+        "totalHours": "Jumla ya saa za utoro: {n}",
+        "justified": "Zilizohalalishwa: {n}",
+        "unjustified": "Zisizohalalishwa: {n}",
+        "councilMentions": "Maoni ya Baraza la darasa",
+        "distinctions": "TUNZO",
+        "moyTitleTerm": "Wastani wa muhula",
+        "moyTitleSemester": "Wastani wa nusu mwaka",
+        "moyTitleSequence": "Wastani wa mfululizo",
+        "rankLabel": "Nafasi: {n}",
+        "councilAppreciations": "Tathmini za Baraza la darasa",
+        "aiSuggestion": "Pendekezo la AI",
+        "classResults": "Matokeo ya darasa",
+        "classAverage": "Wastani wa jumla wa darasa: {n}",
+        "lowestAverage": "Wastani wa chini kabisa: {n}",
+        "highestAverage": "Wastani wa juu kabisa: {n}",
+        "teacherSignature": "Jina/Sahihi ya mwalimu mkuu",
+        "headSignature": "Jina/Sahihi na Muhuri wa Mkuu wa Shule",
+        "doneAt": "Imetayarishwa {place}, tarehe {date}",
+        "headTitle": "Mkuu wa Shule",
+        "emblemAlt": "Nembo ya kitaifa",
+        "signatureAlt": "Sahihi",
+        "stampAlt": "Muhuri",
+        "tagline": "Kujifunza kwa matumaini bora — EduWeb Planner © {year}",
+        "placeFallback": "__________"
+      },
+      "appreciation": {
+        "excellent": "Bora kabisa",
+        "veryGood": "Vizuri sana",
+        "good": "Vizuri",
+        "fairlyGood": "Vizuri kiasi",
+        "passable": "Inafaa",
+        "mediocre": "Wastani",
+        "insufficient": "Haifai"
+      },
+      "distinctions": {
+        "honor": "Bodi ya Heshima",
+        "congrats": "Pongezi za Baraza",
+        "encouragement": "Mahimizo"
+      },
+      "rankOrdinal": {
+        "first": "1",
+        "other": "{n}"
+      },
+      "regimes": {
+        "term": "Kimuhula",
+        "semester": "Nusu mwaka",
+        "sequence": "Mfululizo"
+      }
     },
     "vieScolaireLivretScolaire": {
       "title": "Rekodi ya shule",

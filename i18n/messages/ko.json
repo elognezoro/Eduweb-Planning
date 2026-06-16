@@ -708,7 +708,143 @@
     },
     "vieScolaireNotesBulletins": {
       "title": "성적 및 성적표",
-      "description": "학급 및 기간별로 성적을 입력하고 공식 성적표를 생성합니다."
+      "description": "학급 및 기간별로 성적을 입력하고 공식 성적표를 생성합니다.",
+      "sections": {
+        "saisie": "성적 추가",
+        "notes": "학급 성적",
+        "bulletins": "성적표"
+      },
+      "filters": {
+        "class": "학급",
+        "period": "학기 / 기간",
+        "defaultPeriod": "1학기"
+      },
+      "tableHeaders": {
+        "student": "학생",
+        "discipline": "과목",
+        "type": "유형",
+        "note": "점수",
+        "scale": "만점",
+        "coeff": "계수"
+      },
+      "tableActions": {
+        "delete": "삭제"
+      },
+      "noteForm": {
+        "title": "성적 추가",
+        "importTitle": "성적 가져오기",
+        "importDescription": "성적당 한 행: 성 이름; 과목; 유형; 점수; 만점; 계수.",
+        "importButton": "CSV 가져오기",
+        "student": "학생",
+        "studentPlaceholder": "성이나 이름 입력…",
+        "studentsGroup": "학급 학생",
+        "discipline": "과목",
+        "evaluationType": "평가 유형",
+        "note": "점수",
+        "notePlaceholder": "예: 14",
+        "scale": "만점 (총점)",
+        "coefficient": "계수",
+        "csvFormat": "예상 CSV 형식",
+        "csvHeader": "성 이름 ; 과목 ; 유형 ; 점수 ; 만점 ; 계수",
+        "csvExample": "Kouadio Aya ; 수학 ; 감독 시험 ; 14 ; 20 ; 3",
+        "save": "점수 저장"
+      },
+      "notesSection": {
+        "title": "학급 성적 ({class} — {period})"
+      },
+      "bulletinsSection": {
+        "title": "성적표 ({class} — {period})",
+        "notesCount": "성적 수",
+        "average": "평균",
+        "details": "상세 보기",
+        "downloadPdf": "PDF 다운로드"
+      },
+      "toasts": {
+        "selectStudentAndNote": "학생을 선택하고 점수를 입력하세요",
+        "noteSaved": "점수가 저장되었습니다"
+      },
+      "modal": {
+        "title": "성적표",
+        "downloadPdf": "PDF 다운로드",
+        "close": "닫기"
+      },
+      "bulletin": {
+        "header": "성적표",
+        "schoolYear": "학년도 {year}",
+        "defaultDirection": "지역 관리국",
+        "institution": "기관:",
+        "code": "코드:",
+        "statusLabel": "상태:",
+        "class": "학급:",
+        "regime": "학제:",
+        "enrolment": "인원:",
+        "logoFallback": "로고",
+        "tableHeaders": {
+          "disciplines": "과목",
+          "average": "평균/20",
+          "coeff": "계수",
+          "weighted": "평균",
+          "weighted2": "계수",
+          "rank": "순위",
+          "appreciation": "평가",
+          "teacher": "교사"
+        },
+        "domains": {
+          "lettres": "언어",
+          "sciences": "과학",
+          "autres": "기타"
+        },
+        "balance": "{domain} 요약",
+        "totals": "합계",
+        "attendance": "출석",
+        "totalHours": "결석 총 시간: {n}",
+        "justified": "정당화: {n}",
+        "unjustified": "비정당화: {n}",
+        "councilMentions": "학급 위원회 의견",
+        "distinctions": "표창",
+        "moyTitleTerm": "학기 평균",
+        "moyTitleSemester": "반기 평균",
+        "moyTitleSequence": "단계 평균",
+        "rankLabel": "순위: {n}",
+        "councilAppreciations": "학급 위원회 평가",
+        "aiSuggestion": "AI 제안",
+        "classResults": "학급 결과",
+        "classAverage": "학급 평균: {n}",
+        "lowestAverage": "최저 평균: {n}",
+        "highestAverage": "최고 평균: {n}",
+        "teacherSignature": "담임 교사 이름/서명",
+        "headSignature": "교장 이름/서명 및 직인",
+        "doneAt": "{place}에서 {date} 작성",
+        "headTitle": "교장",
+        "emblemAlt": "국가 상징",
+        "signatureAlt": "서명",
+        "stampAlt": "직인",
+        "tagline": "더 나은 미래를 위한 배움 — EduWeb Planner © {year}",
+        "placeFallback": "__________"
+      },
+      "appreciation": {
+        "excellent": "우수",
+        "veryGood": "매우 좋음",
+        "good": "좋음",
+        "fairlyGood": "꽤 좋음",
+        "passable": "보통",
+        "mediocre": "미흡",
+        "insufficient": "불충분"
+      },
+      "distinctions": {
+        "honor": "명예의 전당",
+        "congrats": "위원회 축하",
+        "encouragement": "격려"
+      },
+      "rankOrdinal": {
+        "first": "1위",
+        "other": "{n}위"
+      },
+      "regimes": {
+        "term": "학기제",
+        "semester": "반기제",
+        "sequence": "단계제"
+      }
     },
     "vieScolaireLivretScolaire": {
       "title": "학교 기록",

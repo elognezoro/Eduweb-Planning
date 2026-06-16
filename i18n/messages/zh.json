@@ -708,7 +708,143 @@
     },
     "vieScolaireNotesBulletins": {
       "title": "成绩与成绩单",
-      "description": "按班级和周期输入成绩，然后生成正式成绩单。"
+      "description": "按班级和周期输入成绩，然后生成正式成绩单。",
+      "sections": {
+        "saisie": "添加成绩",
+        "notes": "班级成绩",
+        "bulletins": "成绩单"
+      },
+      "filters": {
+        "class": "班级",
+        "period": "学期 / 阶段",
+        "defaultPeriod": "第一学期"
+      },
+      "tableHeaders": {
+        "student": "学生",
+        "discipline": "学科",
+        "type": "类型",
+        "note": "成绩",
+        "scale": "满分",
+        "coeff": "系数"
+      },
+      "tableActions": {
+        "delete": "删除"
+      },
+      "noteForm": {
+        "title": "添加成绩",
+        "importTitle": "导入成绩",
+        "importDescription": "每行一条成绩：姓 名；学科；类型；成绩；满分；系数。",
+        "importButton": "导入 CSV",
+        "student": "学生",
+        "studentPlaceholder": "输入姓或名…",
+        "studentsGroup": "本班学生",
+        "discipline": "学科",
+        "evaluationType": "评估类型",
+        "note": "成绩",
+        "notePlaceholder": "例：14",
+        "scale": "满分（总分）",
+        "coefficient": "系数",
+        "csvFormat": "预期 CSV 格式",
+        "csvHeader": "姓 名 ; 学科 ; 类型 ; 成绩 ; 满分 ; 系数",
+        "csvExample": "Kouadio Aya ; 数学 ; 监考测验 ; 14 ; 20 ; 3",
+        "save": "保存成绩"
+      },
+      "notesSection": {
+        "title": "班级成绩（{class} — {period}）"
+      },
+      "bulletinsSection": {
+        "title": "成绩单（{class} — {period}）",
+        "notesCount": "成绩数",
+        "average": "平均分",
+        "details": "查看详情",
+        "downloadPdf": "下载 PDF"
+      },
+      "toasts": {
+        "selectStudentAndNote": "请选择学生并输入成绩",
+        "noteSaved": "成绩已保存"
+      },
+      "modal": {
+        "title": "成绩单",
+        "downloadPdf": "下载 PDF",
+        "close": "关闭"
+      },
+      "bulletin": {
+        "header": "成绩单",
+        "schoolYear": "学年 {year}",
+        "defaultDirection": "区域管理局",
+        "institution": "机构：",
+        "code": "代码：",
+        "statusLabel": "状态：",
+        "class": "班级：",
+        "regime": "学制：",
+        "enrolment": "人数：",
+        "logoFallback": "标志",
+        "tableHeaders": {
+          "disciplines": "学科",
+          "average": "平均/20",
+          "coeff": "系数",
+          "weighted": "平均",
+          "weighted2": "系数",
+          "rank": "排名",
+          "appreciation": "评价",
+          "teacher": "教师"
+        },
+        "domains": {
+          "lettres": "语言",
+          "sciences": "理科",
+          "autres": "其他"
+        },
+        "balance": "{domain} 总结",
+        "totals": "总计",
+        "attendance": "出勤",
+        "totalHours": "缺勤总小时数：{n}",
+        "justified": "已证明：{n}",
+        "unjustified": "未证明：{n}",
+        "councilMentions": "班级委员会备注",
+        "distinctions": "荣誉",
+        "moyTitleTerm": "学期平均分",
+        "moyTitleSemester": "半年平均分",
+        "moyTitleSequence": "阶段平均分",
+        "rankLabel": "排名：{n}",
+        "councilAppreciations": "班级委员会评价",
+        "aiSuggestion": "AI 建议",
+        "classResults": "班级结果",
+        "classAverage": "班级总平均分：{n}",
+        "lowestAverage": "最低平均分：{n}",
+        "highestAverage": "最高平均分：{n}",
+        "teacherSignature": "班主任姓名/签名",
+        "headSignature": "校长姓名/签名和印章",
+        "doneAt": "{place} 制定，{date}",
+        "headTitle": "校长",
+        "emblemAlt": "国徽",
+        "signatureAlt": "签名",
+        "stampAlt": "印章",
+        "tagline": "学习为更美好的未来 — EduWeb Planner © {year}",
+        "placeFallback": "__________"
+      },
+      "appreciation": {
+        "excellent": "优秀",
+        "veryGood": "很好",
+        "good": "良好",
+        "fairlyGood": "较好",
+        "passable": "及格",
+        "mediocre": "一般",
+        "insufficient": "不及格"
+      },
+      "distinctions": {
+        "honor": "光荣榜",
+        "congrats": "委员会祝贺",
+        "encouragement": "鼓励"
+      },
+      "rankOrdinal": {
+        "first": "第1",
+        "other": "第{n}"
+      },
+      "regimes": {
+        "term": "学期制",
+        "semester": "学年制",
+        "sequence": "阶段制"
+      }
     },
     "vieScolaireLivretScolaire": {
       "title": "学籍",
