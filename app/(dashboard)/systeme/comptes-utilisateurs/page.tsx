@@ -56,7 +56,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useStore } from "@/components/app-shell/data-store";
+import { DirectoryUsersProvider, useDirectoryUsers } from "@/components/app-shell/use-directory-users";
 import type { DirectoryUser } from "@/lib/mock-data";
 import { ETABLISSEMENTS } from "@/lib/mock-data";
 import { ROLE_LIST, ROLE_FAMILY_LABELS } from "@/lib/roles";
@@ -149,7 +149,15 @@ const columns: ColumnDef<DirectoryUser>[] = [
 ];
 
 export default function ComptesUtilisateursPage() {
-  const { users, addUser, removeUsers } = useStore();
+  return (
+    <DirectoryUsersProvider>
+      <ComptesUtilisateursContent />
+    </DirectoryUsersProvider>
+  );
+}
+
+function ComptesUtilisateursContent() {
+  const { users, addUser, removeUsers, loading, realMode, refresh } = useDirectoryUsers();
   const [role, setRole] = React.useState("all");
   const [status, setStatus] = React.useState("all");
   const [country, setCountry] = React.useState("all");
@@ -186,6 +194,11 @@ export default function ComptesUtilisateursPage() {
       permission="system:manage_users"
       actions={
         <div className="flex gap-2">
+          {realMode && (
+            <Button variant="outline" onClick={refresh} disabled={loading}>
+              <RotateCcw className={cn("h-4 w-4", loading && "animate-spin")} /> Actualiser
+            </Button>
+          )}
           <ImportCsvDialog
             title="Importer des utilisateurs"
             description="Le fichier doit contenir les colonnes attendues. Téléchargez le modèle si besoin."
@@ -259,6 +272,10 @@ export default function ComptesUtilisateursPage() {
         />
       </FilterBar>
 
+      {realMode && loading && users.length === 0 && (
+        <p className="px-1 py-8 text-center text-sm text-muted-foreground">Chargement des comptes…</p>
+      )}
+
       <DataTable
         columns={columns}
         data={data}
@@ -315,7 +332,7 @@ function IconBtn({
 }
 
 function RowActions({ user }: { user: DirectoryUser }) {
-  const { setUserStatus, updateUser, removeUser } = useStore();
+  const { setUserStatus, updateUser, removeUser } = useDirectoryUsers();
   const [editOpen, setEditOpen] = React.useState(false);
   const [previewOpen, setPreviewOpen] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
