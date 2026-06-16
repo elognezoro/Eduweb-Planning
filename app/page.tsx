@@ -18,7 +18,6 @@ import {
   Building2,
   Users,
   Network,
-  ChevronDown,
 } from "lucide-react";
 import { Logo } from "@/components/app-shell/logo";
 import { Reveal } from "@/components/marketing/reveal";
@@ -62,10 +61,10 @@ const ATOUTS = [
   { icon: Globe, title: "Adapté à votre pays", desc: "Devise, armoiries, régions académiques et régime scolaire entièrement configurables." },
 ];
 
-function Eyebrow({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
+function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <span className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] ${light ? "text-ew-gold-500" : "text-ew-green-700"}`}>
-      <span className={`h-px w-7 ${light ? "bg-ew-gold-500/60" : "bg-ew-green-600/50"}`} />
+    <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-ew-green-700">
+      <span className="h-px w-7 bg-ew-green-600/50" />
       {children}
     </span>
   );
@@ -74,72 +73,36 @@ function Eyebrow({ children, light = false }: { children: React.ReactNode; light
 export default function HomePage() {
   return (
     <div className="flex min-h-full flex-col bg-background">
-      {/* En-tête */}
-      <header className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Logo tone="dark" />
-          <nav className="hidden items-center gap-7 text-sm font-semibold text-muted-foreground md:flex">
-            <a href="#fonctionnalites" className="transition-colors hover:text-ew-green-700">Fonctionnalités</a>
-            <a href="#publics" className="transition-colors hover:text-ew-green-700">Publics</a>
-            <a href="#atouts" className="transition-colors hover:text-ew-green-700">Atouts</a>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Link href="/register" className="hidden rounded-lg px-4 py-2 text-sm font-semibold text-ew-green-800 transition-colors hover:bg-ew-green-50 sm:inline-flex">
-              Créer un compte
-            </Link>
-            <Link href="/login" className="inline-flex items-center gap-2 rounded-lg bg-ew-green-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-ew-green-800 hover:shadow-md">
-              <LogIn className="h-4 w-4" /> Connexion
-            </Link>
-          </div>
+      {/* Hero — bannière pleine largeur (image fournie) + accès rapide.
+          Repli gracieux : si /brand/hero-cover.{png,jpg} est absent, le SVG s'affiche. */}
+      <section className="relative w-full overflow-hidden bg-ew-green-950">
+        <div
+          className="aspect-[16/9] max-h-[92vh] w-full bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "url('/brand/hero-cover.png'), url('/brand/hero-cover.jpg'), url('/brand/hero.svg')",
+          }}
+          role="img"
+          aria-label="EduWeb Planner — Planifiez mieux, enseignez sereinement"
+        />
+        <div className="absolute right-4 top-4 z-10 flex items-center gap-2 sm:right-6 sm:top-6">
+          <Link
+            href="/register"
+            className="hidden rounded-lg bg-white/90 px-4 py-2 text-sm font-semibold text-ew-green-800 shadow-sm backdrop-blur transition-colors hover:bg-white sm:inline-flex"
+          >
+            Créer un compte
+          </Link>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 rounded-lg bg-ew-green-700 px-4 py-2 text-sm font-semibold text-white shadow-md transition-colors hover:bg-ew-green-800"
+          >
+            <LogIn className="h-4 w-4" /> Connexion
+          </Link>
         </div>
-      </header>
-
-      {/* Hero — image SVG en arrière-plan + voile + éléments flottants */}
-      <section className="relative isolate overflow-hidden text-white">
-        <div className="absolute inset-0 -z-20 bg-ew-green-950 bg-cover bg-center" style={{ backgroundImage: "url('/brand/hero.svg')" }} />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-ew-green-950/75 via-ew-green-900/55 to-ew-green-950/85" />
-        {/* Orbes flottants */}
-        <div className="pointer-events-none absolute -right-20 top-10 -z-10 h-72 w-72 rounded-full bg-ew-gold-500/15 blur-3xl ew-float" />
-        <div className="pointer-events-none absolute -left-24 bottom-0 -z-10 h-80 w-80 rounded-full bg-ew-green-600/20 blur-3xl ew-float-slow" />
-
-        <div className="mx-auto max-w-6xl px-4 pb-28 pt-20 sm:px-6 sm:pb-32 sm:pt-28">
-          <div className="max-w-3xl">
-            <div className="ew-rise" style={{ animationDelay: "60ms" }}>
-              <Eyebrow light>Plateforme internationale de pilotage scolaire</Eyebrow>
-            </div>
-            <h1 className="ew-rise mt-6 font-display text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl" style={{ animationDelay: "140ms" }}>
-              Pilotez, planifiez et accompagnez{" "}
-              <span className="bg-gradient-to-r from-ew-gold-500 to-ew-gold-600 bg-clip-text text-transparent">chaque parcours scolaire</span>.
-            </h1>
-            <p className="ew-rise mt-6 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg" style={{ animationDelay: "220ms" }}>
-              EduWeb Planner réunit la vie scolaire, les évaluations, l&apos;inspection et le pilotage dans un seul
-              espace numérique sécurisé — du primaire au secondaire, jusqu&apos;à la formation des enseignants.
-            </p>
-            <div className="ew-rise mt-9 flex flex-wrap items-center gap-3" style={{ animationDelay: "300ms" }}>
-              <Link href="/login" className="group inline-flex items-center gap-2 rounded-xl bg-ew-gold-500 px-7 py-3.5 text-base font-bold text-ew-green-950 shadow-lg shadow-ew-gold-500/20 transition-transform hover:scale-[1.03]">
-                <LogIn className="h-5 w-5" /> Accéder à mon espace
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link href="/register" className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/10">
-                <UserPlus className="h-5 w-5" /> Créer un compte
-              </Link>
-            </div>
-            <div className="ew-rise mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/60" style={{ animationDelay: "380ms" }}>
-              <span className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-ew-gold-500" /> Accès sécurisé par rôle</span>
-              <span className="flex items-center gap-1.5"><Building2 className="h-4 w-4 text-ew-gold-500" /> Multi-établissement</span>
-              <span className="flex items-center gap-1.5"><Globe className="h-4 w-4 text-ew-gold-500" /> Multi-pays</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Indicateur de défilement */}
-        <a href="#chiffres" aria-label="Faire défiler" className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-white/55 sm:block">
-          <ChevronDown className="ew-bob h-6 w-6" />
-        </a>
       </section>
 
-      {/* Chiffres — carte flottante chevauchant le hero */}
-      <section id="chiffres" className="relative z-10 mx-auto -mt-14 w-full max-w-5xl px-4 sm:px-6">
+      {/* Chiffres */}
+      <section id="chiffres" className="mx-auto mt-14 w-full max-w-5xl scroll-mt-20 px-4 sm:mt-20 sm:px-6">
         <Reveal>
           <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border shadow-xl sm:grid-cols-4">
             {STATS.map((s) => (
