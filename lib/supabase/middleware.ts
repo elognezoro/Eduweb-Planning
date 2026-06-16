@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { isSupabaseConfigured } from "./config";
+import { isSupabaseConfigured, SUPABASE_URL, SUPABASE_ANON_KEY } from "./config";
 
 /** Préfixes des routes du tableau de bord (protégées en mode réel). */
 const PROTECTED_PREFIXES = [
@@ -27,8 +27,8 @@ export async function updateSession(request: NextRequest) {
   if (!isSupabaseConfigured()) return response;
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    SUPABASE_URL!,
+    SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
