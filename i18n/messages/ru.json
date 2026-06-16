@@ -271,7 +271,127 @@
     },
     "systemeComptesUtilisateurs": {
       "title": "Учётные записи пользователей",
-      "description": "Создавайте, утверждайте, изменяйте, блокируйте, импортируйте и удаляйте учётные записи. Фильтр по роли, статусу и учреждению."
+      "description": "Создавайте, утверждайте, изменяйте, блокируйте, импортируйте и удаляйте учётные записи. Фильтр по роли, статусу и учреждению.",
+      "kpis": {
+        "total": "Всего учёток",
+        "active": "Активные",
+        "pending": "Ожидающие",
+        "suspended": "Заблокированные"
+      },
+      "table": {
+        "user": "Пользователь",
+        "role": "Роль",
+        "institution": "Учреждение",
+        "country": "Страна",
+        "registeredAt": "Дата регистрации (UTC)",
+        "status": "Статус",
+        "actions": "Действия"
+      },
+      "filters": {
+        "allRoles": "Все роли",
+        "noRoleFound": "Роль не найдена",
+        "rolePlaceholder": "Первые буквы роли…",
+        "allStatuses": "Все статусы",
+        "statusActive": "Активный",
+        "statusPending": "Ожидающий",
+        "statusSuspended": "Заблокированный",
+        "statusArchived": "В архиве",
+        "allInstitutions": "Все учреждения",
+        "institutionPlaceholder": "Первые буквы учреждения…",
+        "noInstitution": "Нет учреждения",
+        "allCohorts": "Все когорты",
+        "manualRegistration": "Ручная регистрация",
+        "cohortPlaceholder": "Первые буквы когорты…",
+        "noCohort": "Нет когорты",
+        "searchUser": "Найти пользователя…"
+      },
+      "actions": {
+        "refresh": "Обновить",
+        "importCsv": "Импорт CSV",
+        "importTitle": "Импорт пользователей",
+        "importDescription": "Файл должен содержать ожидаемые колонки. При необходимости скачайте шаблон.",
+        "createUser": "Создать пользователя",
+        "loading": "Загрузка учётных записей…",
+        "validateAccount": "Подтвердить учётную запись (активировать)",
+        "changeRoleTitle": "Изменить роль и привязку",
+        "previewProfile": "Превью профиля",
+        "edit": "Изменить",
+        "delete": "Удалить",
+        "moreActions": "Ещё действия",
+        "approveAccount": "Утвердить учётную запись",
+        "reactivate": "Реактивировать",
+        "suspend": "Заблокировать",
+        "archive": "В архив",
+        "close": "Закрыть",
+        "cancel": "Отмена",
+        "save": "Сохранить",
+        "createAccount": "Создать учётную запись"
+      },
+      "toasts": {
+        "userActivated": "{name} активирован(а)",
+        "userActivatedDesc": "Учётная запись активна.",
+        "userApproved": "{name} утверждён(а)",
+        "userReactivated": "{name} реактивирован(а)",
+        "userSuspended": "{name} заблокирован(а)",
+        "accountArchived": "Учётная запись в архиве",
+        "accountArchivedDesc": "{name} помещён(а) в архив (обратимо).",
+        "roleUpdated": "Роль обновлена",
+        "userEdited": "Пользователь изменён",
+        "userDeleted": "Пользователь удалён",
+        "userDeletedDesc": "{name} удалён(а) из списка.",
+        "nameRequired": "Имя обязательно",
+        "userCreated": "Пользователь создан",
+        "userCreatedDesc": "Учётная запись добавлена со статусом «ожидающий».",
+        "bulkDeleted": "Удалено пользователей: {count}"
+      },
+      "preview": {
+        "title": "Превью профиля",
+        "description": "Сводка учётной записи пользователя.",
+        "role": "Роль",
+        "status": "Статус",
+        "institution": "Учреждение",
+        "region": "Регион",
+        "technicalId": "Технический идентификатор"
+      },
+      "delete": {
+        "single": "Удалить этого пользователя?",
+        "singleDesc1": "Учётная запись ",
+        "singleDesc2": " будет окончательно удалена. Действие необратимо.",
+        "bulk": "Удалить {count} пользователей?",
+        "bulkDesc": "Выбранные учётные записи будут окончательно удалены. Действие необратимо.",
+        "bulkButton": "Удалить ({count})"
+      },
+      "edit": {
+        "title": "Изменить пользователя",
+        "fullName": "Полное имя",
+        "fullNamePlaceholder": "KOUASSI Affoué Marie",
+        "email": "Электронная почта",
+        "role": "Роль"
+      },
+      "changeRole": {
+        "current": "Текущая роль",
+        "new": "Новая роль",
+        "specialized": "Специализированные роли администраторов",
+        "standard": "Стандартные роли",
+        "attachInstitution": "Привязать к учреждению",
+        "noAttachment": "Без привязки",
+        "choosePlaceholder": "Выбрать учреждение…",
+        "searchInstitution": "Первые буквы учреждения…",
+        "noInstitutionFound": "Учреждение не найдено",
+        "save": "Изменить"
+      },
+      "create": {
+        "title": "Создать пользователя",
+        "description": "Учётная запись будет создана со статусом «ожидающий» до подтверждения.",
+        "firstName": "Имя",
+        "firstNamePlaceholder": "Elogne Guessan",
+        "lastName": "Фамилия",
+        "lastNamePlaceholder": "ZORO",
+        "email": "Электронная почта",
+        "phone": "Телефон",
+        "phonePlaceholder": "Номер телефона",
+        "role": "Роль"
+      }
     },
     "systemeApprobationsPromo": {
       "title": "Одобрение промокодов",

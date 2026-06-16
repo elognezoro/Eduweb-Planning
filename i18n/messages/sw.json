@@ -271,7 +271,127 @@
     },
     "systemeComptesUtilisateurs": {
       "title": "Akaunti za watumiaji",
-      "description": "Unda, idhinisha, hariri, simamisha, ingiza na futa akaunti. Chuja kwa jukumu, hali na taasisi."
+      "description": "Unda, idhinisha, hariri, simamisha, ingiza na futa akaunti. Chuja kwa jukumu, hali na taasisi.",
+      "kpis": {
+        "total": "Jumla ya akaunti",
+        "active": "Hai",
+        "pending": "Inasubiri",
+        "suspended": "Zimesimamishwa"
+      },
+      "table": {
+        "user": "Mtumiaji",
+        "role": "Jukumu",
+        "institution": "Taasisi",
+        "country": "Nchi",
+        "registeredAt": "Tarehe ya usajili (UTC)",
+        "status": "Hali",
+        "actions": "Vitendo"
+      },
+      "filters": {
+        "allRoles": "Majukumu yote",
+        "noRoleFound": "Hakuna jukumu lililopatikana",
+        "rolePlaceholder": "Herufi za kwanza za jukumu…",
+        "allStatuses": "Hali zote",
+        "statusActive": "Hai",
+        "statusPending": "Inasubiri",
+        "statusSuspended": "Imesimamishwa",
+        "statusArchived": "Imeingizwa kumbukumbu",
+        "allInstitutions": "Taasisi zote",
+        "institutionPlaceholder": "Herufi za kwanza za taasisi…",
+        "noInstitution": "Hakuna taasisi",
+        "allCohorts": "Vikundi vyote",
+        "manualRegistration": "Usajili wa mkono",
+        "cohortPlaceholder": "Herufi za kwanza za kikundi…",
+        "noCohort": "Hakuna kikundi",
+        "searchUser": "Tafuta mtumiaji…"
+      },
+      "actions": {
+        "refresh": "Onyesha upya",
+        "importCsv": "Ingiza CSV",
+        "importTitle": "Ingiza watumiaji",
+        "importDescription": "Faili lazima liwe na safu wima zinazotarajiwa. Pakua kiolezo ikihitajika.",
+        "createUser": "Unda mtumiaji",
+        "loading": "Inapakia akaunti…",
+        "validateAccount": "Idhinisha akaunti (anzisha)",
+        "changeRoleTitle": "Badilisha jukumu na uhusiano",
+        "previewProfile": "Hakiki ya wasifu",
+        "edit": "Hariri",
+        "delete": "Futa",
+        "moreActions": "Vitendo zaidi",
+        "approveAccount": "Idhinisha akaunti",
+        "reactivate": "Anzisha tena",
+        "suspend": "Simamisha",
+        "archive": "Hifadhi kumbukumbu",
+        "close": "Funga",
+        "cancel": "Ghairi",
+        "save": "Hifadhi",
+        "createAccount": "Unda akaunti"
+      },
+      "toasts": {
+        "userActivated": "{name} amewashwa",
+        "userActivatedDesc": "Akaunti sasa imewashwa.",
+        "userApproved": "{name} ameidhinishwa",
+        "userReactivated": "{name} ameanzishwa tena",
+        "userSuspended": "{name} amesimamishwa",
+        "accountArchived": "Akaunti imehifadhiwa kumbukumbu",
+        "accountArchivedDesc": "{name} imehifadhiwa kumbukumbu (inaweza kurudishwa).",
+        "roleUpdated": "Jukumu limesasishwa",
+        "userEdited": "Mtumiaji amehaririwa",
+        "userDeleted": "Mtumiaji amefutwa",
+        "userDeletedDesc": "{name} ameondolewa kwenye orodha.",
+        "nameRequired": "Jina linahitajika",
+        "userCreated": "Mtumiaji ameundwa",
+        "userCreatedDesc": "Akaunti imeongezwa kwa hali ya «inasubiri».",
+        "bulkDeleted": "{count} mtumiaji wamefutwa"
+      },
+      "preview": {
+        "title": "Hakiki ya wasifu",
+        "description": "Muhtasari wa akaunti ya mtumiaji.",
+        "role": "Jukumu",
+        "status": "Hali",
+        "institution": "Taasisi",
+        "region": "Mkoa",
+        "technicalId": "Kitambulisho cha kiufundi"
+      },
+      "delete": {
+        "single": "Futa mtumiaji huyu?",
+        "singleDesc1": "Akaunti ",
+        "singleDesc2": " itafutwa kabisa. Kitendo hiki hakirudiwi.",
+        "bulk": "Futa {count} mtumiaji?",
+        "bulkDesc": "Akaunti zilizochaguliwa zitafutwa kabisa. Kitendo hiki hakirudiwi.",
+        "bulkButton": "Futa ({count})"
+      },
+      "edit": {
+        "title": "Hariri mtumiaji",
+        "fullName": "Jina kamili",
+        "fullNamePlaceholder": "KOUASSI Affoué Marie",
+        "email": "Anwani ya barua pepe",
+        "role": "Jukumu"
+      },
+      "changeRole": {
+        "current": "Jukumu la sasa",
+        "new": "Jukumu jipya",
+        "specialized": "Majukumu maalum ya wasimamizi",
+        "standard": "Majukumu ya kawaida",
+        "attachInstitution": "Unganisha na taasisi",
+        "noAttachment": "Hakuna kiambatisho",
+        "choosePlaceholder": "Chagua taasisi…",
+        "searchInstitution": "Herufi za kwanza za taasisi…",
+        "noInstitutionFound": "Hakuna taasisi iliyopatikana",
+        "save": "Badilisha"
+      },
+      "create": {
+        "title": "Unda mtumiaji",
+        "description": "Akaunti itaundwa kwa hali ya «inasubiri» hadi uthibitisho.",
+        "firstName": "Jina",
+        "firstNamePlaceholder": "Elogne Guessan",
+        "lastName": "Jina la ukoo",
+        "lastNamePlaceholder": "ZORO",
+        "email": "Anwani ya barua pepe",
+        "phone": "Simu",
+        "phonePlaceholder": "Nambari ya simu",
+        "role": "Jukumu"
+      }
     },
     "systemeApprobationsPromo": {
       "title": "Idhini za misimbo ya promo",

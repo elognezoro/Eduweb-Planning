@@ -271,7 +271,127 @@
     },
     "systemeComptesUtilisateurs": {
       "title": "Benutzerkonten",
-      "description": "Konten erstellen, freigeben, bearbeiten, sperren, importieren und löschen. Filterung nach Rolle, Status und Einrichtung."
+      "description": "Konten erstellen, freigeben, bearbeiten, sperren, importieren und löschen. Filterung nach Rolle, Status und Einrichtung.",
+      "kpis": {
+        "total": "Konten gesamt",
+        "active": "Aktive",
+        "pending": "Ausstehend",
+        "suspended": "Gesperrt"
+      },
+      "table": {
+        "user": "Benutzer",
+        "role": "Rolle",
+        "institution": "Einrichtung",
+        "country": "Land",
+        "registeredAt": "Registriert am (UTC)",
+        "status": "Status",
+        "actions": "Aktionen"
+      },
+      "filters": {
+        "allRoles": "Alle Rollen",
+        "noRoleFound": "Keine Rolle gefunden",
+        "rolePlaceholder": "Erste Buchstaben der Rolle…",
+        "allStatuses": "Alle Status",
+        "statusActive": "Aktiv",
+        "statusPending": "Ausstehend",
+        "statusSuspended": "Gesperrt",
+        "statusArchived": "Archiviert",
+        "allInstitutions": "Alle Einrichtungen",
+        "institutionPlaceholder": "Erste Buchstaben der Einrichtung…",
+        "noInstitution": "Keine Einrichtung",
+        "allCohorts": "Alle Kohorten",
+        "manualRegistration": "Manuelle Anmeldung",
+        "cohortPlaceholder": "Erste Buchstaben der Kohorte…",
+        "noCohort": "Keine Kohorte",
+        "searchUser": "Benutzer suchen…"
+      },
+      "actions": {
+        "refresh": "Aktualisieren",
+        "importCsv": "CSV importieren",
+        "importTitle": "Benutzer importieren",
+        "importDescription": "Die Datei muss die erwarteten Spalten enthalten. Bei Bedarf die Vorlage herunterladen.",
+        "createUser": "Benutzer erstellen",
+        "loading": "Konten werden geladen…",
+        "validateAccount": "Konto freigeben (aktivieren)",
+        "changeRoleTitle": "Rolle und Zuordnung ändern",
+        "previewProfile": "Profilvorschau",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "moreActions": "Weitere Aktionen",
+        "approveAccount": "Konto genehmigen",
+        "reactivate": "Reaktivieren",
+        "suspend": "Sperren",
+        "archive": "Archivieren",
+        "close": "Schließen",
+        "cancel": "Abbrechen",
+        "save": "Speichern",
+        "createAccount": "Konto erstellen"
+      },
+      "toasts": {
+        "userActivated": "{name} aktiviert",
+        "userActivatedDesc": "Das Konto ist jetzt aktiv.",
+        "userApproved": "{name} genehmigt",
+        "userReactivated": "{name} reaktiviert",
+        "userSuspended": "{name} gesperrt",
+        "accountArchived": "Konto archiviert",
+        "accountArchivedDesc": "{name} wurde archiviert (rückgängig machbar).",
+        "roleUpdated": "Rolle aktualisiert",
+        "userEdited": "Benutzer bearbeitet",
+        "userDeleted": "Benutzer gelöscht",
+        "userDeletedDesc": "{name} wurde aus der Liste entfernt.",
+        "nameRequired": "Name ist erforderlich",
+        "userCreated": "Benutzer erstellt",
+        "userCreatedDesc": "Konto im Status „ausstehend\" hinzugefügt.",
+        "bulkDeleted": "{count} Benutzer gelöscht"
+      },
+      "preview": {
+        "title": "Profilvorschau",
+        "description": "Zusammenfassung des Benutzerkontos.",
+        "role": "Rolle",
+        "status": "Status",
+        "institution": "Einrichtung",
+        "region": "Region",
+        "technicalId": "Technische Kennung"
+      },
+      "delete": {
+        "single": "Diesen Benutzer löschen?",
+        "singleDesc1": "Das Konto ",
+        "singleDesc2": " wird endgültig gelöscht. Diese Aktion ist nicht umkehrbar.",
+        "bulk": "{count} Benutzer löschen?",
+        "bulkDesc": "Die ausgewählten Konten werden endgültig gelöscht. Diese Aktion ist nicht umkehrbar.",
+        "bulkButton": "Löschen ({count})"
+      },
+      "edit": {
+        "title": "Benutzer bearbeiten",
+        "fullName": "Vor- und Nachname",
+        "fullNamePlaceholder": "KOUASSI Affoué Marie",
+        "email": "E-Mail-Adresse",
+        "role": "Rolle"
+      },
+      "changeRole": {
+        "current": "Aktuelle Rolle",
+        "new": "Neue Rolle",
+        "specialized": "Spezialisierte Admin-Rollen",
+        "standard": "Standardrollen",
+        "attachInstitution": "Einer Einrichtung zuordnen",
+        "noAttachment": "Keine Zuordnung",
+        "choosePlaceholder": "Einrichtung wählen…",
+        "searchInstitution": "Erste Buchstaben der Einrichtung…",
+        "noInstitutionFound": "Keine Einrichtung gefunden",
+        "save": "Ändern"
+      },
+      "create": {
+        "title": "Benutzer erstellen",
+        "description": "Das Konto wird mit Status „ausstehend\" erstellt, bis es freigegeben wird.",
+        "firstName": "Vorname",
+        "firstNamePlaceholder": "Elogne Guessan",
+        "lastName": "Nachname",
+        "lastNamePlaceholder": "ZORO",
+        "email": "E-Mail-Adresse",
+        "phone": "Telefon",
+        "phonePlaceholder": "Telefonnummer",
+        "role": "Rolle"
+      }
     },
     "systemeApprobationsPromo": {
       "title": "Promo-Code-Freigaben",

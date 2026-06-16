@@ -271,7 +271,127 @@
     },
     "systemeComptesUtilisateurs": {
       "title": "حسابات المستخدمين",
-      "description": "إنشاء واعتماد وتعديل وتعليق واستيراد وحذف الحسابات. تصفية حسب الدور والحالة والمؤسسة."
+      "description": "إنشاء واعتماد وتعديل وتعليق واستيراد وحذف الحسابات. تصفية حسب الدور والحالة والمؤسسة.",
+      "kpis": {
+        "total": "إجمالي الحسابات",
+        "active": "نشطة",
+        "pending": "قيد الانتظار",
+        "suspended": "معلقة"
+      },
+      "table": {
+        "user": "المستخدم",
+        "role": "الدور",
+        "institution": "المؤسسة",
+        "country": "البلد",
+        "registeredAt": "تاريخ التسجيل (UTC)",
+        "status": "الحالة",
+        "actions": "الإجراءات"
+      },
+      "filters": {
+        "allRoles": "جميع الأدوار",
+        "noRoleFound": "لم يتم العثور على دور",
+        "rolePlaceholder": "الحروف الأولى من الدور…",
+        "allStatuses": "جميع الحالات",
+        "statusActive": "نشط",
+        "statusPending": "قيد الانتظار",
+        "statusSuspended": "معلق",
+        "statusArchived": "مؤرشف",
+        "allInstitutions": "جميع المؤسسات",
+        "institutionPlaceholder": "الحروف الأولى من المؤسسة…",
+        "noInstitution": "لا توجد مؤسسة",
+        "allCohorts": "جميع الدفعات",
+        "manualRegistration": "تسجيل يدوي",
+        "cohortPlaceholder": "الحروف الأولى من الدفعة…",
+        "noCohort": "لا توجد دفعة",
+        "searchUser": "البحث عن مستخدم…"
+      },
+      "actions": {
+        "refresh": "تحديث",
+        "importCsv": "استيراد CSV",
+        "importTitle": "استيراد المستخدمين",
+        "importDescription": "يجب أن يحتوي الملف على الأعمدة المتوقعة. حمّل القالب إذا لزم الأمر.",
+        "createUser": "إنشاء مستخدم",
+        "loading": "جارٍ تحميل الحسابات…",
+        "validateAccount": "اعتماد الحساب (تفعيل)",
+        "changeRoleTitle": "تغيير الدور والانتماء",
+        "previewProfile": "معاينة الملف الشخصي",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "moreActions": "المزيد من الإجراءات",
+        "approveAccount": "اعتماد الحساب",
+        "reactivate": "إعادة التفعيل",
+        "suspend": "تعليق",
+        "archive": "أرشفة",
+        "close": "إغلاق",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "createAccount": "إنشاء الحساب"
+      },
+      "toasts": {
+        "userActivated": "تم تفعيل {name}",
+        "userActivatedDesc": "أصبح الحساب نشطًا.",
+        "userApproved": "تم اعتماد {name}",
+        "userReactivated": "تم إعادة تفعيل {name}",
+        "userSuspended": "تم تعليق {name}",
+        "accountArchived": "تمت أرشفة الحساب",
+        "accountArchivedDesc": "تمت أرشفة {name} (قابل للاسترجاع).",
+        "roleUpdated": "تم تحديث الدور",
+        "userEdited": "تم تعديل المستخدم",
+        "userDeleted": "تم حذف المستخدم",
+        "userDeletedDesc": "تم حذف {name} من القائمة.",
+        "nameRequired": "الاسم مطلوب",
+        "userCreated": "تم إنشاء المستخدم",
+        "userCreatedDesc": "تمت إضافة الحساب بحالة «قيد الانتظار».",
+        "bulkDeleted": "تم حذف {count} مستخدم"
+      },
+      "preview": {
+        "title": "معاينة الملف الشخصي",
+        "description": "ملخص حساب المستخدم.",
+        "role": "الدور",
+        "status": "الحالة",
+        "institution": "المؤسسة",
+        "region": "المنطقة",
+        "technicalId": "المعرف التقني"
+      },
+      "delete": {
+        "single": "حذف هذا المستخدم؟",
+        "singleDesc1": "سيتم حذف حساب ",
+        "singleDesc2": " نهائيًا. هذا الإجراء لا رجعة فيه.",
+        "bulk": "حذف {count} مستخدم؟",
+        "bulkDesc": "سيتم حذف الحسابات المحددة نهائيًا. هذا الإجراء لا رجعة فيه.",
+        "bulkButton": "حذف ({count})"
+      },
+      "edit": {
+        "title": "تعديل المستخدم",
+        "fullName": "الاسم الكامل",
+        "fullNamePlaceholder": "KOUASSI Affoué Marie",
+        "email": "البريد الإلكتروني",
+        "role": "الدور"
+      },
+      "changeRole": {
+        "current": "الدور الحالي",
+        "new": "الدور الجديد",
+        "specialized": "أدوار المسؤولين المتخصصة",
+        "standard": "الأدوار القياسية",
+        "attachInstitution": "ربط بمؤسسة",
+        "noAttachment": "بدون ربط",
+        "choosePlaceholder": "اختر مؤسسة…",
+        "searchInstitution": "الحروف الأولى من المؤسسة…",
+        "noInstitutionFound": "لم يتم العثور على مؤسسة",
+        "save": "تعديل"
+      },
+      "create": {
+        "title": "إنشاء مستخدم",
+        "description": "سيتم إنشاء الحساب بحالة «قيد الانتظار» حتى الاعتماد.",
+        "firstName": "الاسم الأول",
+        "firstNamePlaceholder": "Elogne Guessan",
+        "lastName": "اسم العائلة",
+        "lastNamePlaceholder": "ZORO",
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "phonePlaceholder": "رقم الهاتف",
+        "role": "الدور"
+      }
     },
     "systemeApprobationsPromo": {
       "title": "اعتماد رموز الخصم",

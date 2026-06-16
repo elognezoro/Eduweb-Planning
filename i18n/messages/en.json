@@ -271,7 +271,127 @@
     },
     "systemeComptesUtilisateurs": {
       "title": "User accounts",
-      "description": "Create, approve, edit, suspend, import and delete accounts. Filter by role, status and institution."
+      "description": "Create, approve, edit, suspend, import and delete accounts. Filter by role, status and institution.",
+      "kpis": {
+        "total": "Total accounts",
+        "active": "Active",
+        "pending": "Pending",
+        "suspended": "Suspended"
+      },
+      "table": {
+        "user": "User",
+        "role": "Role",
+        "institution": "Institution",
+        "country": "Country",
+        "registeredAt": "Registered (UTC)",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "filters": {
+        "allRoles": "All roles",
+        "noRoleFound": "No role found",
+        "rolePlaceholder": "First letters of the role…",
+        "allStatuses": "All statuses",
+        "statusActive": "Active",
+        "statusPending": "Pending",
+        "statusSuspended": "Suspended",
+        "statusArchived": "Archived",
+        "allInstitutions": "All institutions",
+        "institutionPlaceholder": "First letters of the institution…",
+        "noInstitution": "No institution",
+        "allCohorts": "All cohorts",
+        "manualRegistration": "Manual registration",
+        "cohortPlaceholder": "First letters of the cohort…",
+        "noCohort": "No cohort",
+        "searchUser": "Search for a user…"
+      },
+      "actions": {
+        "refresh": "Refresh",
+        "importCsv": "Import CSV",
+        "importTitle": "Import users",
+        "importDescription": "The file must contain the expected columns. Download the template if needed.",
+        "createUser": "Create a user",
+        "loading": "Loading accounts…",
+        "validateAccount": "Validate the account (activate)",
+        "changeRoleTitle": "Change role and assignment",
+        "previewProfile": "Profile preview",
+        "edit": "Edit",
+        "delete": "Delete",
+        "moreActions": "More actions",
+        "approveAccount": "Approve account",
+        "reactivate": "Reactivate",
+        "suspend": "Suspend",
+        "archive": "Archive",
+        "close": "Close",
+        "cancel": "Cancel",
+        "save": "Save",
+        "createAccount": "Create account"
+      },
+      "toasts": {
+        "userActivated": "{name} activated",
+        "userActivatedDesc": "The account is now active.",
+        "userApproved": "{name} approved",
+        "userReactivated": "{name} reactivated",
+        "userSuspended": "{name} suspended",
+        "accountArchived": "Account archived",
+        "accountArchivedDesc": "{name} has been archived (reversible).",
+        "roleUpdated": "Role updated",
+        "userEdited": "User edited",
+        "userDeleted": "User deleted",
+        "userDeletedDesc": "{name} has been removed from the list.",
+        "nameRequired": "Name is required",
+        "userCreated": "User created",
+        "userCreatedDesc": "Account added with \"pending\" status.",
+        "bulkDeleted": "{count} user(s) deleted"
+      },
+      "preview": {
+        "title": "Profile preview",
+        "description": "Summary of the user account.",
+        "role": "Role",
+        "status": "Status",
+        "institution": "Institution",
+        "region": "Region",
+        "technicalId": "Technical ID"
+      },
+      "delete": {
+        "single": "Delete this user?",
+        "singleDesc1": "The account ",
+        "singleDesc2": " will be permanently deleted. This action is irreversible.",
+        "bulk": "Delete {count} user{plural}?",
+        "bulkDesc": "The selected accounts will be permanently deleted. This action is irreversible.",
+        "bulkButton": "Delete ({count})"
+      },
+      "edit": {
+        "title": "Edit user",
+        "fullName": "Full name",
+        "fullNamePlaceholder": "KOUASSI Affoué Marie",
+        "email": "Email address",
+        "role": "Role"
+      },
+      "changeRole": {
+        "current": "Current role",
+        "new": "New role",
+        "specialized": "Specialised admin roles",
+        "standard": "Standard roles",
+        "attachInstitution": "Attach to an institution",
+        "noAttachment": "No attachment",
+        "choosePlaceholder": "Choose an institution…",
+        "searchInstitution": "First letters of the institution…",
+        "noInstitutionFound": "No institution found",
+        "save": "Update"
+      },
+      "create": {
+        "title": "Create a user",
+        "description": "The account will be created with \"pending\" status until validation.",
+        "firstName": "First name",
+        "firstNamePlaceholder": "Elogne Guessan",
+        "lastName": "Last name",
+        "lastNamePlaceholder": "ZORO",
+        "email": "Email address",
+        "phone": "Phone",
+        "phonePlaceholder": "Phone number",
+        "role": "Role"
+      }
     },
     "systemeApprobationsPromo": {
       "title": "Promo code approvals",

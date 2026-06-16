@@ -90,65 +90,68 @@ function RoleSelectItems() {
   );
 }
 
-const columns: ColumnDef<DirectoryUser>[] = [
-  {
-    accessorKey: "name",
-    header: "Utilisateur",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-3">
-        <Avatar className="h-9 w-9">
-          <AvatarFallback className="bg-ew-green-100 text-xs text-ew-green-800">
-            {initials(row.original.name)}
-          </AvatarFallback>
-        </Avatar>
-        <div>
-          <p className="font-semibold text-foreground">{row.original.name}</p>
-          <p className="text-xs text-muted-foreground">{row.original.email}</p>
+function useColumns(): ColumnDef<DirectoryUser>[] {
+  const t = useTranslations("pages.systemeComptesUtilisateurs.table");
+  return [
+    {
+      accessorKey: "name",
+      header: t("user"),
+      cell: ({ row }) => (
+        <div className="flex items-center gap-3">
+          <Avatar className="h-9 w-9">
+            <AvatarFallback className="bg-ew-green-100 text-xs text-ew-green-800">
+              {initials(row.original.name)}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="font-semibold text-foreground">{row.original.name}</p>
+            <p className="text-xs text-muted-foreground">{row.original.email}</p>
+          </div>
         </div>
-      </div>
-    ),
-  },
-  { accessorKey: "role", header: "Rôle", cell: ({ row }) => <RoleBadge role={row.original.role} short /> },
-  { accessorKey: "etablissement", header: "Établissement" },
-  {
-    accessorKey: "country",
-    header: "Pays",
-    cell: ({ row }) => {
-      const code = row.original.country ?? "CI";
-      return (
-        <span className="flex items-center gap-2">
-          <CountryFlag code={code} />
-          <span>{getUnCountry(code)?.name ?? code}</span>
-        </span>
-      );
+      ),
     },
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Inscrit le (UTC)",
-    cell: ({ row }) => {
-      const iso = row.original.createdAt;
-      if (!iso) return <span className="text-muted-foreground">—</span>;
-      const [date, time] = iso.split("T");
-      const [y, m, d] = date.split("-");
-      return (
-        <div>
-          <p className="text-foreground">
-            {d}/{m}/{y} · {time.slice(0, 5)} UTC
-          </p>
-          {row.original.cohorte && <p className="text-xs text-muted-foreground">{row.original.cohorte}</p>}
-        </div>
-      );
+    { accessorKey: "role", header: t("role"), cell: ({ row }) => <RoleBadge role={row.original.role} short /> },
+    { accessorKey: "etablissement", header: t("institution") },
+    {
+      accessorKey: "country",
+      header: t("country"),
+      cell: ({ row }) => {
+        const code = row.original.country ?? "CI";
+        return (
+          <span className="flex items-center gap-2">
+            <CountryFlag code={code} />
+            <span>{getUnCountry(code)?.name ?? code}</span>
+          </span>
+        );
+      },
     },
-  },
-  { accessorKey: "status", header: "Statut", cell: ({ row }) => <StatusBadge status={row.original.status} /> },
-  {
-    id: "actions",
-    header: () => <span className="block text-right">Actions</span>,
-    enableSorting: false,
-    cell: ({ row }) => <RowActions user={row.original} />,
-  },
-];
+    {
+      accessorKey: "createdAt",
+      header: t("registeredAt"),
+      cell: ({ row }) => {
+        const iso = row.original.createdAt;
+        if (!iso) return <span className="text-muted-foreground">—</span>;
+        const [date, time] = iso.split("T");
+        const [y, m, d] = date.split("-");
+        return (
+          <div>
+            <p className="text-foreground">
+              {d}/{m}/{y} · {time.slice(0, 5)} UTC
+            </p>
+            {row.original.cohorte && <p className="text-xs text-muted-foreground">{row.original.cohorte}</p>}
+          </div>
+        );
+      },
+    },
+    { accessorKey: "status", header: t("status"), cell: ({ row }) => <StatusBadge status={row.original.status} /> },
+    {
+      id: "actions",
+      header: () => <span className="block text-right">{t("actions")}</span>,
+      enableSorting: false,
+      cell: ({ row }) => <RowActions user={row.original} />,
+    },
+  ];
+}
 
 export default function ComptesUtilisateursPage() {
   return (
@@ -197,18 +200,18 @@ function ComptesUtilisateursContent() {
         <div className="flex gap-2">
           {realMode && (
             <Button variant="outline" onClick={refresh} disabled={loading}>
-              <RotateCcw className={cn("h-4 w-4", loading && "animate-spin")} /> Actualiser
+              <RotateCcw className={cn("h-4 w-4", loading && "animate-spin")} /> {t("pages.systemeComptesUtilisateurs.actions.refresh")}
             </Button>
           )}
           <ImportCsvDialog
-            title="Importer des utilisateurs"
-            description="Le fichier doit contenir les colonnes attendues. Téléchargez le modèle si besoin."
+            title={t("pages.systemeComptesUtilisateurs.actions.importTitle")}
+            description={t("pages.systemeComptesUtilisateurs.actions.importDescription")}
             expectedColumns={["prenom", "nom", "email", "role", "etablissement"]}
             sampleRow={["Koffi", "Kouamé", "kkouame@eduweb.ci", "enseignant", "Lycée Moderne de Cocody"]}
             templateFilename="modele-utilisateurs.csv"
             trigger={(open) => (
               <Button variant="outline" onClick={open}>
-                <UploadCloud className="h-4 w-4" /> Importer CSV
+                <UploadCloud className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.actions.importCsv")}
               </Button>
             )}
           />
@@ -216,10 +219,10 @@ function ComptesUtilisateursContent() {
         </div>
       }
       kpis={[
-        { label: "Total comptes", value: counts.total, icon: Users, tone: "green" },
-        { label: "Actifs", value: counts.active, icon: Users, tone: "blue" },
-        { label: "En attente", value: counts.pending, icon: Users, tone: "gold" },
-        { label: "Suspendus", value: counts.suspended, icon: Users, tone: "red" },
+        { label: t("pages.systemeComptesUtilisateurs.kpis.total"), value: counts.total, icon: Users, tone: "green" },
+        { label: t("pages.systemeComptesUtilisateurs.kpis.active"), value: counts.active, icon: Users, tone: "blue" },
+        { label: t("pages.systemeComptesUtilisateurs.kpis.pending"), value: counts.pending, icon: Users, tone: "gold" },
+        { label: t("pages.systemeComptesUtilisateurs.kpis.suspended"), value: counts.suspended, icon: Users, tone: "red" },
       ]}
     >
       <FilterBar>
@@ -234,20 +237,20 @@ function ComptesUtilisateursContent() {
           value={role}
           onChange={setRole}
           allowAll
-          allLabel="Tous les rôles"
-          searchPlaceholder="Premières lettres du rôle…"
-          emptyText="Aucun rôle trouvé"
+          allLabel={t("pages.systemeComptesUtilisateurs.filters.allRoles")}
+          searchPlaceholder={t("pages.systemeComptesUtilisateurs.filters.rolePlaceholder")}
+          emptyText={t("pages.systemeComptesUtilisateurs.filters.noRoleFound")}
           className="w-52"
         />
         <FilterSelect
           value={status}
           onValueChange={setStatus}
           options={[
-            { value: "all", label: "Tous les statuts" },
-            { value: "active", label: "Actif" },
-            { value: "pending", label: "En attente" },
-            { value: "suspended", label: "Suspendu" },
-            { value: "archived", label: "Archivé" },
+            { value: "all", label: t("pages.systemeComptesUtilisateurs.filters.allStatuses") },
+            { value: "active", label: t("pages.systemeComptesUtilisateurs.filters.statusActive") },
+            { value: "pending", label: t("pages.systemeComptesUtilisateurs.filters.statusPending") },
+            { value: "suspended", label: t("pages.systemeComptesUtilisateurs.filters.statusSuspended") },
+            { value: "archived", label: t("pages.systemeComptesUtilisateurs.filters.statusArchived") },
           ]}
         />
         <CountrySearchSelect value={country} onChange={setCountry} allowAll className="w-52" />
@@ -256,31 +259,31 @@ function ComptesUtilisateursContent() {
           value={etab}
           onChange={setEtab}
           allowAll
-          allLabel="Tous les établissements"
-          searchPlaceholder="Premières lettres de l'établissement…"
-          emptyText="Aucun établissement"
+          allLabel={t("pages.systemeComptesUtilisateurs.filters.allInstitutions")}
+          searchPlaceholder={t("pages.systemeComptesUtilisateurs.filters.institutionPlaceholder")}
+          emptyText={t("pages.systemeComptesUtilisateurs.filters.noInstitution")}
           className="w-56"
         />
         <SearchSelect
-          items={[{ value: "manual", label: "Inscription manuelle" }, ...cohortes.map((c) => ({ value: c, label: c }))]}
+          items={[{ value: "manual", label: t("pages.systemeComptesUtilisateurs.filters.manualRegistration") }, ...cohortes.map((c) => ({ value: c, label: c }))]}
           value={cohorte}
           onChange={setCohorte}
           allowAll
-          allLabel="Toutes les cohortes"
-          searchPlaceholder="Premières lettres de la cohorte…"
-          emptyText="Aucune cohorte"
+          allLabel={t("pages.systemeComptesUtilisateurs.filters.allCohorts")}
+          searchPlaceholder={t("pages.systemeComptesUtilisateurs.filters.cohortPlaceholder")}
+          emptyText={t("pages.systemeComptesUtilisateurs.filters.noCohort")}
           className="w-56"
         />
       </FilterBar>
 
       {realMode && loading && users.length === 0 && (
-        <p className="px-1 py-8 text-center text-sm text-muted-foreground">Chargement des comptes…</p>
+        <p className="px-1 py-8 text-center text-sm text-muted-foreground">{t("pages.systemeComptesUtilisateurs.actions.loading")}</p>
       )}
 
       <DataTable
-        columns={columns}
+        columns={useColumns()}
         data={data}
-        searchPlaceholder="Rechercher un utilisateur…"
+        searchPlaceholder={t("pages.systemeComptesUtilisateurs.filters.searchUser")}
         enableSelection
         getRowId={(u) => u.id}
         bulkActions={(rows, clear) => (
@@ -288,7 +291,7 @@ function ComptesUtilisateursContent() {
             rows={rows as DirectoryUser[]}
             onConfirm={(ids) => {
               removeUsers(ids);
-              toast.success(`${ids.length} utilisateur(s) supprimé(s)`);
+              toast.success(t("pages.systemeComptesUtilisateurs.toasts.bulkDeleted", { count: ids.length }));
               clear();
             }}
           />
@@ -333,6 +336,7 @@ function IconBtn({
 }
 
 function RowActions({ user }: { user: DirectoryUser }) {
+  const t = useTranslations();
   const { setUserStatus, updateUser, removeUser } = useDirectoryUsers();
   const [editOpen, setEditOpen] = React.useState(false);
   const [previewOpen, setPreviewOpen] = React.useState(false);
@@ -344,35 +348,35 @@ function RowActions({ user }: { user: DirectoryUser }) {
       <div className="flex items-center justify-end gap-0.5">
         {user.status === "pending" && (
           <IconBtn
-            title="Valider le compte (rendre actif)"
+            title={t("pages.systemeComptesUtilisateurs.actions.validateAccount")}
             tone="green"
             onClick={() => {
               setUserStatus(user.id, "active");
-              toast.success(`${user.name} activé`, { description: "Le compte est désormais actif." });
+              toast.success(t("pages.systemeComptesUtilisateurs.toasts.userActivated", { name: user.name }), { description: t("pages.systemeComptesUtilisateurs.toasts.userActivatedDesc") });
             }}
           >
             <CheckCircle2 className="h-4 w-4" />
           </IconBtn>
         )}
-        <IconBtn title="Changer le rôle et le rattachement" tone="green" onClick={() => setRoleOpen(true)}>
+        <IconBtn title={t("pages.systemeComptesUtilisateurs.actions.changeRoleTitle")} tone="green" onClick={() => setRoleOpen(true)}>
           <ShieldCheck className="h-4 w-4" />
         </IconBtn>
 
-        <IconBtn title="Aperçu du profil" onClick={() => setPreviewOpen(true)}>
+        <IconBtn title={t("pages.systemeComptesUtilisateurs.actions.previewProfile")} onClick={() => setPreviewOpen(true)}>
           <Eye className="h-4 w-4" />
         </IconBtn>
 
-        <IconBtn title="Modifier" onClick={() => setEditOpen(true)}>
+        <IconBtn title={t("pages.systemeComptesUtilisateurs.actions.edit")} onClick={() => setEditOpen(true)}>
           <Pencil className="h-4 w-4" />
         </IconBtn>
 
-        <IconBtn title="Supprimer" tone="red" onClick={() => setDeleteOpen(true)}>
+        <IconBtn title={t("pages.systemeComptesUtilisateurs.actions.delete")} tone="red" onClick={() => setDeleteOpen(true)}>
           <Trash2 className="h-4 w-4" />
         </IconBtn>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Plus d'actions">
+            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={t("pages.systemeComptesUtilisateurs.actions.moreActions")}>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -381,38 +385,38 @@ function RowActions({ user }: { user: DirectoryUser }) {
               <DropdownMenuItem
                 onClick={() => {
                   setUserStatus(user.id, "active");
-                  toast.success(`${user.name} approuvé`, { description: "Le compte est désormais actif." });
+                  toast.success(t("pages.systemeComptesUtilisateurs.toasts.userApproved", { name: user.name }), { description: t("pages.systemeComptesUtilisateurs.toasts.userActivatedDesc") });
                 }}
               >
-                <ShieldCheck className="h-4 w-4" /> Approuver le compte
+                <ShieldCheck className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.actions.approveAccount")}
               </DropdownMenuItem>
             )}
             {user.status === "suspended" || user.status === "archived" ? (
               <DropdownMenuItem
                 onClick={() => {
                   setUserStatus(user.id, "active");
-                  toast.success(`${user.name} réactivé`);
+                  toast.success(t("pages.systemeComptesUtilisateurs.toasts.userReactivated", { name: user.name }));
                 }}
               >
-                <RotateCcw className="h-4 w-4" /> Réactiver
+                <RotateCcw className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.actions.reactivate")}
               </DropdownMenuItem>
             ) : (
               <DropdownMenuItem
                 onClick={() => {
                   setUserStatus(user.id, "suspended");
-                  toast.warning(`${user.name} suspendu`);
+                  toast.warning(t("pages.systemeComptesUtilisateurs.toasts.userSuspended", { name: user.name }));
                 }}
               >
-                <Ban className="h-4 w-4" /> Suspendre
+                <Ban className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.actions.suspend")}
               </DropdownMenuItem>
             )}
             <DropdownMenuItem
               onClick={() => {
                 setUserStatus(user.id, "archived");
-                toast("Compte archivé", { description: `${user.name} a été archivé (suppression réversible).` });
+                toast(t("pages.systemeComptesUtilisateurs.toasts.accountArchived"), { description: t("pages.systemeComptesUtilisateurs.toasts.accountArchivedDesc", { name: user.name }) });
               }}
             >
-              <Archive className="h-4 w-4" /> Archiver
+              <Archive className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.actions.archive")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -424,9 +428,7 @@ function RowActions({ user }: { user: DirectoryUser }) {
         onOpenChange={setRoleOpen}
         onSave={(patch) => {
           updateUser(user.id, patch);
-          toast.success("Rôle mis à jour", {
-            description: `${user.name} — ${patch.role ? ROLE_LIST.find((r) => r.id === patch.role)?.label : ""}${patch.etablissement ? ` · ${patch.etablissement}` : ""}.`,
-          });
+          toast.success(t("pages.systemeComptesUtilisateurs.toasts.roleUpdated"));
           setRoleOpen(false);
         }}
       />
@@ -445,21 +447,21 @@ function RowActions({ user }: { user: DirectoryUser }) {
         onOpenChange={setEditOpen}
         onSave={(patch) => {
           updateUser(user.id, patch);
-          toast.success("Utilisateur modifié");
+          toast.success(t("pages.systemeComptesUtilisateurs.toasts.userEdited"));
         }}
       />
       <ConfirmDeleteDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title="Supprimer cet utilisateur ?"
+        title={t("pages.systemeComptesUtilisateurs.delete.single")}
         description={
           <>
-            Le compte <strong>{user.name}</strong> sera définitivement supprimé. Cette action est irréversible.
+            {t("pages.systemeComptesUtilisateurs.delete.singleDesc1")}<strong>{user.name}</strong>{t("pages.systemeComptesUtilisateurs.delete.singleDesc2")}
           </>
         }
         onConfirm={() => {
           removeUser(user.id);
-          toast.success("Utilisateur supprimé", { description: `${user.name} a été retiré de la liste.` });
+          toast.success(t("pages.systemeComptesUtilisateurs.toasts.userDeleted"), { description: t("pages.systemeComptesUtilisateurs.toasts.userDeletedDesc", { name: user.name }) });
           setDeleteOpen(false);
         }}
       />
@@ -487,12 +489,13 @@ function UserPreviewDialog({
   onOpenChange: (o: boolean) => void;
   onEdit: () => void;
 }) {
+  const t = useTranslations();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Aperçu du profil</DialogTitle>
-          <DialogDescription>Récapitulatif du compte utilisateur.</DialogDescription>
+          <DialogTitle>{t("pages.systemeComptesUtilisateurs.preview.title")}</DialogTitle>
+          <DialogDescription>{t("pages.systemeComptesUtilisateurs.preview.description")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex items-center gap-3">
@@ -505,25 +508,23 @@ function UserPreviewDialog({
             </div>
           </div>
           <dl className="divide-y divide-border rounded-lg border border-border">
-            <PreviewRow label="Rôle">
+            <PreviewRow label={t("pages.systemeComptesUtilisateurs.preview.role")}>
               <RoleBadge role={user.role} />
             </PreviewRow>
-            <PreviewRow label="Statut">
+            <PreviewRow label={t("pages.systemeComptesUtilisateurs.preview.status")}>
               <StatusBadge status={user.status} />
             </PreviewRow>
-            <PreviewRow label="Établissement">{user.etablissement}</PreviewRow>
-            <PreviewRow label="Région">{user.region}</PreviewRow>
-            <PreviewRow label="Identifiant technique">
+            <PreviewRow label={t("pages.systemeComptesUtilisateurs.preview.institution")}>{user.etablissement}</PreviewRow>
+            <PreviewRow label={t("pages.systemeComptesUtilisateurs.preview.region")}>{user.region}</PreviewRow>
+            <PreviewRow label={t("pages.systemeComptesUtilisateurs.preview.technicalId")}>
               <span className="font-mono text-xs">{user.id}</span>
             </PreviewRow>
           </dl>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Fermer
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("pages.systemeComptesUtilisateurs.actions.close")}</Button>
           <Button onClick={onEdit}>
-            <Pencil className="h-4 w-4" /> Modifier
+            <Pencil className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.actions.edit")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -536,7 +537,7 @@ function ConfirmDeleteDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = "Supprimer",
+  confirmLabel,
   onConfirm,
 }: {
   open: boolean;
@@ -546,6 +547,7 @@ function ConfirmDeleteDialog({
   confirmLabel?: string;
   onConfirm: () => void;
 }) {
+  const t = useTranslations();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -555,10 +557,10 @@ function ConfirmDeleteDialog({
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Annuler
+            {t("pages.systemeComptesUtilisateurs.actions.cancel")}
           </Button>
           <Button variant="destructive" onClick={onConfirm}>
-            <Trash2 className="h-4 w-4" /> {confirmLabel}
+            <Trash2 className="h-4 w-4" /> {confirmLabel ?? t("pages.systemeComptesUtilisateurs.actions.delete")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -567,6 +569,7 @@ function ConfirmDeleteDialog({
 }
 
 function BulkDeleteButton({ rows, onConfirm }: { rows: DirectoryUser[]; onConfirm: (ids: string[]) => void }) {
+  const t = useTranslations();
   const [open, setOpen] = React.useState(false);
   return (
     <>
@@ -576,14 +579,14 @@ function BulkDeleteButton({ rows, onConfirm }: { rows: DirectoryUser[]; onConfir
         className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
         onClick={() => setOpen(true)}
       >
-        <Trash2 className="h-4 w-4" /> Supprimer ({rows.length})
+        <Trash2 className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.delete.bulkButton", { count: rows.length })}
       </Button>
       <ConfirmDeleteDialog
         open={open}
         onOpenChange={setOpen}
-        title={`Supprimer ${rows.length} utilisateur${rows.length > 1 ? "s" : ""} ?`}
-        description="Les comptes sélectionnés seront définitivement supprimés. Cette action est irréversible."
-        confirmLabel={`Supprimer (${rows.length})`}
+        title={t("pages.systemeComptesUtilisateurs.delete.bulk", { count: rows.length, plural: rows.length > 1 ? "s" : "" })}
+        description={t("pages.systemeComptesUtilisateurs.delete.bulkDesc")}
+        confirmLabel={t("pages.systemeComptesUtilisateurs.delete.bulkButton", { count: rows.length })}
         onConfirm={() => {
           onConfirm(rows.map((r) => r.id));
           setOpen(false);
@@ -604,6 +607,7 @@ function EditUserDialog({
   onOpenChange: (o: boolean) => void;
   onSave: (patch: Partial<DirectoryUser>) => void;
 }) {
+  const t = useTranslations();
   const [name, setName] = React.useState(user.name);
   const [email, setEmail] = React.useState(user.email);
   const [role, setRole] = React.useState<UserRole>(user.role);
@@ -618,7 +622,7 @@ function EditUserDialog({
 
   const save = () => {
     if (!name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error(t("pages.systemeComptesUtilisateurs.toasts.nameRequired"));
       return;
     }
     onSave({ name: name.trim(), email: email.trim(), role });
@@ -629,19 +633,19 @@ function EditUserDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Modifier l&apos;utilisateur</DialogTitle>
+          <DialogTitle>{t("pages.systemeComptesUtilisateurs.edit.title")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label>Nom et prénoms</Label>
-            <Input value={name} onChange={(e) => setName(toFullNameCase(e.target.value))} placeholder="KOUASSI Affoué Marie" />
+            <Label>{t("pages.systemeComptesUtilisateurs.edit.fullName")}</Label>
+            <Input value={name} onChange={(e) => setName(toFullNameCase(e.target.value))} placeholder={t("pages.systemeComptesUtilisateurs.edit.fullNamePlaceholder")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Adresse e-mail</Label>
+            <Label>{t("pages.systemeComptesUtilisateurs.edit.email")}</Label>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label>Rôle</Label>
+            <Label>{t("pages.systemeComptesUtilisateurs.edit.role")}</Label>
             <Select value={role} onValueChange={(v) => setRole(v as UserRole)}>
               <SelectTrigger>
                 <SelectValue />
@@ -653,10 +657,8 @@ function EditUserDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Annuler
-          </Button>
-          <Button onClick={save}>Enregistrer</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("pages.systemeComptesUtilisateurs.actions.cancel")}</Button>
+          <Button onClick={save}>{t("pages.systemeComptesUtilisateurs.actions.save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -710,6 +712,7 @@ function ChangeRoleDialog({
   onOpenChange: (o: boolean) => void;
   onSave: (patch: Partial<DirectoryUser>) => void;
 }) {
+  const t = useTranslations();
   const [role, setRole] = React.useState<UserRole>(user.role);
   const [etab, setEtab] = React.useState(user.etablissement);
 
@@ -737,18 +740,18 @@ function ChangeRoleDialog({
 
         <div className="space-y-4">
           <p className="flex items-center gap-2 text-sm text-muted-foreground">
-            Rôle actuel : <RoleBadge role={user.role} />
+            {t("pages.systemeComptesUtilisateurs.changeRole.current")} : <RoleBadge role={user.role} />
           </p>
 
           <div className="space-y-2">
-            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Nouveau rôle</p>
-            <p className="text-xs font-semibold text-ew-orange">Rôles Administrateurs Spécialisés</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t("pages.systemeComptesUtilisateurs.changeRole.new")}</p>
+            <p className="text-xs font-semibold text-ew-orange">{t("pages.systemeComptesUtilisateurs.changeRole.specialized")}</p>
             <div className="grid grid-cols-3 gap-2">
               {SPECIALIZED_ROLES.map((r) => (
                 <RolePill key={r.id} label={r.label} active={role === r.id} onClick={() => setRole(r.id)} />
               ))}
             </div>
-            <p className="pt-1 text-xs font-semibold text-muted-foreground">Rôles Standards</p>
+            <p className="pt-1 text-xs font-semibold text-muted-foreground">{t("pages.systemeComptesUtilisateurs.changeRole.standard")}</p>
             <div className="grid grid-cols-2 gap-2">
               {STANDARD_ROLES.map((r) => (
                 <RolePill key={r.id} label={r.label} active={role === r.id} onClick={() => setRole(r.id)} />
@@ -757,27 +760,25 @@ function ChangeRoleDialog({
           </div>
 
           <div className="space-y-1.5">
-            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Rattacher à un établissement</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t("pages.systemeComptesUtilisateurs.changeRole.attachInstitution")}</p>
             <SearchSelect
               items={ETABLISSEMENTS.map((e) => ({ value: e.shortName, label: e.name, sublabel: e.locality }))}
               value={etab}
               onChange={setEtab}
               allowAll
               allValue=""
-              allLabel="Aucun rattachement"
-              placeholder="Choisir un établissement…"
-              searchPlaceholder="Premières lettres de l'établissement…"
-              emptyText="Aucun établissement trouvé"
+              allLabel={t("pages.systemeComptesUtilisateurs.changeRole.noAttachment")}
+              placeholder={t("pages.systemeComptesUtilisateurs.changeRole.choosePlaceholder")}
+              searchPlaceholder={t("pages.systemeComptesUtilisateurs.filters.institutionPlaceholder")}
+              emptyText={t("pages.systemeComptesUtilisateurs.changeRole.noInstitutionFound")}
             />
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Annuler
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("pages.systemeComptesUtilisateurs.actions.cancel")}</Button>
           <Button onClick={() => onSave({ role, etablissement: etab })}>
-            <ShieldCheck className="h-4 w-4" /> Modifier
+            <ShieldCheck className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.changeRole.save")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -786,6 +787,7 @@ function ChangeRoleDialog({
 }
 
 function CreateUserDialog({ onCreate }: { onCreate: (u: Omit<DirectoryUser, "id">) => void }) {
+  const t = useTranslations();
   const [open, setOpen] = React.useState(false);
   const [firstName, setFirstName] = React.useState("");
   const [lastName, setLastName] = React.useState("");
@@ -817,7 +819,7 @@ function CreateUserDialog({ onCreate }: { onCreate: (u: Omit<DirectoryUser, "id"
       country: phoneCountry,
       createdAt: new Date().toISOString(),
     });
-    toast.success("Utilisateur créé", { description: "Compte ajouté en statut « en attente »." });
+    toast.success(t("pages.systemeComptesUtilisateurs.toasts.userCreated"), { description: t("pages.systemeComptesUtilisateurs.toasts.userCreatedDesc") });
     reset();
     setOpen(false);
   };
@@ -832,44 +834,44 @@ function CreateUserDialog({ onCreate }: { onCreate: (u: Omit<DirectoryUser, "id"
     >
       <DialogTrigger asChild>
         <Button>
-          <UserPlus className="h-4 w-4" /> Créer un utilisateur
+          <UserPlus className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.actions.createUser")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Créer un utilisateur</DialogTitle>
-          <DialogDescription>Le compte sera créé en statut « en attente » jusqu&apos;à validation.</DialogDescription>
+          <DialogTitle>{t("pages.systemeComptesUtilisateurs.create.title")}</DialogTitle>
+          <DialogDescription>{t("pages.systemeComptesUtilisateurs.create.description")}</DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label>Prénom</Label>
+            <Label>{t("pages.systemeComptesUtilisateurs.create.firstName")}</Label>
             <Input
               value={firstName}
               onChange={(e) => setFirstName(toPrenomCase(e.target.value))}
-              placeholder="Elogne Guessan"
+              placeholder={t("pages.systemeComptesUtilisateurs.create.firstNamePlaceholder")}
               autoComplete="given-name"
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Nom</Label>
+            <Label>{t("pages.systemeComptesUtilisateurs.create.lastName")}</Label>
             <Input
               value={lastName}
               onChange={(e) => setLastName(toNomCase(e.target.value))}
               className="uppercase placeholder:normal-case"
-              placeholder="ZORO"
+              placeholder={t("pages.systemeComptesUtilisateurs.create.lastNamePlaceholder")}
               autoComplete="family-name"
             />
           </div>
           <div className="col-span-2 space-y-1.5">
-            <Label>Adresse e-mail</Label>
+            <Label>{t("pages.systemeComptesUtilisateurs.edit.email")}</Label>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="col-span-2 space-y-1.5">
-            <Label>Téléphone</Label>
-            <PhoneInput variant="field" countryCode={phoneCountry} value={phone} onChange={setPhone} placeholder="Numéro de téléphone" />
+            <Label>{t("pages.systemeComptesUtilisateurs.create.phone")}</Label>
+            <PhoneInput variant="field" countryCode={phoneCountry} value={phone} onChange={setPhone} placeholder={t("pages.systemeComptesUtilisateurs.create.phonePlaceholder")} />
           </div>
           <div className="col-span-2 space-y-1.5">
-            <Label>Rôle</Label>
+            <Label>{t("pages.systemeComptesUtilisateurs.edit.role")}</Label>
             <Select value={role} onValueChange={(v) => setRole(v as UserRole)}>
               <SelectTrigger>
                 <SelectValue />
@@ -881,11 +883,9 @@ function CreateUserDialog({ onCreate }: { onCreate: (u: Omit<DirectoryUser, "id"
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Annuler
-          </Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>{t("pages.systemeComptesUtilisateurs.actions.cancel")}</Button>
           <Button disabled={!canSubmit} onClick={submit}>
-            Créer le compte
+            {t("pages.systemeComptesUtilisateurs.actions.createAccount")}
           </Button>
         </DialogFooter>
       </DialogContent>

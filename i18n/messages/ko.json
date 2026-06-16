@@ -271,7 +271,127 @@
     },
     "systemeComptesUtilisateurs": {
       "title": "사용자 계정",
-      "description": "계정 생성, 승인, 편집, 정지, 가져오기 및 삭제. 역할, 상태 및 기관으로 필터링."
+      "description": "계정 생성, 승인, 편집, 정지, 가져오기 및 삭제. 역할, 상태 및 기관으로 필터링.",
+      "kpis": {
+        "total": "전체 계정",
+        "active": "활성",
+        "pending": "대기 중",
+        "suspended": "정지됨"
+      },
+      "table": {
+        "user": "사용자",
+        "role": "역할",
+        "institution": "기관",
+        "country": "국가",
+        "registeredAt": "가입일 (UTC)",
+        "status": "상태",
+        "actions": "작업"
+      },
+      "filters": {
+        "allRoles": "모든 역할",
+        "noRoleFound": "역할을 찾을 수 없음",
+        "rolePlaceholder": "역할 첫 글자…",
+        "allStatuses": "모든 상태",
+        "statusActive": "활성",
+        "statusPending": "대기 중",
+        "statusSuspended": "정지됨",
+        "statusArchived": "보관됨",
+        "allInstitutions": "모든 기관",
+        "institutionPlaceholder": "기관 첫 글자…",
+        "noInstitution": "기관 없음",
+        "allCohorts": "모든 코호트",
+        "manualRegistration": "수동 등록",
+        "cohortPlaceholder": "코호트 첫 글자…",
+        "noCohort": "코호트 없음",
+        "searchUser": "사용자 검색…"
+      },
+      "actions": {
+        "refresh": "새로 고침",
+        "importCsv": "CSV 가져오기",
+        "importTitle": "사용자 가져오기",
+        "importDescription": "파일에는 예상되는 열이 포함되어야 합니다. 필요시 템플릿을 다운로드하세요.",
+        "createUser": "사용자 생성",
+        "loading": "계정 불러오는 중…",
+        "validateAccount": "계정 승인 (활성화)",
+        "changeRoleTitle": "역할 및 소속 변경",
+        "previewProfile": "프로필 미리보기",
+        "edit": "편집",
+        "delete": "삭제",
+        "moreActions": "추가 작업",
+        "approveAccount": "계정 승인",
+        "reactivate": "재활성화",
+        "suspend": "정지",
+        "archive": "보관",
+        "close": "닫기",
+        "cancel": "취소",
+        "save": "저장",
+        "createAccount": "계정 생성"
+      },
+      "toasts": {
+        "userActivated": "{name} 활성화됨",
+        "userActivatedDesc": "계정이 활성 상태입니다.",
+        "userApproved": "{name} 승인됨",
+        "userReactivated": "{name} 재활성화됨",
+        "userSuspended": "{name} 정지됨",
+        "accountArchived": "계정 보관됨",
+        "accountArchivedDesc": "{name} 보관되었습니다 (되돌릴 수 있음).",
+        "roleUpdated": "역할이 업데이트되었습니다",
+        "userEdited": "사용자가 편집되었습니다",
+        "userDeleted": "사용자가 삭제되었습니다",
+        "userDeletedDesc": "{name} 목록에서 제거되었습니다.",
+        "nameRequired": "이름이 필요합니다",
+        "userCreated": "사용자가 생성되었습니다",
+        "userCreatedDesc": "계정이 \"대기 중\" 상태로 추가되었습니다.",
+        "bulkDeleted": "{count}명의 사용자가 삭제되었습니다"
+      },
+      "preview": {
+        "title": "프로필 미리보기",
+        "description": "사용자 계정 요약.",
+        "role": "역할",
+        "status": "상태",
+        "institution": "기관",
+        "region": "지역",
+        "technicalId": "기술 ID"
+      },
+      "delete": {
+        "single": "이 사용자를 삭제하시겠습니까?",
+        "singleDesc1": "계정 ",
+        "singleDesc2": "이(가) 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",
+        "bulk": "{count}명의 사용자를 삭제하시겠습니까?",
+        "bulkDesc": "선택한 계정이 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",
+        "bulkButton": "삭제 ({count})"
+      },
+      "edit": {
+        "title": "사용자 편집",
+        "fullName": "전체 이름",
+        "fullNamePlaceholder": "KOUASSI Affoué Marie",
+        "email": "이메일 주소",
+        "role": "역할"
+      },
+      "changeRole": {
+        "current": "현재 역할",
+        "new": "새 역할",
+        "specialized": "전문 관리자 역할",
+        "standard": "표준 역할",
+        "attachInstitution": "기관에 연결",
+        "noAttachment": "연결 없음",
+        "choosePlaceholder": "기관 선택…",
+        "searchInstitution": "기관 첫 글자…",
+        "noInstitutionFound": "기관을 찾을 수 없음",
+        "save": "변경"
+      },
+      "create": {
+        "title": "사용자 생성",
+        "description": "계정이 \"대기 중\" 상태로 생성되며 승인을 기다립니다.",
+        "firstName": "이름",
+        "firstNamePlaceholder": "Elogne Guessan",
+        "lastName": "성",
+        "lastNamePlaceholder": "ZORO",
+        "email": "이메일 주소",
+        "phone": "전화",
+        "phonePlaceholder": "전화번호",
+        "role": "역할"
+      }
     },
     "systemeApprobationsPromo": {
       "title": "프로모션 코드 승인",

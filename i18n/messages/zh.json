@@ -271,7 +271,127 @@
     },
     "systemeComptesUtilisateurs": {
       "title": "用户账户",
-      "description": "创建、批准、修改、暂停、导入和删除账户。按角色、状态和机构筛选。"
+      "description": "创建、批准、修改、暂停、导入和删除账户。按角色、状态和机构筛选。",
+      "kpis": {
+        "total": "账户总数",
+        "active": "活跃",
+        "pending": "待处理",
+        "suspended": "已暂停"
+      },
+      "table": {
+        "user": "用户",
+        "role": "角色",
+        "institution": "机构",
+        "country": "国家",
+        "registeredAt": "注册时间 (UTC)",
+        "status": "状态",
+        "actions": "操作"
+      },
+      "filters": {
+        "allRoles": "所有角色",
+        "noRoleFound": "未找到角色",
+        "rolePlaceholder": "角色首字母…",
+        "allStatuses": "所有状态",
+        "statusActive": "活跃",
+        "statusPending": "待处理",
+        "statusSuspended": "已暂停",
+        "statusArchived": "已归档",
+        "allInstitutions": "所有机构",
+        "institutionPlaceholder": "机构首字母…",
+        "noInstitution": "无机构",
+        "allCohorts": "所有批次",
+        "manualRegistration": "手动注册",
+        "cohortPlaceholder": "批次首字母…",
+        "noCohort": "无批次",
+        "searchUser": "搜索用户…"
+      },
+      "actions": {
+        "refresh": "刷新",
+        "importCsv": "导入 CSV",
+        "importTitle": "导入用户",
+        "importDescription": "文件必须包含预期的列。如需要请下载模板。",
+        "createUser": "创建用户",
+        "loading": "加载账户中…",
+        "validateAccount": "验证账户（激活）",
+        "changeRoleTitle": "更改角色和归属",
+        "previewProfile": "资料预览",
+        "edit": "编辑",
+        "delete": "删除",
+        "moreActions": "更多操作",
+        "approveAccount": "批准账户",
+        "reactivate": "重新激活",
+        "suspend": "暂停",
+        "archive": "归档",
+        "close": "关闭",
+        "cancel": "取消",
+        "save": "保存",
+        "createAccount": "创建账户"
+      },
+      "toasts": {
+        "userActivated": "{name} 已激活",
+        "userActivatedDesc": "账户现已激活。",
+        "userApproved": "{name} 已批准",
+        "userReactivated": "{name} 已重新激活",
+        "userSuspended": "{name} 已暂停",
+        "accountArchived": "账户已归档",
+        "accountArchivedDesc": "{name} 已归档（可恢复）。",
+        "roleUpdated": "角色已更新",
+        "userEdited": "用户已编辑",
+        "userDeleted": "用户已删除",
+        "userDeletedDesc": "{name} 已从列表中删除。",
+        "nameRequired": "姓名必填",
+        "userCreated": "用户已创建",
+        "userCreatedDesc": "账户已添加，状态为「待处理」。",
+        "bulkDeleted": "已删除 {count} 个用户"
+      },
+      "preview": {
+        "title": "资料预览",
+        "description": "用户账户摘要。",
+        "role": "角色",
+        "status": "状态",
+        "institution": "机构",
+        "region": "地区",
+        "technicalId": "技术标识"
+      },
+      "delete": {
+        "single": "删除此用户？",
+        "singleDesc1": "账户 ",
+        "singleDesc2": " 将被永久删除。此操作无法撤销。",
+        "bulk": "删除 {count} 个用户？",
+        "bulkDesc": "所选账户将被永久删除。此操作无法撤销。",
+        "bulkButton": "删除 ({count})"
+      },
+      "edit": {
+        "title": "编辑用户",
+        "fullName": "姓名",
+        "fullNamePlaceholder": "KOUASSI Affoué Marie",
+        "email": "电子邮箱",
+        "role": "角色"
+      },
+      "changeRole": {
+        "current": "当前角色",
+        "new": "新角色",
+        "specialized": "专门管理员角色",
+        "standard": "标准角色",
+        "attachInstitution": "归属到机构",
+        "noAttachment": "无归属",
+        "choosePlaceholder": "选择机构…",
+        "searchInstitution": "机构首字母…",
+        "noInstitutionFound": "未找到机构",
+        "save": "修改"
+      },
+      "create": {
+        "title": "创建用户",
+        "description": "账户将以「待处理」状态创建，等待验证。",
+        "firstName": "名",
+        "firstNamePlaceholder": "Elogne Guessan",
+        "lastName": "姓",
+        "lastNamePlaceholder": "ZORO",
+        "email": "电子邮箱",
+        "phone": "电话",
+        "phonePlaceholder": "电话号码",
+        "role": "角色"
+      }
     },
     "systemeApprobationsPromo": {
       "title": "促销码审批",

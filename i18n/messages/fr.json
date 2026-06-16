@@ -271,7 +271,127 @@
     },
     "systemeComptesUtilisateurs": {
       "title": "Comptes utilisateurs",
-      "description": "Créez, approuvez, modifiez, suspendez, importez et supprimez des comptes. Filtrez par rôle, statut et établissement."
+      "description": "Créez, approuvez, modifiez, suspendez, importez et supprimez des comptes. Filtrez par rôle, statut et établissement.",
+      "kpis": {
+        "total": "Total comptes",
+        "active": "Actifs",
+        "pending": "En attente",
+        "suspended": "Suspendus"
+      },
+      "table": {
+        "user": "Utilisateur",
+        "role": "Rôle",
+        "institution": "Établissement",
+        "country": "Pays",
+        "registeredAt": "Inscrit le (UTC)",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "filters": {
+        "allRoles": "Tous les rôles",
+        "noRoleFound": "Aucun rôle trouvé",
+        "rolePlaceholder": "Premières lettres du rôle…",
+        "allStatuses": "Tous les statuts",
+        "statusActive": "Actif",
+        "statusPending": "En attente",
+        "statusSuspended": "Suspendu",
+        "statusArchived": "Archivé",
+        "allInstitutions": "Tous les établissements",
+        "institutionPlaceholder": "Premières lettres de l'établissement…",
+        "noInstitution": "Aucun établissement",
+        "allCohorts": "Toutes les cohortes",
+        "manualRegistration": "Inscription manuelle",
+        "cohortPlaceholder": "Premières lettres de la cohorte…",
+        "noCohort": "Aucune cohorte",
+        "searchUser": "Rechercher un utilisateur…"
+      },
+      "actions": {
+        "refresh": "Actualiser",
+        "importCsv": "Importer CSV",
+        "importTitle": "Importer des utilisateurs",
+        "importDescription": "Le fichier doit contenir les colonnes attendues. Téléchargez le modèle si besoin.",
+        "createUser": "Créer un utilisateur",
+        "loading": "Chargement des comptes…",
+        "validateAccount": "Valider le compte (rendre actif)",
+        "changeRoleTitle": "Changer le rôle et le rattachement",
+        "previewProfile": "Aperçu du profil",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "moreActions": "Plus d'actions",
+        "approveAccount": "Approuver le compte",
+        "reactivate": "Réactiver",
+        "suspend": "Suspendre",
+        "archive": "Archiver",
+        "close": "Fermer",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "createAccount": "Créer le compte"
+      },
+      "toasts": {
+        "userActivated": "{name} activé",
+        "userActivatedDesc": "Le compte est désormais actif.",
+        "userApproved": "{name} approuvé",
+        "userReactivated": "{name} réactivé",
+        "userSuspended": "{name} suspendu",
+        "accountArchived": "Compte archivé",
+        "accountArchivedDesc": "{name} a été archivé (suppression réversible).",
+        "roleUpdated": "Rôle mis à jour",
+        "userEdited": "Utilisateur modifié",
+        "userDeleted": "Utilisateur supprimé",
+        "userDeletedDesc": "{name} a été retiré de la liste.",
+        "nameRequired": "Le nom est requis",
+        "userCreated": "Utilisateur créé",
+        "userCreatedDesc": "Compte ajouté en statut « en attente ».",
+        "bulkDeleted": "{count} utilisateur(s) supprimé(s)"
+      },
+      "preview": {
+        "title": "Aperçu du profil",
+        "description": "Récapitulatif du compte utilisateur.",
+        "role": "Rôle",
+        "status": "Statut",
+        "institution": "Établissement",
+        "region": "Région",
+        "technicalId": "Identifiant technique"
+      },
+      "delete": {
+        "single": "Supprimer cet utilisateur ?",
+        "singleDesc1": "Le compte ",
+        "singleDesc2": " sera définitivement supprimé. Cette action est irréversible.",
+        "bulk": "Supprimer {count} utilisateur{plural} ?",
+        "bulkDesc": "Les comptes sélectionnés seront définitivement supprimés. Cette action est irréversible.",
+        "bulkButton": "Supprimer ({count})"
+      },
+      "edit": {
+        "title": "Modifier l'utilisateur",
+        "fullName": "Nom et prénoms",
+        "fullNamePlaceholder": "KOUASSI Affoué Marie",
+        "email": "Adresse e-mail",
+        "role": "Rôle"
+      },
+      "changeRole": {
+        "current": "Rôle actuel",
+        "new": "Nouveau rôle",
+        "specialized": "Rôles Administrateurs Spécialisés",
+        "standard": "Rôles Standards",
+        "attachInstitution": "Rattacher à un établissement",
+        "noAttachment": "Aucun rattachement",
+        "choosePlaceholder": "Choisir un établissement…",
+        "searchInstitution": "Premières lettres de l'établissement…",
+        "noInstitutionFound": "Aucun établissement trouvé",
+        "save": "Modifier"
+      },
+      "create": {
+        "title": "Créer un utilisateur",
+        "description": "Le compte sera créé en statut « en attente » jusqu'à validation.",
+        "firstName": "Prénom",
+        "firstNamePlaceholder": "Elogne Guessan",
+        "lastName": "Nom",
+        "lastNamePlaceholder": "ZORO",
+        "email": "Adresse e-mail",
+        "phone": "Téléphone",
+        "phonePlaceholder": "Numéro de téléphone",
+        "role": "Rôle"
+      }
     },
     "systemeApprobationsPromo": {
       "title": "Approbations de codes promo",
