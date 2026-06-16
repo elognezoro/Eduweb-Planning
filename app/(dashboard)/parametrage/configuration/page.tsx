@@ -275,16 +275,16 @@ export default function ConfigurationPage() {
     a.download = "configuration-etablissement.json";
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Configuration exportée");
+    toast.success(t("pages.parametrageConfiguration.toasts.exported"));
   };
 
   const importConfig = async (file: File) => {
     try {
       const parsed = JSON.parse(await file.text());
       setConfig({ ...defaultConfig(), ...parsed });
-      toast.success("Configuration importée");
+      toast.success(t("pages.parametrageConfiguration.toasts.imported"));
     } catch {
-      toast.error("Fichier invalide");
+      toast.error(t("pages.parametrageConfiguration.toasts.invalidFile"));
     }
   };
 
@@ -294,23 +294,23 @@ export default function ConfigurationPage() {
       permission="settings:manage_configuration"
       showContextBadge={false}
       sections={[
-        { id: "pays", label: "Pays & en-tête" },
-        { id: "infos", label: "Informations générales" },
-        { id: "documents", label: "Chef & documents officiels" },
-        { id: "rapport", label: "Rapport d'établissement" },
-        { id: "champs-enseignants", label: "Champs enseignants" },
-        { id: "effectifs", label: "Effectifs par niveau" },
-        { id: "volumes", label: "Volumes horaires" },
-        { id: "utilisateurs", label: "Utilisateurs" },
-        { id: "competences", label: "Compétences enseignants" },
+        { id: "pays", label: t("pages.parametrageConfiguration.sections.pays") },
+        { id: "infos", label: t("pages.parametrageConfiguration.sections.infos") },
+        { id: "documents", label: t("pages.parametrageConfiguration.sections.documents") },
+        { id: "rapport", label: t("pages.parametrageConfiguration.sections.rapport") },
+        { id: "champs-enseignants", label: t("pages.parametrageConfiguration.sections.champsEnseignants") },
+        { id: "effectifs", label: t("pages.parametrageConfiguration.sections.effectifs") },
+        { id: "volumes", label: t("pages.parametrageConfiguration.sections.volumes") },
+        { id: "utilisateurs", label: t("pages.parametrageConfiguration.sections.utilisateurs") },
+        { id: "competences", label: t("pages.parametrageConfiguration.sections.competences") },
       ]}
       actions={
         <div className="flex gap-2">
           <Button variant="outline" onClick={exportConfig}>
-            <Upload className="h-4 w-4" /> Exporter
+            <Upload className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.export")}
           </Button>
           <Button variant="secondary" onClick={() => importRef.current?.click()}>
-            <Download className="h-4 w-4" /> Importer
+            <Download className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.import")}
           </Button>
           <input
             ref={importRef}
@@ -323,14 +323,14 @@ export default function ConfigurationPage() {
       }
     >
       {/* Bloc 1 : Pays, slogan, en-tête bulletin */}
-      <SectionCard id="pays" title="Pays, slogan national officiel & en-tête du bulletin">
+      <SectionCard id="pays" title={t("pages.parametrageConfiguration.blocks.paysTitle")}>
         <div className="grid gap-5 lg:grid-cols-3">
           <div className="space-y-1.5">
-            <Label>Pays</Label>
+            <Label>{t("pages.parametrageConfiguration.fields.country")}</Label>
             <CountryCombobox value={config.countryCode} onChange={selectCountry} />
           </div>
           <div className="space-y-1.5">
-            <Label>Slogan national officiel</Label>
+            <Label>{t("pages.parametrageConfiguration.fields.slogan")}</Label>
             <div className="flex items-center gap-2">
               <Input value={config.slogan} onChange={(e) => set("slogan", e.target.value)} />
               <Button
@@ -339,29 +339,29 @@ export default function ConfigurationPage() {
                 onClick={() => set("slogan", country?.devise ?? "")}
                 className="shrink-0"
               >
-                <RotateCcw className="h-3.5 w-3.5" /> Réinitialiser
+                <RotateCcw className="h-3.5 w-3.5" /> {t("pages.parametrageConfiguration.actions.reset")}
               </Button>
             </div>
             <p className="text-xs italic text-muted-foreground">
-              Slogan national officiel : <span className="font-semibold not-italic text-foreground">{config.slogan || "—"}</span>
+              {t("pages.parametrageConfiguration.fields.sloganHint")} : <span className="font-semibold not-italic text-foreground">{config.slogan || "—"}</span>
             </p>
           </div>
           <div className="space-y-1.5">
-            <Label>Année scolaire</Label>
+            <Label>{t("pages.parametrageConfiguration.fields.schoolYear")}</Label>
             <Input value={config.schoolYear} onChange={(e) => set("schoolYear", e.target.value)} />
           </div>
           <div className="space-y-1.5 lg:col-span-2">
-            <Label>Ministère (en-tête du bulletin)</Label>
+            <Label>{t("pages.parametrageConfiguration.fields.ministry")}</Label>
             <Textarea value={config.ministry} onChange={(e) => set("ministry", e.target.value)} className="min-h-[70px]" />
           </div>
           <div className="space-y-1.5">
-            <Label>Direction régionale</Label>
+            <Label>{t("pages.parametrageConfiguration.fields.regionalDirection")}</Label>
             <Select value={config.regionalDirection || "__none__"} onValueChange={(v) => set("regionalDirection", v === "__none__" ? "" : v)}>
               <SelectTrigger>
-                <SelectValue placeholder="-- Choisir une direction régionale --" />
+                <SelectValue placeholder={t("pages.parametrageConfiguration.fields.regionalDirectionPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">-- Choisir une direction régionale --</SelectItem>
+                <SelectItem value="__none__">{t("pages.parametrageConfiguration.fields.regionalDirectionPlaceholder")}</SelectItem>
                 {regions.map((r) => (
                   <SelectItem key={r.code} value={r.name}>
                     {r.name}
@@ -383,7 +383,7 @@ export default function ConfigurationPage() {
       </SectionCard>
 
       {/* Bloc 2 : Aperçu en-tête */}
-      <SectionCard title="Aperçu en-tête du bulletin" description="Ce bandeau s'imprime en haut de chaque bulletin et s'adapte au pays sélectionné.">
+      <SectionCard title={t("pages.parametrageConfiguration.blocks.previewTitle")} description={t("pages.parametrageConfiguration.blocks.previewDescription")}>
         <BulletinHeader
           ministry={config.ministry}
           official={country?.official ?? config.countryCode}
@@ -394,14 +394,14 @@ export default function ConfigurationPage() {
       </SectionCard>
 
       {/* Bloc 3 : Informations générales */}
-      <SectionCard id="infos" title="Informations générales">
+      <SectionCard id="infos" title={t("pages.parametrageConfiguration.blocks.infosTitle")}>
         <div className="grid gap-5 lg:grid-cols-3">
           <div className="space-y-1.5">
-            <Label>Nom de l&apos;établissement</Label>
-            <Input value={config.name} onChange={(e) => set("name", e.target.value)} placeholder="Ex : Lycée Moderne de Cocody" />
+            <Label>{t("pages.parametrageConfiguration.fields.schoolName")}</Label>
+            <Input value={config.name} onChange={(e) => set("name", e.target.value)} placeholder={t("pages.parametrageConfiguration.fields.schoolNamePlaceholder")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Type d&apos;établissement</Label>
+            <Label>{t("pages.parametrageConfiguration.fields.schoolType")}</Label>
             <Select value={config.type} onValueChange={(v) => set("type", v)}>
               <SelectTrigger>
                 <SelectValue />
@@ -416,7 +416,7 @@ export default function ConfigurationPage() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Régime</Label>
+            <Label>{t("pages.parametrageConfiguration.fields.regime")}</Label>
             <Select value={config.regime} onValueChange={(v) => set("regime", v)}>
               <SelectTrigger>
                 <SelectValue />
@@ -431,41 +431,41 @@ export default function ConfigurationPage() {
             </Select>
             {config.regime === "sequence" && (
               <div className="space-y-1 pt-1">
-                <Label className="text-xs text-muted-foreground">Nombre de séquences</Label>
+                <Label className="text-xs text-muted-foreground">{t("pages.parametrageConfiguration.fields.sequenceCount")}</Label>
                 <Input
                   type="number"
                   min={2}
                   max={20}
                   value={config.sequenceCount ?? 6}
-                  aria-label="Nombre de séquences"
+                  aria-label={t("pages.parametrageConfiguration.fields.sequenceCount")}
                   onChange={(e) => set("sequenceCount", Math.max(2, Math.min(20, Number(e.target.value) || 2)))}
                 />
               </div>
             )}
           </div>
           <div className="space-y-1.5">
-            <Label>Code de l&apos;établissement</Label>
-            <Input value={config.code} onChange={(e) => set("code", e.target.value)} placeholder="Ex : 001256" />
+            <Label>{t("pages.parametrageConfiguration.fields.schoolCode")}</Label>
+            <Input value={config.code} onChange={(e) => set("code", e.target.value)} placeholder={t("pages.parametrageConfiguration.fields.schoolCodePlaceholder")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Localité</Label>
-            <Input value={config.locality} onChange={(e) => set("locality", e.target.value)} placeholder="Ex : Abidjan, Cocody" />
+            <Label>{t("pages.parametrageConfiguration.fields.locality")}</Label>
+            <Input value={config.locality} onChange={(e) => set("locality", e.target.value)} placeholder={t("pages.parametrageConfiguration.fields.localityPlaceholder")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Direction régionale</Label>
+            <Label>{t("pages.parametrageConfiguration.fields.regionalDirection")}</Label>
             <div className="flex h-10 items-center rounded-lg border border-input bg-muted/40 px-3 text-sm italic text-muted-foreground">
-              {config.regionalDirection || "Aucune direction sélectionnée"}
+              {config.regionalDirection || t("pages.parametrageConfiguration.fields.regionalDirectionEmpty")}
             </div>
-            <p className="text-xs text-muted-foreground">Modifiable depuis le bloc « Pays, slogan national officiel & en-tête du bulletin ».</p>
+            <p className="text-xs text-muted-foreground">{t("pages.parametrageConfiguration.fields.regionalDirectionHint")}</p>
           </div>
         </div>
       </SectionCard>
 
       {/* Bloc 4 : Chef d'établissement & documents */}
-      <SectionCard id="documents" title="Chef d'établissement & documents officiels">
+      <SectionCard id="documents" title={t("pages.parametrageConfiguration.blocks.documentsTitle")}>
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label>Fonction</Label>
+            <Label>{t("pages.parametrageConfiguration.fields.headFunction")}</Label>
             <Select value={config.headFunction} onValueChange={(v) => set("headFunction", v)}>
               <SelectTrigger>
                 <SelectValue />
@@ -480,33 +480,33 @@ export default function ConfigurationPage() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Nom et prénoms</Label>
-            <Input value={config.headName} onChange={(e) => set("headName", toFullNameCase(e.target.value))} placeholder="Ex : KOUASSI Affoué Marie-…" />
+            <Label>{t("pages.parametrageConfiguration.fields.headName")}</Label>
+            <Input value={config.headName} onChange={(e) => set("headName", toFullNameCase(e.target.value))} placeholder={t("pages.parametrageConfiguration.fields.headNamePlaceholder")} />
           </div>
         </div>
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1.5">
-            <ImageDrop label="Emblème national (armoiries)" value={config.nationalEmblem} onChange={(v) => set("nationalEmblem", v)} icon={ImageIcon} />
+            <ImageDrop label={t("pages.parametrageConfiguration.fields.nationalEmblem")} value={config.nationalEmblem} onChange={(v) => set("nationalEmblem", v)} icon={ImageIcon} />
             <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <img src={defaultNationalEmblem(config.countryCode)} alt="" className="h-6 w-auto object-contain" />
-              Vide → l&apos;emblème national du pays (armoiries) est utilisé automatiquement.
+              {t("pages.parametrageConfiguration.fields.nationalEmblemHint")}
             </p>
           </div>
-          <ImageDrop label="Logo de l'établissement" value={config.logo} onChange={(v) => set("logo", v)} icon={ImageIcon} />
-          <ImageDrop label="Cachet de l'établissement" value={config.stamp} onChange={(v) => set("stamp", v)} icon={ImageIcon} />
-          <ImageDrop label="Signature électronique du chef d'établissement" value={config.signature} onChange={(v) => set("signature", v)} icon={PenLine} />
+          <ImageDrop label={t("pages.parametrageConfiguration.fields.logo")} value={config.logo} onChange={(v) => set("logo", v)} icon={ImageIcon} />
+          <ImageDrop label={t("pages.parametrageConfiguration.fields.stamp")} value={config.stamp} onChange={(v) => set("stamp", v)} icon={ImageIcon} />
+          <ImageDrop label={t("pages.parametrageConfiguration.fields.signature")} value={config.signature} onChange={(v) => set("signature", v)} icon={PenLine} />
         </div>
       </SectionCard>
 
       {/* Bloc 4 bis : Rapport d'établissement (plan & présentation par défaut) */}
       <SectionCard
         id="rapport"
-        title="Rapport d'établissement"
-        description="Définissez une fois pour toutes le plan (structure) et la présentation par défaut du rapport de fin de période. Le chef d'établissement peut toujours en changer ponctuellement sur la page du rapport."
+        title={t("pages.parametrageConfiguration.blocks.rapportTitle")}
+        description={t("pages.parametrageConfiguration.blocks.rapportDescription")}
       >
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label>Plan du rapport (titres et sous-titres)</Label>
+            <Label>{t("pages.parametrageConfiguration.fields.reportPlan")}</Label>
             <Select value={config.reportPlan} onValueChange={(v) => set("reportPlan", v)}>
               <SelectTrigger>
                 <SelectValue />
@@ -521,7 +521,7 @@ export default function ConfigurationPage() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Présentation par défaut</Label>
+            <Label>{t("pages.parametrageConfiguration.fields.reportFormat")}</Label>
             <Select value={config.reportFormat} onValueChange={(v) => set("reportFormat", v)}>
               <SelectTrigger>
                 <SelectValue />
@@ -541,33 +541,33 @@ export default function ConfigurationPage() {
       {/* Bloc 5 : Champs requis enseignants */}
       <SectionCard
         id="champs-enseignants"
-        title="Champs requis pour l'enregistrement des enseignants"
-        description="Configurez les champs de données à compléter lors de l'inscription d'un enseignant. Ces champs s'affichent aussi dans les grilles de supervision."
+        title={t("pages.parametrageConfiguration.blocks.champsTitle")}
+        description={t("pages.parametrageConfiguration.blocks.champsDescription")}
       >
         <TeacherFieldsEditor fields={config.teacherFields} onChange={(f) => set("teacherFields", f)} />
       </SectionCard>
 
       {/* Bloc 6 : Effectif d'élèves par niveau */}
-      <SectionCard id="effectifs" title="Effectif d'élèves par niveau">
+      <SectionCard id="effectifs" title={t("pages.parametrageConfiguration.blocks.effectifsTitle")}>
         <EffectifsBlock config={config} setConfig={setConfig} />
       </SectionCard>
 
       {/* Bloc 7 : Volumes horaires par niveau et par discipline */}
       <SectionCard
         id="volumes"
-        title="Volumes horaires par niveau et par discipline"
-        description="Définissez pour chaque niveau et chaque discipline la durée d'une séance (en minutes) et le nombre de séances hebdomadaires. Le volume horaire hebdomadaire est calculé automatiquement."
+        title={t("pages.parametrageConfiguration.blocks.volumesTitle")}
+        description={t("pages.parametrageConfiguration.blocks.volumesDescription")}
       >
         <VolumesBlock config={config} setConfig={setConfig} />
       </SectionCard>
 
       {/* Bloc 8 : Gestion des utilisateurs de l'établissement */}
-      <SectionCard id="utilisateurs" title="Gestion des utilisateurs de l'établissement">
+      <SectionCard id="utilisateurs" title={t("pages.parametrageConfiguration.blocks.usersTitle")}>
         <UsersBlock config={config} setConfig={setConfig} />
       </SectionCard>
 
       {/* Bloc 9 : Synthèse des compétences des enseignants */}
-      <SectionCard id="competences" title="Synthèse des compétences des enseignants">
+      <SectionCard id="competences" title={t("pages.parametrageConfiguration.blocks.competencesTitle")}>
         <CompetencesBlock config={config} />
       </SectionCard>
 
@@ -577,13 +577,13 @@ export default function ConfigurationPage() {
           className="border-red-300 text-red-600 hover:bg-red-50"
           onClick={() => {
             setConfig(defaultConfig());
-            toast.success("Configuration réinitialisée");
+            toast.success(t("pages.parametrageConfiguration.toasts.resetDone"));
           }}
         >
-          <RotateCcw className="h-4 w-4" /> Tout réinitialiser
+          <RotateCcw className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.resetAll")}
         </Button>
-        <Button size="lg" onClick={() => toast.success("Configuration enregistrée", { description: "Les modifications ont été enregistrées avec succès." })}>
-          <Save className="h-4 w-4" /> Enregistrer
+        <Button size="lg" onClick={() => toast.success(t("pages.parametrageConfiguration.toasts.saved"), { description: t("pages.parametrageConfiguration.toasts.savedDescription") })}>
+          <Save className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.save")}
         </Button>
       </div>
     </ModulePage>
@@ -765,48 +765,49 @@ function ImageDrop({
 }
 
 function TeacherFieldsEditor({ fields, onChange }: { fields: TeacherField[]; onChange: (f: TeacherField[]) => void }) {
+  const t = useTranslations();
   const update = (id: string, patch: Partial<TeacherField>) =>
     onChange(fields.map((f) => (f.id === id ? { ...f, ...patch } : f)));
   const remove = (id: string) => onChange(fields.filter((f) => f.id !== id));
   const add = () =>
-    onChange([...fields, { id: genId(), label: "Nouveau champ", type: "Texte", placeholder: "", required: false }]);
+    onChange([...fields, { id: genId(), label: t("pages.parametrageConfiguration.fields.newFieldDefault"), type: "Texte", placeholder: "", required: false }]);
 
   return (
     <div className="space-y-3">
       {fields.map((f) => (
         <div key={f.id} className="rounded-xl border border-border p-3">
           <div className="grid items-end gap-3 sm:grid-cols-[auto_1.4fr_1fr_1fr_auto]">
-            <span className="hidden cursor-grab pb-2.5 text-muted-foreground sm:block" title="Réordonner">
+            <span className="hidden cursor-grab pb-2.5 text-muted-foreground sm:block" title={t("pages.parametrageConfiguration.fields.reorder")}>
               <GripVertical className="h-4 w-4" />
             </span>
             <div className="space-y-1">
-              <Label className="text-[11px] uppercase text-muted-foreground">Étiquette du champ</Label>
+              <Label className="text-[11px] uppercase text-muted-foreground">{t("pages.parametrageConfiguration.fields.fieldLabel")}</Label>
               <Input value={f.label} onChange={(e) => update(f.id, { label: e.target.value })} className="h-9" />
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] uppercase text-muted-foreground">Type</Label>
+              <Label className="text-[11px] uppercase text-muted-foreground">{t("pages.parametrageConfiguration.fields.fieldType")}</Label>
               <Select value={f.type} onValueChange={(v) => update(f.id, { type: v })}>
                 <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {FIELD_TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t}
+                  {FIELD_TYPES.map((ft) => (
+                    <SelectItem key={ft} value={ft}>
+                      {ft}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] uppercase text-muted-foreground">Placeholder</Label>
+              <Label className="text-[11px] uppercase text-muted-foreground">{t("pages.parametrageConfiguration.fields.fieldPlaceholder")}</Label>
               <Input value={f.placeholder} onChange={(e) => update(f.id, { placeholder: e.target.value })} className="h-9" />
             </div>
             <button
               type="button"
               onClick={() => remove(f.id)}
               className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-600"
-              title="Supprimer"
+              title={t("pages.parametrageConfiguration.fields.delete")}
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -814,11 +815,11 @@ function TeacherFieldsEditor({ fields, onChange }: { fields: TeacherField[]; onC
 
           {f.type === "Liste déroulante" && (
             <div className="mt-2 space-y-1">
-              <Label className="text-[11px] uppercase text-muted-foreground">Options (séparées par des virgules)</Label>
+              <Label className="text-[11px] uppercase text-muted-foreground">{t("pages.parametrageConfiguration.fields.fieldOptions")}</Label>
               <Input
                 value={(f.options ?? []).join(", ")}
                 onChange={(e) => update(f.id, { options: e.target.value.split(",").map((o) => o.trim()).filter(Boolean) })}
-                placeholder="Ex : Français, Mathématiques, Anglais"
+                placeholder={t("pages.parametrageConfiguration.fields.fieldOptionsPlaceholder")}
                 className="h-9"
               />
             </div>
@@ -831,12 +832,12 @@ function TeacherFieldsEditor({ fields, onChange }: { fields: TeacherField[]; onC
               onChange={(e) => update(f.id, { required: e.target.checked })}
               className="h-4 w-4 accent-ew-green-700"
             />
-            Champ requis
+            {t("pages.parametrageConfiguration.fields.fieldRequired")}
           </label>
         </div>
       ))}
       <Button variant="outline" onClick={add} className="w-full border-dashed">
-        <Plus className="h-4 w-4" /> Ajouter un champ personnalisé
+        <Plus className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.addField")}
       </Button>
     </div>
   );
@@ -866,16 +867,17 @@ function Stepper({ value, onChange, min = 0, max = 99 }: { value: number; onChan
   );
 }
 
-const SCHEDULE_FIELDS: { key: keyof DailySchedule; label: string }[] = [
-  { key: "startMorning", label: "Début des cours (matin)" },
-  { key: "breakStart", label: "Pause mi-matinée (début)" },
-  { key: "breakEnd", label: "Reprise mi-matinée (fin pause)" },
-  { key: "lunchStart", label: "Pause méridienne (début)" },
-  { key: "afternoonStart", label: "Reprise après-midi" },
-  { key: "endDay", label: "Fin des cours (après-midi)" },
+const SCHEDULE_FIELDS: { key: keyof DailySchedule; labelKey: string }[] = [
+  { key: "startMorning", labelKey: "schedule.startMorning" },
+  { key: "breakStart", labelKey: "schedule.breakStart" },
+  { key: "breakEnd", labelKey: "schedule.breakEnd" },
+  { key: "lunchStart", labelKey: "schedule.lunchStart" },
+  { key: "afternoonStart", labelKey: "schedule.afternoonStart" },
+  { key: "endDay", labelKey: "schedule.endDay" },
 ];
 
 function EffectifsBlock({ config, setConfig }: BlockProps) {
+  const t = useTranslations();
   const [newLevel, setNewLevel] = React.useState("");
   const total = config.levels.reduce((s, l) => s + (Number(l.effectif) || 0), 0);
 
@@ -896,51 +898,51 @@ function EffectifsBlock({ config, setConfig }: BlockProps) {
       m[l.id] = e > 0 ? Math.max(1, Math.ceil(e / (config.defaultClassSize || 60))) : 0;
     });
     setConfig((c) => ({ ...c, classesByLevel: m }));
-    toast.success("Classes pédagogiques calculées");
+    toast.success(t("pages.parametrageConfiguration.toasts.classesComputed"));
   };
 
   return (
     <div className="space-y-5">
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-1.5">
-          <Label className="text-xs uppercase">Effectif souhaité par classe (par défaut)</Label>
+          <Label className="text-xs uppercase">{t("pages.parametrageConfiguration.fields.defaultClassSize")}</Label>
           <Input type="number" value={config.defaultClassSize} onChange={(e) => setField("defaultClassSize", Number(e.target.value))} />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs uppercase">Salles de classe disponibles (capacité physique)</Label>
+          <Label className="text-xs uppercase">{t("pages.parametrageConfiguration.fields.availableRooms")}</Label>
           <Input type="number" value={config.availableRooms} onChange={(e) => setField("availableRooms", Number(e.target.value))} />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs uppercase">Créneaux horaires par jour</Label>
+          <Label className="text-xs uppercase">{t("pages.parametrageConfiguration.fields.slotsPerDay")}</Label>
           <Stepper value={config.slotsPerDay} onChange={(v) => setField("slotsPerDay", v)} min={1} max={12} />
         </div>
       </div>
       <label className="flex w-fit items-center gap-2 text-sm text-foreground">
         <input type="checkbox" checked={config.undefinedRooms} onChange={(e) => setField("undefinedRooms", e.target.checked)} className="h-4 w-4 accent-ew-green-700" />
-        Non défini (l&apos;application calcule l&apos;effectif optimal)
+        {t("pages.parametrageConfiguration.fields.undefinedRooms")}
       </label>
 
       <div className="rounded-xl border border-border bg-muted/20 p-4">
-        <p className="mb-3 font-bold text-foreground">Horaires journaliers</p>
+        <p className="mb-3 font-bold text-foreground">{t("pages.parametrageConfiguration.fields.dailySchedule")}</p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {SCHEDULE_FIELDS.map((f) => (
             <div key={f.key} className="space-y-1.5">
-              <Label className="text-xs uppercase">{f.label}</Label>
+              <Label className="text-xs uppercase">{t(`pages.parametrageConfiguration.${f.labelKey}`)}</Label>
               <Input type="time" value={config.schedule[f.key]} onChange={(e) => setSched(f.key, e.target.value)} />
             </div>
           ))}
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">Ces horaires sont utilisés pour la génération des emplois du temps et l&apos;affichage des classes.</p>
+        <p className="mt-2 text-xs text-muted-foreground">{t("pages.parametrageConfiguration.fields.scheduleHint")}</p>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead className="bg-muted">
             <tr>
-              <th className="px-4 py-2.5 text-left font-bold">Niveau</th>
-              <th className="px-4 py-2.5 text-left font-bold">Effectif élèves</th>
-              <th className="px-4 py-2.5 text-left font-bold">Vacation</th>
-              <th className="px-4 py-2.5 text-center font-bold">Classes</th>
+              <th className="px-4 py-2.5 text-left font-bold">{t("pages.parametrageConfiguration.fields.levelName")}</th>
+              <th className="px-4 py-2.5 text-left font-bold">{t("pages.parametrageConfiguration.fields.studentCount")}</th>
+              <th className="px-4 py-2.5 text-left font-bold">{t("pages.parametrageConfiguration.fields.vacation")}</th>
+              <th className="px-4 py-2.5 text-center font-bold">{t("pages.parametrageConfiguration.fields.classes")}</th>
               <th className="px-2 py-2.5" />
             </tr>
           </thead>
@@ -978,21 +980,22 @@ function EffectifsBlock({ config, setConfig }: BlockProps) {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Input value={newLevel} onChange={(e) => setNewLevel(e.target.value)} placeholder="Nom du niveau (ex : 6ème, 2nde A)" className="max-w-xs" />
+        <Input value={newLevel} onChange={(e) => setNewLevel(e.target.value)} placeholder={t("pages.parametrageConfiguration.fields.newLevelPlaceholder")} className="max-w-xs" />
         <Button variant="outline" onClick={addLevel}>
-          <Plus className="h-4 w-4" /> Ajouter
+          <Plus className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.add")}
         </Button>
-        <span className="ml-auto text-sm font-semibold text-foreground">Total élèves : {total}</span>
+        <span className="ml-auto text-sm font-semibold text-foreground">{t("pages.parametrageConfiguration.fields.totalStudents")} : {total}</span>
       </div>
 
       <Button variant="secondary" onClick={compute}>
-        <Calculator className="h-4 w-4" /> Calculer les classes pédagogiques
+        <Calculator className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.compute")}
       </Button>
     </div>
   );
 }
 
 function VolumesBlock({ config, setConfig }: BlockProps) {
+  const t = useTranslations();
   const [active, setActive] = React.useState(config.levels[0]?.id ?? "");
   React.useEffect(() => {
     if (!config.levels.find((l) => l.id === active)) setActive(config.levels[0]?.id ?? "");
@@ -1017,7 +1020,7 @@ function VolumesBlock({ config, setConfig }: BlockProps) {
     setVol(code, coeff, { sessions: fn(getVol(code, coeff).sessions) });
 
   if (!config.levels.length) {
-    return <p className="text-sm text-muted-foreground">Ajoutez d&apos;abord des niveaux dans le bloc « Effectif d&apos;élèves par niveau ».</p>;
+    return <p className="text-sm text-muted-foreground">{t("pages.parametrageConfiguration.fields.noLevels")}</p>;
   }
 
   const volOf = (s: number[]) => s.reduce((a, b) => a + (b || 0), 0);
@@ -1047,11 +1050,11 @@ function VolumesBlock({ config, setConfig }: BlockProps) {
         <table className="w-full min-w-[660px] text-sm">
           <thead className="bg-muted">
             <tr>
-              <th className="px-4 py-2.5 text-left font-bold">Discipline</th>
-              <th className="px-4 py-2.5 text-center font-bold">Coeff.</th>
-              <th className="px-4 py-2.5 text-center font-bold">Séances (durée en min)</th>
-              <th className="px-4 py-2.5 text-center font-bold">Volume hebdo</th>
-              <th className="px-4 py-2.5 text-center font-bold">Statut</th>
+              <th className="px-4 py-2.5 text-left font-bold">{t("pages.parametrageConfiguration.fields.discipline")}</th>
+              <th className="px-4 py-2.5 text-center font-bold">{t("pages.parametrageConfiguration.fields.coefficient")}</th>
+              <th className="px-4 py-2.5 text-center font-bold">{t("pages.parametrageConfiguration.fields.sessions")}</th>
+              <th className="px-4 py-2.5 text-center font-bold">{t("pages.parametrageConfiguration.fields.weeklyVolume")}</th>
+              <th className="px-4 py-2.5 text-center font-bold">{t("pages.parametrageConfiguration.fields.status")}</th>
             </tr>
           </thead>
           <tbody>
@@ -1074,7 +1077,7 @@ function VolumesBlock({ config, setConfig }: BlockProps) {
                             max={300}
                             step={5}
                             value={dur}
-                            aria-label={`Durée de la séance ${i + 1} (minutes)`}
+                            aria-label={t("pages.parametrageConfiguration.fields.sessionDurationAria", { n: i + 1 })}
                             onChange={(e) =>
                               mutateSessions(d.code, d.coeff, (a) =>
                                 a.map((x, j) => (j === i ? Math.max(5, Math.min(300, Number(e.target.value) || 5)) : x)),
@@ -1082,10 +1085,10 @@ function VolumesBlock({ config, setConfig }: BlockProps) {
                             }
                             className="h-7 w-14 border-0 p-0 text-center shadow-none focus-visible:ring-0"
                           />
-                          <span className="text-[11px] text-muted-foreground">min</span>
+                          <span className="text-[11px] text-muted-foreground">{t("pages.parametrageConfiguration.fields.minutesShort")}</span>
                           <button
                             type="button"
-                            aria-label={`Retirer la séance ${i + 1}`}
+                            aria-label={t("pages.parametrageConfiguration.fields.removeSessionAria", { n: i + 1 })}
                             onClick={() => mutateSessions(d.code, d.coeff, (a) => a.filter((_, j) => j !== i))}
                             className="ml-0.5 rounded p-0.5 text-muted-foreground hover:bg-red-50 hover:text-red-600"
                           >
@@ -1098,13 +1101,13 @@ function VolumesBlock({ config, setConfig }: BlockProps) {
                         onClick={() => mutateSessions(d.code, d.coeff, (a) => [...a, 60])}
                         className="inline-flex items-center gap-1 rounded-lg border border-dashed border-ew-green-100 px-2 py-1 text-xs font-semibold text-ew-green-700 hover:bg-ew-green-50"
                       >
-                        <Plus className="h-3.5 w-3.5" /> séance
+                        <Plus className="h-3.5 w-3.5" /> {t("pages.parametrageConfiguration.actions.addSession")}
                       </button>
                     </div>
                   </td>
                   <td className="px-4 py-2 text-center font-bold text-foreground">{fmtHM(vol)}</td>
                   <td className="px-4 py-2 text-center">
-                    {v.sessions.length > 0 ? <Badge tone="green">OK</Badge> : <Badge tone="slate">À définir</Badge>}
+                    {v.sessions.length > 0 ? <Badge tone="green">{t("pages.parametrageConfiguration.fields.statusOk")}</Badge> : <Badge tone="slate">{t("pages.parametrageConfiguration.fields.statusToDefine")}</Badge>}
                   </td>
                 </tr>
               );
@@ -1112,9 +1115,9 @@ function VolumesBlock({ config, setConfig }: BlockProps) {
           </tbody>
           <tfoot>
             <tr className="border-t border-border bg-ew-green-50/50">
-              <td className="px-4 py-2.5 text-xs font-bold uppercase text-muted-foreground">Total — {activeLevel?.name}</td>
+              <td className="px-4 py-2.5 text-xs font-bold uppercase text-muted-foreground">{t("pages.parametrageConfiguration.fields.totalLine", { level: activeLevel?.name ?? "" })}</td>
               <td />
-              <td className="px-4 py-2.5 text-center font-bold text-ew-gold-600">{totalSessions} séance(s)</td>
+              <td className="px-4 py-2.5 text-center font-bold text-ew-gold-600">{t("pages.parametrageConfiguration.fields.sessionsLine", { count: totalSessions })}</td>
               <td className="px-4 py-2.5 text-center font-bold text-foreground">{fmtHM(totalMin)}</td>
               <td />
             </tr>
@@ -1126,16 +1129,17 @@ function VolumesBlock({ config, setConfig }: BlockProps) {
 }
 
 function AddEstabUserDialog({ onAdd }: { onAdd: (u: Omit<EstabUser, "id">) => void }) {
+  const t = useTranslations();
   const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState("");
   const [role, setRole] = React.useState(ESTAB_ROLES[0]);
   const submit = () => {
     if (!name.trim()) {
-      toast.error("Le nom est requis");
+      toast.error(t("pages.parametrageConfiguration.toasts.nameRequired"));
       return;
     }
     onAdd({ name: name.trim(), role });
-    toast.success("Utilisateur ajouté à l'établissement");
+    toast.success(t("pages.parametrageConfiguration.toasts.userAdded"));
     setName("");
     setOpen(false);
   };
@@ -1143,20 +1147,20 @@ function AddEstabUserDialog({ onAdd }: { onAdd: (u: Omit<EstabUser, "id">) => vo
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <UserPlus className="h-4 w-4" /> Ajouter un utilisateur
+          <UserPlus className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.addUser")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Ajouter un utilisateur</DialogTitle>
+          <DialogTitle>{t("pages.parametrageConfiguration.dialog.addUserTitle")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label>Nom et prénoms</Label>
-            <Input value={name} onChange={(e) => setName(toFullNameCase(e.target.value))} placeholder="KOUASSI Affoué Marie" />
+            <Label>{t("pages.parametrageConfiguration.fields.headName")}</Label>
+            <Input value={name} onChange={(e) => setName(toFullNameCase(e.target.value))} placeholder={t("pages.parametrageConfiguration.fields.userNamePlaceholder")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Rôle</Label>
+            <Label>{t("pages.parametrageConfiguration.fields.userRole")}</Label>
             <Select value={role} onValueChange={setRole}>
               <SelectTrigger>
                 <SelectValue />
@@ -1173,9 +1177,9 @@ function AddEstabUserDialog({ onAdd }: { onAdd: (u: Omit<EstabUser, "id">) => vo
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Annuler
+            {t("pages.parametrageConfiguration.dialog.cancel")}
           </Button>
-          <Button onClick={submit}>Ajouter</Button>
+          <Button onClick={submit}>{t("pages.parametrageConfiguration.dialog.add")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -1183,6 +1187,7 @@ function AddEstabUserDialog({ onAdd }: { onAdd: (u: Omit<EstabUser, "id">) => vo
 }
 
 function UsersBlock({ config, setConfig }: BlockProps) {
+  const t = useTranslations();
   const addUser = (u: Omit<EstabUser, "id">) =>
     setConfig((c) => ({ ...c, establishmentUsers: [{ ...u, id: genId() }, ...c.establishmentUsers] }));
   const removeUser = (id: string) =>
@@ -1206,37 +1211,37 @@ function UsersBlock({ config, setConfig }: BlockProps) {
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
         <AddEstabUserDialog onAdd={addUser} />
-        <Button variant="outline" onClick={() => toast.info("Recherche dans la base centrale (démo)")}>
-          <Search className="h-4 w-4" /> Rechercher dans la base
+        <Button variant="outline" onClick={() => toast.info(t("pages.parametrageConfiguration.toasts.searchDemo"))}>
+          <Search className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.searchBase")}
         </Button>
         <ImportCsvDialog
-          title="Importer une cohorte"
-          description="Importez une liste d'utilisateurs de l'établissement."
+          title={t("pages.parametrageConfiguration.dialog.importCohortTitle")}
+          description={t("pages.parametrageConfiguration.dialog.importCohortDescription")}
           expectedColumns={["prenom", "nom", "role", "email"]}
           sampleRow={["Koffi", "Kouamé", "Enseignant", "kkouame@eduweb.ci"]}
           templateFilename="modele-cohorte.csv"
           trigger={(open) => (
             <Button variant="outline" onClick={open}>
-              <FileSpreadsheet className="h-4 w-4" /> Importer une cohorte (CSV)
+              <FileSpreadsheet className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.importCohort")}
             </Button>
           )}
         />
         <Button variant="outline" onClick={downloadModel}>
-          <Download className="h-4 w-4" /> Télécharger le modèle CSV
+          <Download className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.downloadTemplate")}
         </Button>
       </div>
 
       <div className="rounded-xl border border-border">
         <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
           <p className="flex items-center gap-2 font-semibold text-foreground">
-            <Users className="h-4 w-4" /> Utilisateurs de l&apos;établissement ({config.establishmentUsers.length})
+            <Users className="h-4 w-4" /> {t("pages.parametrageConfiguration.fields.establishmentUsers")} ({config.establishmentUsers.length})
           </p>
-          <button type="button" onClick={() => toast.success("Liste actualisée")} className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-            <RefreshCw className="h-3.5 w-3.5" /> Actualiser
+          <button type="button" onClick={() => toast.success(t("pages.parametrageConfiguration.toasts.listRefreshed"))} className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+            <RefreshCw className="h-3.5 w-3.5" /> {t("pages.parametrageConfiguration.actions.refresh")}
           </button>
         </div>
         {config.establishmentUsers.length === 0 ? (
-          <p className="px-4 py-10 text-center text-sm text-muted-foreground">Aucun utilisateur enregistré dans cet établissement.</p>
+          <p className="px-4 py-10 text-center text-sm text-muted-foreground">{t("pages.parametrageConfiguration.fields.noUsers")}</p>
         ) : (
           <ul className="divide-y divide-border">
             {config.establishmentUsers.map((u) => (
@@ -1259,25 +1264,26 @@ function UsersBlock({ config, setConfig }: BlockProps) {
 }
 
 function CompetencesBlock({ config }: { config: EtabConfig }) {
+  const t = useTranslations();
   const teachers = config.establishmentUsers.filter((u) => u.role === "Enseignant");
   if (teachers.length === 0) {
     return (
       <p className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-10 text-center text-sm text-muted-foreground">
-        Aucun enseignant enregistré dans le bloc « Gestion des utilisateurs de l&apos;établissement ».
+        {t("pages.parametrageConfiguration.fields.noTeachers")}
       </p>
     );
   }
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {teachers.map((t) => (
-        <div key={t.id} className="rounded-xl border border-border p-4">
+      {teachers.map((teacher) => (
+        <div key={teacher.id} className="rounded-xl border border-border p-4">
           <div className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ew-green-100 text-xs font-bold text-ew-green-800">{initials(t.name)}</span>
-            <p className="font-semibold text-foreground">{t.name}</p>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ew-green-100 text-xs font-bold text-ew-green-800">{initials(teacher.name)}</span>
+            <p className="font-semibold text-foreground">{teacher.name}</p>
           </div>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            <Badge tone="green">Disponible</Badge>
-            <Badge tone="slate">Compétences à compléter</Badge>
+            <Badge tone="green">{t("pages.parametrageConfiguration.fields.available")}</Badge>
+            <Badge tone="slate">{t("pages.parametrageConfiguration.fields.skillsTodo")}</Badge>
           </div>
         </div>
       ))}
