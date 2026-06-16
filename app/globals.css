@@ -243,3 +243,69 @@ input::-ms-clear {
 .ew-fade-in {
   animation: ew-fade-in 0.4s ease both;
 }
+
+/* ----------------------------------------------------------------------------
+   Animations de la page d'accueil (landing)
+   -------------------------------------------------------------------------- */
+
+/* Apparition au défilement : l'IntersectionObserver ajoute `.is-visible`. */
+.ew-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.ew-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Entrée à l'ouverture (hero) — cascade via animation-delay en ligne. */
+@keyframes ew-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ew-rise {
+  opacity: 0;
+  animation: ew-rise 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Flottement doux des éléments décoratifs. */
+@keyframes ew-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+.ew-float { animation: ew-float 8s ease-in-out infinite; }
+.ew-float-slow { animation: ew-float 12s ease-in-out infinite; animation-delay: -4s; }
+
+/* Lueur pulsée très discrète. */
+@keyframes ew-pulse-soft {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.85; }
+}
+.ew-pulse-soft { animation: ew-pulse-soft 7s ease-in-out infinite; }
+
+/* Indicateur de défilement. */
+@keyframes ew-bob {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(6px); opacity: 1; }
+}
+.ew-bob { animation: ew-bob 1.8s ease-in-out infinite; }
+
+/* Respect des préférences d'accessibilité : pas d'animation si demandé. */
+@media (prefers-reduced-motion: reduce) {
+  .ew-reveal,
+  .ew-rise,
+  .ew-float,
+  .ew-float-slow,
+  .ew-pulse-soft,
+  .ew-bob,
+  .ew-fade-in {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
