@@ -229,5 +229,183 @@
     "loadingTitle": "جارٍ تحميل مساحتك…",
     "errorTitle": "الملف الشخصي غير متاح",
     "errorDescription": "تعذر تحميل ملفك الشخصي. للأمان، لم يُمنح أي وصول. أعد تسجيل الدخول؛ إذا استمر المشكل، تواصل مع مسؤول المنصة."
+  },
+  "pages": {
+    "dashboard": {
+      "modulesTitle": "الوحدات الرئيسية",
+      "modulesDescription": "وصول سريع إلى الوظائف الأساسية للمنصة.",
+      "welcome": "مرحبًا، {name} 👋",
+      "loggedInAs": "أنت مسجل الدخول بصفة {role}.",
+      "subtitleAdmin": "رؤية واضحة، قرارات سريعة، أسر مطلعة.",
+      "subtitleTeacher": "رؤية واضحة، قرارات سريعة، متابعة تربوية مستمرة.",
+      "subtitleFamily": "تابع المسار المدرسي بكل وضوح.",
+      "ctaWorkspace": "الوصول إلى مساحتي",
+      "ctaFeatures": "اكتشاف الميزات",
+      "status": "الحالة",
+      "region": "المنطقة",
+      "activeRole": "الدور النشط"
+    },
+    "pilotageTableauDeBord": {
+      "title": "لوحة تحكم الإدارة",
+      "description": "عرض موحد للمؤشرات الرئيسية للمنطقة والمؤسسات."
+    },
+    "systemeVueDEnsemble": {
+      "title": "نظرة عامة",
+      "description": "لوحة تحكم الإدارة: الفوترة والاشتراكات والحياة المدرسية والنشاط الأخير."
+    },
+    "systemeMonIdentification": {
+      "title": "هويتي",
+      "description": "ملخص هويتك وانتمائك على المنصة."
+    },
+    "systemeMonProfil": {
+      "title": "ملفي الشخصي",
+      "description": "إدارة معلوماتك الشخصية وتفضيلاتك وأمان الحساب."
+    },
+    "systemeNiveauxAcces": {
+      "title": "مستويات الوصول",
+      "description": "مصفوفة الصلاحيات حسب الدور وتخصيص أذونات محددة ومؤقتة."
+    },
+    "systemeHabilitations": {
+      "title": "إدارة الصلاحيات",
+      "description": "خصص الأذونات — لنشاط معين، لعدة مستخدمين في وقت واحد."
+    },
+    "systemeComptesUtilisateurs": {
+      "title": "حسابات المستخدمين",
+      "description": "إنشاء واعتماد وتعديل وتعليق واستيراد وحذف الحسابات. تصفية حسب الدور والحالة والمؤسسة."
+    },
+    "systemeApprobationsPromo": {
+      "title": "اعتماد رموز الخصم",
+      "description": "اعتماد أو رفض طلبات رموز الخصم الترويجية (مخصصات IZEN و E-School ومجموعات المؤسسات…)."
+    },
+    "systemeEtablissements": {
+      "title": "المؤسسات",
+      "description": "إدارة المؤسسات حسب البلد: التحميل بالدفعات أو التسجيل اليدوي."
+    },
+    "systemeCafop": {
+      "title": "إدارة مراكز CAFOP",
+      "description": "مراكز التكوين الأولي للمعلمين: الإدارة والدرجات وكشوف العلامات والإحصاءات والتقارير.",
+      "centersTitle": "مراكز CAFOP",
+      "centersDescription": "البحث في المراكز المسجلة واستشارتها وحذفها."
+    },
+    "systemeConvertisseurCsv": {
+      "title": "محوّل CSV",
+      "description": "إعداد ملفات CSV متوافقة مع Moodle: ربط الأعمدة، المعاينة، التصدير."
+    },
+    "systemeJournalActivite": {
+      "title": "سجل النشاط",
+      "description": "تتبع الإجراءات الحساسة: تسجيل الدخول، التعديلات، الاستيراد/التصدير."
+    },
+    "systemeFacturation": {
+      "title": "الفوترة",
+      "description": "الاشتراكات والمدفوعات والخطط. تكامل Stripe قابل للتمديد إلى مشغلي الهاتف المحمول."
+    },
+    "systemeDesignTheme": {
+      "title": "التصميم والسمة",
+      "description": "تخصيص الهوية البصرية: الألوان والاستدارة والكثافة والعلامة التجارية."
+    },
+    "systemeInstallation": {
+      "title": "التثبيت",
+      "description": "دليل التثبيت وحالة تكوين البيئة."
+    },
+    "parametrageConfiguration": {
+      "title": "إعداد المؤسسة",
+      "description": "أدخل معلومات مؤسستك لإنشاء كشوف العلامات والوثائق والإحصاءات بشكل صحيح."
+    },
+    "parametrageEmploisDuTemps": {
+      "title": "الجداول",
+      "description": "عرض أسبوعي لكل معلم وصف، ومولّد جداول لمحاكاة سيناريوهات الأعداد والقاعات."
+    },
+    "vieScolaireRegistreAppel": {
+      "title": "سجل الحضور",
+      "description": "تسجيل الحضور والغياب والتأخر."
+    },
+    "vieScolaireCahierDeTexte": {
+      "title": "دفتر النصوص",
+      "description": "تسجيل الحصص: الأهداف، المحتوى، الواجبات، الموارد."
+    },
+    "vieScolaireCommunication": {
+      "title": "التواصل",
+      "description": "المراسلة الداخلية والإعلانات مع استهداف المجموعات والأولوية وإيصال القراءة."
+    },
+    "vieScolaireNotesBulletins": {
+      "title": "الدرجات وكشوف العلامات",
+      "description": "إدخال الدرجات حسب الصف والفترة، ثم توليد كشوف العلامات الرسمية."
+    },
+    "vieScolaireLivretScolaire": {
+      "title": "السجل المدرسي",
+      "description": "السجل السنوي للتلميذ: الهوية، النتائج، الكفاءات، الملاحظات."
+    },
+    "vieScolaireRapportEtablissement": {
+      "title": "تقرير المؤسسة",
+      "description": "تقرير مركّز من بيانات المؤسسة، جاهز للطباعة أو التصدير."
+    },
+    "vieScolaireRapportsActivite": {
+      "title": "تقارير النشاط",
+      "description": "توثيق ومتابعة الأنشطة: النوع، الفترة، المعنيون، المؤشرات، المرفقات."
+    },
+    "vieScolaireRendezVous": {
+      "title": "المواعيد",
+      "description": "تخطيط ومتابعة المواعيد: لقاءات الأولياء، المتابعات التربوية، الاستدعاءات."
+    },
+    "vieScolaireAcademiePremium": {
+      "title": "أكاديمية بريميوم",
+      "description": "اشترك في عرض بريميوم: كشوف العلامات الرسمية، تنبيهات SMS، دعم مميز."
+    },
+    "vieScolaireAlertesSms": {
+      "title": "التنبيهات والرسائل القصيرة التلقائية",
+      "description": "عتبات قابلة للتعديل — إشعارات متعددة القنوات للأولياء."
+    },
+    "inspectionInspection": {
+      "title": "التفتيش",
+      "description": "تخطيط ومتابعة عمليات التفتيش التربوي: المفتشون، المعلمون، الأقسام، الملاحظات."
+    },
+    "inspectionApfc": {
+      "title": "إدارة APFC",
+      "description": "فروع التكوين المستمر التربوي: الفروع، الأنشطة، التقارير."
+    },
+    "inspectionRapportsAntennes": {
+      "title": "تقارير الفروع",
+      "description": "تجميع واستشارة تقارير نشاط الفروع التربوية."
+    },
+    "inspectionRapportAntennesPedagogiques": {
+      "title": "تقرير الفروع التربوية",
+      "description": "تجميع تقارير منسقي المواد ورؤساء الفروع التربوية."
+    },
+    "inspectionGrilleEvaluation": {
+      "title": "شبكة التقييم",
+      "description": "بناء وترجيح شبكات ملاحظة الصف المستخدمة في التفتيش."
+    },
+    "inspectionRapportsInspection": {
+      "title": "تقارير التفتيش",
+      "description": "إعداد تقرير التفتيش من الشبكة: نقاط القوة، محاور التقدم، التوصيات."
+    },
+    "statistiquesParClasse": {
+      "title": "إحصاءات الصف",
+      "description": "العدد، المعدل، المواظبة، توزيع الدرجات، التلاميذ المهددون."
+    },
+    "statistiquesEtablissement": {
+      "title": "إحصاءات المؤسسة",
+      "description": "الأعداد، النتائج، الغيابات، الانضباط، ومقارنة الأقسام."
+    },
+    "statistiquesRegionales": {
+      "title": "إحصاءات إقليمية",
+      "description": "عرض حسب المنطقة الأكاديمية: المؤسسات، الأعداد، الأداء، الاتجاهات."
+    },
+    "statistiquesAnalytics": {
+      "title": "تحليلات",
+      "description": "لوحات تحكم بصرية متقدمة: الاتجاهات، المقارنات، المؤشرات المتقاطعة."
+    },
+    "statistiquesPerformanceEnseignants": {
+      "title": "أداء المعلمين",
+      "description": "مؤشرات مهنية وغير وصمة: التفتيش، دفتر النصوص، نتائج الأقسام."
+    },
+    "statistiquesEfficacitePedagogique": {
+      "title": "الفعالية التربوية",
+      "description": "لوحة تحكم لدعم القرار: النتائج، المواظبة، الالتزام، المرافقة."
+    },
+    "statistiquesSuiviRecommandations": {
+      "title": "متابعة التوصيات",
+      "description": "إدارة التوصيات: الأولوية، المسؤول، الأجل، التقدم."
+    }
   }
 }

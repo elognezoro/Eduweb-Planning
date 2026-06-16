@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserCog, Save, Bell, Lock } from "lucide-react";
 import { toast } from "sonner";
@@ -33,6 +34,7 @@ const NOTIFS = [
 ];
 
 export default function MonProfilPage() {
+  const t = useTranslations();
   const { user, country } = useApp();
   const {
     register,
@@ -63,9 +65,7 @@ export default function MonProfilPage() {
   const lastNameReg = register("lastName");
 
   return (
-    <ModulePage
-      title="Mon profil"
-      description="Gérez vos informations personnelles, vos préférences et la sécurité de votre compte."
+    <ModulePage title={t("pages.systemeMonProfil.title")} description={t("pages.systemeMonProfil.description")}
       icon={UserCog}
       permission="system:manage_profile"
       sections={[

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   ClipboardCheck,
   Search,
@@ -115,6 +116,7 @@ function aiSuggest(kind: ActionKind, id: string, status: Status, variant: number
 const DEFAULT_ROW: AttendanceRow = { status: "P", motif: "", enc: [], obs: [], inf: [] };
 
 export default function RegistreAppelPage() {
+  const t = useTranslations();
   const { attendance, setAttendance } = useStore();
   const { effectiveRole, user } = useApp();
   // Enseignant : seules SES disciplines (dérivées de l'emploi du temps) ; s'il est
@@ -216,9 +218,7 @@ export default function RegistreAppelPage() {
   };
 
   return (
-    <ModulePage
-      title="Registre d'appel"
-      description="Enregistrement des présences, absences et retards."
+    <ModulePage title={t("pages.vieScolaireRegistreAppel.title")} description={t("pages.vieScolaireRegistreAppel.description")}
       icon={ClipboardCheck}
       permission="attendance:view"
       sections={[

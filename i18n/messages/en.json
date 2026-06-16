@@ -229,5 +229,183 @@
     "loadingTitle": "Loading your workspace…",
     "errorTitle": "Profile unavailable",
     "errorDescription": "Your profile could not be loaded. For security, no access has been granted. Please sign in again; if the issue persists, contact the platform administrator."
+  },
+  "pages": {
+    "dashboard": {
+      "modulesTitle": "Key modules",
+      "modulesDescription": "Quick access to the platform's essential features.",
+      "welcome": "Welcome, {name} 👋",
+      "loggedInAs": "You are signed in as {role}.",
+      "subtitleAdmin": "A clear vision, fast decisions, informed families.",
+      "subtitleTeacher": "A clear vision, fast decisions, continuous educational tracking.",
+      "subtitleFamily": "Follow each school journey with clarity.",
+      "ctaWorkspace": "Go to my workspace",
+      "ctaFeatures": "Discover features",
+      "status": "Status",
+      "region": "Region",
+      "activeRole": "Active role"
+    },
+    "pilotageTableauDeBord": {
+      "title": "Management dashboard",
+      "description": "Consolidated view of key indicators for the region and its institutions."
+    },
+    "systemeVueDEnsemble": {
+      "title": "Overview",
+      "description": "Management dashboard: billing, subscriptions, school life and recent activity."
+    },
+    "systemeMonIdentification": {
+      "title": "My ID",
+      "description": "Summary of your identity and your assignment on the platform."
+    },
+    "systemeMonProfil": {
+      "title": "My profile",
+      "description": "Manage your personal information, preferences and account security."
+    },
+    "systemeNiveauxAcces": {
+      "title": "Access levels",
+      "description": "Permissions matrix per role and assignment of specific, time-limited grants."
+    },
+    "systemeHabilitations": {
+      "title": "Permissions management",
+      "description": "Assign permissions — per precise activity, to several users at once."
+    },
+    "systemeComptesUtilisateurs": {
+      "title": "User accounts",
+      "description": "Create, approve, edit, suspend, import and delete accounts. Filter by role, status and institution."
+    },
+    "systemeApprobationsPromo": {
+      "title": "Promo code approvals",
+      "description": "Approve or refuse promo code discount requests (IZEN allocations, E-School, school groups…)."
+    },
+    "systemeEtablissements": {
+      "title": "Institutions",
+      "description": "Manage institutions by country: cohort upload or manual registration."
+    },
+    "systemeCafop": {
+      "title": "CAFOP management",
+      "description": "Initial teacher training centres: management, grades & reports, statistics and reports.",
+      "centersTitle": "CAFOP centres",
+      "centersDescription": "Search, consult and delete registered centres."
+    },
+    "systemeConvertisseurCsv": {
+      "title": "CSV converter",
+      "description": "Prepare Moodle-compatible CSV files: column mapping, preview and export."
+    },
+    "systemeJournalActivite": {
+      "title": "Activity log",
+      "description": "Trace sensitive actions: sign-ins, changes, imports/exports."
+    },
+    "systemeFacturation": {
+      "title": "Billing",
+      "description": "Subscriptions, payments and plans. Stripe integration, extensible to mobile operators."
+    },
+    "systemeDesignTheme": {
+      "title": "Design & theme",
+      "description": "Customise the visual identity: colours, roundness, density and brand."
+    },
+    "systemeInstallation": {
+      "title": "Installation",
+      "description": "Installation guide and environment configuration status."
+    },
+    "parametrageConfiguration": {
+      "title": "Institution configuration",
+      "description": "Fill in your institution's details to correctly generate reports, documents and statistics."
+    },
+    "parametrageEmploisDuTemps": {
+      "title": "Schedules",
+      "description": "Weekly view by teacher and class, plus a schedule generator to simulate staffing and room scenarios."
+    },
+    "vieScolaireRegistreAppel": {
+      "title": "Attendance register",
+      "description": "Record presences, absences and lateness."
+    },
+    "vieScolaireCahierDeTexte": {
+      "title": "Lesson book",
+      "description": "Log sessions: objectives, content, homework and resources."
+    },
+    "vieScolaireCommunication": {
+      "title": "Communication",
+      "description": "Internal messaging and announcements with group targeting, priority and read receipts."
+    },
+    "vieScolaireNotesBulletins": {
+      "title": "Grades & report cards",
+      "description": "Enter grades by class and period, then generate official report cards."
+    },
+    "vieScolaireLivretScolaire": {
+      "title": "School record",
+      "description": "Annual record of the student: identity, results, skills, observations."
+    },
+    "vieScolaireRapportEtablissement": {
+      "title": "School report",
+      "description": "Synthetic report from the institution's data, ready to print or export."
+    },
+    "vieScolaireRapportsActivite": {
+      "title": "Activity reports",
+      "description": "Document and consult activities: type, period, stakeholders, indicators and attachments."
+    },
+    "vieScolaireRendezVous": {
+      "title": "Appointments",
+      "description": "Plan and track appointments: parent meetings, educational follow-ups, summons."
+    },
+    "vieScolaireAcademiePremium": {
+      "title": "Premium Academy",
+      "description": "Subscribe to the Premium offer: official report cards, SMS alerts, priority support."
+    },
+    "vieScolaireAlertesSms": {
+      "title": "Alerts & automatic SMS",
+      "description": "Configurable thresholds — multi-channel notifications to parents."
+    },
+    "inspectionInspection": {
+      "title": "Inspection",
+      "description": "Plan and track pedagogical inspections: inspectors, teachers, classes and observations."
+    },
+    "inspectionApfc": {
+      "title": "APFC management",
+      "description": "Continuous teacher training branches: branches, activities and reports."
+    },
+    "inspectionRapportsAntennes": {
+      "title": "Branch reports",
+      "description": "Compile and consult activity reports from educational branches."
+    },
+    "inspectionRapportAntennesPedagogiques": {
+      "title": "Educational branch reports",
+      "description": "Compile reports from disciplinary coordinators and educational branch heads."
+    },
+    "inspectionGrilleEvaluation": {
+      "title": "Evaluation grid",
+      "description": "Build and weight classroom observation grids used during inspections."
+    },
+    "inspectionRapportsInspection": {
+      "title": "Inspection reports",
+      "description": "Write the inspection report from the grid: strengths, areas for progress, recommendations."
+    },
+    "statistiquesParClasse": {
+      "title": "Statistics by class",
+      "description": "Class size, average, attendance, grade distribution and at-risk students."
+    },
+    "statistiquesEtablissement": {
+      "title": "School statistics",
+      "description": "Enrolment, results, absences, discipline and class comparison."
+    },
+    "statistiquesRegionales": {
+      "title": "Regional statistics",
+      "description": "View by academic region: institutions, enrolment, performance and trends."
+    },
+    "statistiquesAnalytics": {
+      "title": "Analytics",
+      "description": "Advanced visual dashboards: trends, comparisons and cross indicators."
+    },
+    "statistiquesPerformanceEnseignants": {
+      "title": "Teacher performance",
+      "description": "Professional, non-stigmatising indicators: inspections, lesson book, class results."
+    },
+    "statistiquesEfficacitePedagogique": {
+      "title": "Teaching effectiveness",
+      "description": "Decision-support dashboard: results, attendance, compliance and follow-up."
+    },
+    "statistiquesSuiviRecommandations": {
+      "title": "Recommendations tracking",
+      "description": "Drive recommendations: priority, owner, deadline, progress."
+    }
   }
 }

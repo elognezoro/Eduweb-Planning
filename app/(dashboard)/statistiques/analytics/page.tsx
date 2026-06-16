@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { LineChart, TrendingUp, Users, GraduationCap, CheckCircle2, Eye, UserPlus, Globe } from "lucide-react";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { ChartCard, AreaTrend, BarsChart, DonutChart, LineTrend, RadarScore } from "@/components/charts/charts";
@@ -52,6 +53,7 @@ const CYCLES_BY_TYPE: Record<string, { value: string; label: string }[]> = {
 };
 
 export default function AnalyticsPage() {
+  const t = useTranslations();
   const { academicYear, country } = useApp();
   const [region, setRegion] = React.useState("all");
   const [teachingType, setTeachingType] = React.useState("all");
@@ -62,9 +64,7 @@ export default function AnalyticsPage() {
     ...country.academicRegions.map((r) => ({ value: r.code, label: r.name })),
   ];
   return (
-    <ModulePage
-      title="Analytics"
-      description="Tableaux de bord visuels avancés : tendances, comparaisons et indicateurs croisés."
+    <ModulePage title={t("pages.statistiquesAnalytics.title")} description={t("pages.statistiquesAnalytics.description")}
       icon={LineChart}
       permission="statistics:analytics"
       sections={[

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { History, ShieldAlert, AlertTriangle, Info } from "lucide-react";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { FilterBar, FilterSelect } from "@/components/layout/filter-bar";
@@ -9,13 +10,12 @@ import { AuditTimeline } from "@/components/dashboard/visuals";
 import { AUDIT_ENTRIES } from "@/lib/mock-data";
 
 export default function JournalActivitePage() {
+  const t = useTranslations();
   const [severity, setSeverity] = React.useState("all");
   const entries = AUDIT_ENTRIES.filter((e) => severity === "all" || e.severity === severity);
 
   return (
-    <ModulePage
-      title="Journal d'activité"
-      description="Traçabilité des actions sensibles : connexions, modifications, imports, paiements."
+    <ModulePage title={t("pages.systemeJournalActivite.title")} description={t("pages.systemeJournalActivite.description")}
       icon={History}
       permission="system:view_audit_log"
       actions={

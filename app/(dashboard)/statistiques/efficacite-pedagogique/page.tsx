@@ -1,6 +1,7 @@
 "use client";
 
 import { Target, TrendingUp, BookOpen, ClipboardList, Lightbulb } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ModulePage, SectionCard, TwoColumn } from "@/components/modules/module-page";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -20,10 +21,9 @@ const INDICATORS = [
 ];
 
 export default function EfficacitePedagogiquePage() {
+  const t = useTranslations();
   return (
-    <ModulePage
-      title="Efficacité pédagogique"
-      description="Tableau de bord d'aide à la décision : résultats, assiduité, couverture du programme et progression."
+    <ModulePage title={t("pages.statistiquesEfficacitePedagogique.title")} description={t("pages.statistiquesEfficacitePedagogique.description")}
       icon={Target}
       permission="statistics:pedagogical_effectiveness"
       sections={[

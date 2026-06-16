@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { FileSpreadsheet, UploadCloud, Download, Wand2, CheckCircle2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
@@ -29,6 +30,7 @@ function download(content: string, filename: string) {
 }
 
 export default function ConvertisseurCsvPage() {
+  const t = useTranslations();
   const [parsed, setParsed] = React.useState<ParsedCsv | null>(null);
   const [mapping, setMapping] = React.useState<Record<string, string>>({});
 
@@ -63,9 +65,7 @@ export default function ConvertisseurCsvPage() {
   const validRows = records.length - errorRows;
 
   return (
-    <ModulePage
-      title="Convertisseur CSV"
-      description="Préparez des fichiers CSV compatibles Moodle : mapping des colonnes, validation et export."
+    <ModulePage title={t("pages.systemeConvertisseurCsv.title")} description={t("pages.systemeConvertisseurCsv.description")}
       icon={FileSpreadsheet}
       permission="system:convert_csv"
       actions={

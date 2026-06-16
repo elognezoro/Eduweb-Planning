@@ -1,6 +1,7 @@
 "use client";
 
 import { Wrench, CheckCircle2, AlertTriangle, XCircle, BookOpen, Database, CreditCard, HardDrive, Layers, Terminal } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { LucideIcon } from "lucide-react";
 import { ModulePage, SectionCard, TwoColumn } from "@/components/modules/module-page";
 import { Badge } from "@/components/ui/badge";
@@ -44,12 +45,11 @@ const ICON: Record<State, { icon: LucideIcon; tone: "green" | "gold" | "red" }> 
 };
 
 export default function InstallationPage() {
+  const t = useTranslations();
   const ready = STATUS.filter((s) => s.state === "ok").length;
 
   return (
-    <ModulePage
-      title="Installation"
-      description="Guide d'installation et état de configuration de l'environnement."
+    <ModulePage title={t("pages.systemeInstallation.title")} description={t("pages.systemeInstallation.description")}
       icon={Wrench}
       permission="system:view_installation"
       actions={

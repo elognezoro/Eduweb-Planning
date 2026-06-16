@@ -1,6 +1,7 @@
 "use client";
 
 import { FileCheck2, ThumbsUp, AlertTriangle, ListTodo, Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ModulePage, SectionCard, TwoColumn } from "@/components/modules/module-page";
 import { Button } from "@/components/ui/button";
@@ -13,12 +14,11 @@ import { ChartCard, RadarScore } from "@/components/charts/charts";
 import { TEACHER_RADAR } from "@/lib/mock-data";
 
 export default function RapportsInspectionPage() {
+  const t = useTranslations();
   const globalScore = (TEACHER_RADAR.reduce((s, d) => s + d.valeur, 0) / TEACHER_RADAR.length).toFixed(1);
 
   return (
-    <ModulePage
-      title="Rapports d'inspection"
-      description="Rédigez le rapport d'inspection à partir de la grille : points forts, axes d'amélioration, recommandations."
+    <ModulePage title={t("pages.inspectionRapportsInspection.title")} description={t("pages.inspectionRapportsInspection.description")}
       icon={FileCheck2}
       permission="inspection_reports:view"
       sections={[

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   Users,
   Medal,
@@ -123,6 +124,7 @@ const PLAN_SECTIONS: Record<string, PlanSection[]> = {
 };
 
 export default function RapportEtablissementPage() {
+  const t = useTranslations();
   const { can } = useApp();
   // Configuration de l'établissement (plan & présentation par défaut), chargée après montage.
   const [cfg, setCfg] = React.useState<StoredEtabConfig>({});
@@ -283,7 +285,7 @@ export default function RapportEtablissementPage() {
       {/* En-tête */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Rapport d&apos;établissement</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">{t("pages.vieScolaireRapportEtablissement.title")}</h1>
           <p className="text-sm text-muted-foreground">
             Rédigé automatiquement à partir des données saisies dans les modules de votre établissement.
           </p>

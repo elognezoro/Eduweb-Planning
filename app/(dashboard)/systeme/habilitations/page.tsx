@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { KeyRound, History, Save, Users, X, Trash2, Target, Clock, CheckCircle2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage, SectionCard, TwoColumn } from "@/components/modules/module-page";
@@ -38,6 +39,7 @@ const STRUCTURES: { id: string; label: string; roles: UserRole[] }[] = [
 const structureOf = (role: UserRole) => STRUCTURES.find((s) => s.roles.includes(role))?.id ?? "administration";
 
 export default function HabilitationsPage() {
+  const t = useTranslations();
   const { users, userGrants, grantLog, grantPermissions, revokeUserGrant } = useStore();
   const { user: me } = useApp();
 
@@ -113,9 +115,7 @@ export default function HabilitationsPage() {
   const activeGrants = userGrants.filter((g) => g.expiresAt === null || new Date(g.expiresAt).getTime() > now);
 
   return (
-    <ModulePage
-      title="Gestion des habilitations"
-      description="Attribuez des permissions — par activité précise, à plusieurs utilisateurs, par groupe ou rôle, pour une durée limitée — avec traçabilité complète."
+    <ModulePage title={t("pages.systemeHabilitations.title")} description={t("pages.systemeHabilitations.description")}
       icon={KeyRound}
       permission="system:manage_permissions"
       sections={[

@@ -1,6 +1,7 @@
 "use client";
 
 import { ListChecks, Copy, Plus, FileDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { ExportMenu } from "@/components/layout/export-menu";
 import { EVALUATION_GRID } from "@/lib/mock-data";
 
 export default function GrilleEvaluationPage() {
+  const t = useTranslations();
   const totalCriteria = EVALUATION_GRID.domains.reduce((s, d) => s + d.criteria.length, 0);
   const totalPoints = EVALUATION_GRID.domains.reduce(
     (s, d) => s + d.criteria.reduce((ss, c) => ss + c.max, 0),
@@ -16,9 +18,7 @@ export default function GrilleEvaluationPage() {
   );
 
   return (
-    <ModulePage
-      title="Grille d'évaluation"
-      description="Construisez et pondérez les grilles d'observation de classe utilisées en inspection."
+    <ModulePage title={t("pages.inspectionGrilleEvaluation.title")} description={t("pages.inspectionGrilleEvaluation.description")}
       icon={ListChecks}
       permission="evaluation_grid:view"
       actions={

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { FolderTree, Sparkles, FileText, Users, Layers } from "lucide-react";
 import { ModulePage, SectionCard, TwoColumn } from "@/components/modules/module-page";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,7 @@ const REPORTS: CoordReport[] = [
 ];
 
 export default function RapportAntennesPedagogiquesPage() {
+  const t = useTranslations();
   const { country } = useApp();
   const [region, setRegion] = React.useState("all");
   const [discipline, setDiscipline] = React.useState("all");
@@ -37,9 +39,7 @@ export default function RapportAntennesPedagogiquesPage() {
   const totalActivities = data.reduce((s, r) => s + r.activities, 0);
 
   return (
-    <ModulePage
-      title="Rapport d'Antennes Pédagogiques"
-      description="Compilez les rapports des coordonnateurs disciplinaires et chefs d'antenne, avec synthèse automatique."
+    <ModulePage title={t("pages.inspectionRapportAntennesPedagogiques.title")} description={t("pages.inspectionRapportAntennesPedagogiques.description")}
       icon={FolderTree}
       permission="antenna_reports:view"
       sections={[

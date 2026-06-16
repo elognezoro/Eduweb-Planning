@@ -1,6 +1,7 @@
 "use client";
 
 import { Activity, FileText, FileCheck2, Clock } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ReportModule, defaultReportPayload, type ReportItem } from "@/components/modules/report-module";
 
 const REPORTS: ReportItem[] = [
@@ -11,10 +12,9 @@ const REPORTS: ReportItem[] = [
 ];
 
 export default function RapportsActivitePage() {
+  const t = useTranslations();
   return (
-    <ReportModule
-      title="Rapports d'activité"
-      description="Documentez et consultez les activités : type, période, acteurs, indicateurs et pièces jointes."
+    <ReportModule title={t("pages.vieScolaireRapportsActivite.title")} description={t("pages.vieScolaireRapportsActivite.description")}
       icon={Activity}
       permission="activity_reports:view"
       scopeLabel="Type d'activité"

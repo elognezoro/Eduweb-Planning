@@ -1,6 +1,7 @@
 "use client";
 
 import { Award, SearchCheck, NotebookText, CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ModulePage, SectionCard, TwoColumn } from "@/components/modules/module-page";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -11,13 +12,12 @@ import { ENSEIGNANTS, TEACHER_RADAR } from "@/lib/mock-data";
 import type { Enseignant } from "@/lib/types";
 
 export default function PerformanceEnseignantsPage() {
+  const t = useTranslations();
   const avgScore = ENSEIGNANTS.reduce((s, e) => s + e.inspectionScore, 0) / ENSEIGNANTS.length;
   const barData = ENSEIGNANTS.map((e) => ({ nom: `${e.lastName}`, score: e.inspectionScore }));
 
   return (
-    <ModulePage
-      title="Performance des enseignants"
-      description="Indicateurs professionnels et non stigmatisants : inspections, cahier de texte, assiduité, progression."
+    <ModulePage title={t("pages.statistiquesPerformanceEnseignants.title")} description={t("pages.statistiquesPerformanceEnseignants.description")}
       icon={Award}
       permission="statistics:teacher_performance"
       sections={[

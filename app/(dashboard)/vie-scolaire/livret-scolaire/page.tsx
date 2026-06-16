@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { BookMarked, Award, Heart, FileText, FileType2, Download, Eye } from "lucide-react";
 import { ModulePage, SectionCard, TwoColumn } from "@/components/modules/module-page";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,7 @@ const COMPETENCES = [
 const TRIM_LABELS = ["1ᵉʳ Trimestre", "2ᵉ Trimestre", "3ᵉ Trimestre"];
 
 export default function LivretScolairePage() {
+  const t = useTranslations();
   const classOptions = React.useMemo(() => [...new Set(ELEVES.map((e) => e.className))], []);
   const [cls, setCls] = React.useState(classOptions[0]);
   const classStudents = React.useMemo(() => ELEVES.filter((e) => e.className === cls), [cls]);
@@ -73,9 +75,7 @@ export default function LivretScolairePage() {
   };
 
   return (
-    <ModulePage
-      title="Livret scolaire"
-      description="Parcours annuel de l'élève : identité, résultats, compétences, conduite et appréciations."
+    <ModulePage title={t("pages.vieScolaireLivretScolaire.title")} description={t("pages.vieScolaireLivretScolaire.description")}
       icon={BookMarked}
       permission="school_record:view"
       sections={[

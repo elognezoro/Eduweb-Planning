@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   Building2,
@@ -115,6 +116,7 @@ const columns: ColumnDef<Etablissement>[] = [
 ];
 
 export default function EtablissementsPage() {
+  const t = useTranslations();
   const { country: appCountry } = useApp();
   const { etablissements, addEtablissement, addEtablissements, removeEtablissements } = useStore();
   const [type, setType] = React.useState("all");
@@ -128,9 +130,7 @@ export default function EtablissementsPage() {
   const countryLabel = country === "all" ? "tous les pays" : getUnCountry(country)?.name ?? country;
 
   return (
-    <ModulePage
-      title="Établissements"
-      description="Gérez les établissements rattachés par pays : dépôt par cohorte CSV, inscription manuelle, suppression individuelle ou collective."
+    <ModulePage title={t("pages.systemeEtablissements.title")} description={t("pages.systemeEtablissements.description")}
       icon={Building2}
       permission="system:manage_institutions"
       actions={

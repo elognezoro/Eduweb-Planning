@@ -1,6 +1,7 @@
 "use client";
 
 import { Gauge, Building2, Users, GraduationCap, SearchCheck, ListTodo, CheckCircle2, AlertTriangle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { ChartCard, AreaTrend, BarsChart } from "@/components/charts/charts";
 import { SimpleTable } from "@/components/data-table/simple-table";
@@ -18,14 +19,13 @@ const ALERTS = [
 ];
 
 export default function PilotageDashboardPage() {
+  const t = useTranslations();
   const totalStudents = ETABLISSEMENTS.reduce((s, e) => s + e.studentsCount, 0);
   const totalTeachers = ETABLISSEMENTS.reduce((s, e) => s + e.teachersCount, 0);
   const top = [...ETABLISSEMENTS].sort((a, b) => b.successRate - a.successRate);
 
   return (
-    <ModulePage
-      title="Tableau de bord de pilotage"
-      description="Vue consolidée des indicateurs clés de la région et des établissements."
+    <ModulePage title={t("pages.pilotageTableauDeBord.title")} description={t("pages.pilotageTableauDeBord.description")}
       icon={Gauge}
       permission="statistics:analytics"
       sections={[

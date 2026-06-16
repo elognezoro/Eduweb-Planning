@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   LayoutDashboard,
   Users,
@@ -35,6 +36,7 @@ const TONE_PASTILLE: Record<string, string> = {
 };
 
 export default function VueEnsemblePage() {
+  const t = useTranslations();
   const { can, user } = useApp();
   // Activité récente : chacun ne voit que ses propres actions ; seuls les profils
   // habilités au journal d'activité (admin) voient l'activité de tous les utilisateurs.
@@ -52,9 +54,7 @@ export default function VueEnsemblePage() {
   const totalClasses = ETABLISSEMENTS.reduce((s, e) => s + e.classesCount, 0);
 
   return (
-    <ModulePage
-      title="Vue d'ensemble"
-      description="Tableau de bord de gestion : facturation, abonnements, vie scolaire et activité récente."
+    <ModulePage title={t("pages.systemeVueDEnsemble.title")} description={t("pages.systemeVueDEnsemble.description")}
       icon={LayoutDashboard}
       permission="system:view"
       kpis={[

@@ -229,5 +229,183 @@
     "loadingTitle": "Chargement de votre espace…",
     "errorTitle": "Profil indisponible",
     "errorDescription": "Votre profil n'a pas pu être chargé. Par sécurité, aucun accès n'est accordé. Reconnectez-vous ; si le problème persiste, contactez l'administrateur de la plateforme."
+  },
+  "pages": {
+    "dashboard": {
+      "modulesTitle": "Modules clés",
+      "modulesDescription": "Accédez rapidement aux fonctionnalités essentielles de la plateforme.",
+      "welcome": "Bienvenue, {name} 👋",
+      "loggedInAs": "Vous êtes connecté(e) en tant que {role}.",
+      "subtitleAdmin": "Une vision claire, des décisions rapides, des familles informées.",
+      "subtitleTeacher": "Une vision claire, des décisions rapides, un suivi pédagogique continu.",
+      "subtitleFamily": "Suivez le parcours scolaire en toute clarté.",
+      "ctaWorkspace": "Accéder à mon espace",
+      "ctaFeatures": "Découvrir les fonctionnalités",
+      "status": "Statut",
+      "region": "Région",
+      "activeRole": "Rôle actif"
+    },
+    "pilotageTableauDeBord": {
+      "title": "Tableau de bord de pilotage",
+      "description": "Vue consolidée des indicateurs clés de la région et des établissements."
+    },
+    "systemeVueDEnsemble": {
+      "title": "Vue d'ensemble",
+      "description": "Tableau de bord de gestion : facturation, abonnements, vie scolaire et activité récente."
+    },
+    "systemeMonIdentification": {
+      "title": "Mon Identification",
+      "description": "Récapitulatif de votre identité et de votre rattachement sur la plateforme."
+    },
+    "systemeMonProfil": {
+      "title": "Mon profil",
+      "description": "Gérez vos informations personnelles, vos préférences et la sécurité du compte."
+    },
+    "systemeNiveauxAcces": {
+      "title": "Niveaux d'accès",
+      "description": "Matrice des droits par rôle et attribution de permissions spécifiques et temporaires."
+    },
+    "systemeHabilitations": {
+      "title": "Gestion des habilitations",
+      "description": "Attribuez des permissions — par activité précise, à plusieurs utilisateurs en une seule fois."
+    },
+    "systemeComptesUtilisateurs": {
+      "title": "Comptes utilisateurs",
+      "description": "Créez, approuvez, modifiez, suspendez, importez et supprimez des comptes. Filtrez par rôle, statut et établissement."
+    },
+    "systemeApprobationsPromo": {
+      "title": "Approbations de codes promo",
+      "description": "Validez ou refusez les demandes de codes promo de réduction (allocations IZEN, E-School, groupes d'établissements…)."
+    },
+    "systemeEtablissements": {
+      "title": "Établissements",
+      "description": "Gérez les établissements rattachés par pays : dépôt par cohorte ou inscription manuelle."
+    },
+    "systemeCafop": {
+      "title": "Gestion des CAFOP",
+      "description": "Centres de formation initiale des instituteurs : gestion, notes & bulletins, statistiques et rapports.",
+      "centersTitle": "Centres CAFOP",
+      "centersDescription": "Recherche, consultation et suppression des centres enregistrés."
+    },
+    "systemeConvertisseurCsv": {
+      "title": "Convertisseur CSV",
+      "description": "Préparez des fichiers CSV compatibles Moodle : mapping des colonnes, prévisualisation et export."
+    },
+    "systemeJournalActivite": {
+      "title": "Journal d'activité",
+      "description": "Traçabilité des actions sensibles : connexions, modifications, imports/exports."
+    },
+    "systemeFacturation": {
+      "title": "Facturation",
+      "description": "Abonnements, paiements et plans. Intégration Stripe, extensible aux opérateurs mobiles."
+    },
+    "systemeDesignTheme": {
+      "title": "Design & thème",
+      "description": "Personnalisez la charte graphique : couleurs, arrondi, densité et marque."
+    },
+    "systemeInstallation": {
+      "title": "Installation",
+      "description": "Guide d'installation et état de configuration de l'environnement."
+    },
+    "parametrageConfiguration": {
+      "title": "Configuration de l'établissement",
+      "description": "Renseignez les informations de votre établissement pour générer correctement bulletins, documents et statistiques."
+    },
+    "parametrageEmploisDuTemps": {
+      "title": "Emplois du temps",
+      "description": "Vue hebdomadaire par enseignant et par classe, et générateur d'EDT pour simuler des scénarios d'effectif et de salles."
+    },
+    "vieScolaireRegistreAppel": {
+      "title": "Registre d'appel",
+      "description": "Enregistrement des présences, absences et retards."
+    },
+    "vieScolaireCahierDeTexte": {
+      "title": "Cahier de texte",
+      "description": "Consignez les séances : objectifs, contenu, devoirs et ressources."
+    },
+    "vieScolaireCommunication": {
+      "title": "Communication",
+      "description": "Messagerie interne et annonces, avec ciblage par groupe, priorité et accusé de lecture."
+    },
+    "vieScolaireNotesBulletins": {
+      "title": "Notes & Bulletins",
+      "description": "Saisissez les notes par classe et période, puis générez les bulletins officiels."
+    },
+    "vieScolaireLivretScolaire": {
+      "title": "Livret scolaire",
+      "description": "Parcours annuel de l'élève : identité, résultats, compétences, observations."
+    },
+    "vieScolaireRapportEtablissement": {
+      "title": "Rapport d'établissement",
+      "description": "Rapport synthétique issu des données de l'établissement, prêt à imprimer ou exporter."
+    },
+    "vieScolaireRapportsActivite": {
+      "title": "Rapports d'activité",
+      "description": "Documentez et consultez les activités : type, période, acteurs, indicateurs et pièces jointes."
+    },
+    "vieScolaireRendezVous": {
+      "title": "Rendez-vous",
+      "description": "Planifiez et suivez les rendez-vous : entretiens parents, suivis pédagogiques, convocations."
+    },
+    "vieScolaireAcademiePremium": {
+      "title": "Académie Premium",
+      "description": "Souscrivez à l'offre Premium : bulletins officiels, alertes SMS, support prioritaire."
+    },
+    "vieScolaireAlertesSms": {
+      "title": "Alertes & SMS automatiques",
+      "description": "Seuils configurables — notifications multicanales aux parents d'élèves."
+    },
+    "inspectionInspection": {
+      "title": "Inspection",
+      "description": "Planifiez et suivez les inspections pédagogiques : inspecteurs, enseignants, classes et observations."
+    },
+    "inspectionApfc": {
+      "title": "Gestion des APFC",
+      "description": "Antennes pédagogiques de formation continue : antennes, activités et rapports."
+    },
+    "inspectionRapportsAntennes": {
+      "title": "Rapports d'antennes",
+      "description": "Compilez et consultez les rapports d'activité des antennes pédagogiques."
+    },
+    "inspectionRapportAntennesPedagogiques": {
+      "title": "Rapport d'Antennes Pédagogiques",
+      "description": "Compilez les rapports des coordonnateurs disciplinaires et chefs d'antennes pédagogiques."
+    },
+    "inspectionGrilleEvaluation": {
+      "title": "Grille d'évaluation",
+      "description": "Construisez et pondérez les grilles d'observation de classe utilisées en inspection."
+    },
+    "inspectionRapportsInspection": {
+      "title": "Rapports d'inspection",
+      "description": "Rédigez le rapport d'inspection à partir de la grille : points forts, axes de progrès, recommandations."
+    },
+    "statistiquesParClasse": {
+      "title": "Statistiques par classe",
+      "description": "Effectif, moyenne, assiduité, distribution des notes et élèves à risque."
+    },
+    "statistiquesEtablissement": {
+      "title": "Statistiques d'établissement",
+      "description": "Effectifs, résultats, absences, discipline et comparaison des classes."
+    },
+    "statistiquesRegionales": {
+      "title": "Statistiques régionales",
+      "description": "Vue par région académique : établissements, effectifs, performances et tendances."
+    },
+    "statistiquesAnalytics": {
+      "title": "Analytics",
+      "description": "Tableaux de bord visuels avancés : tendances, comparaisons et indicateurs croisés."
+    },
+    "statistiquesPerformanceEnseignants": {
+      "title": "Performance des enseignants",
+      "description": "Indicateurs professionnels et non stigmatisants : inspections, cahier de texte, résultats des classes."
+    },
+    "statistiquesEfficacitePedagogique": {
+      "title": "Efficacité pédagogique",
+      "description": "Tableau de bord d'aide à la décision : résultats, assiduité, conformité et accompagnement."
+    },
+    "statistiquesSuiviRecommandations": {
+      "title": "Suivi des recommandations",
+      "description": "Pilotez les recommandations : priorité, responsable, échéance, progression."
+    }
   }
 }

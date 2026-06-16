@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { BarChart3, Users, TrendingUp, CheckCircle2, AlertTriangle } from "lucide-react";
 import { ModulePage, SectionCard, TwoColumn } from "@/components/modules/module-page";
 import { Badge } from "@/components/ui/badge";
@@ -13,15 +14,14 @@ import type { Eleve } from "@/lib/types";
 import { formatPercent } from "@/lib/utils";
 
 export default function StatistiquesParClassePage() {
+  const t = useTranslations();
   const [cls, setCls] = React.useState("3eA");
   const students = ELEVES.slice(0, 14);
   const avg = students.reduce((s, e) => s + e.average, 0) / students.length;
   const atRisk = students.filter((s) => s.average < 10 || s.attendanceRate < 88);
 
   return (
-    <ModulePage
-      title="Statistiques par classe"
-      description="Effectif, moyenne, assiduité, distribution des notes et élèves à risque."
+    <ModulePage title={t("pages.statistiquesParClasse.title")} description={t("pages.statistiquesParClasse.description")}
       icon={BarChart3}
       permission="statistics:class"
       sections={[

@@ -1,6 +1,7 @@
 "use client";
 
 import { Files, FileText, FileCheck2, Clock } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ReportModule, defaultReportPayload, type ReportItem } from "@/components/modules/report-module";
 import { APFC_ANTENNAS } from "@/lib/mock-data";
 
@@ -11,10 +12,9 @@ const REPORTS: ReportItem[] = [
 ];
 
 export default function RapportsAntennesPage() {
+  const t = useTranslations();
   return (
-    <ReportModule
-      title="Rapports d'antennes"
-      description="Compilez et consultez les rapports d'activité des antennes pédagogiques."
+    <ReportModule title={t("pages.inspectionRapportsAntennes.title")} description={t("pages.inspectionRapportsAntennes.description")}
       icon={Files}
       permission="antenna_reports:view"
       scopeLabel="Antenne"

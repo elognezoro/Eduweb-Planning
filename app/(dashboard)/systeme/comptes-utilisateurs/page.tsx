@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   Users,
@@ -158,6 +159,7 @@ export default function ComptesUtilisateursPage() {
 }
 
 function ComptesUtilisateursContent() {
+  const t = useTranslations();
   const { users, addUser, removeUsers, loading, realMode, refresh } = useDirectoryUsers();
   const [role, setRole] = React.useState("all");
   const [status, setStatus] = React.useState("all");
@@ -188,9 +190,7 @@ function ComptesUtilisateursContent() {
   };
 
   return (
-    <ModulePage
-      title="Comptes utilisateurs"
-      description="Créez, approuvez, modifiez, suspendez, importez et supprimez des comptes. Filtrez par rôle, statut et établissement."
+    <ModulePage title={t("pages.systemeComptesUtilisateurs.title")} description={t("pages.systemeComptesUtilisateurs.description")}
       icon={Users}
       permission="system:manage_users"
       actions={

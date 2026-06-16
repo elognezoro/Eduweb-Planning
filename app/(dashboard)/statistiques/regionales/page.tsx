@@ -1,6 +1,7 @@
 "use client";
 
 import { Map, Building2, Users, TrendingUp, SearchCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -11,13 +12,12 @@ import { REGION_STATS } from "@/lib/mock-data";
 import { formatNumber, formatPercent } from "@/lib/utils";
 
 export default function StatistiquesRegionalesPage() {
+  const t = useTranslations();
   const totalEtab = REGION_STATS.reduce((s, r) => s + r.etablissements, 0);
   const totalStudents = REGION_STATS.reduce((s, r) => s + r.eleves, 0);
 
   return (
-    <ModulePage
-      title="Statistiques régionales"
-      description="Vue par région académique : établissements, effectifs, performances et inspections."
+    <ModulePage title={t("pages.statistiquesRegionales.title")} description={t("pages.statistiquesRegionales.description")}
       icon={Map}
       permission="statistics:regional"
       sections={[

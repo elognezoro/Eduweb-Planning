@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { CalendarClock, Plus, MapPin, Video, Check, Clock, MessageSquare, Megaphone } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage, SectionCard, TwoColumn } from "@/components/modules/module-page";
@@ -39,6 +40,7 @@ const NO_CONVOKE: UserRole[] = ["parent", "eleve", "enseignant"];
 type RdvMode = "request" | "convocation";
 
 export default function RendezVousPage() {
+  const t = useTranslations();
   const { appointments, addAppointment, users } = useStore();
   const { effectiveRole } = useApp();
   const canConvoke = !NO_CONVOKE.includes(effectiveRole);
@@ -106,9 +108,7 @@ export default function RendezVousPage() {
   };
 
   return (
-    <ModulePage
-      title="Rendez-vous"
-      description="Planifiez et suivez les rendez-vous : entretiens parents, suivis pédagogiques, réunions."
+    <ModulePage title={t("pages.vieScolaireRendezVous.title")} description={t("pages.vieScolaireRendezVous.description")}
       icon={CalendarClock}
       permission="appointments:view"
       sections={[

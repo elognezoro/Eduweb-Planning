@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { ListTodo, CheckCheck, AlertTriangle, Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
@@ -11,13 +12,12 @@ import { ChartCard, LineTrend } from "@/components/charts/charts";
 import { RECOMMENDATIONS, RECOMMENDATION_COMPLETION } from "@/lib/mock-data";
 
 export default function SuiviRecommandationsPage() {
+  const t = useTranslations();
   const [status, setStatus] = React.useState("all");
   const items = RECOMMENDATIONS.filter((r) => status === "all" || r.status === status);
 
   return (
-    <ModulePage
-      title="Suivi des recommandations"
-      description="Pilotez les recommandations : priorité, responsable, échéance, progression et relances."
+    <ModulePage title={t("pages.statistiquesSuiviRecommandations.title")} description={t("pages.statistiquesSuiviRecommandations.description")}
       icon={ListTodo}
       permission="recommendations:view"
       sections={[

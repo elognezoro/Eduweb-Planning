@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   Network,
   Plus,
@@ -69,6 +70,7 @@ const GESTION_SECTIONS: SectionItem[] = [
 ];
 
 export default function ApfcPage() {
+  const t = useTranslations();
   const { can } = useApp();
   const { apfcs, apfcActivities, addApfc, addApfcs, updateApfc, removeApfc, removeApfcs, addApfcActivity, removeApfcActivity } = useStore();
   const [query, setQuery] = React.useState("");
@@ -129,10 +131,8 @@ export default function ApfcPage() {
             <Network className="h-6 w-6" />
           </span>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Gestion des APFC</h1>
-            <p className="text-sm text-muted-foreground">
-              {`${apfcs.length} APFC enregistrées — Antennes de la Pédagogie et de la Formation Continue`}
-            </p>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">{t("pages.inspectionApfc.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("pages.inspectionApfc.description")}</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">

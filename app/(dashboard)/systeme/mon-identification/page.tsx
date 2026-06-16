@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeCheck, Mail, Phone, Globe, Building2, CalendarDays, Clock, ShieldCheck, Eye, IdCard, Fingerprint } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import { ETABLISSEMENTS } from "@/lib/mock-data";
 import { formatDate, initials } from "@/lib/utils";
 
 export default function MonIdentificationPage() {
+  const t = useTranslations();
   const { user, effectiveRole, isPreview, country } = useApp();
   const role = getRole(effectiveRole);
   const region = country.academicRegions.find((r) => r.code === user.academicRegionCode);
@@ -34,9 +36,7 @@ export default function MonIdentificationPage() {
   ];
 
   return (
-    <ModulePage
-      title="Mon Identification"
-      description="Récapitulatif de votre identité et de votre rattachement sur la plateforme."
+    <ModulePage title={t("pages.systemeMonIdentification.title")} description={t("pages.systemeMonIdentification.description")}
       icon={BadgeCheck}
       permission="system:manage_profile"
       sections={[

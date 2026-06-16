@@ -229,5 +229,183 @@
     "loadingTitle": "Inapakia nafasi yako…",
     "errorTitle": "Wasifu haupatikani",
     "errorDescription": "Wasifu wako haukuweza kupakuliwa. Kwa usalama, hakuna ufikiaji uliotolewa. Tafadhali ingia tena; ikiwa tatizo linaendelea, wasiliana na msimamizi wa jukwaa."
+  },
+  "pages": {
+    "dashboard": {
+      "modulesTitle": "Moduli muhimu",
+      "modulesDescription": "Ufikiaji wa haraka kwa vipengele muhimu vya jukwaa.",
+      "welcome": "Karibu, {name} 👋",
+      "loggedInAs": "Umeingia kama {role}.",
+      "subtitleAdmin": "Maono wazi, maamuzi ya haraka, familia zenye taarifa.",
+      "subtitleTeacher": "Maono wazi, maamuzi ya haraka, ufuatiliaji wa elimu unaoendelea.",
+      "subtitleFamily": "Fuatilia safari ya kila mwanafunzi kwa uwazi.",
+      "ctaWorkspace": "Fikia nafasi yangu",
+      "ctaFeatures": "Gundua vipengele",
+      "status": "Hali",
+      "region": "Mkoa",
+      "activeRole": "Jukumu hai"
+    },
+    "pilotageTableauDeBord": {
+      "title": "Dashibodi ya uongozi",
+      "description": "Mtazamo umoja wa viashiria muhimu vya kanda na taasisi."
+    },
+    "systemeVueDEnsemble": {
+      "title": "Muhtasari",
+      "description": "Dashibodi ya usimamizi: bili, usajili, maisha ya shule na shughuli za hivi karibuni."
+    },
+    "systemeMonIdentification": {
+      "title": "Kitambulisho changu",
+      "description": "Muhtasari wa kitambulisho na ushiriki wako kwenye jukwaa."
+    },
+    "systemeMonProfil": {
+      "title": "Wasifu wangu",
+      "description": "Simamia taarifa za kibinafsi, mapendekezo na usalama wa akaunti."
+    },
+    "systemeNiveauxAcces": {
+      "title": "Viwango vya ufikiaji",
+      "description": "Matrix ya haki kwa jukumu na utoaji wa vibali maalum na vya muda."
+    },
+    "systemeHabilitations": {
+      "title": "Usimamizi wa vibali",
+      "description": "Toa vibali — kwa shughuli sahihi, kwa watumiaji kadhaa kwa wakati mmoja."
+    },
+    "systemeComptesUtilisateurs": {
+      "title": "Akaunti za watumiaji",
+      "description": "Unda, idhinisha, hariri, simamisha, ingiza na futa akaunti. Chuja kwa jukumu, hali na taasisi."
+    },
+    "systemeApprobationsPromo": {
+      "title": "Idhini za misimbo ya promo",
+      "description": "Thibitisha au kataa maombi ya misimbo ya punguzo (mikopo IZEN, E-School, makundi ya taasisi…)."
+    },
+    "systemeEtablissements": {
+      "title": "Taasisi",
+      "description": "Simamia taasisi kwa nchi: upakiaji wa kundi au usajili wa mkono."
+    },
+    "systemeCafop": {
+      "title": "Usimamizi wa CAFOP",
+      "description": "Vituo vya mafunzo ya awali kwa walimu: usimamizi, alama na ripoti, takwimu na taarifa.",
+      "centersTitle": "Vituo vya CAFOP",
+      "centersDescription": "Tafuta, angalia na futa vituo vilivyosajiliwa."
+    },
+    "systemeConvertisseurCsv": {
+      "title": "Kibadilishaji cha CSV",
+      "description": "Tayarisha faili za CSV zinazoendana na Moodle: ramani ya safu wima, hakiki na hamisha."
+    },
+    "systemeJournalActivite": {
+      "title": "Kumbukumbu za shughuli",
+      "description": "Ufuatiliaji wa vitendo nyeti: kuingia, mabadiliko, uingizaji/uhamishaji."
+    },
+    "systemeFacturation": {
+      "title": "Bili",
+      "description": "Usajili, malipo na mipango. Ujumuishaji wa Stripe, unaoweza kupanuka kwa waendeshaji wa simu."
+    },
+    "systemeDesignTheme": {
+      "title": "Muundo na mandhari",
+      "description": "Badilisha utambulisho wa kuona: rangi, mviringo, msongamano na chapa."
+    },
+    "systemeInstallation": {
+      "title": "Usakinishaji",
+      "description": "Mwongozo wa usakinishaji na hali ya usanidi wa mazingira."
+    },
+    "parametrageConfiguration": {
+      "title": "Usanidi wa taasisi",
+      "description": "Jaza taarifa za taasisi yako kuzalisha kwa usahihi kadi za ripoti, hati na takwimu."
+    },
+    "parametrageEmploisDuTemps": {
+      "title": "Ratiba",
+      "description": "Mtazamo wa wiki kwa mwalimu na darasa, pamoja na jenereta ya ratiba kuiga matukio ya wafanyikazi na vyumba."
+    },
+    "vieScolaireRegistreAppel": {
+      "title": "Sajili ya mahudhurio",
+      "description": "Rekodi mahudhurio, utoro na kuchelewa."
+    },
+    "vieScolaireCahierDeTexte": {
+      "title": "Daftari la masomo",
+      "description": "Rekodi vipindi: malengo, maudhui, kazi za nyumbani na rasilimali."
+    },
+    "vieScolaireCommunication": {
+      "title": "Mawasiliano",
+      "description": "Ujumbe wa ndani na matangazo, na lengo la kikundi, kipaumbele na uthibitisho wa kusoma."
+    },
+    "vieScolaireNotesBulletins": {
+      "title": "Alama na kadi za ripoti",
+      "description": "Ingiza alama kwa darasa na kipindi, kisha tengeneza kadi za ripoti rasmi."
+    },
+    "vieScolaireLivretScolaire": {
+      "title": "Rekodi ya shule",
+      "description": "Rekodi ya mwaka ya mwanafunzi: kitambulisho, matokeo, ujuzi, uchunguzi."
+    },
+    "vieScolaireRapportEtablissement": {
+      "title": "Ripoti ya shule",
+      "description": "Ripoti fupi kutoka data ya shule, tayari kuchapishwa au kuhamishwa."
+    },
+    "vieScolaireRapportsActivite": {
+      "title": "Ripoti za shughuli",
+      "description": "Toa hati na uangalie shughuli: aina, kipindi, washiriki, viashiria na viambatisho."
+    },
+    "vieScolaireRendezVous": {
+      "title": "Miadi",
+      "description": "Panga na fuatilia miadi: mahojiano ya wazazi, ufuatiliaji wa elimu, miito."
+    },
+    "vieScolaireAcademiePremium": {
+      "title": "Akademia ya Premium",
+      "description": "Jisajili kwa toleo la Premium: kadi rasmi za ripoti, tahadhari za SMS, msaada wa kipaumbele."
+    },
+    "vieScolaireAlertesSms": {
+      "title": "Tahadhari na SMS za moja kwa moja",
+      "description": "Vipimo vya kubadilika — arifa za njia nyingi kwa wazazi."
+    },
+    "inspectionInspection": {
+      "title": "Ukaguzi",
+      "description": "Panga na fuatilia ukaguzi wa kielimu: wakaguzi, walimu, madarasa na uchunguzi."
+    },
+    "inspectionApfc": {
+      "title": "Usimamizi wa APFC",
+      "description": "Matawi ya mafunzo endelevu ya kielimu: matawi, shughuli na ripoti."
+    },
+    "inspectionRapportsAntennes": {
+      "title": "Ripoti za matawi",
+      "description": "Kusanya na angalia ripoti za shughuli za matawi ya kielimu."
+    },
+    "inspectionRapportAntennesPedagogiques": {
+      "title": "Ripoti za matawi ya kielimu",
+      "description": "Kusanya ripoti kutoka kwa waratibu wa kisomo na wakuu wa matawi ya kielimu."
+    },
+    "inspectionGrilleEvaluation": {
+      "title": "Gridi ya tathmini",
+      "description": "Jenga na pima uzito wa gridi za uchunguzi wa darasa zinazotumika katika ukaguzi."
+    },
+    "inspectionRapportsInspection": {
+      "title": "Ripoti za ukaguzi",
+      "description": "Andika ripoti ya ukaguzi kutoka kwa gridi: nguvu, maeneo ya kukua, mapendekezo."
+    },
+    "statistiquesParClasse": {
+      "title": "Takwimu kwa darasa",
+      "description": "Idadi, wastani, mahudhurio, mgawanyo wa alama na wanafunzi walio katika hatari."
+    },
+    "statistiquesEtablissement": {
+      "title": "Takwimu za shule",
+      "description": "Idadi, matokeo, kutokuwepo, nidhamu na ulinganisho wa madarasa."
+    },
+    "statistiquesRegionales": {
+      "title": "Takwimu za kanda",
+      "description": "Mtazamo kwa mkoa wa kitaaluma: taasisi, idadi, utendaji na mwenendo."
+    },
+    "statistiquesAnalytics": {
+      "title": "Uchanganuzi",
+      "description": "Dashibodi za kuona za hali ya juu: mwenendo, ulinganisho na viashiria vya msalaba."
+    },
+    "statistiquesPerformanceEnseignants": {
+      "title": "Utendaji wa walimu",
+      "description": "Viashiria vya kitaalamu visivyokwaza: ukaguzi, daftari la masomo, matokeo ya madarasa."
+    },
+    "statistiquesEfficacitePedagogique": {
+      "title": "Ufanisi wa kielimu",
+      "description": "Dashibodi ya msaada wa kufanya maamuzi: matokeo, mahudhurio, ufuasi na ufuatiliaji."
+    },
+    "statistiquesSuiviRecommandations": {
+      "title": "Ufuatiliaji wa mapendekezo",
+      "description": "Endesha mapendekezo: kipaumbele, mmiliki, tarehe ya mwisho, maendeleo."
+    }
   }
 }

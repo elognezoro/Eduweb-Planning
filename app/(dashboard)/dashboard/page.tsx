@@ -33,6 +33,7 @@ import {
   Star,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useApp } from "@/components/app-shell/app-context";
 import { getRole, type UserRole } from "@/lib/roles";
 import { hasPermission } from "@/lib/permissions";
@@ -116,6 +117,7 @@ const PARTNERS: { name: string; short: string; description: string; accent: stri
 ];
 
 export default function DashboardPage() {
+  const t = useTranslations();
   const { user, effectiveRole, country, academicYear, regionCode } = useApp();
   const role = getRole(effectiveRole);
   const isAdminLike = hasPermission(effectiveRole, "role_preview:use");
@@ -131,16 +133,16 @@ export default function DashboardPage() {
             {country.flag} {country.nameFr} · {academicYear.label}
           </Badge>
           <h1 className="font-display text-2xl font-extrabold leading-tight sm:text-3xl">
-            Bienvenue, {user.firstName} 👋
+            {t("pages.dashboard.welcome", { name: user.firstName })}
           </h1>
           <p className="mt-2 max-w-xl text-white/80">
-            Vous êtes connecté(e) en tant que <strong className="text-white">{role.label}</strong>. Une vision claire,
-            des décisions rapides, un suivi pédagogique continu — de la classe au pilotage national.
+            {t("pages.dashboard.loggedInAs", { role: role.label })}{" "}
+            {t("pages.dashboard.subtitleTeacher")}
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Button asChild size="lg" variant="secondary">
               <Link href="/pilotage/tableau-de-bord">
-                Accéder à mon espace <ArrowRight className="h-4 w-4" />
+                {t("pages.dashboard.ctaWorkspace")} <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
             <Button
@@ -149,14 +151,14 @@ export default function DashboardPage() {
               className="border border-white/30 bg-white/10 text-white hover:bg-white/20"
             >
               <Link href="/statistiques/analytics">
-                <Sparkles className="h-4 w-4" /> Découvrir les fonctionnalités
+                <Sparkles className="h-4 w-4" /> {t("pages.dashboard.ctaFeatures")}
               </Link>
             </Button>
           </div>
           <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/70">
-            <span>Rôle actif : <strong className="text-white">{role.label}</strong></span>
-            <span>Région : <strong className="text-white">{regionName}</strong></span>
-            <span>Statut : <strong className="text-white">Compte actif</strong></span>
+            <span>{t("pages.dashboard.activeRole")} : <strong className="text-white">{role.label}</strong></span>
+            <span>{t("pages.dashboard.region")} : <strong className="text-white">{regionName}</strong></span>
+            <span>{t("pages.dashboard.status")} : <strong className="text-white">{t("common.status")}</strong></span>
           </div>
         </div>
       </section>
@@ -192,8 +194,8 @@ export default function DashboardPage() {
       {/* Modules clés */}
       <SectionCard
         id="modules"
-        title="Modules clés"
-        description="Accédez rapidement aux fonctionnalités essentielles de la plateforme."
+        title={t("pages.dashboard.modulesTitle")}
+        description={t("pages.dashboard.modulesDescription")}
         action={
           <Button variant="ghost" size="sm" asChild>
             <Link href="/pilotage/tableau-de-bord">Tout voir</Link>

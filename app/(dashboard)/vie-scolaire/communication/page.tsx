@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   MessagesSquare,
   Send,
@@ -54,13 +55,12 @@ const fmtTime = (iso: string) => {
 };
 
 export default function CommunicationPage() {
+  const t = useTranslations();
   const { announcements, addAnnouncement, removeAnnouncement } = useStore();
   const [messages] = React.useState<Message[]>(MESSAGES);
 
   return (
-    <ModulePage
-      title="Communication"
-      description="Messagerie interne et annonces, avec ciblage par groupe, priorité et accusé de lecture."
+    <ModulePage title={t("pages.vieScolaireCommunication.title")} description={t("pages.vieScolaireCommunication.description")}
       icon={MessagesSquare}
       permission="communication:view"
       sections={[

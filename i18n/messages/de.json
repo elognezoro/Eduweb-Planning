@@ -229,5 +229,183 @@
     "loadingTitle": "Ihr Bereich wird geladen…",
     "errorTitle": "Profil nicht verfügbar",
     "errorDescription": "Ihr Profil konnte nicht geladen werden. Aus Sicherheitsgründen wurde kein Zugriff gewährt. Bitte melden Sie sich erneut an; falls das Problem weiterhin besteht, kontaktieren Sie den Plattformadministrator."
+  },
+  "pages": {
+    "dashboard": {
+      "modulesTitle": "Hauptmodule",
+      "modulesDescription": "Schneller Zugriff auf die wichtigsten Funktionen der Plattform.",
+      "welcome": "Willkommen, {name} 👋",
+      "loggedInAs": "Sie sind angemeldet als {role}.",
+      "subtitleAdmin": "Klare Vision, schnelle Entscheidungen, informierte Familien.",
+      "subtitleTeacher": "Klare Vision, schnelle Entscheidungen, kontinuierliche pädagogische Begleitung.",
+      "subtitleFamily": "Verfolgen Sie jeden Schulweg in aller Klarheit.",
+      "ctaWorkspace": "Zu meinem Bereich",
+      "ctaFeatures": "Funktionen entdecken",
+      "status": "Status",
+      "region": "Region",
+      "activeRole": "Aktive Rolle"
+    },
+    "pilotageTableauDeBord": {
+      "title": "Steuerungs-Dashboard",
+      "description": "Konsolidierte Übersicht der Schlüsselindikatoren der Region und der Einrichtungen."
+    },
+    "systemeVueDEnsemble": {
+      "title": "Übersicht",
+      "description": "Management-Dashboard: Abrechnung, Abonnements, Schulalltag und aktuelle Aktivitäten."
+    },
+    "systemeMonIdentification": {
+      "title": "Meine Identifikation",
+      "description": "Zusammenfassung Ihrer Identität und Zuordnung auf der Plattform."
+    },
+    "systemeMonProfil": {
+      "title": "Mein Profil",
+      "description": "Verwalten Sie persönliche Daten, Einstellungen und Kontosicherheit."
+    },
+    "systemeNiveauxAcces": {
+      "title": "Zugriffsstufen",
+      "description": "Berechtigungsmatrix pro Rolle und Vergabe spezifischer, befristeter Rechte."
+    },
+    "systemeHabilitations": {
+      "title": "Berechtigungsverwaltung",
+      "description": "Berechtigungen vergeben — für eine konkrete Aktivität, mehreren Nutzern gleichzeitig."
+    },
+    "systemeComptesUtilisateurs": {
+      "title": "Benutzerkonten",
+      "description": "Konten erstellen, freigeben, bearbeiten, sperren, importieren und löschen. Filterung nach Rolle, Status und Einrichtung."
+    },
+    "systemeApprobationsPromo": {
+      "title": "Promo-Code-Freigaben",
+      "description": "Anträge auf Promo-Codes (IZEN-Zuteilungen, E-School, Schulgruppen…) genehmigen oder ablehnen."
+    },
+    "systemeEtablissements": {
+      "title": "Einrichtungen",
+      "description": "Einrichtungen pro Land verwalten: Kohortenimport oder manuelle Anmeldung."
+    },
+    "systemeCafop": {
+      "title": "CAFOP-Verwaltung",
+      "description": "Erstausbildungszentren für Lehrer: Verwaltung, Noten & Zeugnisse, Statistiken und Berichte.",
+      "centersTitle": "CAFOP-Zentren",
+      "centersDescription": "Registrierte Zentren suchen, ansehen und löschen."
+    },
+    "systemeConvertisseurCsv": {
+      "title": "CSV-Konverter",
+      "description": "Moodle-kompatible CSV-Dateien vorbereiten: Spaltenzuordnung, Vorschau und Export."
+    },
+    "systemeJournalActivite": {
+      "title": "Aktivitätsprotokoll",
+      "description": "Sensible Aktionen nachverfolgen: Anmeldungen, Änderungen, Importe/Exporte."
+    },
+    "systemeFacturation": {
+      "title": "Abrechnung",
+      "description": "Abonnements, Zahlungen und Pläne. Stripe-Integration, erweiterbar auf Mobilfunkbetreiber."
+    },
+    "systemeDesignTheme": {
+      "title": "Design & Theme",
+      "description": "Visuelle Identität anpassen: Farben, Rundungen, Dichte und Marke."
+    },
+    "systemeInstallation": {
+      "title": "Installation",
+      "description": "Installationsanleitung und Konfigurationsstatus der Umgebung."
+    },
+    "parametrageConfiguration": {
+      "title": "Einrichtungskonfiguration",
+      "description": "Geben Sie die Daten Ihrer Einrichtung ein, um Zeugnisse, Dokumente und Statistiken korrekt zu erzeugen."
+    },
+    "parametrageEmploisDuTemps": {
+      "title": "Stundenpläne",
+      "description": "Wochenansicht pro Lehrkraft und Klasse plus Stundenplangenerator zur Simulation von Besetzung und Räumen."
+    },
+    "vieScolaireRegistreAppel": {
+      "title": "Anwesenheitsregister",
+      "description": "Anwesenheit, Abwesenheit und Verspätungen erfassen."
+    },
+    "vieScolaireCahierDeTexte": {
+      "title": "Klassenbuch",
+      "description": "Stunden eintragen: Ziele, Inhalt, Hausaufgaben und Materialien."
+    },
+    "vieScolaireCommunication": {
+      "title": "Kommunikation",
+      "description": "Interne Nachrichten und Ankündigungen mit Gruppen-Targeting, Priorität und Lesebestätigung."
+    },
+    "vieScolaireNotesBulletins": {
+      "title": "Noten & Zeugnisse",
+      "description": "Noten pro Klasse und Periode eingeben und offizielle Zeugnisse erzeugen."
+    },
+    "vieScolaireLivretScolaire": {
+      "title": "Schülerakte",
+      "description": "Jahresakte des Schülers: Identität, Ergebnisse, Kompetenzen, Beobachtungen."
+    },
+    "vieScolaireRapportEtablissement": {
+      "title": "Schulbericht",
+      "description": "Synthetischer Bericht aus den Schuldaten, druck- und exportbereit."
+    },
+    "vieScolaireRapportsActivite": {
+      "title": "Tätigkeitsberichte",
+      "description": "Aktivitäten dokumentieren und konsultieren: Art, Zeitraum, Akteure, Indikatoren und Anhänge."
+    },
+    "vieScolaireRendezVous": {
+      "title": "Termine",
+      "description": "Termine planen und verfolgen: Elterngespräche, pädagogische Nachverfolgung, Vorladungen."
+    },
+    "vieScolaireAcademiePremium": {
+      "title": "Premium-Akademie",
+      "description": "Premium abonnieren: offizielle Zeugnisse, SMS-Benachrichtigungen, priorisierter Support."
+    },
+    "vieScolaireAlertesSms": {
+      "title": "Benachrichtigungen & automatische SMS",
+      "description": "Konfigurierbare Schwellenwerte — Mehrkanal-Benachrichtigungen an Eltern."
+    },
+    "inspectionInspection": {
+      "title": "Inspektion",
+      "description": "Pädagogische Inspektionen planen und verfolgen: Inspektoren, Lehrkräfte, Klassen und Beobachtungen."
+    },
+    "inspectionApfc": {
+      "title": "APFC-Verwaltung",
+      "description": "Pädagogische Fortbildungsfilialen: Filialen, Aktivitäten und Berichte."
+    },
+    "inspectionRapportsAntennes": {
+      "title": "Filialberichte",
+      "description": "Tätigkeitsberichte der pädagogischen Filialen zusammenstellen und einsehen."
+    },
+    "inspectionRapportAntennesPedagogiques": {
+      "title": "Pädagogische Filialberichte",
+      "description": "Berichte der Fachkoordinatoren und Leiter pädagogischer Filialen zusammenstellen."
+    },
+    "inspectionGrilleEvaluation": {
+      "title": "Bewertungsraster",
+      "description": "Unterrichtsbeobachtungsraster für Inspektionen erstellen und gewichten."
+    },
+    "inspectionRapportsInspection": {
+      "title": "Inspektionsberichte",
+      "description": "Inspektionsbericht aus dem Raster verfassen: Stärken, Entwicklungsfelder, Empfehlungen."
+    },
+    "statistiquesParClasse": {
+      "title": "Statistiken pro Klasse",
+      "description": "Klassengröße, Durchschnitt, Anwesenheit, Notenverteilung und gefährdete Schüler."
+    },
+    "statistiquesEtablissement": {
+      "title": "Einrichtungsstatistiken",
+      "description": "Anzahl, Ergebnisse, Abwesenheiten, Disziplin und Klassenvergleich."
+    },
+    "statistiquesRegionales": {
+      "title": "Regionale Statistiken",
+      "description": "Ansicht pro akademischer Region: Einrichtungen, Anzahl, Leistung und Trends."
+    },
+    "statistiquesAnalytics": {
+      "title": "Analytics",
+      "description": "Erweiterte visuelle Dashboards: Trends, Vergleiche und Querindikatoren."
+    },
+    "statistiquesPerformanceEnseignants": {
+      "title": "Lehrerleistung",
+      "description": "Professionelle, nicht stigmatisierende Indikatoren: Inspektionen, Klassenbuch, Klassenergebnisse."
+    },
+    "statistiquesEfficacitePedagogique": {
+      "title": "Pädagogische Effektivität",
+      "description": "Entscheidungs-Dashboard: Ergebnisse, Anwesenheit, Konformität und Begleitung."
+    },
+    "statistiquesSuiviRecommandations": {
+      "title": "Empfehlungsverfolgung",
+      "description": "Empfehlungen steuern: Priorität, Verantwortlicher, Frist, Fortschritt."
+    }
   }
 }

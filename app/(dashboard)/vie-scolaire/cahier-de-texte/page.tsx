@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   NotebookText,
   Plus,
@@ -53,15 +54,14 @@ const ACCESS_REQUESTS = [
 ];
 
 export default function CahierDeTextePage() {
+  const t = useTranslations();
   const { lessonBook, addLessonEntry, updateLessonEntry } = useStore();
   const [requests, setRequests] = React.useState(ACCESS_REQUESTS);
   // null = fermé · { entry: null } = création · { entry } = édition
   const [dlg, setDlg] = React.useState<{ entry: LessonEntry | null } | null>(null);
 
   return (
-    <ModulePage
-      title="Cahier de texte"
-      description="Consignez les séances : objectifs, contenu, devoirs et ressources. Validez les demandes d'accès."
+    <ModulePage title={t("pages.vieScolaireCahierDeTexte.title")} description={t("pages.vieScolaireCahierDeTexte.description")}
       icon={NotebookText}
       permission="lesson_book:view"
       sections={[

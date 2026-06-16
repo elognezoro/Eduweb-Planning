@@ -2,6 +2,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { ClipboardList, Plus, Trash2, Download, Eye, UploadCloud, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
@@ -69,6 +70,7 @@ const note20 = (n: NoteEntry) => (n.bareme ? (n.note / n.bareme) * 20 : n.note);
 const avg = (a: number[]) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0);
 
 export default function NotesBulletinsPage() {
+  const t = useTranslations();
   const classOptions = React.useMemo(() => [...new Set(ELEVES.map((e) => e.className))], []);
   const [cls, setCls] = React.useState(classOptions[0]);
   const [periods, setPeriods] = React.useState<BulletinPeriod[]>(() => etabPeriods({}));
@@ -112,9 +114,7 @@ export default function NotesBulletinsPage() {
   const removeNote = (id: string) => setNotes((ns) => ns.filter((n) => n.id !== id));
 
   return (
-    <ModulePage
-      title="Notes & Bulletins"
-      description="Saisissez les notes par classe et période, puis générez les bulletins officiels."
+    <ModulePage title={t("pages.vieScolaireNotesBulletins.title")} description={t("pages.vieScolaireNotesBulletins.description")}
       icon={ClipboardList}
       permission="grades:view"
       sections={[

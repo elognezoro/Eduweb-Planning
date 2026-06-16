@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { BadgePercent, Check, X, Clock, Ticket, Copy, Building2, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
@@ -29,6 +30,7 @@ const STATUS_LABELS: Record<PromoRequest["status"], { label: string; tone: "gold
 };
 
 export default function ApprobationsPromoPage() {
+  const t = useTranslations();
   const { promoRequests, approvePromoRequest, rejectPromoRequest } = useStore();
   const { user: me } = useApp();
   const [rejecting, setRejecting] = React.useState<PromoRequest | null>(null);
@@ -59,9 +61,7 @@ export default function ApprobationsPromoPage() {
     );
 
   return (
-    <ModulePage
-      title="Approbations de codes promo"
-      description="Validez ou refusez les demandes de codes promo de réduction (allocations IZEN, E-School, groupes d'établissements…)."
+    <ModulePage title={t("pages.systemeApprobationsPromo.title")} description={t("pages.systemeApprobationsPromo.description")}
       icon={BadgePercent}
       permission="system:approve_promotions"
       kpis={[

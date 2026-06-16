@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import {
   Crown,
@@ -100,6 +101,7 @@ const eur2 = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits
 const eurInt = (n: number) => `${Math.round(n).toLocaleString("fr-FR")} EUR`;
 
 export default function AcademiePremiumPage() {
+  const t = useTranslations();
   const router = useRouter();
   const { subscription, smsAlerts, subscribe, cancelSubscription, setSmsAlerts, etablissements, updateEtablissement, promoRequests, addPromoRequest } = useStore();
   const { user: me, effectiveRole } = useApp();
@@ -248,9 +250,7 @@ export default function AcademiePremiumPage() {
   };
 
   return (
-    <ModulePage
-      title="Académie Premium"
-      description="Souscrivez à l'offre Premium : bulletins officiels, alertes SMS, statistiques avancées et support prioritaire."
+    <ModulePage title={t("pages.vieScolaireAcademiePremium.title")} description={t("pages.vieScolaireAcademiePremium.description")}
       icon={Crown}
       permission="premium:view"
       sections={[

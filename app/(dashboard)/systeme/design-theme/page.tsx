@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Palette, RotateCcw, Check, Save } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage, SectionCard, TwoColumn } from "@/components/modules/module-page";
@@ -19,6 +20,7 @@ const PRESETS = [
 ];
 
 export default function DesignThemePage() {
+  const t = useTranslations();
   const [primary, setPrimary] = React.useState(DEFAULT_THEME.primaryColor);
   const [secondary, setSecondary] = React.useState(DEFAULT_THEME.secondaryColor);
   const [radius, setRadius] = React.useState(DEFAULT_THEME.radius);
@@ -41,9 +43,7 @@ export default function DesignThemePage() {
   };
 
   return (
-    <ModulePage
-      title="Design & thème"
-      description="Personnalisez la charte graphique : couleurs, arrondi, densité et logo. Prévisualisation en direct."
+    <ModulePage title={t("pages.systemeDesignTheme.title")} description={t("pages.systemeDesignTheme.description")}
       icon={Palette}
       permission="system:customize_theme"
       sections={[

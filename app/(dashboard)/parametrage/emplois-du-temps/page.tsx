@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { CalendarDays, Copy, Printer, Plus, AlertTriangle, CheckCircle2, Clock, Wand2, FlaskConical, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
@@ -86,6 +87,7 @@ function WeeklyGrid({
 }
 
 export default function EmploisDuTempsPage() {
+  const t = useTranslations();
   const { can, user, effectiveRole } = useApp();
   // Seuls le Chef d'établissement / l'Admin Établissement (timetable:manage) accèdent au générateur.
   const canSimulate = can("timetable:manage");
@@ -147,9 +149,7 @@ export default function EmploisDuTempsPage() {
   }
 
   return (
-    <ModulePage
-      title="Emplois du temps"
-      description="Vue hebdomadaire par enseignant et par classe, et générateur d'EDT pour simuler des scénarios d'effectif et de salles."
+    <ModulePage title={t("pages.parametrageEmploisDuTemps.title")} description={t("pages.parametrageEmploisDuTemps.description")}
       icon={CalendarDays}
       permission="timetable:view"
     >

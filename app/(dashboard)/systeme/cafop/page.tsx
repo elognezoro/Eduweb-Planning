@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   GraduationCap,
   Plus,
@@ -242,6 +243,7 @@ function bulletinData(cafop: Cafop, modules: ModuleRow[], promo: string, groupe:
 }
 
 export default function CafopPage() {
+  const t = useTranslations();
   const { can } = useApp();
   const { cafops, addCafop, addCafops, removeCafop, cafopModules, setCafopModules, cafopFormationYears, setCafopFormationYears } = useStore();
   const modules = cafopModules ?? CAFOP_MODULES_DEFAULT;
@@ -269,7 +271,7 @@ export default function CafopPage() {
             <GraduationCap className="h-6 w-6" />
           </span>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Gestion des CAFOP</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">{t("pages.systemeCafop.title")}</h1>
             <p className="text-sm text-muted-foreground">
               {`${cafops.length} CAFOP enregistrés — Centres d'Animation et de Formation Pédagogique`}
             </p>

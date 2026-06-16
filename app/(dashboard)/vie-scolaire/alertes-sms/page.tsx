@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   BellRing,
   MessageSquare,
@@ -113,6 +114,7 @@ function Slider({ label, value, onChange, min, max, help }: { label: string; val
 }
 
 export default function AlertesSmsPage() {
+  const t = useTranslations();
   const [alertsOn, setAlertsOn] = React.useState(true);
   const [thresholds, setThresholds] = React.useState({ retards: 5, absences: 3, note: 8 });
   const [channels, setChannels] = React.useState<Record<string, boolean>>({ sms: true, email: true, inapp: true, whatsapp: false });
@@ -144,9 +146,7 @@ export default function AlertesSmsPage() {
   ];
 
   return (
-    <ModulePage
-      title="Alertes & SMS automatiques"
-      description="Seuils configurables — notifications multicanales aux parents d'élèves."
+    <ModulePage title={t("pages.vieScolaireAlertesSms.title")} description={t("pages.vieScolaireAlertesSms.description")}
       icon={BellRing}
       permission="sms:view"
       sections={[

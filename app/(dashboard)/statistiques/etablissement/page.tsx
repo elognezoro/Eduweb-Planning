@@ -1,16 +1,16 @@
 "use client";
 
 import { Building, Users, GraduationCap, TrendingUp, CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ModulePage } from "@/components/modules/module-page";
 import { ChartCard, BarsChart, AreaTrend, DonutChart } from "@/components/charts/charts";
 import { ExportMenu } from "@/components/layout/export-menu";
 import { ENROLLMENT_BY_LEVEL, SUBJECT_AVERAGES, ATTENDANCE_SERIES, ENROLLMENT_PIE } from "@/lib/mock-data";
 
 export default function StatistiquesEtablissementPage() {
+  const t = useTranslations();
   return (
-    <ModulePage
-      title="Statistiques d'établissement"
-      description="Effectifs, résultats, absences, discipline et comparaison des classes."
+    <ModulePage title={t("pages.statistiquesEtablissement.title")} description={t("pages.statistiquesEtablissement.description")}
       icon={Building}
       permission="statistics:institution"
       sections={[

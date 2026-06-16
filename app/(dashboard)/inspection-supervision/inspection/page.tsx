@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { SearchCheck, Plus, CalendarClock, CheckCheck, Loader2, MoreHorizontal, FileText, Play } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage } from "@/components/modules/module-page";
@@ -39,14 +40,13 @@ import { formatDate } from "@/lib/utils";
 import type { Inspection } from "@/lib/types";
 
 export default function InspectionPage() {
+  const t = useTranslations();
   const { inspections, addInspection } = useStore();
   const [status, setStatus] = React.useState("all");
   const data = inspections.filter((i) => status === "all" || i.status === status);
 
   return (
-    <ModulePage
-      title="Inspection"
-      description="Planifiez et suivez les inspections pédagogiques : inspecteurs, enseignants, grilles et scores."
+    <ModulePage title={t("pages.inspectionInspection.title")} description={t("pages.inspectionInspection.description")}
       icon={SearchCheck}
       permission="inspection:view"
       actions={<PlanInspectionDialog onCreate={addInspection} />}

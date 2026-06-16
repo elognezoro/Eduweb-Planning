@@ -2,6 +2,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import {
   Settings,
   Upload,
@@ -222,6 +223,7 @@ const STORAGE_KEY = "eduweb.etab-config.v1";
 const genId = () => `f-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`;
 
 export default function ConfigurationPage() {
+  const t = useTranslations();
   const [config, setConfig] = React.useState<EtabConfig>(defaultConfig);
   const [hydrated, setHydrated] = React.useState(false);
   const importRef = React.useRef<HTMLInputElement>(null);
@@ -287,9 +289,7 @@ export default function ConfigurationPage() {
   };
 
   return (
-    <ModulePage
-      title="Configuration de l'établissement"
-      description="Renseignez les informations de votre établissement pour générer les emplois du temps, bulletins et statistiques."
+    <ModulePage title={t("pages.parametrageConfiguration.title")} description={t("pages.parametrageConfiguration.description")}
       icon={Settings}
       permission="settings:manage_configuration"
       showContextBadge={false}

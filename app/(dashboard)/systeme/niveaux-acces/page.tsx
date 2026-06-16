@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { ShieldCheck, Check, Minus, Users, Pencil, Search, Clock, Trash2, Plus, ShieldPlus, CheckCircle2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
@@ -74,6 +75,7 @@ const regDate = (id: string) => {
 };
 
 export default function NiveauxAccesPage() {
+  const t = useTranslations();
   const { users, roleOverrides, userGrants, toggleRolePermission, resetRoleOverrides } = useStore();
   const overrideCount = Object.keys(roleOverrides).length;
 
@@ -103,9 +105,7 @@ export default function NiveauxAccesPage() {
     userGrants.filter((g) => g.userId === userId && (g.expiresAt === null || new Date(g.expiresAt).getTime() > now)).length;
 
   return (
-    <ModulePage
-      title="Niveaux d'accès"
-      description="Matrice des droits par rôle et attribution de permissions spécifiques et temporaires."
+    <ModulePage title={t("pages.systemeNiveauxAcces.title")} description={t("pages.systemeNiveauxAcces.description")}
       icon={ShieldCheck}
       permission="system:manage_roles"
       sections={[

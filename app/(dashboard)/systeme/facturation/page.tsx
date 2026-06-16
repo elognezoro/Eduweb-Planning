@@ -1,6 +1,7 @@
 "use client";
 
 import { CreditCard, Check, Wallet, TrendingUp, Clock, Building2, Crown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
@@ -14,6 +15,7 @@ import { SUBSCRIPTION_PLANS, PAYMENTS } from "@/lib/mock-data";
 import { formatCurrency } from "@/lib/utils";
 
 export default function FacturationPage() {
+  const t = useTranslations();
   const router = useRouter();
   const { subscription, etablissements } = useStore();
   const etabName = etablissements[0]?.name ?? "Votre établissement";
@@ -35,9 +37,7 @@ export default function FacturationPage() {
   const revenue = payments.filter((p) => p.status === "paid").reduce((s, p) => s + p.amount, 0);
 
   return (
-    <ModulePage
-      title="Facturation"
-      description="Abonnements, paiements et plans. Intégration Stripe, extensible aux paiements mobile money."
+    <ModulePage title={t("pages.systemeFacturation.title")} description={t("pages.systemeFacturation.description")}
       icon={CreditCard}
       permission="system:manage_billing"
       kpis={[
