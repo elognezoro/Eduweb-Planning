@@ -1,0 +1,245 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   EduWeb Planner — Design system
+   Charte : vert bouteille institutionnel + or. Typographie arrondie Nunito Sans.
+   ========================================================================== */
+
+:root {
+  /* Surfaces */
+  --background: #f7f6f1;
+  --foreground: #17231d;
+  --card: #ffffff;
+  --card-foreground: #17231d;
+  --popover: #ffffff;
+  --popover-foreground: #17231d;
+
+  /* Marque */
+  --primary: #176b45;
+  --primary-foreground: #ffffff;
+  --secondary: #eba52a;
+  --secondary-foreground: #3a2a06;
+
+  /* Neutres & accents */
+  --muted: #eef0ec;
+  --muted-foreground: #65726b;
+  --accent: #dff4e9;
+  --accent-foreground: #0b3b25;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+
+  /* Lignes & focus */
+  --border: #e6e2d8;
+  --input: #e6e2d8;
+  --ring: #176b45;
+
+  --radius: 0.9rem;
+
+  /* Échelle EduWeb (vert bouteille + or) */
+  --ew-green-950: #062c1b;
+  --ew-green-900: #0b3b25;
+  --ew-green-800: #105234;
+  --ew-green-700: #176b45;
+  --ew-green-600: #218552;
+  --ew-green-100: #dff4e9;
+  --ew-green-50: #f0fbf5;
+  --ew-gold-600: #d99a1e;
+  --ew-gold-500: #eba52a;
+  --ew-gold-100: #fff1cc;
+
+  /* Couleurs sémantiques */
+  --ew-blue: #2563eb;
+  --ew-red: #dc2626;
+  --ew-orange: #ea580c;
+  --ew-purple: #7c3aed;
+  --ew-teal: #0891b2;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-ew-green-950: var(--ew-green-950);
+  --color-ew-green-900: var(--ew-green-900);
+  --color-ew-green-800: var(--ew-green-800);
+  --color-ew-green-700: var(--ew-green-700);
+  --color-ew-green-600: var(--ew-green-600);
+  --color-ew-green-100: var(--ew-green-100);
+  --color-ew-green-50: var(--ew-green-50);
+  --color-ew-gold-600: var(--ew-gold-600);
+  --color-ew-gold-500: var(--ew-gold-500);
+  --color-ew-gold-100: var(--ew-gold-100);
+  --color-ew-blue: var(--ew-blue);
+  --color-ew-red: var(--ew-red);
+  --color-ew-orange: var(--ew-orange);
+  --color-ew-purple: var(--ew-purple);
+  --color-ew-teal: var(--ew-teal);
+
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, "Segoe UI", Verdana,
+    sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 3px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: calc(var(--radius) + 12px);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3, h4 {
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Dégradé institutionnel pour les hero / bannières.
+   NB : .ew-hero-gradient et .ew-mesh sont toutes deux autonomes (couleur verte
+   incluse) car elles définissent `background-image` — la dernière appliquée gagne. */
+.ew-hero-gradient {
+  background-color: #0b3b25;
+  background-image: radial-gradient(
+      1200px 400px at 100% -10%,
+      rgba(235, 165, 42, 0.22),
+      transparent 60%
+    ),
+    linear-gradient(135deg, #062c1b 0%, #0b3b25 38%, #105234 70%, #176b45 100%);
+}
+
+.ew-mesh {
+  background-color: #0b3b25;
+  background-image: radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.07) 0, transparent 42%),
+    radial-gradient(circle at 82% 0%, rgba(235, 165, 42, 0.16) 0, transparent 40%),
+    radial-gradient(1200px 400px at 100% -10%, rgba(235, 165, 42, 0.18), transparent 60%),
+    linear-gradient(135deg, #062c1b 0%, #0b3b25 38%, #105234 70%, #176b45 100%);
+}
+
+/* Scrollbar discrète */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cfd6cf transparent;
+}
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #cfd6cf;
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #b6c0b6;
+}
+
+/* Masquer le bouton natif « œil » / « croix » d'Edge & IE sur les champs mot de passe
+   (on fournit notre propre bascule de visibilité — évite l'icône en double). */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+/* Impression : n'imprimer que le bulletin (#bulletin-print) ou le livret (#livret-print). */
+@media print {
+  body {
+    background: #fff !important;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  #bulletin-print,
+  #bulletin-print *,
+  #livret-print,
+  #livret-print * {
+    visibility: visible !important;
+  }
+  /* Bulletin : page unique, ancrée au viewport. */
+  #bulletin-print {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  /* Livret : document multi-pages, flux normal depuis le haut de la feuille. */
+  #livret-print {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .livret-overlay {
+    position: static !important;
+    overflow: visible !important;
+    background: none !important;
+    padding: 0 !important;
+  }
+  .livret-page {
+    break-after: page;
+    page-break-after: always;
+  }
+  .livret-page:last-of-type {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  /* Pas de séparateur d'aperçu écran à l'impression (chaque feuille a son saut de page). */
+  .livret-page + .livret-page {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  @page {
+    margin: 13mm;
+  }
+}
+
+/* Aperçu écran : séparer visuellement les « feuilles » du livret. */
+.livret-page {
+  break-inside: avoid;
+}
+.livret-page + .livret-page {
+  margin-top: 1.75rem;
+  padding-top: 1.75rem;
+  border-top: 1px dashed #d4d4d4;
+}
+
+/* Animation douce d'apparition */
+@keyframes ew-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ew-fade-in {
+  animation: ew-fade-in 0.4s ease both;
+}

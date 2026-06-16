@@ -1,0 +1,127 @@
+{
+  "eleves": 3500,
+  "salles": 50,
+  "classes": 63,
+  "tailleMoyenne": 55.6,
+  "niveaux": [
+    {
+      "niveau": "6e",
+      "effectif": 700,
+      "classes": 12,
+      "flux": "Matin"
+    },
+    {
+      "niveau": "5e",
+      "effectif": 620,
+      "classes": 11,
+      "flux": "Matin"
+    },
+    {
+      "niveau": "4e",
+      "effectif": 560,
+      "classes": 10,
+      "flux": "Matin"
+    },
+    {
+      "niveau": "3e",
+      "effectif": 520,
+      "classes": 9,
+      "flux": "Matin"
+    },
+    {
+      "niveau": "2nde",
+      "effectif": 460,
+      "classes": 8,
+      "flux": "Apres-midi"
+    },
+    {
+      "niveau": "1ere",
+      "effectif": 360,
+      "classes": 7,
+      "flux": "Apres-midi"
+    },
+    {
+      "niveau": "Tle",
+      "effectif": 280,
+      "classes": 6,
+      "flux": "Apres-midi"
+    }
+  ],
+  "doubleVacation": {
+    "matin": 42,
+    "apresMidi": 21,
+    "sallesMatin": 42,
+    "sallesSoir": 21
+  },
+  "enseignants": 103,
+  "heuresHebdo": 1890,
+  "parMatiere": {
+    "Français": {
+      "heures": 294,
+      "profs": 15
+    },
+    "Mathématiques": {
+      "heures": 315,
+      "profs": 16
+    },
+    "Anglais": {
+      "heures": 231,
+      "profs": 12
+    },
+    "Histoire-Géographie": {
+      "heures": 189,
+      "profs": 10
+    },
+    "SVT": {
+      "heures": 189,
+      "profs": 10
+    },
+    "Physique-Chimie": {
+      "heures": 210,
+      "profs": 11
+    },
+    "EPS": {
+      "heures": 126,
+      "profs": 7
+    },
+    "Espagnol (LV2)": {
+      "heures": 126,
+      "profs": 7
+    },
+    "EDHC": {
+      "heures": 63,
+      "profs": 4
+    },
+    "Arts plastiques": {
+      "heures": 42,
+      "profs": 3
+    },
+    "Éducation musicale": {
+      "heures": 42,
+      "profs": 3
+    },
+    "Philosophie": {
+      "heures": 42,
+      "profs": 3
+    },
+    "Sciences économiques": {
+      "heures": 21,
+      "profs": 2
+    }
+  },
+  "edt": {
+    "matin": {
+      "placed": 1260,
+      "unplaced": 0,
+      "conflitsSalle": 0,
+      "conflitsProf": 0
+    },
+    "apresMidi": {
+      "placed": 630,
+      "unplaced": 0,
+      "conflitsSalle": 0,
+      "conflitsProf": 0
+    },
+    "faisable": true
+  }
+}
