@@ -279,6 +279,7 @@ interface DataStore extends StoreState {
   cancelSubscription: () => void;
   setSmsAlerts: (on: boolean) => void;
   toggleRolePermission: (role: UserRole, permission: Permission) => void;
+  resetRoleOverrides: () => void;
   /** Attribution groupée : N utilisateurs × M permissions, avec activité, durée et traçabilité. */
   grantPermissions: (input: {
     userIds: string[];
@@ -436,6 +437,7 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         const current = key in s.roleOverrides ? s.roleOverrides[key] : hasPermission(role, permission);
         return { ...s, roleOverrides: { ...s.roleOverrides, [key]: !current } };
       }),
+    resetRoleOverrides: () => setState((s) => ({ ...s, roleOverrides: {} })),
     grantPermissions: (input) =>
       setState((s) => {
         const now = new Date().toISOString();

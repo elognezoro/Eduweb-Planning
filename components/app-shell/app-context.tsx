@@ -217,14 +217,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     can: (permission) => {
       // Fail-closed : aucun droit tant que le profil réel n'est pas chargé/confirmé.
       if (!accessReady) return false;
-      // En aperçu d'un rôle (profil habilité) : on applique le « template » du rôle prévisualisé.
-      if (isPreview) {
-        const key = `${effectiveRole}|${permission}`;
-        if (key in roleOverrides) return roleOverrides[key];
-        return hasPermission(effectiveRole, permission);
-      }
-      // Rôle réel : permissions du rôle, puis attributions temporaires actives (additives, jamais restrictives).
-      if (hasPermission(realRole, permission)) return true;
+      // L'administrateur conserve toujours l'accès complet (la matrice ne peut pas le verrouiller).
+      if (effectiveRole === "admin") return true;
+      // Matrice des droits : une surcharge de rôle (roleOverrides) est PRIORITAIRE sur le rôle de
+      // base — elle peut accorder OU retirer un droit. S'applique au rôle réel comme à l'aperçu.
+      const key = `${effectiveRole}|${permission}`;
+      if (key in roleOverrides) return roleOverrides[key];
+      if (hasPermission(effectiveRole, permission)) return true;
+      // En aperçu : pas d'attributions temporaires (on simule le rôle « pur »).
+      if (isPreview) return false;
+      // Rôle réel : attributions temporaires actives (additives, jamais restrictives).
       const now = Date.now();
       return userGrants.some(
         (g) => g.userId === user.id && g.permission === permission && (g.expiresAt === null || new Date(g.expiresAt).getTime() > now),

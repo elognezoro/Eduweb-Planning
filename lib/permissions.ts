@@ -466,7 +466,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "appointments:view",
     "appointments:manage",
     "statistics:class",
-    "premium:view",
     "exports:pdf",
   ],
   educateur: [

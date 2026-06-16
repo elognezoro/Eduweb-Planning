@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ShieldCheck, Check, Minus, Users, Pencil, Search, Clock, Trash2, Plus, ShieldPlus } from "lucide-react";
+import { ShieldCheck, Check, Minus, Users, Pencil, Search, Clock, Trash2, Plus, ShieldPlus, CheckCircle2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Badge } from "@/components/ui/badge";
@@ -74,7 +74,8 @@ const regDate = (id: string) => {
 };
 
 export default function NiveauxAccesPage() {
-  const { users, roleOverrides, userGrants, toggleRolePermission } = useStore();
+  const { users, roleOverrides, userGrants, toggleRolePermission, resetRoleOverrides } = useStore();
+  const overrideCount = Object.keys(roleOverrides).length;
 
   const isGranted = (role: UserRole, perm: Permission) => {
     const key = `${role}|${perm}`;
@@ -146,8 +147,30 @@ export default function NiveauxAccesPage() {
       <SectionCard
         id="matrice"
         title="Matrice des droits"
-        description="Cliquez sur une cellule pour activer ou désactiver une permission."
+        description="Cliquez sur une cellule pour activer ou désactiver une permission — la modification est enregistrée et appliquée immédiatement à tous les utilisateurs du rôle concerné."
         contentClassName="p-0"
+        action={
+          overrideCount > 0 ? (
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 rounded-full bg-ew-green-50 px-2.5 py-1 text-xs font-semibold text-ew-green-800">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                {overrideCount} modification{overrideCount > 1 ? "s" : ""} enregistrée{overrideCount > 1 ? "s" : ""}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  resetRoleOverrides();
+                  toast.success("Matrice réinitialisée", { description: "Toutes les permissions reviennent aux valeurs par défaut." });
+                }}
+              >
+                <RotateCcw className="h-4 w-4" /> Réinitialiser
+              </Button>
+            </div>
+          ) : (
+            <span className="text-xs text-muted-foreground">Aucune modification — valeurs par défaut.</span>
+          )
+        }
       >
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-sm">

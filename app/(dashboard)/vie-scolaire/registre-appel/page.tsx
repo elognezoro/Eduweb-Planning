@@ -32,7 +32,8 @@ import { FilterSelect } from "@/components/layout/filter-bar";
 import { ExportMenu } from "@/components/layout/export-menu";
 import { AttendanceHeatmap } from "@/components/dashboard/visuals";
 import { useStore, type AttendanceRow } from "@/components/app-shell/data-store";
-import { ELEVES, ATTENDANCE_HEATMAP } from "@/lib/mock-data";
+import { useApp } from "@/components/app-shell/app-context";
+import { ELEVES, ATTENDANCE_HEATMAP, SCHOOL_TIMETABLE } from "@/lib/mock-data";
 import { etabExportMeta, type EtabExportMeta } from "@/lib/etab-config";
 import { toNomCase, toPrenomCase } from "@/lib/format-name";
 import { cn } from "@/lib/utils";
@@ -115,10 +116,27 @@ const DEFAULT_ROW: AttendanceRow = { status: "P", motif: "", enc: [], obs: [], i
 
 export default function RegistreAppelPage() {
   const { attendance, setAttendance } = useStore();
+  const { effectiveRole, user } = useApp();
+  // Enseignant : seules SES disciplines (dérivées de l'emploi du temps) ; s'il est
+  // multivalent, elles s'affichent dans la liste déroulante. Les autres profils
+  // (chef d'établissement, éducateur, admin) gardent toutes les disciplines.
+  const mySubjects = React.useMemo(
+    () => [...new Set(SCHOOL_TIMETABLE.filter((s) => s.teacher === user.displayName).map((s) => s.subject))],
+    [user.displayName],
+  );
+  const availableDisciplines = React.useMemo(
+    () => (effectiveRole === "enseignant" && mySubjects.length > 0 ? mySubjects : DISCIPLINES),
+    [effectiveRole, mySubjects],
+  );
   const [meta, setMeta] = React.useState<EtabExportMeta>(() => etabExportMeta({}));
   const [date, setDate] = React.useState("2026-05-01");
   const [cls, setCls] = React.useState(CLASS_OPTIONS[0]);
-  const [discipline, setDiscipline] = React.useState(DISCIPLINES[0]);
+  const [discipline, setDiscipline] = React.useState(availableDisciplines[0]);
+
+  // Si la sélection courante n'est plus disponible (changement de rôle), revenir à la 1ʳᵉ.
+  React.useEffect(() => {
+    setDiscipline((d) => (availableDisciplines.includes(d) ? d : availableDisciplines[0]));
+  }, [availableDisciplines]);
   const [seance, setSeance] = React.useState(SEANCES[0]);
   const [q, setQ] = React.useState("");
   const [dialog, setDialog] = React.useState<{ kind: ActionKind; student: Eleve } | null>(null);
@@ -256,7 +274,7 @@ export default function RegistreAppelPage() {
           <FilterSelect value={cls} onValueChange={setCls} className="w-full" options={CLASS_OPTIONS.map((c) => ({ value: c, label: c }))} />
         </Field>
         <Field label="Discipline (matière)">
-          <FilterSelect value={discipline} onValueChange={setDiscipline} className="w-full" options={DISCIPLINES.map((d) => ({ value: d, label: d }))} />
+          <FilterSelect value={discipline} onValueChange={setDiscipline} className="w-full" options={availableDisciplines.map((d) => ({ value: d, label: d }))} />
         </Field>
         <Field label="Heure de la séance">
           <FilterSelect value={seance} onValueChange={setSeance} className="w-full" options={SEANCES.map((s) => ({ value: s, label: s }))} />
