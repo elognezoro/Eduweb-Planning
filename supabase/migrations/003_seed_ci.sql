@@ -69,7 +69,6 @@ on conflict (country_id, code) do nothing;
 insert into education_levels (country_id, cycle_id, code, label, sort_order)
 select c.id, cyc.id, lv.code, lv.label, lv.so
 from countries c
-join education_cycles cyc on cyc.country_id = c.id and cyc.code = lv.cycle_code
 cross join (values
   ('6e', '6e', 'premier_cycle', 1),
   ('5e', '5e', 'premier_cycle', 2),
@@ -79,6 +78,7 @@ cross join (values
   ('1ere', '1ere', 'second_cycle', 6),
   ('tle', 'Tle', 'second_cycle', 7)
 ) as lv(code, label, cycle_code, so)
+join education_cycles cyc on cyc.country_id = c.id and cyc.code = lv.cycle_code
 where c.iso2 = 'CI'
 on conflict (country_id, code) do nothing;
 

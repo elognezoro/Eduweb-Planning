@@ -3,6 +3,7 @@
 -- Row Level Security : fonctions utilitaires + politiques par rôle/périmètre.
 -- Principe : admin = accès total ; régional = sa région ; chef d'établissement
 -- = son établissement ; enseignant = ses classes ; parent/élève = leurs données.
+-- Idempotent : chaque policy est précédée d'un `drop policy if exists` → ré-exécutable.
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
@@ -63,34 +64,41 @@ alter table abonnements         enable row level security;
 -- Référentiels publics en lecture (countries, regions, subjects, etc.)
 -- ----------------------------------------------------------------------------
 alter table countries enable row level security;
+drop policy if exists "countries_read_all" on countries;
 create policy "countries_read_all" on countries for select using (true);
+drop policy if exists "countries_admin_write" on countries;
 create policy "countries_admin_write" on countries for all
   using (public.is_admin()) with check (public.is_admin());
 
 -- ----------------------------------------------------------------------------
 -- PROFILES : chacun lit/écrit son profil ; admin tout ; chef d'étab. son étab.
 -- ----------------------------------------------------------------------------
+drop policy if exists "profiles_self_read" on profiles;
 create policy "profiles_self_read" on profiles for select
   using (id = auth.uid() or public.is_admin()
     or (etablissement_id = public.current_user_etablissement_id()
         and public.current_user_role() in ('chef_etablissement','etablissements_admin')));
 
+drop policy if exists "profiles_self_update" on profiles;
 create policy "profiles_self_update" on profiles for update
   using (id = auth.uid() or public.is_admin())
   with check (id = auth.uid() or public.is_admin());
 
+drop policy if exists "profiles_admin_insert" on profiles;
 create policy "profiles_admin_insert" on profiles for insert
   with check (public.is_admin() or id = auth.uid());
 
 -- ----------------------------------------------------------------------------
 -- ETABLISSEMENTS : admin tout ; régional sa région ; étab. le sien.
 -- ----------------------------------------------------------------------------
+drop policy if exists "etab_read" on etablissements;
 create policy "etab_read" on etablissements for select
   using (
     public.is_admin()
     or country_id = public.current_user_country_id()
   );
 
+drop policy if exists "etab_write_admin" on etablissements;
 create policy "etab_write_admin" on etablissements for all
   using (public.is_admin() or public.current_user_role() = 'etablissements_admin')
   with check (public.is_admin() or public.current_user_role() = 'etablissements_admin');
@@ -99,9 +107,11 @@ create policy "etab_write_admin" on etablissements for all
 -- Données d'établissement (élèves, classes, enseignants…)
 -- Lecture limitée à l'établissement de l'utilisateur (ou admin).
 -- ----------------------------------------------------------------------------
+drop policy if exists "eleves_scope" on eleves;
 create policy "eleves_scope" on eleves for select
   using (public.is_admin() or etablissement_id = public.current_user_etablissement_id());
 
+drop policy if exists "eleves_write" on eleves;
 create policy "eleves_write" on eleves for all
   using (public.is_admin()
     or (etablissement_id = public.current_user_etablissement_id()
@@ -110,19 +120,23 @@ create policy "eleves_write" on eleves for all
     or (etablissement_id = public.current_user_etablissement_id()
         and public.current_user_role() in ('chef_etablissement','etablissements_admin','educateur')));
 
+drop policy if exists "classes_scope" on classes;
 create policy "classes_scope" on classes for select
   using (public.is_admin() or etablissement_id = public.current_user_etablissement_id());
 
+drop policy if exists "enseignants_scope" on enseignants;
 create policy "enseignants_scope" on enseignants for select
   using (public.is_admin() or etablissement_id = public.current_user_etablissement_id());
 
 -- ----------------------------------------------------------------------------
 -- NOTES : enseignant gère les notes qu'il a saisies ; lecture par périmètre.
 -- ----------------------------------------------------------------------------
+drop policy if exists "grades_read" on grades;
 create policy "grades_read" on grades for select
   using (public.is_admin() or recorded_by = auth.uid()
     or eleve_id in (select id from eleves where etablissement_id = public.current_user_etablissement_id()));
 
+drop policy if exists "grades_write" on grades;
 create policy "grades_write" on grades for all
   using (public.is_admin() or recorded_by = auth.uid()
     or public.current_user_role() in ('chef_etablissement','enseignant'))
@@ -132,8 +146,10 @@ create policy "grades_write" on grades for all
 -- ----------------------------------------------------------------------------
 -- MESSAGES : émetteur et destinataire uniquement.
 -- ----------------------------------------------------------------------------
+drop policy if exists "messages_participants" on messages;
 create policy "messages_participants" on messages for select
   using (sender_id = auth.uid() or recipient_id = auth.uid() or public.is_admin());
+drop policy if exists "messages_send" on messages;
 create policy "messages_send" on messages for insert
   with check (sender_id = auth.uid());
 
@@ -141,34 +157,43 @@ create policy "messages_send" on messages for insert
 -- AUDIT : lecture admin ; insertion par tout utilisateur authentifié (ses actions).
 -- Aucune mise à jour / suppression (journal immuable).
 -- ----------------------------------------------------------------------------
+drop policy if exists "audit_read_admin" on audit_logs;
 create policy "audit_read_admin" on audit_logs for select using (public.is_admin());
+drop policy if exists "audit_insert" on audit_logs;
 create policy "audit_insert" on audit_logs for insert with check (actor_id = auth.uid());
 
 -- ----------------------------------------------------------------------------
 -- RECOMMANDATIONS, INSPECTIONS, RAPPORTS : périmètre pays/établissement.
 -- ----------------------------------------------------------------------------
+drop policy if exists "reco_read" on recommendations;
 create policy "reco_read" on recommendations for select
   using (public.is_admin() or country_id = public.current_user_country_id());
+drop policy if exists "reco_write" on recommendations;
 create policy "reco_write" on recommendations for all
   using (public.is_admin()
     or public.current_user_role() in ('inspecteur','conseiller_pedagogique','drena','chef_etablissement'))
   with check (public.is_admin()
     or public.current_user_role() in ('inspecteur','conseiller_pedagogique','drena','chef_etablissement'));
 
+drop policy if exists "inspections_read" on inspections;
 create policy "inspections_read" on inspections for select
   using (public.is_admin() or country_id = public.current_user_country_id());
+drop policy if exists "inspections_write" on inspections;
 create policy "inspections_write" on inspections for all
   using (public.is_admin() or public.current_user_role() in ('inspecteur','drena'))
   with check (public.is_admin() or public.current_user_role() in ('inspecteur','drena'));
 
+drop policy if exists "reports_read" on reports;
 create policy "reports_read" on reports for select
   using (public.is_admin() or country_id = public.current_user_country_id());
 
 -- ----------------------------------------------------------------------------
 -- PAIEMENTS / ABONNEMENTS : admin uniquement (facturation).
 -- ----------------------------------------------------------------------------
+drop policy if exists "paiements_admin" on paiements;
 create policy "paiements_admin" on paiements for all
   using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "abonnements_admin" on abonnements;
 create policy "abonnements_admin" on abonnements for all
   using (public.is_admin()) with check (public.is_admin());
 
