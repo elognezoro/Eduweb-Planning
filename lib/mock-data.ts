@@ -470,6 +470,49 @@ export const TIMETABLE_SLOTS = [
   { id: "ts-8", weekday: 5, start: "10:15", end: "12:15", subject: "EPS", teacher: "M. Koné", room: "Gymnase", color: "#65a30d" },
 ];
 
+/**
+ * Emploi du temps rattaché à la classe ET à l'enseignant (démo).
+ * Plusieurs classes partagent des enseignants → permet « mes classes » (classes
+ * prises par un enseignant) et « collègues sur la même classe ». À remplacer par
+ * les vraies données (créneaux Supabase + affectations enseignants) en Phase 2.
+ */
+export interface ScheduleSlot {
+  id: string;
+  className: string;
+  weekday: number; // 1 = lundi … 5 = vendredi
+  start: string;
+  end: string;
+  subject: string;
+  teacher: string;
+  room: string;
+  color: string;
+}
+
+export const SCHOOL_TIMETABLE: ScheduleSlot[] = [
+  // 2ⁿᵈᵉ C
+  { id: "st-1", className: "2nde C", weekday: 1, start: "08:00", end: "10:00", subject: "Mathématiques", teacher: "P. Kouassi", room: "B12", color: "#176b45" },
+  { id: "st-2", className: "2nde C", weekday: 1, start: "10:15", end: "12:15", subject: "Français", teacher: "H. Brou", room: "A03", color: "#2563eb" },
+  { id: "st-3", className: "2nde C", weekday: 2, start: "08:00", end: "10:00", subject: "SVT", teacher: "G. Tanoh", room: "Labo 2", color: "#16a34a" },
+  { id: "st-4", className: "2nde C", weekday: 2, start: "14:00", end: "16:00", subject: "Anglais", teacher: "A. Cissé", room: "A07", color: "#dc2626" },
+  { id: "st-5", className: "2nde C", weekday: 3, start: "08:00", end: "10:00", subject: "Histoire-Géo", teacher: "D. Yao", room: "B05", color: "#ea580c" },
+  { id: "st-6", className: "2nde C", weekday: 4, start: "10:15", end: "12:15", subject: "Mathématiques", teacher: "P. Kouassi", room: "B12", color: "#176b45" },
+  { id: "st-7", className: "2nde C", weekday: 5, start: "08:00", end: "10:00", subject: "EPS", teacher: "M. Koné", room: "Gymnase", color: "#65a30d" },
+  // 1ʳᵉ D
+  { id: "st-8", className: "1ere D", weekday: 1, start: "08:00", end: "10:00", subject: "Physique-Chimie", teacher: "M. Doumbia", room: "Labo 1", color: "#7c3aed" },
+  { id: "st-9", className: "1ere D", weekday: 1, start: "10:15", end: "12:15", subject: "Mathématiques", teacher: "P. Kouassi", room: "B14", color: "#176b45" },
+  { id: "st-10", className: "1ere D", weekday: 2, start: "08:00", end: "10:00", subject: "Anglais", teacher: "A. Cissé", room: "A07", color: "#dc2626" },
+  { id: "st-11", className: "1ere D", weekday: 3, start: "10:15", end: "12:15", subject: "SVT", teacher: "G. Tanoh", room: "Labo 2", color: "#16a34a" },
+  { id: "st-12", className: "1ere D", weekday: 4, start: "08:00", end: "10:00", subject: "EPS", teacher: "M. Koné", room: "Gymnase", color: "#65a30d" },
+  { id: "st-13", className: "1ere D", weekday: 5, start: "10:15", end: "12:15", subject: "Physique-Chimie", teacher: "M. Doumbia", room: "Labo 1", color: "#7c3aed" },
+  // Tˡᵉ A
+  { id: "st-14", className: "Tle A", weekday: 1, start: "08:00", end: "10:00", subject: "Philosophie", teacher: "J. Aka", room: "A01", color: "#0891b2" },
+  { id: "st-15", className: "Tle A", weekday: 2, start: "10:15", end: "12:15", subject: "Français", teacher: "H. Brou", room: "A03", color: "#2563eb" },
+  { id: "st-16", className: "Tle A", weekday: 3, start: "08:00", end: "10:00", subject: "Physique-Chimie", teacher: "M. Doumbia", room: "Labo 1", color: "#7c3aed" },
+  { id: "st-17", className: "Tle A", weekday: 4, start: "14:00", end: "16:00", subject: "Anglais", teacher: "A. Cissé", room: "A07", color: "#dc2626" },
+  { id: "st-18", className: "Tle A", weekday: 5, start: "08:00", end: "10:00", subject: "Histoire-Géo", teacher: "D. Yao", room: "B05", color: "#ea580c" },
+  { id: "st-19", className: "Tle A", weekday: 5, start: "10:15", end: "12:15", subject: "EPS", teacher: "M. Koné", room: "Gymnase", color: "#65a30d" },
+];
+
 export const LESSON_BOOK_ENTRIES: LessonEntry[] = [
   { id: "lb-1", date: "2026-06-09", subject: "Mathématiques", className: "3ᵉ A", title: "Théorème de Thalès", status: "published", teacher: "P. Kouassi" },
   { id: "lb-2", date: "2026-06-09", subject: "Français", className: "2ⁿᵈᵉ C", title: "L'argumentation", status: "published", teacher: "H. Brou" },
