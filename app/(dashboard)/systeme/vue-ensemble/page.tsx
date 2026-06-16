@@ -35,7 +35,18 @@ const TONE_PASTILLE: Record<string, string> = {
 };
 
 export default function VueEnsemblePage() {
-  const { can } = useApp();
+  const { can, user } = useApp();
+  // Activité récente : chacun ne voit que ses propres actions ; seuls les profils
+  // habilités au journal d'activité (admin) voient l'activité de tous les utilisateurs.
+  const activityEntries = can("system:view_audit_log")
+    ? AUDIT_ENTRIES
+    : AUDIT_ENTRIES.filter((e) => e.actor === user.displayName);
+  const renderActivity = (limit: number) =>
+    activityEntries.length ? (
+      <AuditTimeline entries={activityEntries.slice(0, limit)} />
+    ) : (
+      <p className="text-sm text-muted-foreground">Aucune activité récente.</p>
+    );
   const totalStudents = ETABLISSEMENTS.reduce((s, e) => s + e.studentsCount, 0);
   const totalTeachers = ETABLISSEMENTS.reduce((s, e) => s + e.teachersCount, 0);
   const totalClasses = ETABLISSEMENTS.reduce((s, e) => s + e.classesCount, 0);
@@ -136,7 +147,7 @@ export default function VueEnsemblePage() {
           </SectionCard>
         ) : (
           <SectionCard title="Activité récente" description="Journal d'activité">
-            <AuditTimeline entries={AUDIT_ENTRIES.slice(0, 3)} />
+            {renderActivity(3)}
           </SectionCard>
         )}
       </div>
@@ -212,7 +223,7 @@ export default function VueEnsemblePage() {
       {/* Activité récente complète */}
       {can("sms:view") && (
         <SectionCard id="activite" title="Activité récente" description="Dernières actions sur la plateforme">
-          <AuditTimeline entries={AUDIT_ENTRIES.slice(0, 5)} />
+          {renderActivity(5)}
         </SectionCard>
       )}
     </ModulePage>

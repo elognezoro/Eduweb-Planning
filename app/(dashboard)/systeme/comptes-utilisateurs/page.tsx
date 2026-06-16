@@ -12,6 +12,7 @@ import {
   Archive,
   UploadCloud,
   ShieldCheck,
+  CheckCircle2,
   Eye,
   Trash2,
 } from "lucide-react";
@@ -341,6 +342,18 @@ function RowActions({ user }: { user: DirectoryUser }) {
   return (
     <>
       <div className="flex items-center justify-end gap-0.5">
+        {user.status === "pending" && (
+          <IconBtn
+            title="Valider le compte (rendre actif)"
+            tone="green"
+            onClick={() => {
+              setUserStatus(user.id, "active");
+              toast.success(`${user.name} activé`, { description: "Le compte est désormais actif." });
+            }}
+          >
+            <CheckCircle2 className="h-4 w-4" />
+          </IconBtn>
+        )}
         <IconBtn title="Changer le rôle et le rattachement" tone="green" onClick={() => setRoleOpen(true)}>
           <ShieldCheck className="h-4 w-4" />
         </IconBtn>

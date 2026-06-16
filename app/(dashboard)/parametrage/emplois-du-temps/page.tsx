@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FilterBar, FilterSelect } from "@/components/layout/filter-bar";
 import { EdtSimulator } from "@/components/edt/edt-simulator";
 import { EdtViewer } from "@/components/edt/edt-viewer";
+import { useApp } from "@/components/app-shell/app-context";
 import { TIMETABLE_SLOTS } from "@/lib/mock-data";
 import { etabSchedulePeriods, etabLevels, type SchedulePeriod } from "@/lib/etab-config";
 import { loadGeneratedEdt, clearGeneratedEdt, EDT_EVENT, type GeneratedEdt } from "@/lib/edt-store";
@@ -24,6 +25,9 @@ const FALLBACK_CLASSES = [
 ];
 
 export default function EmploisDuTempsPage() {
+  const { can } = useApp();
+  // Seuls le Chef d'établissement / l'Admin Établissement (timetable:manage) accèdent au générateur.
+  const canSimulate = can("timetable:manage");
   const [tab, setTab] = React.useState("vue");
   const [periods, setPeriods] = React.useState<SchedulePeriod[]>(() => etabSchedulePeriods({}));
   const [levels, setLevels] = React.useState<{ id: string; name: string }[]>([]);
@@ -59,9 +63,11 @@ export default function EmploisDuTempsPage() {
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="vue">Vue hebdomadaire</TabsTrigger>
-          <TabsTrigger value="generateur">
-            <Wand2 className="mr-1.5 h-3.5 w-3.5" /> Générateur (simulation)
-          </TabsTrigger>
+          {canSimulate && (
+            <TabsTrigger value="generateur">
+              <Wand2 className="mr-1.5 h-3.5 w-3.5" /> Générateur (simulation)
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="vue" className="space-y-6">
@@ -180,9 +186,11 @@ export default function EmploisDuTempsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="generateur" className="mt-4">
-          <EdtSimulator onView={() => setTab("vue")} />
-        </TabsContent>
+        {canSimulate && (
+          <TabsContent value="generateur" className="mt-4">
+            <EdtSimulator onView={() => setTab("vue")} />
+          </TabsContent>
+        )}
       </Tabs>
     </ModulePage>
   );
