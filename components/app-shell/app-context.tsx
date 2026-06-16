@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Loader2, ShieldAlert } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { DEMO_USER } from "@/lib/mock-data";
 import { hasPermission } from "@/lib/permissions";
 import type { Permission } from "@/lib/permissions";
@@ -249,6 +250,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
 /** Écran de garde affiché tant que le profil réel n'est pas confirmé (chargement / erreur). */
 function ProfileGate({ variant }: { variant: "loading" | "error" }) {
+  const t = useTranslations();
   const signOut = async () => {
     try {
       await createClient().auth.signOut();
@@ -263,30 +265,27 @@ function ProfileGate({ variant }: { variant: "loading" | "error" }) {
       {variant === "loading" ? (
         <>
           <Loader2 className="h-8 w-8 animate-spin text-ew-green-700" />
-          <p className="text-sm text-muted-foreground">Chargement de votre espace…</p>
+          <p className="text-sm text-muted-foreground">{t("profile.loadingTitle")}</p>
         </>
       ) : (
         <div className="max-w-md space-y-4">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-ew-gold-100">
             <ShieldAlert className="h-6 w-6 text-ew-gold-600" />
           </div>
-          <h1 className="font-display text-xl font-bold text-foreground">Profil indisponible</h1>
-          <p className="text-sm text-muted-foreground">
-            Votre profil n&apos;a pas pu être chargé. Par sécurité, aucun accès n&apos;est accordé. Reconnectez-vous ; si
-            le problème persiste, contactez l&apos;administrateur de la plateforme.
-          </p>
+          <h1 className="font-display text-xl font-bold text-foreground">{t("profile.errorTitle")}</h1>
+          <p className="text-sm text-muted-foreground">{t("profile.errorDescription")}</p>
           <div className="flex justify-center gap-3">
             <button
               onClick={() => window.location.reload()}
               className="rounded-lg border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted"
             >
-              Réessayer
+              {t("states.retry")}
             </button>
             <button
               onClick={signOut}
               className="rounded-lg bg-ew-green-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ew-green-800"
             >
-              Se déconnecter
+              {t("common.logout")}
             </button>
           </div>
         </div>

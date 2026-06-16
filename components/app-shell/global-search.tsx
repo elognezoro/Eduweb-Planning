@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Search, CornerDownLeft, FileText, Users, Building2, LayoutGrid } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useApp } from "./app-context";
@@ -21,6 +22,7 @@ interface Result {
 export function GlobalSearch({ trigger }: { trigger: (open: () => void) => React.ReactNode }) {
   const router = useRouter();
   const { can } = useApp();
+  const t = useTranslations();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
 
@@ -28,7 +30,7 @@ export function GlobalSearch({ trigger }: { trigger: (open: () => void) => React
     const q = query.trim().toLowerCase();
     const pages: Result[] = ALL_NAV_ITEMS.filter((it) => can(it.permission)).map((it) => ({
       group: "Pages",
-      label: it.label,
+      label: t(it.label),
       href: it.href,
       icon: it.icon,
     }));
@@ -46,17 +48,17 @@ export function GlobalSearch({ trigger }: { trigger: (open: () => void) => React
       href: "/statistiques/par-classe",
       icon: Users,
     }));
-    const teachers: Result[] = ENSEIGNANTS.map((t) => ({
+    const teachers: Result[] = ENSEIGNANTS.map((tch) => ({
       group: "Enseignants",
-      label: `${t.firstName} ${t.lastName}`,
-      sublabel: t.specialty,
+      label: `${tch.firstName} ${tch.lastName}`,
+      sublabel: tch.specialty,
       href: "/statistiques/performance-enseignants",
       icon: FileText,
     }));
     const all = [...pages, ...etabs, ...teachers, ...students];
     if (!q) return pages.slice(0, 8);
     return all.filter((r) => (r.label + " " + (r.sublabel ?? "")).toLowerCase().includes(q)).slice(0, 14);
-  }, [query, can]);
+  }, [query, can, t]);
 
   const go = (href: string) => {
     setOpen(false);
@@ -69,21 +71,21 @@ export function GlobalSearch({ trigger }: { trigger: (open: () => void) => React
       {trigger(() => setOpen(true))}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="top-24 max-w-xl translate-y-0 p-0">
-          <DialogTitle className="sr-only">Recherche globale</DialogTitle>
+          <DialogTitle className="sr-only">{t("common.search")}</DialogTitle>
           <div className="flex items-center gap-2 border-b border-border px-4">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Rechercher un élève, enseignant, établissement, rapport…"
+              placeholder={t("common.searchGlobal")}
               className="h-12 border-0 shadow-none focus-visible:ring-0"
             />
           </div>
           <div className="max-h-[55vh] overflow-y-auto p-2">
             {results.length === 0 ? (
               <p className="px-3 py-8 text-center text-sm text-muted-foreground">
-                Aucun résultat pour «&nbsp;{query}&nbsp;».
+                {t("states.noResults")}
               </p>
             ) : (
               <Grouped results={results} onSelect={go} />

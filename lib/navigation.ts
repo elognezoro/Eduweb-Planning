@@ -46,6 +46,7 @@ import type { Permission } from "./permissions";
 
 export interface NavItem {
   href: string;
+  /** Clé i18n (ex. "nav.items.accueil"). Le composant Sidebar la résout via useTranslations(). */
   label: string;
   icon: LucideIcon;
   permission: Permission;
@@ -54,6 +55,7 @@ export interface NavItem {
 
 export interface NavGroup {
   id: string;
+  /** Clé i18n (ex. "nav.groups.systeme"). */
   label: string;
   icon: LucideIcon;
   items: NavItem[];
@@ -69,13 +71,13 @@ export interface NavGroup {
 export const NAVIGATION: NavGroup[] = [
   {
     id: "accueil",
-    label: "Accueil",
+    label: "nav.groups.accueil",
     icon: Home,
     direct: true,
     items: [
       {
         href: "/dashboard",
-        label: "Accueil",
+        label: "nav.items.accueil",
         icon: Home,
         permission: "dashboard:view",
         description: "Page d'accueil",
@@ -84,12 +86,12 @@ export const NAVIGATION: NavGroup[] = [
   },
   {
     id: "pilotage",
-    label: "Pilotage",
+    label: "nav.groups.pilotage",
     icon: Gauge,
     items: [
       {
         href: "/pilotage/tableau-de-bord",
-        label: "Tableau de bord",
+        label: "nav.items.tableauDeBord",
         icon: Gauge,
         permission: "statistics:analytics",
         description: "Indicateurs de pilotage",
@@ -98,90 +100,90 @@ export const NAVIGATION: NavGroup[] = [
   },
   {
     id: "systeme",
-    label: "Système",
+    label: "nav.groups.systeme",
     icon: Settings2,
     items: [
       {
         href: "/systeme/vue-ensemble",
-        label: "Vue d'ensemble",
+        label: "nav.items.vueDEnsemble",
         icon: LayoutDashboard,
         permission: "system:view",
       },
       {
         href: "/systeme/mon-identification",
-        label: "Mon Identification",
+        label: "nav.items.monIdentification",
         icon: BadgeCheck,
         permission: "system:manage_profile",
       },
       {
         href: "/systeme/mon-profil",
-        label: "Mon profil",
+        label: "nav.items.monProfil",
         icon: UserCog,
         permission: "system:manage_profile",
       },
       {
         href: "/systeme/niveaux-acces",
-        label: "Niveaux d'accès",
+        label: "nav.items.niveauxAcces",
         icon: ShieldCheck,
         permission: "system:manage_roles",
       },
       {
         href: "/systeme/habilitations",
-        label: "Habilitations",
+        label: "nav.items.habilitations",
         icon: KeyRound,
         permission: "system:manage_permissions",
       },
       {
         href: "/systeme/comptes-utilisateurs",
-        label: "Comptes utilisateurs",
+        label: "nav.items.comptesUtilisateurs",
         icon: Users,
         permission: "system:manage_users",
       },
       {
         href: "/systeme/approbations-promo",
-        label: "Approbations promo",
+        label: "nav.items.approbationsPromo",
         icon: UserCheck,
         permission: "system:approve_promotions",
       },
       {
         href: "/systeme/etablissements",
-        label: "Établissements",
+        label: "nav.items.etablissements",
         icon: Building2,
         permission: "system:manage_institutions",
       },
       {
         href: "/systeme/cafop",
-        label: "CAFOP",
+        label: "nav.items.cafop",
         icon: GraduationCap,
         permission: "system:manage_cafop",
       },
       {
         href: "/systeme/convertisseur-csv",
-        label: "Convertisseur CSV",
+        label: "nav.items.convertisseurCsv",
         icon: FileSpreadsheet,
         permission: "system:convert_csv",
       },
       {
         href: "/systeme/journal-activite",
-        label: "Journal d'activité",
+        label: "nav.items.journalActivite",
         icon: History,
         permission: "system:view_audit_log",
       },
       {
         href: "/systeme/facturation",
-        label: "Facturation",
+        label: "nav.items.facturation",
         icon: CreditCard,
         permission: "system:manage_billing",
       },
       {
         href: "/systeme/design-theme",
-        label: "Design & thème",
+        label: "nav.items.designTheme",
         icon: Palette,
         permission: "system:customize_theme",
       },
       {
         href: "/systeme/installation",
-        label: "Installation",
+        label: "nav.items.installation",
         icon: Wrench,
         permission: "system:view_installation",
       },
@@ -189,18 +191,18 @@ export const NAVIGATION: NavGroup[] = [
   },
   {
     id: "parametrage",
-    label: "Paramétrage",
+    label: "nav.groups.parametrage",
     icon: Settings,
     items: [
       {
         href: "/parametrage/configuration",
-        label: "Configuration",
+        label: "nav.items.configuration",
         icon: Settings,
         permission: "settings:manage_configuration",
       },
       {
         href: "/parametrage/emplois-du-temps",
-        label: "Emplois du temps",
+        label: "nav.items.emploisDuTemps",
         icon: CalendarDays,
         permission: "timetable:view",
       },
@@ -208,66 +210,66 @@ export const NAVIGATION: NavGroup[] = [
   },
   {
     id: "vie-scolaire",
-    label: "Vie scolaire",
+    label: "nav.groups.vieScolaire",
     icon: GraduationCap,
     items: [
       {
         href: "/vie-scolaire/registre-appel",
-        label: "Registre d'appel",
+        label: "nav.items.registreAppel",
         icon: ClipboardCheck,
         permission: "attendance:view",
       },
       {
         href: "/vie-scolaire/cahier-de-texte",
-        label: "Cahier de texte",
+        label: "nav.items.cahierDeTexte",
         icon: NotebookText,
         permission: "lesson_book:view",
       },
       {
         href: "/vie-scolaire/communication",
-        label: "Communication",
+        label: "nav.items.communication",
         icon: MessagesSquare,
         permission: "communication:view",
       },
       {
         href: "/vie-scolaire/notes-bulletins",
-        label: "Notes & bulletins",
+        label: "nav.items.notesBulletins",
         icon: ClipboardList,
         permission: "grades:view",
       },
       {
         href: "/vie-scolaire/livret-scolaire",
-        label: "Livret scolaire",
+        label: "nav.items.livretScolaire",
         icon: BookMarked,
         permission: "school_record:view",
       },
       {
         href: "/vie-scolaire/rapport-etablissement",
-        label: "Rapport d'établissement",
+        label: "nav.items.rapportEtablissement",
         icon: Building,
         permission: "institution_report:view",
       },
       {
         href: "/vie-scolaire/rapports-activite",
-        label: "Rapports d'activité",
+        label: "nav.items.rapportsActivite",
         icon: Activity,
         permission: "activity_reports:view",
       },
       {
         href: "/vie-scolaire/rendez-vous",
-        label: "Rendez-vous",
+        label: "nav.items.rendezVous",
         icon: CalendarClock,
         permission: "appointments:view",
       },
       {
         href: "/vie-scolaire/academie-premium",
-        label: "Académie Premium",
+        label: "nav.items.academiePremium",
         icon: Crown,
         permission: "premium:view",
       },
       {
         href: "/vie-scolaire/alertes-sms",
-        label: "Alertes & SMS",
+        label: "nav.items.alertesSms",
         icon: BellRing,
         permission: "sms:view",
       },
@@ -275,42 +277,42 @@ export const NAVIGATION: NavGroup[] = [
   },
   {
     id: "inspection-supervision",
-    label: "Inspection & Supervision",
+    label: "nav.groups.inspectionSupervision",
     icon: ShieldCheck,
     items: [
       {
         href: "/inspection-supervision/inspection",
-        label: "Inspection",
+        label: "nav.items.inspection",
         icon: SearchCheck,
         permission: "inspection:view",
       },
       {
         href: "/inspection-supervision/apfc",
-        label: "APFC",
+        label: "nav.items.apfc",
         icon: Network,
         permission: "system:manage_apfc",
       },
       {
         href: "/inspection-supervision/rapports-antennes",
-        label: "Rapports d'antennes",
+        label: "nav.items.rapportsAntennes",
         icon: Files,
         permission: "antenna_reports:view",
       },
       {
         href: "/inspection-supervision/rapport-antennes-pedagogiques",
-        label: "Rapport d'Antennes Pédagogiques",
+        label: "nav.items.rapportAntennesPedagogiques",
         icon: FolderTree,
         permission: "antenna_reports:view",
       },
       {
         href: "/inspection-supervision/grille-evaluation",
-        label: "Grille d'évaluation",
+        label: "nav.items.grilleEvaluation",
         icon: ListChecks,
         permission: "evaluation_grid:view",
       },
       {
         href: "/inspection-supervision/rapports-inspection",
-        label: "Rapports d'inspection",
+        label: "nav.items.rapportsInspection",
         icon: FileCheck2,
         permission: "inspection_reports:view",
       },
@@ -318,48 +320,48 @@ export const NAVIGATION: NavGroup[] = [
   },
   {
     id: "statistiques",
-    label: "Statistiques",
+    label: "nav.groups.statistiques",
     icon: BarChart3,
     items: [
       {
         href: "/statistiques/par-classe",
-        label: "Par classe",
+        label: "nav.items.parClasse",
         icon: BarChart3,
         permission: "statistics:class",
       },
       {
         href: "/statistiques/etablissement",
-        label: "Établissement",
+        label: "nav.items.etablissementStats",
         icon: Building,
         permission: "statistics:institution",
       },
       {
         href: "/statistiques/regionales",
-        label: "Régionales",
+        label: "nav.items.regionales",
         icon: Map,
         permission: "statistics:regional",
       },
       {
         href: "/statistiques/analytics",
-        label: "Analytics",
+        label: "nav.items.analytics",
         icon: LineChart,
         permission: "statistics:analytics",
       },
       {
         href: "/statistiques/performance-enseignants",
-        label: "Performance des enseignants",
+        label: "nav.items.performanceEnseignants",
         icon: Award,
         permission: "statistics:teacher_performance",
       },
       {
         href: "/statistiques/efficacite-pedagogique",
-        label: "Efficacité pédagogique",
+        label: "nav.items.efficacitePedagogique",
         icon: Target,
         permission: "statistics:pedagogical_effectiveness",
       },
       {
         href: "/statistiques/suivi-recommandations",
-        label: "Suivi des recommandations",
+        label: "nav.items.suiviRecommandations",
         icon: ListTodo,
         permission: "recommendations:view",
       },

@@ -19,6 +19,7 @@ import {
   Users,
   Network,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Logo } from "@/components/app-shell/logo";
 import { Reveal } from "@/components/marketing/reveal";
 import { CountUp } from "@/components/marketing/count-up";
@@ -27,39 +28,11 @@ export const metadata = {
   title: "EduWeb Planner — Portail de pilotage scolaire",
 };
 
-const MODULES = [
-  { icon: ClipboardCheck, title: "Registre d'appel", desc: "Présences, retards, justificatifs et alertes SMS aux parents, en temps réel." },
-  { icon: NotebookText, title: "Cahier de texte", desc: "Séances, objectifs, contenus et devoirs, publiés et accessibles en ligne." },
-  { icon: ClipboardList, title: "Notes & bulletins", desc: "Saisie des notes, calcul des moyennes et bulletins officiels en un clic." },
-  { icon: BookMarked, title: "Livret scolaire", desc: "Parcours, compétences et synthèses individualisées de chaque élève." },
-  { icon: SearchCheck, title: "Inspection & supervision", desc: "Grilles d'évaluation, rapports d'inspection et suivi des recommandations." },
-  { icon: BarChart3, title: "Statistiques & analytics", desc: "Réussite, assiduité, tendances et indicateurs croisés, par région." },
-  { icon: CalendarDays, title: "Emplois du temps", desc: "Génération assistée et simulation des emplois du temps par classe." },
-  { icon: GraduationCap, title: "CAFOP & APFC", desc: "Formation initiale et continue des enseignants, bulletins et activités." },
-  { icon: MessagesSquare, title: "Communication & rendez-vous", desc: "Annonces, convocations, messagerie interne et notifications SMS." },
+const MODULE_ICONS = [
+  ClipboardCheck, NotebookText, ClipboardList, BookMarked, SearchCheck, BarChart3, CalendarDays, GraduationCap, MessagesSquare,
 ];
-
-const AUDIENCES = [
-  { icon: Building2, label: "Chefs d'établissement" },
-  { icon: Users, label: "Enseignants & éducateurs" },
-  { icon: GraduationCap, label: "Parents & élèves" },
-  { icon: SearchCheck, label: "Inspecteurs & conseillers" },
-  { icon: Globe, label: "DRENA & administration" },
-  { icon: Network, label: "CAFOP & APFC" },
-];
-
-const STATS = [
-  { to: 9, suffix: "", label: "Modules intégrés" },
-  { to: 13, suffix: "", label: "Rôles & permissions" },
-  { to: 193, suffix: "", label: "Pays pris en charge" },
-  { to: 100, suffix: " %", label: "Accessible en ligne" },
-];
-
-const ATOUTS = [
-  { icon: ShieldCheck, title: "Sécurité & rôles", desc: "Authentification, permissions par rôle et habilitations temporaires traçables." },
-  { icon: FileText, title: "Documents officiels", desc: "Bulletins, livrets et rapports exportables en PDF et Word, avec en-tête institutionnel." },
-  { icon: Globe, title: "Adapté à votre pays", desc: "Devise, armoiries, régions académiques et régime scolaire entièrement configurables." },
-];
+const AUDIENCE_ICONS = [Building2, Users, GraduationCap, SearchCheck, Globe, Network];
+const ATOUT_ICONS = [ShieldCheck, FileText, Globe];
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
@@ -70,7 +43,18 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Pied de page (tagline international + année). */
+function FooterTagline() {
+  const tCommon = useTranslations();
+  return (
+    <>
+      {tCommon("footer.tagline")} · © {new Date().getFullYear()}
+    </>
+  );
+}
+
 export default function HomePage() {
+  const t = useTranslations("home");
   return (
     <div className="flex min-h-full flex-col bg-background">
       {/* Hero — bannière pleine largeur (image fournie) + accès rapide.
@@ -90,13 +74,13 @@ export default function HomePage() {
             href="/register"
             className="hidden rounded-lg bg-white/90 px-4 py-2 text-sm font-semibold text-ew-green-800 shadow-sm backdrop-blur transition-colors hover:bg-white sm:inline-flex"
           >
-            Créer un compte
+            {t("createAccount")}
           </Link>
           <Link
             href="/login"
             className="inline-flex items-center gap-2 rounded-lg bg-ew-green-700 px-4 py-2 text-sm font-semibold text-white shadow-md transition-colors hover:bg-ew-green-800"
           >
-            <LogIn className="h-4 w-4" /> Connexion
+            <LogIn className="h-4 w-4" /> {t("login")}
           </Link>
         </div>
       </section>
@@ -105,12 +89,17 @@ export default function HomePage() {
       <section id="chiffres" className="mx-auto mt-14 w-full max-w-5xl scroll-mt-20 px-4 sm:mt-20 sm:px-6">
         <Reveal>
           <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border shadow-xl sm:grid-cols-4">
-            {STATS.map((s) => (
-              <div key={s.label} className="bg-card px-5 py-7 text-center">
+            {([
+              { to: 9, suffix: "", labelKey: "stat1" },
+              { to: 13, suffix: "", labelKey: "stat2" },
+              { to: 193, suffix: "", labelKey: "stat3" },
+              { to: 100, suffix: " %", labelKey: "stat4" },
+            ] as const).map((s) => (
+              <div key={s.labelKey} className="bg-card px-5 py-7 text-center">
                 <p className="font-display text-3xl font-extrabold text-ew-green-700 sm:text-4xl">
                   <CountUp to={s.to} suffix={s.suffix} />
                 </p>
-                <p className="mt-1 text-xs font-medium text-muted-foreground">{s.label}</p>
+                <p className="mt-1 text-xs font-medium text-muted-foreground">{t(s.labelKey)}</p>
               </div>
             ))}
           </div>
@@ -120,22 +109,23 @@ export default function HomePage() {
       {/* Fonctionnalités */}
       <section id="fonctionnalites" className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-20 sm:px-6 sm:py-24">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <Eyebrow>Fonctionnalités</Eyebrow>
-          <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">Un espace pour chaque mission</h2>
-          <p className="mt-3 text-muted-foreground">Tous les outils du quotidien scolaire, intégrés et reliés entre eux.</p>
+          <Eyebrow>{t("eyebrowFunctionalities")}</Eyebrow>
+          <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{t("modulesTitle")}</h2>
+          <p className="mt-3 text-muted-foreground">{t("modulesSubtitle")}</p>
         </Reveal>
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {MODULES.map((m, i) => {
-            const Icon = m.icon;
+          {MODULE_ICONS.map((Icon, i) => {
+            const titleKey = `module${i + 1}Title` as const;
+            const descKey = `module${i + 1}Desc` as const;
             return (
-              <Reveal key={m.title} delay={(i % 3) * 90} className="h-full">
+              <Reveal key={i} delay={(i % 3) * 90} className="h-full">
                 <div className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-ew-green-600/40 hover:shadow-xl">
                   <span className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-ew-green-600 to-ew-gold-500 transition-transform duration-300 group-hover:scale-x-100" />
                   <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-ew-green-100 to-ew-green-50 text-ew-green-700 ring-1 ring-inset ring-ew-green-600/10 transition-transform duration-300 group-hover:scale-110">
                     <Icon className="h-6 w-6" />
                   </span>
-                  <h3 className="mt-5 text-lg font-bold text-foreground">{m.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{m.desc}</p>
+                  <h3 className="mt-5 text-lg font-bold text-foreground">{t(titleKey)}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t(descKey)}</p>
                 </div>
               </Reveal>
             );
@@ -147,20 +137,20 @@ export default function HomePage() {
       <section id="publics" className="scroll-mt-20 border-y border-border bg-gradient-to-b from-ew-green-50/60 to-background">
         <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
           <Reveal className="mx-auto max-w-2xl text-center">
-            <Eyebrow>Publics</Eyebrow>
-            <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">Pensé pour tous les acteurs de l&apos;école</h2>
-            <p className="mt-3 text-muted-foreground">Chaque utilisateur accède à un espace adapté à son rôle et à ses droits.</p>
+            <Eyebrow>{t("eyebrowAudiences")}</Eyebrow>
+            <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{t("audiencesTitle")}</h2>
+            <p className="mt-3 text-muted-foreground">{t("audiencesSubtitle")}</p>
           </Reveal>
           <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {AUDIENCES.map((a, i) => {
-              const Icon = a.icon;
+            {AUDIENCE_ICONS.map((Icon, i) => {
+              const labelKey = `audience${i + 1}` as const;
               return (
-                <Reveal key={a.label} delay={(i % 6) * 70}>
+                <Reveal key={i} delay={(i % 6) * 70}>
                   <div className="flex h-full flex-col items-center gap-3 rounded-2xl border border-border bg-card p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                     <span className="flex h-12 w-12 items-center justify-center rounded-full bg-ew-gold-100 text-ew-gold-600">
                       <Icon className="h-6 w-6" />
                     </span>
-                    <span className="text-sm font-semibold leading-snug text-foreground">{a.label}</span>
+                    <span className="text-sm font-semibold leading-snug text-foreground">{t(labelKey)}</span>
                   </div>
                 </Reveal>
               );
@@ -172,20 +162,21 @@ export default function HomePage() {
       {/* Atouts */}
       <section id="atouts" className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-20 sm:px-6 sm:py-24">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <Eyebrow>Atouts</Eyebrow>
-          <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">Conçu pour les systèmes éducatifs exigeants</h2>
+          <Eyebrow>{t("eyebrowAtouts")}</Eyebrow>
+          <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{t("atoutsTitle")}</h2>
         </Reveal>
         <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {ATOUTS.map((f, i) => {
-            const Icon = f.icon;
+          {ATOUT_ICONS.map((Icon, i) => {
+            const titleKey = `atout${i + 1}Title` as const;
+            const descKey = `atout${i + 1}Desc` as const;
             return (
-              <Reveal key={f.title} delay={i * 110} className="h-full">
+              <Reveal key={i} delay={i * 110} className="h-full">
                 <div className="h-full rounded-2xl border border-border bg-card p-7 shadow-sm transition-all duration-300 hover:shadow-lg">
                   <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-ew-green-700 text-white shadow-sm">
                     <Icon className="h-6 w-6" />
                   </span>
-                  <h3 className="mt-5 text-lg font-bold text-foreground">{f.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
+                  <h3 className="mt-5 text-lg font-bold text-foreground">{t(titleKey)}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t(descKey)}</p>
                 </div>
               </Reveal>
             );
@@ -198,16 +189,14 @@ export default function HomePage() {
         <Reveal>
           <div className="ew-mesh relative overflow-hidden rounded-3xl px-6 py-14 text-center text-white sm:px-12 sm:py-16">
             <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-ew-gold-500/15 blur-3xl ew-pulse-soft" />
-            <h2 className="relative font-display text-3xl font-extrabold tracking-tight sm:text-4xl">Prêt à piloter votre établissement ?</h2>
-            <p className="relative mx-auto mt-3 max-w-xl text-white/75">
-              Connectez-vous pour retrouver votre tableau de bord, ou créez un compte pour rejoindre la plateforme.
-            </p>
+            <h2 className="relative font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{t("ctaTitle")}</h2>
+            <p className="relative mx-auto mt-3 max-w-xl text-white/75">{t("ctaSubtitle")}</p>
             <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link href="/login" className="group inline-flex items-center gap-2 rounded-xl bg-ew-gold-500 px-7 py-3.5 text-base font-bold text-ew-green-950 shadow-lg transition-transform hover:scale-[1.03]">
-                Connexion <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                {t("login")} <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link href="/register" className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white transition-colors hover:bg-white/10">
-                <UserPlus className="h-5 w-5" /> Créer un compte
+                <UserPlus className="h-5 w-5" /> {t("createAccount")}
               </Link>
             </div>
           </div>
@@ -219,31 +208,27 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
           <div className="lg:col-span-2">
             <Logo tone="dark" />
-            <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Plateforme internationale de gestion, de planification et de pilotage scolaire — du primaire au
-              secondaire et à la formation des enseignants.
-            </p>
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">{t("audiencesSubtitle")}</p>
           </div>
           <div>
-            <p className="text-sm font-bold text-foreground">Plateforme</p>
+            <p className="text-sm font-bold text-foreground">{t("footerProduct")}</p>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li><a href="#fonctionnalites" className="hover:text-ew-green-700">Fonctionnalités</a></li>
-              <li><a href="#publics" className="hover:text-ew-green-700">Publics</a></li>
-              <li><a href="#atouts" className="hover:text-ew-green-700">Atouts</a></li>
+              <li><a href="#fonctionnalites" className="hover:text-ew-green-700">{t("navFonctionnalites")}</a></li>
+              <li><a href="#publics" className="hover:text-ew-green-700">{t("navPublics")}</a></li>
+              <li><a href="#atouts" className="hover:text-ew-green-700">{t("navAtouts")}</a></li>
             </ul>
           </div>
           <div>
-            <p className="text-sm font-bold text-foreground">Accès</p>
+            <p className="text-sm font-bold text-foreground">{t("footerCompany")}</p>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/login" className="hover:text-ew-green-700">Connexion</Link></li>
-              <li><Link href="/register" className="hover:text-ew-green-700">Créer un compte</Link></li>
-              <li><Link href="/reset-password" className="hover:text-ew-green-700">Mot de passe oublié</Link></li>
+              <li><Link href="/login" className="hover:text-ew-green-700">{t("login")}</Link></li>
+              <li><Link href="/register" className="hover:text-ew-green-700">{t("createAccount")}</Link></li>
             </ul>
           </div>
         </div>
         <div className="border-t border-border">
           <p className="mx-auto max-w-6xl px-4 py-5 text-center text-xs text-muted-foreground sm:px-6">
-            EduWeb Planner — Plateforme internationale de pilotage scolaire · © 2026
+            <FooterTagline />
           </p>
         </div>
       </footer>

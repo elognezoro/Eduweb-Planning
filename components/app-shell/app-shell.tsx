@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { SidebarContent } from "./sidebar";
 import { Topbar } from "./topbar";
 import { RolePreviewBanner } from "./role-preview";
@@ -11,6 +12,7 @@ const LS_COLLAPSED = "eduweb.sidebar.collapsed";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const t = useTranslations();
 
   React.useEffect(() => {
     setCollapsed(localStorage.getItem(LS_COLLAPSED) === "1");
@@ -64,7 +66,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </main>
         <footer className="border-t border-border px-6 py-4 text-center text-xs text-muted-foreground">
-          EduWeb Planner — Plateforme internationale de pilotage scolaire · © {new Date().getFullYear()}
+          {t("footer.tagline")} · © {new Date().getFullYear()}
         </footer>
       </div>
     </div>

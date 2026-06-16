@@ -3,6 +3,7 @@
 
 import * as React from "react";
 import { GraduationCap } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -17,6 +18,7 @@ interface LogoProps {
  */
 export function Logo({ collapsed = false, tone = "light", className }: LogoProps) {
   const [imgOk, setImgOk] = React.useState(true);
+  const t = useTranslations();
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
       <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-md">
@@ -40,7 +42,7 @@ export function Logo({ collapsed = false, tone = "light", className }: LogoProps
             EduWeb<span className="text-ew-gold-500"> Planner</span>
           </span>
           <span className={cn("mt-0.5 text-[10px] font-medium", tone === "light" ? "text-white/55" : "text-muted-foreground")}>
-            Pilotage scolaire
+            {t("common.tagline")}
           </span>
         </span>
       )}

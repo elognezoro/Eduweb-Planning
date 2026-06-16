@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, LogOut } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { NAVIGATION, type NavItem } from "@/lib/navigation";
 import { useApp } from "./app-context";
 import { useLogout } from "./use-logout";
@@ -25,6 +26,7 @@ export function SidebarContent({ collapsed = false, onNavigate }: SidebarContent
   const logout = useLogout();
   const profilePhoto = useProfilePhoto();
   const role = getRole(effectiveRole);
+  const t = useTranslations();
 
   const groups = NAVIGATION.map((g) => ({
     ...g,
@@ -110,7 +112,7 @@ export function SidebarContent({ collapsed = false, onNavigate }: SidebarContent
                 type="button"
                 onClick={logout}
                 className="rounded-lg p-1.5 text-white/55 transition-colors hover:bg-white/10 hover:text-white"
-                aria-label="Se déconnecter"
+                aria-label={t("common.logout")}
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -137,6 +139,7 @@ function NavGroupBlock({
   onToggle: () => void;
   onNavigate?: () => void;
 }) {
+  const t = useTranslations();
   const hasActive = group.items.some((it) => pathname === it.href || pathname.startsWith(it.href + "/"));
 
   return (
@@ -151,7 +154,7 @@ function NavGroupBlock({
             hasActive ? "text-ew-gold-500" : "text-white/40",
           )}
         >
-          {group.label}
+          {t(group.label)}
           <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", !isOpen && "-rotate-90")} />
         </button>
       )}
@@ -185,7 +188,9 @@ function NavLink({
   collapsed: boolean;
   onNavigate?: () => void;
 }) {
+  const t = useTranslations();
   const Icon = item.icon;
+  const label = t(item.label);
   const link = (
     <Link
       href={item.href}
@@ -208,13 +213,13 @@ function NavLink({
           active ? "text-ew-gold-500" : "text-white/55 group-hover:text-white/90",
         )}
       />
-      {!collapsed && <span className="truncate">{item.label}</span>}
+      {!collapsed && <span className="truncate">{label}</span>}
     </Link>
   );
   return collapsed ? (
     <Tooltip>
       <TooltipTrigger asChild>{link}</TooltipTrigger>
-      <TooltipContent side="right">{item.label}</TooltipContent>
+      <TooltipContent side="right">{label}</TooltipContent>
     </Tooltip>
   ) : (
     link

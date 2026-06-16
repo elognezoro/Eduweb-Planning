@@ -14,6 +14,7 @@ import {
   BadgeCheck,
   LogOut,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfilePhoto } from "@/lib/profile-photo";
@@ -47,13 +48,14 @@ export function Topbar({ collapsed, onToggleCollapse, onOpenMobile }: TopbarProp
   const logout = useLogout();
   const profilePhoto = useProfilePhoto();
   const role = getRole(effectiveRole);
+  const t = useTranslations();
 
   const item = findNavItem(pathname) ?? ALL_FALLBACK(pathname);
   const group = NAVIGATION.find((g) => g.items.some((it) => it.href === item?.href));
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-border bg-card/85 px-3 backdrop-blur sm:px-5">
-      <Button variant="ghost" size="icon" className="lg:hidden" onClick={onOpenMobile} aria-label="Ouvrir le menu">
+      <Button variant="ghost" size="icon" className="lg:hidden" onClick={onOpenMobile} aria-label={t("topbar.openMenu")}>
         <Menu className="h-5 w-5" />
       </Button>
       <Button
@@ -61,26 +63,26 @@ export function Topbar({ collapsed, onToggleCollapse, onOpenMobile }: TopbarProp
         size="icon"
         className="hidden lg:inline-flex"
         onClick={onToggleCollapse}
-        aria-label={collapsed ? "Déplier le menu" : "Replier le menu"}
+        aria-label={collapsed ? t("topbar.expandSidebar") : t("topbar.collapseSidebar")}
       >
         {collapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
       </Button>
 
       {/* Fil d'Ariane */}
-      <nav className="hidden items-center gap-1.5 text-sm md:flex" aria-label="Fil d'Ariane">
+      <nav className="hidden items-center gap-1.5 text-sm md:flex" aria-label="Breadcrumb">
         <Link href="/dashboard" className="flex items-center gap-1 text-muted-foreground hover:text-foreground">
           <Home className="h-4 w-4" />
         </Link>
         {group && group.label !== item?.label && (
           <>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-muted-foreground">{group.label}</span>
+            <span className="text-muted-foreground">{t(group.label)}</span>
           </>
         )}
         {item && (
           <>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="font-semibold text-foreground">{item.label}</span>
+            <span className="font-semibold text-foreground">{t(item.label)}</span>
           </>
         )}
       </nav>
@@ -94,13 +96,13 @@ export function Topbar({ collapsed, onToggleCollapse, onOpenMobile }: TopbarProp
               className="hidden h-9 w-56 justify-start gap-2 text-muted-foreground xl:flex"
             >
               <Search className="h-4 w-4" />
-              Rechercher…
+              {t("common.search")}
             </Button>
           )}
         />
         <GlobalSearch
           trigger={(open) => (
-            <Button variant="ghost" size="icon" className="xl:hidden" onClick={open} aria-label="Rechercher">
+            <Button variant="ghost" size="icon" className="xl:hidden" onClick={open} aria-label={t("common.search")}>
               <Search className="h-5 w-5" />
             </Button>
           )}
@@ -141,17 +143,17 @@ export function Topbar({ collapsed, onToggleCollapse, onOpenMobile }: TopbarProp
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href="/systeme/mon-profil">
-                <CircleUser className="h-4 w-4" /> Mon profil
+                <CircleUser className="h-4 w-4" /> {t("nav.items.monProfil")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/systeme/mon-identification">
-                <BadgeCheck className="h-4 w-4" /> Mon identification
+                <BadgeCheck className="h-4 w-4" /> {t("nav.items.monIdentification")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} className="text-red-600">
-              <LogOut className="h-4 w-4" /> Se déconnecter
+              <LogOut className="h-4 w-4" /> {t("common.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -173,17 +175,18 @@ const NOTIFICATIONS = [
 ];
 
 function NotificationsMenu() {
+  const t = useTranslations();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+        <Button variant="ghost" size="icon" className="relative" aria-label={t("common.notifications")}>
           <Bell className="h-5 w-5" />
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-ew-gold-500 ring-2 ring-card" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel className="flex items-center justify-between normal-case">
-          <span>Notifications</span>
+          <span>{t("common.notifications")}</span>
           <Badge tone="gold">{NOTIFICATIONS.length} nouvelles</Badge>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
