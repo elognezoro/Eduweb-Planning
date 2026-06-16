@@ -14,11 +14,13 @@ security definer
 set search_path = public
 as $$
 begin
-  -- Les administrateurs peuvent tout modifier.
-  if public.is_admin() then
+  -- Contexte serveur de confiance (éditeur SQL en `postgres`, clé service_role,
+  -- scripts) : aucun utilisateur authentifié → `auth.uid()` vaut NULL → autorisé.
+  -- Administrateur authentifié : autorisé aussi.
+  if auth.uid() is null or public.is_admin() then
     return new;
   end if;
-  -- Pour tout autre utilisateur : rôle et statut figés (pas d'auto-élévation).
+  -- Utilisateur authentifié non-admin : rôle et statut figés (pas d'auto-élévation).
   if new.role is distinct from old.role then
     raise exception 'Modification de votre propre rôle non autorisée.';
   end if;
