@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
 /**
  * Proxy (ex-Middleware en Next.js 16).
  *
- * En mode démo, il laisse passer toutes les requêtes. En production, c'est ici
- * que l'on rafraîchit la session Supabase (updateSession) et que l'on protège les
+ * En mode démo (Supabase non configuré), `updateSession` laisse passer toutes
+ * les requêtes. En mode réel, il rafraîchit la session Supabase et protège les
  * routes du tableau de bord (redirection vers /login si non authentifié).
  */
-export function proxy(_request: NextRequest) {
-  return NextResponse.next();
+export async function proxy(request: NextRequest) {
+  return updateSession(request);
 }
 
 export const config = {

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, LogOut } from "lucide-react";
 import { NAVIGATION, type NavItem } from "@/lib/navigation";
 import { useApp } from "./app-context";
+import { useLogout } from "./use-logout";
 import { getRole } from "@/lib/roles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfilePhoto } from "@/lib/profile-photo";
@@ -21,6 +22,7 @@ interface SidebarContentProps {
 export function SidebarContent({ collapsed = false, onNavigate }: SidebarContentProps) {
   const pathname = usePathname();
   const { can, user, effectiveRole } = useApp();
+  const logout = useLogout();
   const profilePhoto = useProfilePhoto();
   const role = getRole(effectiveRole);
 
@@ -104,13 +106,14 @@ export function SidebarContent({ collapsed = false, onNavigate }: SidebarContent
               </div>
             )}
             {!collapsed && (
-              <Link
-                href="/login"
+              <button
+                type="button"
+                onClick={logout}
                 className="rounded-lg p-1.5 text-white/55 transition-colors hover:bg-white/10 hover:text-white"
                 aria-label="Se déconnecter"
               >
                 <LogOut className="h-4 w-4" />
-              </Link>
+              </button>
             )}
           </div>
         </div>

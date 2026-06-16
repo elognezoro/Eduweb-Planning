@@ -14,8 +14,11 @@ import {
   BadgeCheck,
   CheckCircle2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { AuthShell, AuthField, authInputCls } from "@/components/app-shell/auth-shell";
 import { CountryFlag } from "@/components/app-shell/switchers";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
 import { PhoneInput } from "@/components/forms/phone-input";
 import { toNomCase, toPrenomCase } from "@/lib/format-name";
 import { Button } from "@/components/ui/button";
@@ -70,7 +73,23 @@ export default function RegisterPage() {
   const lastNameReg = register("lastName");
   const firstNameReg = register("firstName");
 
-  const onSubmit = async (_data: RegisterInput) => {
+  const onSubmit = async (data: RegisterInput) => {
+    if (isSupabaseConfigured()) {
+      const { error } = await createClient().auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: { first_name: data.firstName, last_name: data.lastName, phone: data.phone, country: data.country },
+          emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}/login` : undefined,
+        },
+      });
+      if (error) {
+        toast.error("Inscription échouée", { description: error.message });
+        throw error; // empêche l'écran de succès
+      }
+      return; // succès → écran « Compte créé / en attente de validation »
+    }
+    // Mode démo
     await new Promise((r) => setTimeout(r, 700));
   };
 

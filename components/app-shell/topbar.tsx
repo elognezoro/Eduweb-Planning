@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useApp } from "./app-context";
+import { useLogout } from "./use-logout";
 import { getRole } from "@/lib/roles";
 import { NAVIGATION, findNavItem } from "@/lib/navigation";
 import { CountrySwitcher, AcademicYearSwitcher, LocaleSwitcher } from "./switchers";
@@ -43,6 +44,7 @@ interface TopbarProps {
 export function Topbar({ collapsed, onToggleCollapse, onOpenMobile }: TopbarProps) {
   const pathname = usePathname();
   const { user, effectiveRole } = useApp();
+  const logout = useLogout();
   const profilePhoto = useProfilePhoto();
   const role = getRole(effectiveRole);
 
@@ -148,10 +150,8 @@ export function Topbar({ collapsed, onToggleCollapse, onOpenMobile }: TopbarProp
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/login" className="text-red-600">
-                <LogOut className="h-4 w-4" /> Se déconnecter
-              </Link>
+            <DropdownMenuItem onClick={logout} className="text-red-600">
+              <LogOut className="h-4 w-4" /> Se déconnecter
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

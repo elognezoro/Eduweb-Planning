@@ -9,6 +9,8 @@ import { AuthShell, AuthField, authInputCls } from "@/components/app-shell/auth-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { resetSchema, type ResetInput } from "@/lib/schemas/auth";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ResetPasswordPage() {
   const {
@@ -17,7 +19,14 @@ export default function ResetPasswordPage() {
     formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm<ResetInput>({ resolver: zodResolver(resetSchema) });
 
-  const onSubmit = async (_data: ResetInput) => {
+  const onSubmit = async (data: ResetInput) => {
+    if (isSupabaseConfigured()) {
+      await createClient().auth.resetPasswordForEmail(data.email, {
+        redirectTo: typeof window !== "undefined" ? `${window.location.origin}/login` : undefined,
+      });
+      return; // écran de confirmation (réponse volontairement neutre)
+    }
+    // Mode démo
     await new Promise((r) => setTimeout(r, 600));
     toast.success("E-mail envoyé", { description: "Consultez votre boîte de réception." });
   };

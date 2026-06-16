@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { loginSchema, type LoginInput } from "@/lib/schemas/auth";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,7 +27,22 @@ export default function LoginPage() {
     defaultValues: { email: "elognezoro@gmail.com", password: "demodemo" },
   });
 
-  const onSubmit = async (_data: LoginInput) => {
+  const onSubmit = async (data: LoginInput) => {
+    if (isSupabaseConfigured()) {
+      const { error } = await createClient().auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+      if (error) {
+        toast.error("Connexion échouée", { description: error.message });
+        return;
+      }
+      toast.success("Connexion réussie", { description: "Bienvenue sur EduWeb Planner." });
+      router.push("/dashboard");
+      router.refresh();
+      return;
+    }
+    // Mode démo
     await new Promise((r) => setTimeout(r, 500));
     toast.success("Connexion réussie", { description: "Bienvenue sur EduWeb Planner." });
     router.push("/dashboard");

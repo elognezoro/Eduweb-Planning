@@ -5,6 +5,8 @@ import { DEMO_USER } from "@/lib/mock-data";
 import { hasPermission } from "@/lib/permissions";
 import type { Permission } from "@/lib/permissions";
 import { useStore } from "@/components/app-shell/data-store";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
 import type { UserRole } from "@/lib/roles";
 import type { UserProfile } from "@/lib/types";
 import { COUNTRIES, getCountry, type CountryConfig } from "@/config/countries";
@@ -38,9 +40,48 @@ interface PersistedState {
 }
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const user = DEMO_USER;
+  // Mode démo : utilisateur factice. Mode réel : profil chargé depuis Supabase après montage.
+  const [user, setUser] = React.useState<UserProfile>(DEMO_USER);
   const realRole = user.role;
   const { roleOverrides, userGrants } = useStore();
+
+  React.useEffect(() => {
+    if (!isSupabaseConfigured()) return; // mode démo : on conserve DEMO_USER
+    let active = true;
+    (async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user: authUser },
+        } = await supabase.auth.getUser();
+        if (!authUser || !active) return;
+        const { data: p } = await supabase.from("profiles").select("*").eq("id", authUser.id).maybeSingle();
+        if (!active) return;
+        setUser((prev) => ({
+          ...prev,
+          id: authUser.id,
+          email: (p?.email as string) || authUser.email || prev.email,
+          firstName: (p?.first_name as string) || prev.firstName,
+          lastName: (p?.last_name as string) || prev.lastName,
+          displayName:
+            (p?.display_name as string) ||
+            [p?.first_name, p?.last_name].filter(Boolean).join(" ") ||
+            authUser.email ||
+            prev.displayName,
+          phone: (p?.phone as string) ?? prev.phone,
+          avatarUrl: (p?.avatar_url as string) ?? prev.avatarUrl,
+          role: (p?.role as UserRole) || prev.role,
+          status: (p?.status as UserProfile["status"]) || prev.status,
+          jobTitle: (p?.job_title as string) ?? prev.jobTitle,
+        }));
+      } catch {
+        /* conserve l'utilisateur courant en cas d'erreur réseau/DB */
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const [previewRole, setPreviewRoleState] = React.useState<UserRole | null>(null);
   const [countryCode, setCountryCodeState] = React.useState<string>(user.countryCode);
