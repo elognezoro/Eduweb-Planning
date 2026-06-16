@@ -94,7 +94,7 @@
 
   --font-sans: var(--font-nunito), ui-sans-serif, system-ui, "Segoe UI", Verdana,
     sans-serif;
-  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-display: var(--font-display-rounded), "Nunito", system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 6px);
   --radius-md: calc(var(--radius) - 3px);

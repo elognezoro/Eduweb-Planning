@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Nunito_Sans, Fraunces } from "next/font/google";
+import { Nunito_Sans, Quicksand } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { Toaster } from "@/components/ui/sonner";
@@ -11,10 +11,12 @@ const nunito = Nunito_Sans({
   display: "swap",
 });
 
-const fraunces = Fraunces({
+// Police d'affichage arrondie (titres, logo, hero).
+const displayFont = Quicksand({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  variable: "--font-display-rounded",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -31,7 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${nunito.variable} ${fraunces.variable} h-full`}>
+    <html lang={locale} className={`${nunito.variable} ${displayFont.variable} h-full`}>
       <body className="min-h-full antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
