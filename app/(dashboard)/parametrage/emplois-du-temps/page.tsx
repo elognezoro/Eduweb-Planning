@@ -86,9 +86,13 @@ function WeeklyGrid({
 }
 
 export default function EmploisDuTempsPage() {
-  const { can, user } = useApp();
+  const { can, user, effectiveRole } = useApp();
   // Seuls le Chef d'établissement / l'Admin Établissement (timetable:manage) accèdent au générateur.
   const canSimulate = can("timetable:manage");
+  // Élève / parent : vue figée sur la classe de l'élève (pas de filtres, pas d'autres EDT).
+  const isStudentLike = effectiveRole === "eleve" || effectiveRole === "parent";
+  // Classe rattachée à l'élève (démo : la 1ʳᵉ disponible — sera lue du profil en Phase 2).
+  const studentClass = ALL_CLASSES[0];
   const [tab, setTab] = React.useState("vue");
   const [periods, setPeriods] = React.useState<SchedulePeriod[]>(() => etabSchedulePeriods({}));
   const [gen, setGen] = React.useState<GeneratedEdt | null>(null);
@@ -118,7 +122,12 @@ export default function EmploisDuTempsPage() {
   let displayedSlots: ScheduleSlot[];
   let secondary: "teacher" | "class";
   let contextLabel: string;
-  if (viewBy === "classe") {
+  if (isStudentLike) {
+    // Élève / parent : son seul EDT (celui de sa classe), sans aucun filtre.
+    displayedSlots = SCHOOL_TIMETABLE.filter((s) => s.className === studentClass);
+    secondary = "teacher";
+    contextLabel = effectiveRole === "parent" ? `Classe de votre enfant — ${studentClass}` : `Ma classe — ${studentClass}`;
+  } else if (viewBy === "classe") {
     const c = klass || ALL_CLASSES[0];
     displayedSlots = SCHOOL_TIMETABLE.filter((s) => s.className === c);
     secondary = "teacher";
@@ -192,6 +201,9 @@ export default function EmploisDuTempsPage() {
           ) : (
             <>
               <div className="flex flex-wrap items-end justify-between gap-3">
+                {isStudentLike ? (
+                  <div />
+                ) : (
                 <FilterBar>
                   <FilterSelect
                     value={viewBy}
@@ -248,6 +260,7 @@ export default function EmploisDuTempsPage() {
                     />
                   )}
                 </FilterBar>
+                )}
                 <div className="flex gap-2">
                   {canSimulate && (
                     <Button variant="outline" onClick={() => toast.success("Semaine dupliquée vers S+1")}>
@@ -282,10 +295,12 @@ export default function EmploisDuTempsPage() {
                 </SectionCard>
               )}
 
-              <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                <AlertTriangle className="h-3.5 w-3.5" /> « Par enseignant » affiche votre emploi du temps ; choisissez une de vos
-                classes, puis un collègue qui prend cette même classe pour consulter son emploi du temps.
-              </p>
+              {!isStudentLike && (
+                <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <AlertTriangle className="h-3.5 w-3.5" /> « Par enseignant » affiche votre emploi du temps ; choisissez une de vos
+                  classes, puis un collègue qui prend cette même classe pour consulter son emploi du temps.
+                </p>
+              )}
             </>
           )}
         </TabsContent>

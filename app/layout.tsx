@@ -3,6 +3,7 @@ import { Nunito_Sans, Quicksand } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { Toaster } from "@/components/ui/sonner";
+import { localeDir } from "@/i18n/routing";
 import "./globals.css";
 
 const nunito = Nunito_Sans({
@@ -33,7 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${nunito.variable} ${displayFont.variable} h-full`}>
+    <html lang={locale} dir={localeDir(locale)} className={`${nunito.variable} ${displayFont.variable} h-full`}>
       <body className="min-h-full antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}

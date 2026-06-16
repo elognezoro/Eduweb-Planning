@@ -5,6 +5,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GraduationCap, type LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 /** Style des champs d'authentification (fond doux, arrondi). */
@@ -37,22 +38,23 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "";
   const isRegister = pathname.startsWith("/register");
   const isReset = pathname.startsWith("/reset-password");
+  const t = useTranslations();
 
   return (
     <div className="ew-fade-in max-h-[94vh] w-full overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-black/5 sm:p-8">
       <AuthLogo />
       <h1 className="mt-4 text-center font-display text-[28px] font-extrabold leading-tight text-ew-green-900">
-        EduWeb Planner
+        {t("common.appName")}
       </h1>
-      <p className="text-center text-sm text-muted-foreground">Plateforme de gestion scolaire</p>
+      <p className="text-center text-sm text-muted-foreground">{t("auth.loginSubtitle")}</p>
 
       {!isReset && (
         <div className="mt-6 grid grid-cols-2 gap-1 rounded-xl border border-border p-1">
           <Tab href="/login" active={!isRegister}>
-            Connexion
+            {t("auth.loginTitle")}
           </Tab>
           <Tab href="/register" active={isRegister}>
-            Créer un compte
+            {t("auth.registerTitle")}
           </Tab>
         </div>
       )}
