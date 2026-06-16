@@ -183,7 +183,7 @@ create table if not exists user_role_requests (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references profiles(id) on delete cascade,
   requested_role text not null,
-  current_role text,
+  current_role_value text, -- ex-« current_role » (mot réservé PostgreSQL)
   reason text,
   status text default 'pending',
   reviewed_by uuid references profiles(id),
