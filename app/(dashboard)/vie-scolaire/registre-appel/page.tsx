@@ -59,11 +59,22 @@ const DISCIPLINES = ["Mathématiques", "Français", "Anglais", "Physique-Chimie"
 const SEANCES = ["07h30 - 08h30", "08h30 - 09h30", "09h45 - 10h45", "10h45 - 11h45", "14h00 - 15h00", "15h00 - 16h00"];
 const CLASS_OPTIONS = [...new Set(ELEVES.map((e) => e.className))];
 
-const ACTION_META: Record<ActionKind, { label: string; sub: string; Icon: React.ElementType; circle: string; btn: string }> = {
-  enc: { label: "Encouragement", sub: "Pour participation active en classe", Icon: ThumbsUp, circle: "bg-ew-green-100 text-ew-green-700", btn: "bg-ew-green-600 hover:bg-ew-green-700 text-white" },
-  obs: { label: "Observation", sub: "Pour perturbation ou comportement inadapté", Icon: Eye, circle: "bg-orange-100 text-orange-600", btn: "bg-orange-500 hover:bg-orange-600 text-white" },
-  inf: { label: "Infirmerie", sub: "Admission à l'infirmerie", Icon: HeartPulse, circle: "bg-pink-100 text-pink-600", btn: "bg-pink-600 hover:bg-pink-700 text-white" },
+/** Métadonnées statiques (icônes/styles) — les libellés sont traduits via useActionMeta(). */
+const ACTION_META: Record<ActionKind, { Icon: React.ElementType; circle: string; btn: string }> = {
+  enc: { Icon: ThumbsUp, circle: "bg-ew-green-100 text-ew-green-700", btn: "bg-ew-green-600 hover:bg-ew-green-700 text-white" },
+  obs: { Icon: Eye, circle: "bg-orange-100 text-orange-600", btn: "bg-orange-500 hover:bg-orange-600 text-white" },
+  inf: { Icon: HeartPulse, circle: "bg-pink-100 text-pink-600", btn: "bg-pink-600 hover:bg-pink-700 text-white" },
 };
+
+/** Récupère le libellé/sous-titre traduits pour un type d'action. */
+function useActionMeta() {
+  const t = useTranslations("pages.vieScolaireRegistreAppel.actionMeta");
+  return {
+    enc: { label: t("encLabel"), sub: t("encSub") },
+    obs: { label: t("obsLabel"), sub: t("obsSub") },
+    inf: { label: t("infLabel"), sub: t("infSub") },
+  } as const;
+}
 
 /* --------- données historiques déterministes (stables par élève) --------- */
 const seedOf = (id: string) => [...id].reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -117,6 +128,7 @@ const DEFAULT_ROW: AttendanceRow = { status: "P", motif: "", enc: [], obs: [], i
 
 export default function RegistreAppelPage() {
   const t = useTranslations();
+  const actionMeta = useActionMeta();
   const { attendance, setAttendance } = useStore();
   const { effectiveRole, user } = useApp();
   // Enseignant : seules SES disciplines (dérivées de l'emploi du temps) ; s'il est
@@ -201,11 +213,11 @@ export default function RegistreAppelPage() {
   const selectWhere = (pred: (s: Eleve) => boolean) => setSelected(new Set(classStudents.filter(pred).map((s) => s.id)));
   const idsWhere = (pred: (s: Eleve) => boolean) => classStudents.filter(pred).map((s) => s.id);
   const smsTargets: SmsTarget[] = [
-    { key: "selection", label: "Sélection", ids: [...selected] },
-    { key: "classe", label: "Toute la classe", ids: classStudents.map((s) => s.id) },
-    { key: "absents", label: "Absents", ids: idsWhere((s) => getRow(s.id).status === "A") },
-    { key: "retards", label: "Retards", ids: idsWhere((s) => getRow(s.id).status === "R") },
-    { key: "seuil", label: `Alerte SMS (≥ ${SEUIL_SMS})`, ids: idsWhere((s) => cumulAbs(s.id) >= SEUIL_SMS) },
+    { key: "selection", label: t("pages.vieScolaireRegistreAppel.smsTargets.selection"), ids: [...selected] },
+    { key: "classe", label: t("pages.vieScolaireRegistreAppel.smsTargets.wholeClass"), ids: classStudents.map((s) => s.id) },
+    { key: "absents", label: t("pages.vieScolaireRegistreAppel.smsTargets.absents"), ids: idsWhere((s) => getRow(s.id).status === "A") },
+    { key: "retards", label: t("pages.vieScolaireRegistreAppel.smsTargets.lates"), ids: idsWhere((s) => getRow(s.id).status === "R") },
+    { key: "seuil", label: t("pages.vieScolaireRegistreAppel.smsTargets.threshold", { n: SEUIL_SMS }), ids: idsWhere((s) => cumulAbs(s.id) >= SEUIL_SMS) },
   ];
 
   const saveAction = (kind: ActionKind, student: Eleve, text: string, acc: string) => {
@@ -213,7 +225,7 @@ export default function RegistreAppelPage() {
     const at = new Date().toISOString();
     if (kind === "inf") patchRow(student.id, { inf: [...r.inf, { text, acc, at }] });
     else patchRow(student.id, { [kind]: [...r[kind], { text, at }] } as Partial<AttendanceRow>);
-    toast.success(`${ACTION_META[kind].label} enregistré(e)`, { description: `${toNomCase(student.lastName)} ${toPrenomCase(student.firstName)} · conduite recalculée.` });
+    toast.success(t("pages.vieScolaireRegistreAppel.toasts.actionSaved", { action: actionMeta[kind].label }), { description: t("pages.vieScolaireRegistreAppel.toasts.actionSavedDesc", { name: `${toNomCase(student.lastName)} ${toPrenomCase(student.firstName)}` }) });
     setDialog(null);
   };
 
@@ -222,9 +234,9 @@ export default function RegistreAppelPage() {
       icon={ClipboardCheck}
       permission="attendance:view"
       sections={[
-        { id: "bilan", label: "Bilan de l'appel" },
-        { id: "liste", label: "Liste des élèves" },
-        { id: "heatmap", label: "Heatmap de présence" },
+        { id: "bilan", label: t("pages.vieScolaireRegistreAppel.sections.bilan") },
+        { id: "liste", label: t("pages.vieScolaireRegistreAppel.sections.liste") },
+        { id: "heatmap", label: t("pages.vieScolaireRegistreAppel.sections.heatmap") },
       ]}
       showContextBadge={false}
       actions={
@@ -270,42 +282,42 @@ export default function RegistreAppelPage() {
       </div>
 
       <div className="grid gap-3 rounded-xl border border-border bg-card p-3 sm:grid-cols-2 lg:grid-cols-5">
-        <Field label="Classe pédagogique">
+        <Field label={t("pages.vieScolaireRegistreAppel.filters.class")}>
           <FilterSelect value={cls} onValueChange={setCls} className="w-full" options={CLASS_OPTIONS.map((c) => ({ value: c, label: c }))} />
         </Field>
-        <Field label="Discipline (matière)">
+        <Field label={t("pages.vieScolaireRegistreAppel.filters.discipline")}>
           <FilterSelect value={discipline} onValueChange={setDiscipline} className="w-full" options={availableDisciplines.map((d) => ({ value: d, label: d }))} />
         </Field>
-        <Field label="Heure de la séance">
+        <Field label={t("pages.vieScolaireRegistreAppel.filters.session")}>
           <FilterSelect value={seance} onValueChange={setSeance} className="w-full" options={SEANCES.map((s) => ({ value: s, label: s }))} />
         </Field>
-        <Field label="Date">
+        <Field label={t("pages.vieScolaireRegistreAppel.filters.date")}>
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-9" />
         </Field>
-        <Field label="Rechercher">
+        <Field label={t("pages.vieScolaireRegistreAppel.filters.search")}>
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nom ou prénom…" className="h-9 pl-8" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("pages.vieScolaireRegistreAppel.filters.searchPlaceholder")} className="h-9 pl-8" />
           </div>
         </Field>
       </div>
 
-      <SectionCard id="bilan" title="Bilan de l'appel" contentClassName="pt-4">
+      <SectionCard id="bilan" title={t("pages.vieScolaireRegistreAppel.bilan.title")} contentClassName="pt-4">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
-          <Stat label="Effectif total" value={bilan.total} icon={Users} tone="slate" />
-          <Stat label="Présents (P)" value={bilan.present} tone="green" />
-          <Stat label="Absents (A)" value={bilan.absent} tone="red" />
-          <Stat label="Retards (R)" value={bilan.retard} tone="gold" />
-          <Stat label="Encouragements" value={bilan.enc} icon={ThumbsUp} tone="green" />
-          <Stat label="Observations" value={bilan.obs} icon={Eye} tone="red" />
-          <Stat label="Infirmerie" value={bilan.inf} icon={HeartPulse} tone="blue" />
-          <Stat label="Alertes SMS" value={bilan.sms} icon={MessageSquare} tone="gold" />
+          <Stat label={t("pages.vieScolaireRegistreAppel.bilan.totalEnrolment")} value={bilan.total} icon={Users} tone="slate" />
+          <Stat label={t("pages.vieScolaireRegistreAppel.bilan.present")} value={bilan.present} tone="green" />
+          <Stat label={t("pages.vieScolaireRegistreAppel.bilan.absent")} value={bilan.absent} tone="red" />
+          <Stat label={t("pages.vieScolaireRegistreAppel.bilan.late")} value={bilan.retard} tone="gold" />
+          <Stat label={t("pages.vieScolaireRegistreAppel.bilan.encouragements")} value={bilan.enc} icon={ThumbsUp} tone="green" />
+          <Stat label={t("pages.vieScolaireRegistreAppel.bilan.observations")} value={bilan.obs} icon={Eye} tone="red" />
+          <Stat label={t("pages.vieScolaireRegistreAppel.bilan.infirmary")} value={bilan.inf} icon={HeartPulse} tone="blue" />
+          <Stat label={t("pages.vieScolaireRegistreAppel.bilan.smsAlerts")} value={bilan.sms} icon={MessageSquare} tone="gold" />
         </div>
       </SectionCard>
 
       <SectionCard
         id="liste"
-        title={`Liste des élèves — ${cls}`}
+        title={t("pages.vieScolaireRegistreAppel.list.title", { className: cls })}
         action={
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={() => setAll("P")}>Tout P</Button>
@@ -319,8 +331,8 @@ export default function RegistreAppelPage() {
           <span className="text-xs text-muted-foreground">· Sélection rapide :</span>
           <Button variant="outline" size="sm" onClick={() => selectWhere((s) => getRow(s.id).status === "A")}>Absents</Button>
           <Button variant="outline" size="sm" onClick={() => selectWhere((s) => getRow(s.id).status === "R")}>Retards</Button>
-          <Button variant="outline" size="sm" onClick={() => selectWhere((s) => cumulAbs(s.id) >= SEUIL_SMS)}>Alerte SMS (≥ {SEUIL_SMS})</Button>
-          {selected.size > 0 && <Button variant="ghost" size="sm" onClick={clearSel}>Effacer</Button>}
+          <Button variant="outline" size="sm" onClick={() => selectWhere((s) => cumulAbs(s.id) >= SEUIL_SMS)}>{t("pages.vieScolaireRegistreAppel.bulkButtons.smsThreshold", { n: SEUIL_SMS })}</Button>
+          {selected.size > 0 && <Button variant="ghost" size="sm" onClick={clearSel}>{t("pages.vieScolaireRegistreAppel.bulkButtons.clear")}</Button>}
           <Button size="sm" className="ml-auto" onClick={() => setSmsOpen(selected.size > 0 ? "selection" : "classe")}>
             <Send className="h-4 w-4" /> SMS aux parents{selected.size > 0 ? ` (${selected.size})` : ""}
           </Button>
@@ -434,18 +446,18 @@ export default function RegistreAppelPage() {
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3">
         <div className="flex flex-wrap items-center gap-3">
           <span className="flex items-center gap-1.5 rounded-lg bg-ew-gold-100 px-3 py-1.5 text-xs font-semibold text-ew-gold-600">
-            <MessageSquare className="h-3.5 w-3.5" /> Seuil d&apos;alerte SMS : {SEUIL_SMS} absences
+            <MessageSquare className="h-3.5 w-3.5" /> {t("pages.vieScolaireRegistreAppel.footer.smsThreshold", { n: SEUIL_SMS })}
           </span>
           <Button variant="outline" onClick={() => setSmsOpen("classe")}>
-            <Send className="h-4 w-4" /> SMS groupé
+            <Send className="h-4 w-4" /> {t("pages.vieScolaireRegistreAppel.footer.groupSms")}
           </Button>
         </div>
-        <Button onClick={() => toast.success("Appel enregistré", { description: `${bilan.present} présent(s), ${bilan.absent} absent(s), ${bilan.retard} retard(s).` })}>
-          <Save className="h-4 w-4" /> Enregistrer
+        <Button onClick={() => toast.success(t("pages.vieScolaireRegistreAppel.toasts.callSaved"), { description: t("pages.vieScolaireRegistreAppel.toasts.callSavedDesc", { p: bilan.present, a: bilan.absent, r: bilan.retard }) })}>
+          <Save className="h-4 w-4" /> {t("pages.vieScolaireRegistreAppel.footer.save")}
         </Button>
       </div>
 
-      <SectionCard id="heatmap" title="Heatmap de présence" description="Taux de présence par jour et créneau">
+      <SectionCard id="heatmap" title={t("pages.vieScolaireRegistreAppel.heatmap.title")} description={t("pages.vieScolaireRegistreAppel.heatmap.description")}>
         <AttendanceHeatmap data={ATTENDANCE_HEATMAP} />
       </SectionCard>
 
@@ -467,8 +479,8 @@ export default function RegistreAppelPage() {
           defaultTarget={smsOpen}
           classLabel={cls}
           onClose={() => setSmsOpen(null)}
-          onSend={(t) => {
-            toast.success("SMS envoyé aux parents", { description: `${t.label} · ${t.ids.length} destinataire(s) — message transmis.` });
+          onSend={(target) => {
+            toast.success(t("pages.vieScolaireRegistreAppel.toasts.smsBatchSent"), { description: t("pages.vieScolaireRegistreAppel.toasts.smsBatchDesc", { target: target.label, n: target.ids.length }) });
             setSmsOpen(null);
           }}
         />
@@ -478,50 +490,51 @@ export default function RegistreAppelPage() {
 }
 
 function SmsDialog({ targets, defaultTarget, classLabel, onClose, onSend }: { targets: SmsTarget[]; defaultTarget: string; classLabel: string; onClose: () => void; onSend: (t: SmsTarget) => void }) {
+  const t = useTranslations("pages.vieScolaireRegistreAppel.smsDialog");
   const [targetKey, setTargetKey] = React.useState(defaultTarget);
-  const [msg, setMsg] = React.useState("Bonjour, message de la vie scolaire concernant votre enfant. Merci de prendre contact avec l'établissement.");
-  const current = targets.find((t) => t.key === targetKey) ?? targets[0];
+  const [msg, setMsg] = React.useState(() => t("defaultMessage"));
+  const current = targets.find((tgt) => tgt.key === targetKey) ?? targets[0];
   const segments = Math.max(1, Math.ceil(msg.length / 160));
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Envoyer un SMS aux parents</DialogTitle>
-          <p className="text-sm text-muted-foreground">Classe {classLabel} · choisissez les destinataires et rédigez le message.</p>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <p className="text-sm text-muted-foreground">{t("subtitle", { classLabel })}</p>
         </DialogHeader>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Destinataires</label>
+          <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t("recipients")}</label>
           <div className="flex flex-wrap gap-2">
-            {targets.map((t) => (
+            {targets.map((tgt) => (
               <button
-                key={t.key}
-                onClick={() => setTargetKey(t.key)}
-                disabled={t.ids.length === 0}
+                key={tgt.key}
+                onClick={() => setTargetKey(tgt.key)}
+                disabled={tgt.ids.length === 0}
                 className={cn(
                   "rounded-full border px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-40",
-                  targetKey === t.key ? "border-ew-green-600 bg-ew-green-600 text-white" : "border-border bg-card text-foreground hover:bg-muted",
+                  targetKey === tgt.key ? "border-ew-green-600 bg-ew-green-600 text-white" : "border-border bg-card text-foreground hover:bg-muted",
                 )}
               >
-                {t.label} ({t.ids.length})
+                {tgt.label} ({tgt.ids.length})
               </button>
             ))}
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Message</label>
+          <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t("message")}</label>
           <Textarea value={msg} onChange={(e) => setMsg(e.target.value)} rows={4} className="resize-y" />
           <p className="text-[11px] text-muted-foreground">
-            {msg.length} caractère(s) · {segments} SMS / parent · {current.ids.length} destinataire(s)
+            {t("metrics", { n: msg.length, seg: segments, r: current.ids.length })}
           </p>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button variant="outline" onClick={onClose}>{t("cancel")}</Button>
           <Button disabled={current.ids.length === 0 || !msg.trim()} onClick={() => onSend(current)}>
-            <Send className="h-4 w-4" /> Envoyer ({current.ids.length})
+            <Send className="h-4 w-4" /> {t("send", { n: current.ids.length })}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -563,7 +576,9 @@ function ActIcon({ active, onClick, title, tone, children }: { active: boolean; 
 }
 
 function ActionDialog({ kind, student, classLabel, date, status, onClose, onSave }: { kind: ActionKind; student: Eleve; classLabel: string; date: string; status: Status; onClose: () => void; onSave: (text: string, acc: string) => void }) {
-  const m = ACTION_META[kind];
+  const t = useTranslations("pages.vieScolaireRegistreAppel.actionDialog");
+  const actionMeta = useActionMeta();
+  const m = { ...ACTION_META[kind], ...actionMeta[kind] };
   const [variant, setVariant] = React.useState(0);
   const [text, setText] = React.useState(() => aiSuggest(kind, student.id, status, 0));
   const [acc, setAcc] = React.useState("");
@@ -593,31 +608,31 @@ function ActionDialog({ kind, student, classLabel, date, status, onClose, onSave
           <p className="font-bold text-foreground">
             {toNomCase(student.lastName)} {toPrenomCase(student.firstName)}
           </p>
-          <p className="text-xs text-muted-foreground">{classLabel} · {date} · né(e) le {fmtDate(student.birthDate)}</p>
+          <p className="text-xs text-muted-foreground">{t("studentLine", { class: classLabel, date, birth: fmtDate(student.birthDate) })}</p>
         </div>
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Description</label>
-            <button onClick={regenerate} className="flex items-center gap-1 rounded-full bg-purple-100 px-2.5 py-1 text-[11px] font-semibold text-purple-700 hover:bg-purple-200" title="Régénérer une suggestion">
-              <Sparkles className="h-3 w-3" /> Suggestion IA
+            <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t("description")}</label>
+            <button onClick={regenerate} className="flex items-center gap-1 rounded-full bg-purple-100 px-2.5 py-1 text-[11px] font-semibold text-purple-700 hover:bg-purple-200" title={t("regenerate")}>
+              <Sparkles className="h-3 w-3" /> {t("aiSuggestion")}
             </button>
           </div>
           <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} className="resize-y" />
-          <p className="text-[11px] text-muted-foreground">Suggestion générée selon le profil de l&apos;élève — librement modifiable.</p>
+          <p className="text-[11px] text-muted-foreground">{t("aiHint")}</p>
         </div>
 
         {kind === "inf" && (
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Accompagnateur (optionnel)</label>
-            <Input value={acc} onChange={(e) => setAcc(e.target.value)} placeholder="Nom de l'élève accompagnateur…" />
+            <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t("companion")}</label>
+            <Input value={acc} onChange={(e) => setAcc(e.target.value)} placeholder={t("companionPlaceholder")} />
           </div>
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button variant="outline" onClick={onClose}>{t("cancel")}</Button>
           <Button className={m.btn} onClick={() => onSave(text.trim(), acc.trim())}>
-            <m.Icon className="h-4 w-4" /> Enregistrer
+            <m.Icon className="h-4 w-4" /> {t("save")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -626,34 +641,36 @@ function ActionDialog({ kind, student, classLabel, date, status, onClose, onSave
 }
 
 function HistoryDialog({ student, classLabel, onClose }: { student: Eleve; classLabel: string; onClose: () => void }) {
+  const t = useTranslations("pages.vieScolaireRegistreAppel.historyDialog");
   const rows = historyOf(student.id);
   const cA = cumulAbs(student.id);
   const cR = cumulRet(student.id);
+  const fullName = `${toNomCase(student.lastName)} ${toPrenomCase(student.firstName)}`;
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Historique d&apos;absences</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <p className="text-sm text-muted-foreground">
-            {toNomCase(student.lastName)} {toPrenomCase(student.firstName)} · né(e) le {fmtDate(student.birthDate)} — {classLabel}
+            {t("studentLine", { name: fullName, birth: fmtDate(student.birthDate), className: classLabel })}
           </p>
         </DialogHeader>
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
             <thead className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                <th className="px-3 py-2 text-left">Date</th>
-                <th className="px-3 py-2 text-left">Heure</th>
-                <th className="px-3 py-2 text-left">Discipline</th>
-                <th className="px-3 py-2 text-left">Type</th>
-                <th className="px-3 py-2 text-left">Motif</th>
-                <th className="px-3 py-2 text-left">Justifiée</th>
+                <th className="px-3 py-2 text-left">{t("headers.date")}</th>
+                <th className="px-3 py-2 text-left">{t("headers.time")}</th>
+                <th className="px-3 py-2 text-left">{t("headers.discipline")}</th>
+                <th className="px-3 py-2 text-left">{t("headers.type")}</th>
+                <th className="px-3 py-2 text-left">{t("headers.motif")}</th>
+                <th className="px-3 py-2 text-left">{t("headers.justified")}</th>
               </tr>
             </thead>
             <tbody>
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">Aucune absence ni retard enregistré.</td>
+                  <td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">{t("empty")}</td>
                 </tr>
               ) : (
                 rows.map((r, i) => (
@@ -661,9 +678,9 @@ function HistoryDialog({ student, classLabel, onClose }: { student: Eleve; class
                     <td className="px-3 py-2 text-muted-foreground">{r.date}</td>
                     <td className="px-3 py-2 text-muted-foreground">{r.heure}</td>
                     <td className="px-3 py-2">{r.discipline}</td>
-                    <td className="px-3 py-2"><Badge tone={r.type === "Absence" ? "red" : "gold"}>{r.type}</Badge></td>
+                    <td className="px-3 py-2"><Badge tone={r.type === "Absence" ? "red" : "gold"}>{r.type === "Absence" ? t("typeAbsence") : t("typeLate")}</Badge></td>
                     <td className="px-3 py-2">{r.motif}</td>
-                    <td className="px-3 py-2"><Badge tone={r.justifiee ? "green" : "red"}>{r.justifiee ? "Oui" : "Non"}</Badge></td>
+                    <td className="px-3 py-2"><Badge tone={r.justifiee ? "green" : "red"}>{r.justifiee ? t("yes") : t("no")}</Badge></td>
                   </tr>
                 ))
               )}
@@ -672,11 +689,11 @@ function HistoryDialog({ student, classLabel, onClose }: { student: Eleve; class
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
           <span className="text-muted-foreground">
-            Total : <strong className="text-foreground">{cA}</strong> absence(s), <strong className="text-foreground">{cR}</strong> retard(s)
+            {t("totals", { a: cA, r: cR })}
           </span>
           {cA >= SEUIL_SMS && (
             <span className="flex items-center gap-1.5 rounded-lg bg-ew-gold-100 px-3 py-1.5 text-xs font-semibold text-ew-gold-600">
-              <AlertTriangle className="h-3.5 w-3.5" /> Seuil atteint
+              <AlertTriangle className="h-3.5 w-3.5" /> {t("thresholdReached")}
             </span>
           )}
         </div>

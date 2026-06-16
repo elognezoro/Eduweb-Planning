@@ -580,7 +580,123 @@
     },
     "vieScolaireRegistreAppel": {
       "title": "출석부",
-      "description": "출석, 결석 및 지각 기록."
+      "description": "출석, 결석 및 지각 기록.",
+      "sections": {
+        "bilan": "출석 요약",
+        "liste": "학생 목록",
+        "heatmap": "출석 히트맵"
+      },
+      "filters": {
+        "class": "학급",
+        "discipline": "과목",
+        "session": "수업 시간",
+        "date": "날짜",
+        "search": "검색",
+        "searchPlaceholder": "이름 또는 성…"
+      },
+      "bilan": {
+        "title": "출석 요약",
+        "totalEnrolment": "총 인원",
+        "present": "출석 (P)",
+        "absent": "결석 (A)",
+        "late": "지각 (R)",
+        "encouragements": "격려",
+        "observations": "주의",
+        "infirmary": "보건실",
+        "smsAlerts": "SMS 알림"
+      },
+      "list": {
+        "title": "학생 목록 — {className}",
+        "selectAll": "모두 선택",
+        "selectRow": "{name} 선택",
+        "statusAria": "상태 {key}",
+        "motifPlaceholder": "사유…",
+        "history": "결석 이력 보기",
+        "actions": {
+          "encouragement": "격려",
+          "observation": "주의",
+          "infirmary": "보건실",
+          "sendSms": "SMS 보내기"
+        },
+        "conduiteHint": "프로필에서 계산된 점수 (결석, 지각, 주의, 격려)"
+      },
+      "bulkButtons": {
+        "smsThreshold": "SMS 알림 (≥ {n})",
+        "clear": "지우기"
+      },
+      "footer": {
+        "smsThreshold": "SMS 알림 임계값: 결석 {n}회",
+        "groupSms": "단체 SMS",
+        "save": "저장"
+      },
+      "heatmap": {
+        "title": "출석 히트맵",
+        "description": "일자와 시간대별 출석률"
+      },
+      "actionMeta": {
+        "encLabel": "격려",
+        "encSub": "수업 적극 참여",
+        "obsLabel": "주의",
+        "obsSub": "방해 또는 부적절한 행동",
+        "infLabel": "보건실",
+        "infSub": "보건실 이송"
+      },
+      "actionDialog": {
+        "description": "설명",
+        "aiSuggestion": "AI 제안",
+        "regenerate": "제안 재생성",
+        "aiHint": "학생 프로필에서 생성된 제안 — 자유롭게 편집 가능.",
+        "companion": "동행자 (선택)",
+        "companionPlaceholder": "동행 학생 이름…",
+        "cancel": "취소",
+        "save": "저장",
+        "studentLine": "{class} · {date} · {birth} 출생"
+      },
+      "historyDialog": {
+        "title": "결석 이력",
+        "studentLine": "{name} · {birth} 출생 — {className}",
+        "headers": {
+          "date": "날짜",
+          "time": "시간",
+          "discipline": "과목",
+          "type": "유형",
+          "motif": "사유",
+          "justified": "정당화"
+        },
+        "empty": "기록된 결석이나 지각이 없습니다.",
+        "totals": "총: 결석 {a}회, 지각 {r}회",
+        "thresholdReached": "임계값 도달",
+        "yes": "예",
+        "no": "아니오",
+        "typeAbsence": "결석",
+        "typeLate": "지각"
+      },
+      "smsDialog": {
+        "title": "학부모에게 SMS 보내기",
+        "subtitle": "{classLabel} 학급 · 수신자를 선택하고 메시지를 작성하세요.",
+        "recipients": "수신자",
+        "message": "메시지",
+        "metrics": "{n}자 · {seg} SMS / 학부모 · 수신자 {r}명",
+        "cancel": "취소",
+        "send": "보내기 ({n})",
+        "defaultMessage": "안녕하세요, 자녀에 관한 학교 생활 메시지입니다. 학교로 연락 주세요."
+      },
+      "smsTargets": {
+        "selection": "선택",
+        "wholeClass": "전체 학급",
+        "absents": "결석자",
+        "lates": "지각자",
+        "threshold": "SMS 알림 (≥ {n})"
+      },
+      "toasts": {
+        "actionSaved": "{action} 기록됨",
+        "actionSavedDesc": "{name} · 품행 점수가 재계산되었습니다.",
+        "smsSent": "{name}의 학부모에게 SMS 전송됨",
+        "callSaved": "출석이 기록되었습니다",
+        "callSavedDesc": "출석 {p}, 결석 {a}, 지각 {r}.",
+        "smsBatchSent": "학부모에게 SMS 전송됨",
+        "smsBatchDesc": "{target} · 수신자 {n}명 — 메시지 전송됨."
+      }
     },
     "vieScolaireCahierDeTexte": {
       "title": "수업 일지",

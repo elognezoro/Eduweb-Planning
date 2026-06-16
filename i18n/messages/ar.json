@@ -580,7 +580,123 @@
     },
     "vieScolaireRegistreAppel": {
       "title": "سجل الحضور",
-      "description": "تسجيل الحضور والغياب والتأخر."
+      "description": "تسجيل الحضور والغياب والتأخر.",
+      "sections": {
+        "bilan": "ملخص الحضور",
+        "liste": "قائمة التلاميذ",
+        "heatmap": "خريطة الحضور"
+      },
+      "filters": {
+        "class": "الصف",
+        "discipline": "المادة",
+        "session": "وقت الحصة",
+        "date": "التاريخ",
+        "search": "بحث",
+        "searchPlaceholder": "الاسم أو اللقب…"
+      },
+      "bilan": {
+        "title": "ملخص الحضور",
+        "totalEnrolment": "العدد الإجمالي",
+        "present": "حاضرون (ح)",
+        "absent": "غائبون (غ)",
+        "late": "متأخرون (ت)",
+        "encouragements": "تشجيعات",
+        "observations": "ملاحظات",
+        "infirmary": "العيادة",
+        "smsAlerts": "تنبيهات SMS"
+      },
+      "list": {
+        "title": "قائمة التلاميذ — {className}",
+        "selectAll": "تحديد الكل",
+        "selectRow": "تحديد {name}",
+        "statusAria": "الحالة {key}",
+        "motifPlaceholder": "السبب…",
+        "history": "عرض سجل الغياب",
+        "actions": {
+          "encouragement": "تشجيع",
+          "observation": "ملاحظة",
+          "infirmary": "عيادة",
+          "sendSms": "إرسال SMS"
+        },
+        "conduiteHint": "علامة محسوبة من الملف (الغيابات والتأخرات والملاحظات والتشجيعات)"
+      },
+      "bulkButtons": {
+        "smsThreshold": "تنبيه SMS (≥ {n})",
+        "clear": "مسح"
+      },
+      "footer": {
+        "smsThreshold": "عتبة تنبيه SMS: {n} غيابات",
+        "groupSms": "SMS جماعي",
+        "save": "حفظ"
+      },
+      "heatmap": {
+        "title": "خريطة الحضور",
+        "description": "معدل الحضور حسب اليوم والفترة"
+      },
+      "actionMeta": {
+        "encLabel": "تشجيع",
+        "encSub": "للمشاركة الفعالة في الصف",
+        "obsLabel": "ملاحظة",
+        "obsSub": "للاضطراب أو السلوك غير الملائم",
+        "infLabel": "عيادة",
+        "infSub": "التحويل إلى العيادة"
+      },
+      "actionDialog": {
+        "description": "الوصف",
+        "aiSuggestion": "اقتراح ذكي",
+        "regenerate": "إعادة توليد اقتراح",
+        "aiHint": "اقتراح مولد من ملف التلميذ — قابل للتعديل.",
+        "companion": "مرافق (اختياري)",
+        "companionPlaceholder": "اسم التلميذ المرافق…",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "studentLine": "{class} · {date} · مولود(ة) في {birth}"
+      },
+      "historyDialog": {
+        "title": "سجل الغياب",
+        "studentLine": "{name} · مولود(ة) في {birth} — {className}",
+        "headers": {
+          "date": "التاريخ",
+          "time": "الوقت",
+          "discipline": "المادة",
+          "type": "النوع",
+          "motif": "السبب",
+          "justified": "مبرر"
+        },
+        "empty": "لا غياب ولا تأخر مسجل.",
+        "totals": "الإجمالي: {a} غياب، {r} تأخر",
+        "thresholdReached": "تم بلوغ العتبة",
+        "yes": "نعم",
+        "no": "لا",
+        "typeAbsence": "غياب",
+        "typeLate": "تأخر"
+      },
+      "smsDialog": {
+        "title": "إرسال SMS إلى الأولياء",
+        "subtitle": "الصف {classLabel} · اختر المستلمين واكتب الرسالة.",
+        "recipients": "المستلمون",
+        "message": "الرسالة",
+        "metrics": "{n} حرف · {seg} SMS / ولي · {r} مستلم",
+        "cancel": "إلغاء",
+        "send": "إرسال ({n})",
+        "defaultMessage": "السلام عليكم، رسالة من إدارة الحياة المدرسية بخصوص طفلكم. يرجى الاتصال بالمؤسسة."
+      },
+      "smsTargets": {
+        "selection": "الاختيار",
+        "wholeClass": "الصف كاملًا",
+        "absents": "الغائبون",
+        "lates": "المتأخرون",
+        "threshold": "تنبيه SMS (≥ {n})"
+      },
+      "toasts": {
+        "actionSaved": "تم تسجيل {action}",
+        "actionSavedDesc": "{name} · أعيد حساب علامة السلوك.",
+        "smsSent": "تم إرسال SMS لولي {name}",
+        "callSaved": "تم تسجيل الحضور",
+        "callSavedDesc": "{p} حاضر، {a} غائب، {r} متأخر.",
+        "smsBatchSent": "تم إرسال SMS للأولياء",
+        "smsBatchDesc": "{target} · {n} مستلم — أُرسلت الرسالة."
+      }
     },
     "vieScolaireCahierDeTexte": {
       "title": "دفتر النصوص",

@@ -580,7 +580,123 @@
     },
     "vieScolaireRegistreAppel": {
       "title": "Registre d'appel",
-      "description": "Enregistrement des présences, absences et retards."
+      "description": "Enregistrement des présences, absences et retards.",
+      "sections": {
+        "bilan": "Bilan de l'appel",
+        "liste": "Liste des élèves",
+        "heatmap": "Heatmap de présence"
+      },
+      "filters": {
+        "class": "Classe pédagogique",
+        "discipline": "Discipline (matière)",
+        "session": "Heure de la séance",
+        "date": "Date",
+        "search": "Rechercher",
+        "searchPlaceholder": "Nom ou prénom…"
+      },
+      "bilan": {
+        "title": "Bilan de l'appel",
+        "totalEnrolment": "Effectif total",
+        "present": "Présents (P)",
+        "absent": "Absents (A)",
+        "late": "Retards (R)",
+        "encouragements": "Encouragements",
+        "observations": "Observations",
+        "infirmary": "Infirmerie",
+        "smsAlerts": "Alertes SMS"
+      },
+      "list": {
+        "title": "Liste des élèves — {className}",
+        "selectAll": "Tout sélectionner",
+        "selectRow": "Sélectionner {name}",
+        "statusAria": "Statut {key}",
+        "motifPlaceholder": "Motif…",
+        "history": "Voir l'historique d'absences",
+        "actions": {
+          "encouragement": "Encouragement",
+          "observation": "Observation",
+          "infirmary": "Infirmerie",
+          "sendSms": "Envoyer un SMS"
+        },
+        "conduiteHint": "Note calculée d'après le profil (absences, retards, observations, encouragements)"
+      },
+      "bulkButtons": {
+        "smsThreshold": "Alerte SMS (≥ {n})",
+        "clear": "Effacer"
+      },
+      "footer": {
+        "smsThreshold": "Seuil d'alerte SMS : {n} absences",
+        "groupSms": "SMS groupé",
+        "save": "Enregistrer"
+      },
+      "heatmap": {
+        "title": "Heatmap de présence",
+        "description": "Taux de présence par jour et créneau"
+      },
+      "actionMeta": {
+        "encLabel": "Encouragement",
+        "encSub": "Pour participation active en classe",
+        "obsLabel": "Observation",
+        "obsSub": "Pour perturbation ou comportement inadapté",
+        "infLabel": "Infirmerie",
+        "infSub": "Admission à l'infirmerie"
+      },
+      "actionDialog": {
+        "description": "Description",
+        "aiSuggestion": "Suggestion IA",
+        "regenerate": "Régénérer une suggestion",
+        "aiHint": "Suggestion générée selon le profil de l'élève — librement modifiable.",
+        "companion": "Accompagnateur (optionnel)",
+        "companionPlaceholder": "Nom de l'élève accompagnateur…",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "studentLine": "{class} · {date} · né(e) le {birth}"
+      },
+      "historyDialog": {
+        "title": "Historique d'absences",
+        "studentLine": "{name} · né(e) le {birth} — {className}",
+        "headers": {
+          "date": "Date",
+          "time": "Heure",
+          "discipline": "Discipline",
+          "type": "Type",
+          "motif": "Motif",
+          "justified": "Justifiée"
+        },
+        "empty": "Aucune absence ni retard enregistré.",
+        "totals": "Total : {a} absence(s), {r} retard(s)",
+        "thresholdReached": "Seuil atteint",
+        "yes": "Oui",
+        "no": "Non",
+        "typeAbsence": "Absence",
+        "typeLate": "Retard"
+      },
+      "smsDialog": {
+        "title": "Envoyer un SMS aux parents",
+        "subtitle": "Classe {classLabel} · choisissez les destinataires et rédigez le message.",
+        "recipients": "Destinataires",
+        "message": "Message",
+        "metrics": "{n} caractère(s) · {seg} SMS / parent · {r} destinataire(s)",
+        "cancel": "Annuler",
+        "send": "Envoyer ({n})",
+        "defaultMessage": "Bonjour, message de la vie scolaire concernant votre enfant. Merci de prendre contact avec l'établissement."
+      },
+      "smsTargets": {
+        "selection": "Sélection",
+        "wholeClass": "Toute la classe",
+        "absents": "Absents",
+        "lates": "Retards",
+        "threshold": "Alerte SMS (≥ {n})"
+      },
+      "toasts": {
+        "actionSaved": "{action} enregistré(e)",
+        "actionSavedDesc": "{name} · conduite recalculée.",
+        "smsSent": "SMS envoyé au parent de {name}",
+        "callSaved": "Appel enregistré",
+        "callSavedDesc": "{p} présent(s), {a} absent(s), {r} retard(s).",
+        "smsBatchSent": "SMS envoyé aux parents",
+        "smsBatchDesc": "{target} · {n} destinataire(s) — message transmis."
+      }
     },
     "vieScolaireCahierDeTexte": {
       "title": "Cahier de texte",

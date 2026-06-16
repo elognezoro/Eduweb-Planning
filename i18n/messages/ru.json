@@ -580,7 +580,123 @@
     },
     "vieScolaireRegistreAppel": {
       "title": "Журнал посещаемости",
-      "description": "Регистрация присутствия, отсутствия и опозданий."
+      "description": "Регистрация присутствия, отсутствия и опозданий.",
+      "sections": {
+        "bilan": "Сводка посещаемости",
+        "liste": "Список учеников",
+        "heatmap": "Тепловая карта посещаемости"
+      },
+      "filters": {
+        "class": "Класс",
+        "discipline": "Предмет",
+        "session": "Время урока",
+        "date": "Дата",
+        "search": "Поиск",
+        "searchPlaceholder": "Имя или фамилия…"
+      },
+      "bilan": {
+        "title": "Сводка посещаемости",
+        "totalEnrolment": "Всего учеников",
+        "present": "Присутствуют (П)",
+        "absent": "Отсутствуют (О)",
+        "late": "Опоздали (З)",
+        "encouragements": "Поощрения",
+        "observations": "Замечания",
+        "infirmary": "Медпункт",
+        "smsAlerts": "SMS-оповещения"
+      },
+      "list": {
+        "title": "Список учеников — {className}",
+        "selectAll": "Выбрать всех",
+        "selectRow": "Выбрать {name}",
+        "statusAria": "Статус {key}",
+        "motifPlaceholder": "Причина…",
+        "history": "Просмотр истории отсутствий",
+        "actions": {
+          "encouragement": "Поощрение",
+          "observation": "Замечание",
+          "infirmary": "Медпункт",
+          "sendSms": "Отправить SMS"
+        },
+        "conduiteHint": "Оценка рассчитана по профилю (отсутствия, опоздания, замечания, поощрения)"
+      },
+      "bulkButtons": {
+        "smsThreshold": "SMS-оповещение (≥ {n})",
+        "clear": "Очистить"
+      },
+      "footer": {
+        "smsThreshold": "Порог SMS-оповещения: {n} отсутствий",
+        "groupSms": "Групповое SMS",
+        "save": "Сохранить"
+      },
+      "heatmap": {
+        "title": "Тепловая карта посещаемости",
+        "description": "Посещаемость по дням и слотам"
+      },
+      "actionMeta": {
+        "encLabel": "Поощрение",
+        "encSub": "За активное участие в уроке",
+        "obsLabel": "Замечание",
+        "obsSub": "За нарушение или неподобающее поведение",
+        "infLabel": "Медпункт",
+        "infSub": "Направление в медпункт"
+      },
+      "actionDialog": {
+        "description": "Описание",
+        "aiSuggestion": "AI-подсказка",
+        "regenerate": "Сгенерировать подсказку",
+        "aiHint": "Подсказка из профиля ученика — свободно редактируется.",
+        "companion": "Сопровождающий (необязательно)",
+        "companionPlaceholder": "Имя сопровождающего ученика…",
+        "cancel": "Отмена",
+        "save": "Сохранить",
+        "studentLine": "{class} · {date} · род. {birth}"
+      },
+      "historyDialog": {
+        "title": "История отсутствий",
+        "studentLine": "{name} · род. {birth} — {className}",
+        "headers": {
+          "date": "Дата",
+          "time": "Время",
+          "discipline": "Предмет",
+          "type": "Тип",
+          "motif": "Причина",
+          "justified": "Оправдано"
+        },
+        "empty": "Отсутствий и опозданий не зарегистрировано.",
+        "totals": "Всего: {a} отсутствий, {r} опозданий",
+        "thresholdReached": "Достигнут порог",
+        "yes": "Да",
+        "no": "Нет",
+        "typeAbsence": "Отсутствие",
+        "typeLate": "Опоздание"
+      },
+      "smsDialog": {
+        "title": "Отправить SMS родителям",
+        "subtitle": "Класс {classLabel} · выберите получателей и составьте сообщение.",
+        "recipients": "Получатели",
+        "message": "Сообщение",
+        "metrics": "{n} символ(ов) · {seg} SMS / родитель · {r} получатель(ей)",
+        "cancel": "Отмена",
+        "send": "Отправить ({n})",
+        "defaultMessage": "Здравствуйте, сообщение от школьной жизни относительно вашего ребёнка. Пожалуйста, свяжитесь со школой."
+      },
+      "smsTargets": {
+        "selection": "Выбор",
+        "wholeClass": "Весь класс",
+        "absents": "Отсутствующие",
+        "lates": "Опоздавшие",
+        "threshold": "SMS-оповещение (≥ {n})"
+      },
+      "toasts": {
+        "actionSaved": "{action} записано",
+        "actionSavedDesc": "{name} · оценка поведения пересчитана.",
+        "smsSent": "SMS отправлено родителю {name}",
+        "callSaved": "Посещаемость записана",
+        "callSavedDesc": "{p} присутствуют, {a} отсутствуют, {r} опоздали.",
+        "smsBatchSent": "SMS отправлено родителям",
+        "smsBatchDesc": "{target} · {n} получатель(ей) — сообщение отправлено."
+      }
     },
     "vieScolaireCahierDeTexte": {
       "title": "Журнал уроков",

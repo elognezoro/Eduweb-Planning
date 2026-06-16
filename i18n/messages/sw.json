@@ -580,7 +580,123 @@
     },
     "vieScolaireRegistreAppel": {
       "title": "Sajili ya mahudhurio",
-      "description": "Rekodi mahudhurio, utoro na kuchelewa."
+      "description": "Rekodi mahudhurio, utoro na kuchelewa.",
+      "sections": {
+        "bilan": "Muhtasari wa mahudhurio",
+        "liste": "Orodha ya wanafunzi",
+        "heatmap": "Ramani ya mahudhurio"
+      },
+      "filters": {
+        "class": "Darasa",
+        "discipline": "Somo",
+        "session": "Wakati wa kipindi",
+        "date": "Tarehe",
+        "search": "Tafuta",
+        "searchPlaceholder": "Jina au jina la ukoo…"
+      },
+      "bilan": {
+        "title": "Muhtasari wa mahudhurio",
+        "totalEnrolment": "Jumla ya wanafunzi",
+        "present": "Wapo (P)",
+        "absent": "Hawapo (A)",
+        "late": "Wamechelewa (R)",
+        "encouragements": "Mahimizo",
+        "observations": "Maelezo",
+        "infirmary": "Zahanati",
+        "smsAlerts": "Tahadhari za SMS"
+      },
+      "list": {
+        "title": "Orodha ya wanafunzi — {className}",
+        "selectAll": "Chagua zote",
+        "selectRow": "Chagua {name}",
+        "statusAria": "Hali {key}",
+        "motifPlaceholder": "Sababu…",
+        "history": "Ona historia ya utoro",
+        "actions": {
+          "encouragement": "Himiza",
+          "observation": "Maelezo",
+          "infirmary": "Zahanati",
+          "sendSms": "Tuma SMS"
+        },
+        "conduiteHint": "Alama imehesabiwa kutoka kwa wasifu (utoro, kuchelewa, maelezo, mahimizo)"
+      },
+      "bulkButtons": {
+        "smsThreshold": "Tahadhari ya SMS (≥ {n})",
+        "clear": "Futa"
+      },
+      "footer": {
+        "smsThreshold": "Kiwango cha tahadhari ya SMS: utoro {n}",
+        "groupSms": "SMS ya kikundi",
+        "save": "Hifadhi"
+      },
+      "heatmap": {
+        "title": "Ramani ya mahudhurio",
+        "description": "Kiwango cha mahudhurio kwa siku na kipindi"
+      },
+      "actionMeta": {
+        "encLabel": "Himiza",
+        "encSub": "Kwa ushiriki hai darasani",
+        "obsLabel": "Maelezo",
+        "obsSub": "Kwa usumbufu au tabia isiyofaa",
+        "infLabel": "Zahanati",
+        "infSub": "Kupelekwa zahanati"
+      },
+      "actionDialog": {
+        "description": "Maelezo",
+        "aiSuggestion": "Pendekezo la AI",
+        "regenerate": "Tengeneza pendekezo jipya",
+        "aiHint": "Pendekezo limetengenezwa kutoka wasifu wa mwanafunzi — linaweza kuhaririwa.",
+        "companion": "Msindikizaji (hiari)",
+        "companionPlaceholder": "Jina la mwanafunzi msindikizaji…",
+        "cancel": "Ghairi",
+        "save": "Hifadhi",
+        "studentLine": "{class} · {date} · alizaliwa {birth}"
+      },
+      "historyDialog": {
+        "title": "Historia ya utoro",
+        "studentLine": "{name} · alizaliwa {birth} — {className}",
+        "headers": {
+          "date": "Tarehe",
+          "time": "Saa",
+          "discipline": "Somo",
+          "type": "Aina",
+          "motif": "Sababu",
+          "justified": "Imehalalishwa"
+        },
+        "empty": "Hakuna utoro wala kuchelewa kulikorekodiwa.",
+        "totals": "Jumla: {a} utoro, {r} kuchelewa",
+        "thresholdReached": "Kiwango kimefikiwa",
+        "yes": "Ndiyo",
+        "no": "Hapana",
+        "typeAbsence": "Utoro",
+        "typeLate": "Kuchelewa"
+      },
+      "smsDialog": {
+        "title": "Tuma SMS kwa wazazi",
+        "subtitle": "Darasa {classLabel} · chagua wapokeaji na uandike ujumbe.",
+        "recipients": "Wapokeaji",
+        "message": "Ujumbe",
+        "metrics": "Herufi {n} · SMS {seg} / mzazi · wapokeaji {r}",
+        "cancel": "Ghairi",
+        "send": "Tuma ({n})",
+        "defaultMessage": "Habari, ujumbe wa maisha ya shule kuhusu mtoto wako. Tafadhali wasiliana na shule."
+      },
+      "smsTargets": {
+        "selection": "Uchaguzi",
+        "wholeClass": "Darasa lote",
+        "absents": "Waliotoroka",
+        "lates": "Waliochelewa",
+        "threshold": "Tahadhari ya SMS (≥ {n})"
+      },
+      "toasts": {
+        "actionSaved": "{action} imerekodiwa",
+        "actionSavedDesc": "{name} · alama ya tabia imehesabiwa upya.",
+        "smsSent": "SMS imetumwa kwa mzazi wa {name}",
+        "callSaved": "Mahudhurio yamerekodiwa",
+        "callSavedDesc": "{p} wapo, {a} hawapo, {r} wamechelewa.",
+        "smsBatchSent": "SMS imetumwa kwa wazazi",
+        "smsBatchDesc": "{target} · wapokeaji {n} — ujumbe umetumwa."
+      }
     },
     "vieScolaireCahierDeTexte": {
       "title": "Daftari la masomo",

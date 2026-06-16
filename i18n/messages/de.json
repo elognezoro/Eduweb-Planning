@@ -580,7 +580,123 @@
     },
     "vieScolaireRegistreAppel": {
       "title": "Anwesenheitsregister",
-      "description": "Anwesenheit, Abwesenheit und Verspätungen erfassen."
+      "description": "Anwesenheit, Abwesenheit und Verspätungen erfassen.",
+      "sections": {
+        "bilan": "Anwesenheitsübersicht",
+        "liste": "Schülerliste",
+        "heatmap": "Anwesenheits-Heatmap"
+      },
+      "filters": {
+        "class": "Klasse",
+        "discipline": "Fach",
+        "session": "Stundenzeit",
+        "date": "Datum",
+        "search": "Suchen",
+        "searchPlaceholder": "Vor- oder Nachname…"
+      },
+      "bilan": {
+        "title": "Anwesenheitsübersicht",
+        "totalEnrolment": "Gesamtzahl",
+        "present": "Anwesend (A)",
+        "absent": "Abwesend (F)",
+        "late": "Verspätet (V)",
+        "encouragements": "Lobeinträge",
+        "observations": "Tadel",
+        "infirmary": "Krankenstation",
+        "smsAlerts": "SMS-Warnungen"
+      },
+      "list": {
+        "title": "Schülerliste — {className}",
+        "selectAll": "Alle auswählen",
+        "selectRow": "{name} auswählen",
+        "statusAria": "Status {key}",
+        "motifPlaceholder": "Grund…",
+        "history": "Anwesenheitsverlauf anzeigen",
+        "actions": {
+          "encouragement": "Lob",
+          "observation": "Tadel",
+          "infirmary": "Krankenstation",
+          "sendSms": "SMS senden"
+        },
+        "conduiteHint": "Aus dem Profil berechnete Note (Abwesenheit, Verspätung, Tadel, Lob)"
+      },
+      "bulkButtons": {
+        "smsThreshold": "SMS-Warnung (≥ {n})",
+        "clear": "Leeren"
+      },
+      "footer": {
+        "smsThreshold": "SMS-Warnungsschwelle: {n} Abwesenheiten",
+        "groupSms": "Sammel-SMS",
+        "save": "Speichern"
+      },
+      "heatmap": {
+        "title": "Anwesenheits-Heatmap",
+        "description": "Anwesenheitsquote pro Tag und Slot"
+      },
+      "actionMeta": {
+        "encLabel": "Lob",
+        "encSub": "Für aktive Unterrichtsbeteiligung",
+        "obsLabel": "Tadel",
+        "obsSub": "Für Störung oder unangemessenes Verhalten",
+        "infLabel": "Krankenstation",
+        "infSub": "Einweisung in die Krankenstation"
+      },
+      "actionDialog": {
+        "description": "Beschreibung",
+        "aiSuggestion": "KI-Vorschlag",
+        "regenerate": "Vorschlag neu generieren",
+        "aiHint": "Aus dem Schülerprofil generierter Vorschlag — frei bearbeitbar.",
+        "companion": "Begleiter (optional)",
+        "companionPlaceholder": "Name des begleitenden Schülers…",
+        "cancel": "Abbrechen",
+        "save": "Speichern",
+        "studentLine": "{class} · {date} · geb. am {birth}"
+      },
+      "historyDialog": {
+        "title": "Anwesenheitsverlauf",
+        "studentLine": "{name} · geb. am {birth} — {className}",
+        "headers": {
+          "date": "Datum",
+          "time": "Zeit",
+          "discipline": "Fach",
+          "type": "Typ",
+          "motif": "Grund",
+          "justified": "Entschuldigt"
+        },
+        "empty": "Keine Abwesenheit oder Verspätung erfasst.",
+        "totals": "Gesamt: {a} Abwesenheit(en), {r} Verspätung(en)",
+        "thresholdReached": "Schwelle erreicht",
+        "yes": "Ja",
+        "no": "Nein",
+        "typeAbsence": "Abwesenheit",
+        "typeLate": "Verspätung"
+      },
+      "smsDialog": {
+        "title": "SMS an Eltern senden",
+        "subtitle": "Klasse {classLabel} · Empfänger wählen und Nachricht verfassen.",
+        "recipients": "Empfänger",
+        "message": "Nachricht",
+        "metrics": "{n} Zeichen · {seg} SMS / Elternteil · {r} Empfänger",
+        "cancel": "Abbrechen",
+        "send": "Senden ({n})",
+        "defaultMessage": "Hallo, Nachricht der Schulleitung bezüglich Ihres Kindes. Bitte kontaktieren Sie die Schule."
+      },
+      "smsTargets": {
+        "selection": "Auswahl",
+        "wholeClass": "Ganze Klasse",
+        "absents": "Abwesende",
+        "lates": "Verspätete",
+        "threshold": "SMS-Warnung (≥ {n})"
+      },
+      "toasts": {
+        "actionSaved": "{action} erfasst",
+        "actionSavedDesc": "{name} · Verhaltensnote neu berechnet.",
+        "smsSent": "SMS an die Eltern von {name} gesendet",
+        "callSaved": "Anwesenheit erfasst",
+        "callSavedDesc": "{p} anwesend, {a} abwesend, {r} verspätet.",
+        "smsBatchSent": "SMS an Eltern gesendet",
+        "smsBatchDesc": "{target} · {n} Empfänger — Nachricht gesendet."
+      }
     },
     "vieScolaireCahierDeTexte": {
       "title": "Klassenbuch",

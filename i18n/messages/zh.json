@@ -580,7 +580,123 @@
     },
     "vieScolaireRegistreAppel": {
       "title": "考勤册",
-      "description": "记录出勤、缺勤和迟到。"
+      "description": "记录出勤、缺勤和迟到。",
+      "sections": {
+        "bilan": "考勤摘要",
+        "liste": "学生列表",
+        "heatmap": "考勤热图"
+      },
+      "filters": {
+        "class": "班级",
+        "discipline": "学科",
+        "session": "课节时间",
+        "date": "日期",
+        "search": "搜索",
+        "searchPlaceholder": "姓或名…"
+      },
+      "bilan": {
+        "title": "考勤摘要",
+        "totalEnrolment": "总人数",
+        "present": "出勤 (P)",
+        "absent": "缺勤 (A)",
+        "late": "迟到 (R)",
+        "encouragements": "表扬",
+        "observations": "批评",
+        "infirmary": "医务室",
+        "smsAlerts": "短信提醒"
+      },
+      "list": {
+        "title": "学生列表 — {className}",
+        "selectAll": "全选",
+        "selectRow": "选择 {name}",
+        "statusAria": "状态 {key}",
+        "motifPlaceholder": "原因…",
+        "history": "查看缺勤历史",
+        "actions": {
+          "encouragement": "表扬",
+          "observation": "批评",
+          "infirmary": "医务室",
+          "sendSms": "发送短信"
+        },
+        "conduiteHint": "根据档案计算的分数（缺勤、迟到、批评、表扬）"
+      },
+      "bulkButtons": {
+        "smsThreshold": "短信提醒 (≥ {n})",
+        "clear": "清除"
+      },
+      "footer": {
+        "smsThreshold": "短信提醒阈值：{n} 次缺勤",
+        "groupSms": "群发短信",
+        "save": "保存"
+      },
+      "heatmap": {
+        "title": "考勤热图",
+        "description": "按日期和时段的出勤率"
+      },
+      "actionMeta": {
+        "encLabel": "表扬",
+        "encSub": "课堂积极参与",
+        "obsLabel": "批评",
+        "obsSub": "扰乱或行为不当",
+        "infLabel": "医务室",
+        "infSub": "进入医务室"
+      },
+      "actionDialog": {
+        "description": "描述",
+        "aiSuggestion": "AI 建议",
+        "regenerate": "重新生成建议",
+        "aiHint": "根据学生档案生成的建议——可自由编辑。",
+        "companion": "陪同人员（可选）",
+        "companionPlaceholder": "陪同学生姓名…",
+        "cancel": "取消",
+        "save": "保存",
+        "studentLine": "{class} · {date} · {birth} 出生"
+      },
+      "historyDialog": {
+        "title": "缺勤历史",
+        "studentLine": "{name} · {birth} 出生 — {className}",
+        "headers": {
+          "date": "日期",
+          "time": "时间",
+          "discipline": "学科",
+          "type": "类型",
+          "motif": "原因",
+          "justified": "已证明"
+        },
+        "empty": "无缺勤或迟到记录。",
+        "totals": "总计：{a} 次缺勤，{r} 次迟到",
+        "thresholdReached": "已达阈值",
+        "yes": "是",
+        "no": "否",
+        "typeAbsence": "缺勤",
+        "typeLate": "迟到"
+      },
+      "smsDialog": {
+        "title": "向家长发送短信",
+        "subtitle": "班级 {classLabel} · 选择收件人并撰写消息。",
+        "recipients": "收件人",
+        "message": "消息",
+        "metrics": "{n} 字符 · {seg} 短信 / 家长 · {r} 名收件人",
+        "cancel": "取消",
+        "send": "发送 ({n})",
+        "defaultMessage": "您好，这是关于您孩子的学校生活消息。请联系学校。"
+      },
+      "smsTargets": {
+        "selection": "选择",
+        "wholeClass": "全班",
+        "absents": "缺勤者",
+        "lates": "迟到者",
+        "threshold": "短信提醒 (≥ {n})"
+      },
+      "toasts": {
+        "actionSaved": "{action} 已记录",
+        "actionSavedDesc": "{name} · 行为分已重新计算。",
+        "smsSent": "已向 {name} 的家长发送短信",
+        "callSaved": "考勤已记录",
+        "callSavedDesc": "{p} 出勤，{a} 缺勤，{r} 迟到。",
+        "smsBatchSent": "已向家长发送短信",
+        "smsBatchDesc": "{target} · {n} 名收件人——消息已发送。"
+      }
     },
     "vieScolaireCahierDeTexte": {
       "title": "课程记录",

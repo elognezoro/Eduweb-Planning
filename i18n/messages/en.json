@@ -580,7 +580,123 @@
     },
     "vieScolaireRegistreAppel": {
       "title": "Attendance register",
-      "description": "Record presences, absences and lateness."
+      "description": "Record presences, absences and lateness.",
+      "sections": {
+        "bilan": "Attendance summary",
+        "liste": "Student list",
+        "heatmap": "Attendance heatmap"
+      },
+      "filters": {
+        "class": "Class",
+        "discipline": "Subject",
+        "session": "Session time",
+        "date": "Date",
+        "search": "Search",
+        "searchPlaceholder": "First or last name…"
+      },
+      "bilan": {
+        "title": "Attendance summary",
+        "totalEnrolment": "Total enrolment",
+        "present": "Present (P)",
+        "absent": "Absent (A)",
+        "late": "Late (R)",
+        "encouragements": "Encouragements",
+        "observations": "Observations",
+        "infirmary": "Infirmary",
+        "smsAlerts": "SMS alerts"
+      },
+      "list": {
+        "title": "Student list — {className}",
+        "selectAll": "Select all",
+        "selectRow": "Select {name}",
+        "statusAria": "Status {key}",
+        "motifPlaceholder": "Reason…",
+        "history": "View absence history",
+        "actions": {
+          "encouragement": "Encouragement",
+          "observation": "Observation",
+          "infirmary": "Infirmary",
+          "sendSms": "Send SMS"
+        },
+        "conduiteHint": "Score computed from profile (absences, lateness, observations, encouragements)"
+      },
+      "bulkButtons": {
+        "smsThreshold": "SMS alert (≥ {n})",
+        "clear": "Clear"
+      },
+      "footer": {
+        "smsThreshold": "SMS alert threshold: {n} absences",
+        "groupSms": "Group SMS",
+        "save": "Save"
+      },
+      "heatmap": {
+        "title": "Attendance heatmap",
+        "description": "Attendance rate by day and slot"
+      },
+      "actionMeta": {
+        "encLabel": "Encouragement",
+        "encSub": "For active class participation",
+        "obsLabel": "Observation",
+        "obsSub": "For disruption or inappropriate behaviour",
+        "infLabel": "Infirmary",
+        "infSub": "Admission to the infirmary"
+      },
+      "actionDialog": {
+        "description": "Description",
+        "aiSuggestion": "AI suggestion",
+        "regenerate": "Regenerate a suggestion",
+        "aiHint": "Suggestion generated from the student profile — freely editable.",
+        "companion": "Companion (optional)",
+        "companionPlaceholder": "Companion student's name…",
+        "cancel": "Cancel",
+        "save": "Save",
+        "studentLine": "{class} · {date} · born {birth}"
+      },
+      "historyDialog": {
+        "title": "Absence history",
+        "studentLine": "{name} · born {birth} — {className}",
+        "headers": {
+          "date": "Date",
+          "time": "Time",
+          "discipline": "Subject",
+          "type": "Type",
+          "motif": "Reason",
+          "justified": "Justified"
+        },
+        "empty": "No absence or lateness recorded.",
+        "totals": "Total: {a} absence(s), {r} lateness(es)",
+        "thresholdReached": "Threshold reached",
+        "yes": "Yes",
+        "no": "No",
+        "typeAbsence": "Absence",
+        "typeLate": "Lateness"
+      },
+      "smsDialog": {
+        "title": "Send an SMS to parents",
+        "subtitle": "Class {classLabel} · choose recipients and write the message.",
+        "recipients": "Recipients",
+        "message": "Message",
+        "metrics": "{n} character(s) · {seg} SMS / parent · {r} recipient(s)",
+        "cancel": "Cancel",
+        "send": "Send ({n})",
+        "defaultMessage": "Hello, message from school life regarding your child. Please contact the school."
+      },
+      "smsTargets": {
+        "selection": "Selection",
+        "wholeClass": "Whole class",
+        "absents": "Absent",
+        "lates": "Late",
+        "threshold": "SMS alert (≥ {n})"
+      },
+      "toasts": {
+        "actionSaved": "{action} recorded",
+        "actionSavedDesc": "{name} · conduct score recalculated.",
+        "smsSent": "SMS sent to {name}'s parent",
+        "callSaved": "Attendance recorded",
+        "callSavedDesc": "{p} present, {a} absent, {r} late.",
+        "smsBatchSent": "SMS sent to parents",
+        "smsBatchDesc": "{target} · {n} recipient(s) — message sent."
+      }
     },
     "vieScolaireCahierDeTexte": {
       "title": "Lesson book",
