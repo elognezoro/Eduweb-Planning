@@ -134,8 +134,12 @@ export function ManuelPage({
 
 function RunningHeader({ left, right }: { left: string; right: string }) {
   return (
-    <div className="mb-6 flex items-center justify-between border-b-2 border-gray-800 pb-2 text-[9px] uppercase tracking-[0.18em] text-gray-700">
-      <span className="font-bold">{left}</span>
+    <div className="mb-6 flex items-center justify-between gap-3 border-b-2 border-gray-800 pb-2 text-[9px] uppercase tracking-[0.18em] text-gray-700">
+      <span className="flex items-center gap-2">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/logo.png" alt="EduWeb Planner" className="h-5 w-5 object-contain" />
+        <span className="font-bold">{left}</span>
+      </span>
       <span className="text-gray-500">{right}</span>
     </div>
   );
@@ -165,8 +169,18 @@ export function ManuelCover({
         <p className="mt-3 font-bold">Ministère de l'Éducation Nationale</p>
       </div>
 
+      {/* Logo officiel — pièce maîtresse de la couverture */}
+      <div className="mt-8 flex flex-col items-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/brand/logo.png"
+          alt="Logo EduWeb Planner"
+          className="h-32 w-32 object-contain drop-shadow-sm"
+        />
+      </div>
+
       {/* Identifiant du document */}
-      <div className="mt-10 text-center">
+      <div className="mt-6 text-center">
         <p className="font-display text-[10px] font-bold uppercase tracking-[0.3em] text-ew-gold-600">
           Document de référence pédagogique
         </p>

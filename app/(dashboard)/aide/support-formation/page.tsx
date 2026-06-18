@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Printer, ListTree } from "lucide-react";
+import { ArrowLeft, Printer, ListTree, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   ManuelCover,
@@ -176,14 +176,19 @@ export default function SupportFormationPage() {
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" asChild>
             <a href="#manuel-print">
               <ListTree className="h-4 w-4" /> Aller au manuel
             </a>
           </Button>
+          <Button size="sm" variant="outline" asChild>
+            <a href="/api/docx/training-manual">
+              <FileDown className="h-4 w-4" /> Télécharger Word (.docx)
+            </a>
+          </Button>
           <Button size="sm" onClick={() => window.print()}>
-            <Printer className="h-4 w-4" /> Télécharger le PDF
+            <Printer className="h-4 w-4" /> Télécharger PDF
           </Button>
         </div>
       </div>

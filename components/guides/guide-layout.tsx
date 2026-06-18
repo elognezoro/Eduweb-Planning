@@ -17,6 +17,7 @@ import {
   Clock,
   Users,
   GraduationCap,
+  FileDown,
   type LucideIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -87,18 +88,19 @@ export interface GuideContent {
 export function GuideHeader({ guide }: { guide: GuideContent }) {
   const Icon = guide.icon;
   return (
-    <header className="rounded-2xl border border-border bg-gradient-to-br from-ew-green-700 via-ew-green-800 to-ew-green-950 p-6 text-white shadow-sm sm:p-8">
+    <header className="rounded-2xl border border-border bg-gradient-to-br from-ew-green-700 via-ew-green-800 to-ew-green-950 p-6 text-white shadow-sm sm:p-8 print:rounded-none print:border-b-4 print:border-b-ew-gold-500">
       <Link
         href="/aide"
-        className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ew-gold-100 transition-colors hover:text-ew-gold-500"
+        className="no-print inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ew-gold-100 transition-colors hover:text-ew-gold-500"
       >
         <ArrowLeft className="h-3 w-3" />
         Retour à la bibliothèque des guides
       </Link>
 
       <div className="mt-3 flex items-start gap-4">
-        <span className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-inset ring-white/20 sm:flex">
-          <Icon className="h-7 w-7 text-ew-gold-500" />
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white p-1 ring-1 ring-inset ring-white/20">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo.png" alt="EduWeb Planner" className="h-full w-full object-contain" />
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ew-gold-100/80">Guide de formation</p>
@@ -113,6 +115,10 @@ export function GuideHeader({ guide }: { guide: GuideContent }) {
             {guide.meta.context && <MetaPill icon={Users} label="Quand" value={guide.meta.context} />}
           </div>
         </div>
+        {/* L'icône thématique reste accessible mais à droite */}
+        <span className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-inset ring-white/20 lg:flex print:hidden">
+          <Icon className="h-7 w-7 text-ew-gold-500" />
+        </span>
       </div>
     </header>
   );
@@ -371,7 +377,7 @@ export function Glossary({ glossary }: { glossary: GuideGlossaryEntry[] }) {
 /* -------------------------------------------------------------------------- */
 /*  Pied de page : impression, retour                                         */
 /* -------------------------------------------------------------------------- */
-export function GuideFooter({ roleLabel }: { roleLabel: string }) {
+export function GuideFooter({ roleLabel, roleKey }: { roleLabel: string; roleKey?: string }) {
   return (
     <footer className="rounded-2xl border border-border bg-muted/30 p-5 text-sm text-muted-foreground">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -380,9 +386,16 @@ export function GuideFooter({ roleLabel }: { roleLabel: string }) {
           Fin du guide de formation —{" "}
           <span className="font-semibold text-foreground">{roleLabel}</span>
         </p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {roleKey && (
+            <Button variant="outline" size="sm" asChild>
+              <a href={`/api/docx/guide/${roleKey}`}>
+                <FileDown className="h-4 w-4" /> Télécharger Word (.docx)
+              </a>
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={() => window.print()}>
-            <Printer className="h-4 w-4" /> Imprimer ce guide
+            <Printer className="h-4 w-4" /> Imprimer en PDF
           </Button>
           <Button variant="outline" size="sm" asChild>
             <Link href="/aide">
@@ -411,7 +424,7 @@ export function GuideArticle({ guide }: { guide: GuideContent }) {
       </div>
       <FaqList faq={guide.faq} />
       <Glossary glossary={guide.glossary} />
-      <GuideFooter roleLabel={guide.roleLabel} />
+      <GuideFooter roleLabel={guide.roleLabel} roleKey={guide.roleKey} />
     </article>
   );
 }

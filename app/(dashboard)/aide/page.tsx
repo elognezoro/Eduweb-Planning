@@ -12,6 +12,7 @@ import {
   Filter,
   Download,
   FileText,
+  FileDown,
 } from "lucide-react";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Badge } from "@/components/ui/badge";
@@ -247,29 +248,43 @@ function GuideCard({ guideKey }: { guideKey: string }) {
 /* ---------------------------------------------------------------------- */
 function DownloadManualBanner() {
   return (
-    <Link
-      href="/aide/support-formation"
-      className="group flex flex-wrap items-center gap-4 overflow-hidden rounded-2xl border border-ew-gold-500/40 bg-gradient-to-r from-ew-gold-100/60 via-card to-card p-5 shadow-sm transition-all hover:border-ew-gold-500 hover:shadow-lg"
-    >
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ew-gold-500/15 text-ew-gold-600 ring-1 ring-inset ring-ew-gold-500/30">
-        <FileText className="h-6 w-6" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-ew-gold-600">
-          Manuel académique complet
-        </p>
-        <p className="mt-0.5 font-display text-lg font-bold text-foreground">
-          Support de formation officiel — PDF à télécharger
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Syllabus, 8 modules de formation (un par rôle), auto-évaluations, exercices pratiques, grille de
-          progression et glossaire général — mise en page A4 conforme aux standards académiques.
-        </p>
+    <div className="overflow-hidden rounded-2xl border border-ew-gold-500/40 bg-gradient-to-r from-ew-gold-100/60 via-card to-card p-5 shadow-sm">
+      <div className="flex flex-wrap items-center gap-4">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ew-gold-500/15 text-ew-gold-600 ring-1 ring-inset ring-ew-gold-500/30">
+          <FileText className="h-6 w-6" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-ew-gold-600">
+            Manuel académique complet
+          </p>
+          <p className="mt-0.5 font-display text-lg font-bold text-foreground">
+            Support de formation officiel
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Syllabus, 8 modules de formation (un par rôle), auto-évaluations, exercices pratiques, grille de
+            progression et glossaire général — mise en page A4 conforme aux standards académiques.
+          </p>
+        </div>
       </div>
-      <span className="inline-flex items-center gap-2 rounded-lg bg-ew-green-700 px-4 py-2 text-sm font-semibold text-white transition-transform group-hover:scale-[1.03]">
-        <Download className="h-4 w-4" /> Ouvrir le manuel
-      </span>
-    </Link>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link
+          href="/aide/support-formation"
+          className="inline-flex items-center gap-2 rounded-lg bg-ew-green-700 px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+        >
+          <BookOpen className="h-4 w-4" /> Consulter & imprimer (PDF)
+        </Link>
+        <a
+          href="/api/docx/training-manual"
+          className="inline-flex items-center gap-2 rounded-lg border border-ew-green-700 bg-card px-4 py-2 text-sm font-semibold text-ew-green-700 transition-colors hover:bg-ew-green-50"
+        >
+          <FileDown className="h-4 w-4" /> Télécharger en Word (.docx)
+        </a>
+      </div>
+      <p className="mt-2 text-xs italic text-muted-foreground">
+        Le fichier Word inclut le logo, l&apos;entête et une <strong>table des matières automatique</strong>
+        qui se met à jour à l&apos;ouverture (acceptez la mise à jour des champs à l&apos;ouverture, ou pressez F9).
+      </p>
+    </div>
   );
 }
 
