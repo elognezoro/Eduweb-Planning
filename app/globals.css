@@ -175,8 +175,38 @@ input::-ms-clear {
   #bulletin-print,
   #bulletin-print *,
   #livret-print,
-  #livret-print * {
+  #livret-print *,
+  #manuel-print,
+  #manuel-print * {
     visibility: visible !important;
+  }
+  /* Manuel de formation : document académique multi-pages. */
+  #manuel-print {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .manuel-page {
+    break-after: page;
+    page-break-after: always;
+  }
+  .manuel-page:last-of-type {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .manuel-page + .manuel-page {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+  }
+  .manuel-no-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
   /* Bulletin : page unique, ancrée au viewport. */
   #bulletin-print {
@@ -223,6 +253,16 @@ input::-ms-clear {
   @page {
     margin: 13mm;
   }
+}
+
+/* Aperçu écran : matérialiser les pages A4 du manuel de formation. */
+.manuel-page {
+  break-inside: avoid;
+}
+.manuel-page + .manuel-page {
+  margin-top: 2.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px dashed #d4d4d4;
 }
 
 /* Aperçu écran : séparer visuellement les « feuilles » du livret. */

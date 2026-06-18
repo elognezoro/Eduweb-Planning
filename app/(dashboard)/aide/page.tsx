@@ -10,6 +10,8 @@ import {
   Users,
   Library,
   Filter,
+  Download,
+  FileText,
 } from "lucide-react";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Badge } from "@/components/ui/badge";
@@ -113,9 +115,11 @@ export default function AideIndexPage() {
       ]}
     >
       {/* Recommandation personnalisée selon le rôle effectif */}
-      {myGuideKey && (
-        <RecommendedCard guideKey={myGuideKey} />
-      )}
+      {myGuideKey && <RecommendedCard guideKey={myGuideKey} />}
+
+      {/* Manuel académique téléchargeable en PDF (livrable « disponible à part ») */}
+      <DownloadManualBanner />
+
 
       {/* Filtres */}
       <SectionCard contentClassName="p-4">
@@ -234,6 +238,37 @@ function GuideCard({ guideKey }: { guideKey: string }) {
           <BookOpen className="h-3 w-3" /> {g.chapters.length} chap.
         </span>
       </div>
+    </Link>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Bandeau « Support de formation académique » (lien vers PDF imprimable) */
+/* ---------------------------------------------------------------------- */
+function DownloadManualBanner() {
+  return (
+    <Link
+      href="/aide/support-formation"
+      className="group flex flex-wrap items-center gap-4 overflow-hidden rounded-2xl border border-ew-gold-500/40 bg-gradient-to-r from-ew-gold-100/60 via-card to-card p-5 shadow-sm transition-all hover:border-ew-gold-500 hover:shadow-lg"
+    >
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ew-gold-500/15 text-ew-gold-600 ring-1 ring-inset ring-ew-gold-500/30">
+        <FileText className="h-6 w-6" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-ew-gold-600">
+          Manuel académique complet
+        </p>
+        <p className="mt-0.5 font-display text-lg font-bold text-foreground">
+          Support de formation officiel — PDF à télécharger
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Syllabus, 8 modules de formation (un par rôle), auto-évaluations, exercices pratiques, grille de
+          progression et glossaire général — mise en page A4 conforme aux standards académiques.
+        </p>
+      </div>
+      <span className="inline-flex items-center gap-2 rounded-lg bg-ew-green-700 px-4 py-2 text-sm font-semibold text-white transition-transform group-hover:scale-[1.03]">
+        <Download className="h-4 w-4" /> Ouvrir le manuel
+      </span>
     </Link>
   );
 }
