@@ -1126,6 +1126,14 @@ export function ManuelCertificate({
   issueDate,
   validUntil,
   certificateNumber,
+  institution,
+  headName,
+  headFunction,
+  officialCountry,
+  officialSlogan,
+  ministry,
+  signatureUrl,
+  stampUrl,
 }: {
   identification: ManuelIdentification;
   beneficiaryName?: string;
@@ -1134,6 +1142,14 @@ export function ManuelCertificate({
   issueDate?: string;
   validUntil?: string;
   certificateNumber?: string;
+  institution?: string;
+  headName?: string;
+  headFunction?: string;
+  officialCountry?: string;
+  officialSlogan?: string;
+  ministry?: string;
+  signatureUrl?: string | null;
+  stampUrl?: string | null;
 }) {
   return (
     <ManuelPage className="overflow-hidden border-double" pageLabel="Certificat" pageNumber={undefined}>
@@ -1151,11 +1167,13 @@ export function ManuelCertificate({
 
       <div className="relative z-10 flex h-full min-h-[265mm] flex-col items-center text-center">
         <p className="font-display text-[11px] font-bold uppercase tracking-[0.18em] text-gray-700">
-          République de Côte d&apos;Ivoire
+          {officialCountry || "République de Côte d'Ivoire"}
         </p>
-        <p className="mt-1 text-[10px] italic text-gray-700">Union — Discipline — Travail</p>
+        <p className="mt-1 text-[10px] italic text-gray-700">
+          {officialSlogan || "Union — Discipline — Travail"}
+        </p>
         <p className="mt-3 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-gray-700">
-          Ministère de l&apos;Éducation Nationale
+          {ministry || "Ministère de l'Éducation Nationale"}
         </p>
 
         <div className="mt-6 flex items-center gap-4">
@@ -1219,14 +1237,43 @@ export function ManuelCertificate({
         <div className="mt-10 grid w-[160mm] grid-cols-2 gap-10 text-[10px]">
           <div className="text-center">
             <p className="italic text-gray-700">Le formateur</p>
-            <div className="mt-12 border-t border-black" />
-            <p className="mt-1 text-[9px] italic text-gray-500">Nom, signature, date</p>
+            <div className="relative mt-3 h-16">
+              {signatureUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={signatureUrl}
+                  alt="Signature scannée"
+                  className="mx-auto h-full max-w-[60mm] object-contain"
+                />
+              ) : null}
+            </div>
+            <div className="border-t border-black" />
+            <p className="mt-1 text-[10px] font-bold text-ew-green-900">
+              {headName || "Nom, signature, date"}
+            </p>
+            <p className="text-[9px] italic text-gray-500">
+              {headFunction || "Chef d'établissement"}
+            </p>
           </div>
           <div className="text-center">
             <p className="italic text-gray-700">L&apos;autorité hiérarchique</p>
-            <p className="text-[9px] italic text-gray-500">(Cachet et signature)</p>
-            <div className="mt-12 border-t border-black" />
-            <p className="mt-1 text-[9px] italic text-gray-500">DRENA / CAFOP / APFC selon le cas</p>
+            <div className="relative mt-3 h-16">
+              {stampUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={stampUrl}
+                  alt="Cachet de l'établissement"
+                  className="mx-auto h-full max-w-[60mm] object-contain opacity-90"
+                />
+              ) : (
+                <p className="text-[9px] italic text-gray-500">(Cachet et signature)</p>
+              )}
+            </div>
+            <div className="border-t border-black" />
+            <p className="mt-1 text-[10px] font-bold text-ew-green-900">
+              {institution || "DRENA / CAFOP / APFC"}
+            </p>
+            <p className="text-[9px] italic text-gray-500">DRENA / CAFOP / APFC selon le cas</p>
           </div>
         </div>
 

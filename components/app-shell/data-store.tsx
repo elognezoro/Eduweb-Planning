@@ -195,6 +195,31 @@ function promoCodePrefix(r: PromoRequest): string {
   return "PROMO";
 }
 
+/** Certificat de fin de formation EduWeb Planner délivré et journalisé. */
+export interface DeliveredCertificate {
+  id: string;
+  /** Numéro officiel du certificat (format ETAB-ANNEE-NNN). */
+  number: string;
+  beneficiaryName: string;
+  beneficiaryRole: string;
+  /** Date de délivrance au format `JJ/MM/AAAA`. */
+  issueDate: string;
+  /** Référence et version du support de formation suivi. */
+  formationCode: string;
+  formationVersion: string;
+  /** Date de fin de validité du support de formation. */
+  validUntil: string;
+  /** Nom de l'établissement délivrant le certificat. */
+  establishment: string;
+  /** Code de l'établissement (utilisé pour la séquence). */
+  establishmentCode: string;
+  /** Nom du formateur ou de l'autorité ayant signé. */
+  deliveredBy: string;
+  /** Horodatage technique d'enregistrement. */
+  registeredAt: string;
+  notes?: string;
+}
+
 /** Abonnement Académie Premium souscrit (persisté). */
 export interface Subscription {
   active: boolean;
@@ -243,6 +268,8 @@ interface StoreState {
   apfcs: Apfc[];
   /** Activités de formation continue des APFC (le compteur « Activités » en dérive). */
   apfcActivities: ApfcActivity[];
+  /** Journal des certificats de fin de formation délivrés. */
+  certificates: DeliveredCertificate[];
 }
 
 interface DataStore extends StoreState {
@@ -300,6 +327,10 @@ interface DataStore extends StoreState {
   /** Refuse une demande de code promo avec motif. */
   rejectPromoRequest: (id: string, actor: string, reason: string) => void;
   setRegionalStructures: (list: RegionalStructure[] | null) => void;
+  /** Enregistre un certificat de fin de formation délivré dans le journal. */
+  addCertificate: (c: Omit<DeliveredCertificate, "id" | "registeredAt">) => void;
+  /** Supprime une entrée du journal des certificats. */
+  removeCertificate: (id: string) => void;
   reset: () => void;
 }
 
@@ -325,6 +356,7 @@ const DEFAULTS: StoreState = {
   cafopFormationYears: {},
   apfcs: APFCS_SEED,
   apfcActivities: APFC_ACTIVITIES_SEED,
+  certificates: [],
 };
 
 // Incrémenter la version à chaque changement de schéma persisté (nouveaux champs/tranches) :
@@ -482,6 +514,16 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         return { ...s, userGrants: s.userGrants.filter((x) => x.id !== id), grantLog: [log, ...s.grantLog] };
       }),
     setRegionalStructures: (list) => setState((s) => ({ ...s, regionalStructures: list })),
+    addCertificate: (c) =>
+      setState((s) => ({
+        ...s,
+        certificates: [
+          { ...c, id: genId("cert"), registeredAt: new Date().toISOString() },
+          ...s.certificates,
+        ],
+      })),
+    removeCertificate: (id) =>
+      setState((s) => ({ ...s, certificates: s.certificates.filter((x) => x.id !== id) })),
     addPromoRequest: (r) =>
       setState((s) => ({
         ...s,

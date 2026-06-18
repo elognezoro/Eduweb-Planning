@@ -312,8 +312,10 @@ function CertificateBanner() {
             Certificat de fin de formation
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Modèle officiel à compléter et imprimer pour attester du suivi de la formation EduWeb Planner.
-            Personnalisable (nom, fonction, numéro, date) puis téléchargeable en Word ou imprimable en PDF.
+            Modèle officiel personnalisé par votre établissement : <strong>numérotation
+            automatique</strong> par séquence, reprise de la <strong>signature scannée</strong> et du
+            <strong> cachet</strong> configurés, et <strong>journal de traçabilité</strong> des certificats
+            délivrés. Téléchargeable en Word ou imprimable en PDF.
           </p>
         </div>
       </div>
@@ -322,13 +324,19 @@ function CertificateBanner() {
           href="/aide/certificat"
           className="inline-flex items-center gap-2 rounded-lg bg-ew-green-700 px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
         >
-          <Award className="h-4 w-4" /> Ouvrir le certificat
+          <Award className="h-4 w-4" /> Délivrer un certificat
+        </Link>
+        <Link
+          href="/aide/certificat/journal"
+          className="inline-flex items-center gap-2 rounded-lg border border-ew-green-700 bg-card px-4 py-2 text-sm font-semibold text-ew-green-700 transition-colors hover:bg-ew-green-50"
+        >
+          <Award className="h-4 w-4" /> Journal des délivrés
         </Link>
         <a
           href="/api/docx/certificat"
-          className="inline-flex items-center gap-2 rounded-lg border border-ew-green-700 bg-card px-4 py-2 text-sm font-semibold text-ew-green-700 transition-colors hover:bg-ew-green-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/40"
         >
-          <FileDown className="h-4 w-4" /> Télécharger le modèle vierge (.docx)
+          <FileDown className="h-4 w-4" /> Modèle vierge (.docx)
         </a>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import {
   AlignmentType,
   Document,
+  ImageRun,
   PageOrientation,
   Packer,
   Paragraph,
@@ -22,7 +23,8 @@ import { TRAINING_SYLLABUS } from "@/lib/guides/training-manual-data";
    - Format A4, marges réduites pour aérer la page
    - Logo officiel centré
    - Cadre décoratif via bordures de paragraphes
-   - Champs pré-remplis depuis l'URL (name, role, number, date)
+   - Signature scannée + cachet de l'établissement (si configurés)
+   - Champs pré-remplis (name, role, number, date, identité de l'établissement)
    ========================================================================== */
 
 export interface CertificateData {
@@ -30,13 +32,68 @@ export interface CertificateData {
   beneficiaryRole?: string;
   certificateNumber?: string;
   issueDate?: string;
+  /** Nom officiel de l'établissement délivrant le certificat. */
+  institution?: string;
+  /** Nom du chef d'établissement / formateur signataire. */
+  headName?: string;
+  /** Fonction du signataire (Chef d'établissement, Directeur, etc.). */
+  headFunction?: string;
+  /** Pays d'émission, pour la mention officielle de garde. */
+  officialCountry?: string;
+  /** Slogan ou devise du pays (ex. « Union — Discipline — Travail »). */
+  officialSlogan?: string;
+  /** Ministère de tutelle. */
+  ministry?: string;
+  /** Image data URL (PNG/JPEG) de la signature scannée du signataire. */
+  signatureDataUrl?: string;
+  /** Image data URL (PNG/JPEG) du cachet de l'établissement. */
+  stampDataUrl?: string;
+}
+
+/**
+ * Décode un data URL (`data:image/png;base64,…`) en Buffer + type d'image.
+ * Renvoie `null` si le format n'est pas reconnu.
+ */
+function decodeDataUrl(dataUrl: string | undefined): { buffer: Buffer; type: "png" | "jpg" } | null {
+  if (!dataUrl) return null;
+  const match = /^data:image\/(png|jpe?g);base64,(.+)$/i.exec(dataUrl.trim());
+  if (!match) return null;
+  const ext = match[1].toLowerCase();
+  const type: "png" | "jpg" = ext === "png" ? "png" : "jpg";
+  try {
+    return { buffer: Buffer.from(match[2], "base64"), type };
+  } catch {
+    return null;
+  }
+}
+
+/** Paragraphe centré contenant une image (signature ou cachet). */
+function imageRow(image: { buffer: Buffer; type: "png" | "jpg" }, sizePx: number): Paragraph {
+  return new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 40 },
+    children: [
+      new ImageRun({
+        type: image.type,
+        data: image.buffer,
+        transformation: { width: sizePx, height: sizePx },
+      }),
+    ],
+  });
 }
 
 export async function buildCertificateDocx(data: CertificateData = {}): Promise<Buffer> {
   const logo = await loadLogoBuffer();
   const id = TRAINING_SYLLABUS.identification;
 
+  const country = data.officialCountry?.trim() || "République de Côte d'Ivoire";
+  const slogan = data.officialSlogan?.trim() || "Union — Discipline — Travail";
+  const ministry = data.ministry?.trim() || "Ministère de l'Éducation Nationale";
+
   const placeholder = (v: string | undefined, fallback: string) => v?.trim() || fallback;
+
+  const signature = decodeDataUrl(data.signatureDataUrl);
+  const stamp = decodeDataUrl(data.stampDataUrl);
 
   const beneficiaryLine = new Paragraph({
     alignment: AlignmentType.CENTER,
@@ -51,6 +108,81 @@ export async function buildCertificateDocx(data: CertificateData = {}): Promise<
       }),
     ],
   });
+
+  // ---- Bloc « Le formateur / autorité hiérarchique » -----------------------
+  const headDisplayName = placeholder(
+    data.headName,
+    "Nom de l'autorité hiérarchique",
+  );
+  const headFunction = placeholder(
+    data.headFunction,
+    "Chef d'établissement",
+  );
+  const institutionLabel = placeholder(data.institution, "Établissement");
+
+  const signatureBlock: Paragraph[] = [
+    // Étiquettes des deux blocs
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [
+        new TextRun({
+          text: "Le formateur                                                    L'autorité hiérarchique",
+          italics: true,
+          size: 20,
+          color: COLOR_GRAY,
+        }),
+      ],
+    }),
+  ];
+
+  // Si signature scannée fournie, on la pose à gauche ; sinon un espace.
+  if (signature) {
+    signatureBlock.push(imageRow(signature, 90));
+  } else {
+    signatureBlock.push(spacer(280));
+  }
+
+  // Cachet à droite si fourni (sur la ligne du formateur côté droit).
+  if (stamp) {
+    signatureBlock.push(imageRow(stamp, 100));
+  }
+
+  signatureBlock.push(
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [
+        new TextRun({
+          text: "_________________________            _________________________",
+          size: 20,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 40 },
+      children: [
+        new TextRun({
+          text: `${headDisplayName}            ${institutionLabel}`,
+          bold: true,
+          size: 20,
+          color: COLOR_GREEN,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 40 },
+      children: [
+        new TextRun({
+          text: `${headFunction}            DRENA / CAFOP / APFC selon le cas`,
+          italics: true,
+          size: 18,
+          color: COLOR_GRAY,
+        }),
+      ],
+    }),
+  );
 
   const certificate = new Document({
     creator: "EduWeb Planner",
@@ -71,9 +203,9 @@ export async function buildCertificateDocx(data: CertificateData = {}): Promise<
           },
         },
         children: [
-          centeredLine("République de Côte d'Ivoire", { bold: true, size: 20, color: COLOR_GRAY }),
-          centeredLine("Union — Discipline — Travail", { italic: true, size: 18, color: COLOR_GRAY }),
-          centeredLine("Ministère de l'Éducation Nationale", { bold: true, size: 20, color: COLOR_GRAY }),
+          centeredLine(country, { bold: true, size: 20, color: COLOR_GRAY }),
+          centeredLine(slogan, { italic: true, size: 18, color: COLOR_GRAY }),
+          centeredLine(ministry, { bold: true, size: 20, color: COLOR_GRAY }),
           centeredImage(logo, 130),
           centeredLine("CERTIFICAT DE FIN DE FORMATION", {
             bold: true,
@@ -118,7 +250,6 @@ export async function buildCertificateDocx(data: CertificateData = {}): Promise<
             ],
           }),
           spacer(220),
-          // Tableau de méta (numéro, date, validité) sous forme de paragraphes alignés
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { after: 80 },
@@ -145,43 +276,9 @@ export async function buildCertificateDocx(data: CertificateData = {}): Promise<
               }),
             ],
           }),
-          spacer(360),
-          // Signatures côte-à-côte (deux paragraphes séparés)
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 60 },
-            children: [
-              new TextRun({
-                text: "Le formateur                                                    L'autorité hiérarchique",
-                italics: true,
-                size: 20,
-                color: COLOR_GRAY,
-              }),
-            ],
-          }),
           spacer(280),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-              new TextRun({
-                text: "_________________________            _________________________",
-                size: 20,
-              }),
-            ],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 40 },
-            children: [
-              new TextRun({
-                text: "Nom, signature, date            DRENA / CAFOP / APFC (cachet et signature)",
-                italics: true,
-                size: 18,
-                color: COLOR_GRAY,
-              }),
-            ],
-          }),
-          spacer(360),
+          ...signatureBlock,
+          spacer(240),
           centeredLine(
             "Document à conserver — toute reproduction frauduleuse est sanctionnée par la loi.",
             { italic: true, size: 16, color: COLOR_GRAY },
