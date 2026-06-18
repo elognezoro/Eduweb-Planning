@@ -193,6 +193,7 @@ export async function buildGuideDocx(roleKey: string): Promise<Buffer> {
             logoBuffer: logo,
             centerLabel: headerCenter,
             rightLabel: headerRight,
+            watermark: "EduWeb Planner · Document de formation — usage interne",
           }),
         },
         footers: {

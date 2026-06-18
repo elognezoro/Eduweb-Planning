@@ -39,36 +39,55 @@ export function buildHeader({
   logoBuffer,
   centerLabel,
   rightLabel,
+  watermark,
 }: {
   logoBuffer: Buffer;
   centerLabel: string;
   rightLabel: string;
+  /** Mention discrète d'institution affichée sous le filet d'entête. */
+  watermark?: string;
 }): Header {
-  return new Header({
-    children: [
+  const headerChildren = [
+    new Paragraph({
+      tabStops: [
+        { type: "center", position: 4500 },
+        { type: "right", position: 9000 },
+      ],
+      spacing: { after: 80 },
+      children: [
+        new ImageRun({
+          type: "png",
+          data: logoBuffer,
+          transformation: { width: 32, height: 32 },
+        }),
+        new TextRun({ text: "\t" + centerLabel, bold: true, size: 16, color: COLOR_GREEN }),
+        new TextRun({ text: "\t" + rightLabel, italics: true, size: 14, color: COLOR_GRAY }),
+      ],
+    }),
+    new Paragraph({
+      spacing: { before: 0, after: 0 },
+      border: { bottom: { color: COLOR_GREEN, space: 1, style: "single", size: 12 } },
+      children: [new TextRun({ text: "" })],
+    }),
+  ];
+
+  if (watermark) {
+    headerChildren.push(
       new Paragraph({
-        tabStops: [
-          { type: "center", position: 4500 },
-          { type: "right", position: 9000 },
-        ],
-        spacing: { after: 80 },
+        spacing: { before: 40, after: 40 },
         children: [
-          new ImageRun({
-            type: "png",
-            data: logoBuffer,
-            transformation: { width: 32, height: 32 },
+          new TextRun({
+            text: watermark,
+            italics: true,
+            size: 14,
+            color: "BBBBBB",
           }),
-          new TextRun({ text: "\t" + centerLabel, bold: true, size: 16, color: COLOR_GREEN }),
-          new TextRun({ text: "\t" + rightLabel, italics: true, size: 14, color: COLOR_GRAY }),
         ],
       }),
-      new Paragraph({
-        spacing: { before: 0, after: 0 },
-        border: { bottom: { color: COLOR_GREEN, space: 1, style: "single", size: 12 } },
-        children: [new TextRun({ text: "" })],
-      }),
-    ],
-  });
+    );
+  }
+
+  return new Header({ children: headerChildren });
 }
 
 /** Pied de page : référence à gauche, numéro de page courant à droite. */

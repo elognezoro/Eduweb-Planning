@@ -425,6 +425,12 @@ export async function buildTrainingManualDocx(): Promise<Buffer> {
     );
   });
 
+  // -------- PAGE DE SIGNATURES --------
+  const signatureChildren = buildSignaturesSection();
+
+  // -------- CERTIFICAT (modèle joint au manuel) --------
+  const certificateChildren = buildEmbeddedCertificateSection();
+
   // -------- ANNEXES --------
   const annexChildren = [
     pageBreak(),
@@ -502,6 +508,7 @@ export async function buildTrainingManualDocx(): Promise<Buffer> {
             logoBuffer: logo,
             centerLabel: headerCenter,
             rightLabel: headerRight,
+            watermark: "EduWeb Planner · Document de formation — usage interne",
           }),
         },
         footers: {
@@ -516,6 +523,8 @@ export async function buildTrainingManualDocx(): Promise<Buffer> {
           ...syllabusChildren,
           ...moduleChildren,
           ...annexChildren,
+          ...signatureChildren,
+          ...certificateChildren,
         ],
       },
     ],
@@ -664,6 +673,204 @@ function cellHeader(text: string): TableCell {
       }),
     ],
   });
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Page de signatures (jointe au manuel)                                   */
+/* ---------------------------------------------------------------------- */
+function buildSignaturesSection(): Paragraph[] {
+  const signatureBlock = (title: string, subtitle: string, fields: string[], withStamp: boolean) => {
+    const out: Paragraph[] = [];
+    out.push(
+      new Paragraph({
+        spacing: { before: 240, after: 80 },
+        children: [
+          new TextRun({ text: title, bold: true, color: COLOR_GREEN, size: 24 }),
+          new TextRun({ text: ` — ${subtitle}`, italics: true, size: 20, color: COLOR_GRAY }),
+        ],
+      }),
+    );
+    fields.forEach((f) => {
+      out.push(
+        new Paragraph({
+          spacing: { after: 60 },
+          children: [
+            new TextRun({ text: f + " : ", bold: true, size: 20 }),
+            new TextRun({ text: "______________________________________________________", size: 20 }),
+          ],
+        }),
+      );
+    });
+    out.push(
+      new Paragraph({
+        spacing: { before: 100, after: 120 },
+        children: [
+          new TextRun({ text: `Signature${withStamp ? " et cachet" : ""} : `, bold: true, size: 20 }),
+          new TextRun({ text: "_______________________________________________", size: 20 }),
+        ],
+      }),
+    );
+    return out;
+  };
+
+  return [
+    pageBreak(),
+    heading1("Page de signatures"),
+    bodyText(
+      "À renseigner par le formateur, l'apprenant et son autorité hiérarchique pour attester de la bonne conduite de la formation.",
+      { italic: true },
+    ),
+    ...signatureBlock(
+      "Formateur",
+      "Atteste de la conduite intégrale de la formation",
+      ["Nom et prénoms", "Fonction / Institution", "Date"],
+      true,
+    ),
+    ...signatureBlock(
+      "Apprenant(e)",
+      "Confirme avoir suivi le présent support de formation",
+      ["Nom et prénoms", "Rôle / Établissement", "Date"],
+      false,
+    ),
+    ...signatureBlock(
+      "Visa de la hiérarchie",
+      "Direction d'établissement, DRENA, CAFOP ou APFC selon le cas",
+      ["Nom et prénoms du visa", "Fonction", "Date"],
+      true,
+    ),
+    bodyText(
+      "Ce feuillet est conservé dans le dossier de formation de l'apprenant et, le cas échéant, joint au registre de l'institution organisatrice (DRENA, CAFOP, APFC). Une copie est remise à l'intéressé(e).",
+      { italic: true },
+    ),
+  ];
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Modèle de certificat joint au manuel (page non remplissable)            */
+/* ---------------------------------------------------------------------- */
+function buildEmbeddedCertificateSection(): Paragraph[] {
+  const id = TRAINING_SYLLABUS.identification;
+  return [
+    pageBreak(),
+    heading1("Modèle de certificat de fin de formation"),
+    bodyText(
+      "Le présent modèle peut être détaché ou reproduit pour délivrance officielle. Une version personnalisable (.docx) est également disponible depuis le menu Aide & Formation → Certificat.",
+      { italic: true },
+    ),
+    spacer(160),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 200, after: 120 },
+      children: [new TextRun({ text: "République de Côte d'Ivoire", bold: true, size: 22, color: COLOR_GRAY })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 80 },
+      children: [new TextRun({ text: "Union — Discipline — Travail", italics: true, size: 20, color: COLOR_GRAY })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 160 },
+      children: [new TextRun({ text: "Ministère de l'Éducation Nationale", bold: true, size: 22, color: COLOR_GRAY })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+      children: [
+        new TextRun({
+          text: "CERTIFICAT DE FIN DE FORMATION",
+          bold: true,
+          size: 36,
+          color: COLOR_GOLD,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 80 },
+      children: [new TextRun({ text: "Il est certifié que", italics: true, size: 22, color: COLOR_GRAY })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 80, after: 80 },
+      border: { bottom: { color: COLOR_GREEN, space: 12, style: "single", size: 18 } },
+      children: [
+        new TextRun({
+          text: "…………………………………………………………………",
+          bold: true,
+          size: 44,
+          color: COLOR_GREEN,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+      children: [new TextRun({ text: "Rôle / fonction de l'apprenant(e)", italics: true, size: 20, color: COLOR_GRAY })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: 240 },
+      indent: { left: 600, right: 600 },
+      children: [
+        new TextRun({
+          text: "a suivi avec succès le support de formation académique ",
+          size: 22,
+        }),
+        new TextRun({ text: `« ${id.intitule} »`, bold: true, size: 22 }),
+        new TextRun({
+          text: ` (référence ${id.code}, version ${id.version}) d'une durée totale indicative de ${TRAINING_SYLLABUS.volumeHoraire.dureeTotal}, mobilisant les huit modules de formation aux rôles utilisateurs de la plateforme EduWeb Planner, et a satisfait aux modalités d'évaluation requises pour la délivrance du présent certificat.`,
+          size: 22,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 280 },
+      children: [
+        new TextRun({ text: "N° du certificat : _______________      Délivré le : ____ / ____ / _______      Validité : ", size: 20, bold: true, color: COLOR_GREEN }),
+        new TextRun({ text: id.dateValidite, size: 20, bold: true, color: COLOR_GREEN }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [
+        new TextRun({ text: "Le formateur", italics: true, size: 20, color: COLOR_GRAY }),
+        new TextRun({ text: "                                                  ", size: 20 }),
+        new TextRun({ text: "L'autorité hiérarchique", italics: true, size: 20, color: COLOR_GRAY }),
+      ],
+    }),
+    spacer(280),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun({ text: "_________________________            _________________________", size: 20 })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+      children: [
+        new TextRun({
+          text: "Nom, signature, date            DRENA / CAFOP / APFC (cachet et signature)",
+          italics: true,
+          size: 18,
+          color: COLOR_GRAY,
+        }),
+      ],
+    }),
+    spacer(240),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [
+        new TextRun({
+          text: "Document à conserver — toute reproduction frauduleuse est sanctionnée par la loi.",
+          italics: true,
+          size: 16,
+          color: COLOR_GRAY,
+        }),
+      ],
+    }),
+  ];
 }
 
 function syllabusEvalParagraph(label: string, text: string): Paragraph {

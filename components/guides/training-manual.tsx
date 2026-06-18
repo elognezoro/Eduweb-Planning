@@ -101,25 +101,47 @@ export function ManuelPage({
   className,
   pageNumber,
   pageLabel,
+  watermark,
 }: {
   children: React.ReactNode;
   className?: string;
   pageNumber?: number | string;
   pageLabel?: string;
+  /** Texte de filigrane (institution, mention « Confidentiel », etc.). Vide → pas de filigrane. */
+  watermark?: string;
 }) {
   return (
     <section
       className={cn(
-        "manuel-page relative mx-auto bg-white text-black shadow-md print:shadow-none",
+        "manuel-page relative mx-auto overflow-hidden bg-white text-black shadow-md print:shadow-none",
         "min-h-[297mm] w-[210mm] px-[18mm] py-[16mm]",
         "font-display-fallback",
         className,
       )}
       style={{ fontFamily: "'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}
     >
-      {children}
+      {/* Filigrane diagonal (très discret, ne masque pas le texte) */}
+      {watermark && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 flex select-none items-center justify-center"
+          style={{ zIndex: 0 }}
+        >
+          <span
+            className="whitespace-nowrap font-display text-[68px] font-extrabold uppercase tracking-[0.18em] text-gray-300"
+            style={{ opacity: 0.085, transform: "rotate(-32deg)" }}
+          >
+            {watermark}
+          </span>
+        </div>
+      )}
+
+      <div className="relative" style={{ zIndex: 1 }}>
+        {children}
+      </div>
+
       {(pageNumber || pageLabel) && (
-        <div className="absolute inset-x-[18mm] bottom-[8mm] flex items-end justify-between text-[9px] uppercase tracking-[0.18em] text-gray-500">
+        <div className="absolute inset-x-[18mm] bottom-[8mm] flex items-end justify-between text-[9px] uppercase tracking-[0.18em] text-gray-500" style={{ zIndex: 2 }}>
           <span>{pageLabel ?? "EduWeb Planner — Support de formation"}</span>
           {pageNumber !== undefined && <span className="font-bold">{pageNumber}</span>}
         </div>
@@ -247,10 +269,10 @@ export function ManuelCover({
 /*  PAGE 2 — Colophon (mentions légales, version, propriété)               */
 /* ---------------------------------------------------------------------- */
 
-export function ManuelColophon({ identification }: { identification: ManuelIdentification }) {
+export function ManuelColophon({ identification, watermark }: { identification: ManuelIdentification; watermark?: string }) {
   const year = new Date().getFullYear();
   return (
-    <ManuelPage pageLabel="Colophon" pageNumber="II">
+    <ManuelPage pageLabel="Colophon" pageNumber="II" watermark={watermark}>
       <RunningHeader left="Colophon" right={identification.code} />
       <h2 className="font-display text-2xl font-bold text-ew-green-900">Mentions légales et copyright</h2>
       <div className="mt-6 space-y-4 text-[12px] leading-relaxed text-gray-800">
@@ -304,9 +326,9 @@ export function ManuelColophon({ identification }: { identification: ManuelIdent
 /*  PAGE 3 — Avant-propos                                                  */
 /* ---------------------------------------------------------------------- */
 
-export function ManuelForeword({ syllabus, pageNumber = "III" }: { syllabus: ManuelSyllabus; pageNumber?: string | number }) {
+export function ManuelForeword({ syllabus, pageNumber = "III", watermark }: { syllabus: ManuelSyllabus; pageNumber?: string | number; watermark?: string }) {
   return (
-    <ManuelPage pageLabel="Avant-propos" pageNumber={pageNumber}>
+    <ManuelPage pageLabel="Avant-propos" pageNumber={pageNumber} watermark={watermark}>
       <RunningHeader left="Avant-propos" right={syllabus.identification.code} />
       <h2 className="font-display text-3xl font-extrabold text-ew-green-900">Avant-propos</h2>
       <div className="mt-6 columns-1 gap-8 text-[12px] leading-[1.7] text-gray-800">
@@ -332,12 +354,14 @@ export function ManuelForeword({ syllabus, pageNumber = "III" }: { syllabus: Man
 export function ManuelTOC({
   entries,
   pageNumber = "IV",
+  watermark,
 }: {
   entries: { roman?: string; arabic?: number; label: string; level?: 1 | 2; href?: string }[];
   pageNumber?: string | number;
+  watermark?: string;
 }) {
   return (
-    <ManuelPage pageLabel="Table des matières" pageNumber={pageNumber}>
+    <ManuelPage pageLabel="Table des matières" pageNumber={pageNumber} watermark={watermark}>
       <RunningHeader left="Table des matières" right="EduWeb Planner" />
       <h2 className="font-display text-3xl font-extrabold text-ew-green-900">Table des matières</h2>
       <ul className="mt-6 space-y-2 text-[12px]">
@@ -360,12 +384,14 @@ export function ManuelTOC({
 export function ManuelAbbreviations({
   abbreviations,
   pageNumber,
+  watermark,
 }: {
   abbreviations: { code: string; meaning: string }[];
   pageNumber?: string | number;
+  watermark?: string;
 }) {
   return (
-    <ManuelPage pageLabel="Abréviations" pageNumber={pageNumber}>
+    <ManuelPage pageLabel="Abréviations" pageNumber={pageNumber} watermark={watermark}>
       <RunningHeader left="Liste des abréviations" right="EduWeb Planner" />
       <h2 className="font-display text-3xl font-extrabold text-ew-green-900">Abréviations et acronymes</h2>
       <p className="mt-2 text-[11px] italic text-gray-600">
@@ -387,14 +413,14 @@ export function ManuelAbbreviations({
 /*  PAGES — Syllabus (multi-pages)                                         */
 /* ---------------------------------------------------------------------- */
 
-export function ManuelSyllabusBlock({ syllabus, startPage = 1 }: { syllabus: ManuelSyllabus; startPage?: number }) {
+export function ManuelSyllabusBlock({ syllabus, startPage = 1, watermark }: { syllabus: ManuelSyllabus; startPage?: number; watermark?: string }) {
   const id = syllabus.identification;
   let p = startPage;
   const pages: React.ReactNode[] = [];
 
   // Page 1 — Identification + présentation
   pages.push(
-    <ManuelPage key={`syl-${p}`} pageLabel="Syllabus — Présentation" pageNumber={p++}>
+    <ManuelPage key={`syl-${p}`} pageLabel="Syllabus — Présentation" pageNumber={p++} watermark={watermark}>
       <RunningHeader left="Syllabus de formation" right={id.code} />
       <h2 className="font-display text-3xl font-extrabold text-ew-green-900">Syllabus</h2>
       <p className="mt-1 text-sm italic text-gray-600">Plan général et cadre académique de la formation</p>
@@ -436,7 +462,7 @@ export function ManuelSyllabusBlock({ syllabus, startPage = 1 }: { syllabus: Man
 
   // Page 2 — Objectifs + Compétences
   pages.push(
-    <ManuelPage key={`syl-${p}`} pageLabel="Syllabus — Objectifs et compétences" pageNumber={p++}>
+    <ManuelPage key={`syl-${p}`} pageLabel="Syllabus — Objectifs et compétences" pageNumber={p++} watermark={watermark}>
       <RunningHeader left="Syllabus de formation" right={id.code} />
       <p className="font-display text-xs font-bold uppercase tracking-[0.18em] text-ew-green-700">
         4. Objectifs généraux
@@ -467,7 +493,7 @@ export function ManuelSyllabusBlock({ syllabus, startPage = 1 }: { syllabus: Man
 
   // Page 3 — Méthodologie + Volume horaire
   pages.push(
-    <ManuelPage key={`syl-${p}`} pageLabel="Syllabus — Méthodologie et progression" pageNumber={p++}>
+    <ManuelPage key={`syl-${p}`} pageLabel="Syllabus — Méthodologie et progression" pageNumber={p++} watermark={watermark}>
       <RunningHeader left="Syllabus de formation" right={id.code} />
       <p className="font-display text-xs font-bold uppercase tracking-[0.18em] text-ew-green-700">
         6. Méthodologie pédagogique
@@ -523,7 +549,7 @@ export function ManuelSyllabusBlock({ syllabus, startPage = 1 }: { syllabus: Man
 
   // Page 4 — Évaluation + critères + ressources + charte
   pages.push(
-    <ManuelPage key={`syl-${p}`} pageLabel="Syllabus — Évaluation et ressources" pageNumber={p++}>
+    <ManuelPage key={`syl-${p}`} pageLabel="Syllabus — Évaluation et ressources" pageNumber={p++} watermark={watermark}>
       <RunningHeader left="Syllabus de formation" right={id.code} />
       <p className="font-display text-xs font-bold uppercase tracking-[0.18em] text-ew-green-700">
         8. Modalités d'évaluation
@@ -612,13 +638,13 @@ export interface ManuelModuleProps {
   startPage: number;
 }
 
-export function ManuelModuleBlock({ moduleCode, roleLabel, icon: Icon, duration, level, audience, context, objectives, prerequisites, chapters, startPage }: ManuelModuleProps) {
+export function ManuelModuleBlock({ moduleCode, roleLabel, icon: Icon, duration, level, audience, context, objectives, prerequisites, chapters, startPage, watermark }: ManuelModuleProps & { watermark?: string }) {
   let p = startPage;
   const pages: React.ReactNode[] = [];
 
   // PAGE DE GARDE DU MODULE
   pages.push(
-    <ManuelPage key={`${moduleCode}-cover`} pageLabel={`${moduleCode} — Couverture`} pageNumber={p++}>
+    <ManuelPage key={`${moduleCode}-cover`} pageLabel={`${moduleCode} — Couverture`} pageNumber={p++} watermark={watermark}>
       <RunningHeader left={`Module ${moduleCode}`} right={roleLabel} />
       <div className="mt-2 flex items-center gap-4">
         {Icon && (
@@ -692,7 +718,7 @@ export function ManuelModuleBlock({ moduleCode, roleLabel, icon: Icon, duration,
   // CHAPITRES — un par "page bloc" (les longues retombent naturellement)
   chapters.forEach((c, ci) => {
     pages.push(
-      <ManuelPage key={`${moduleCode}-${c.id}`} pageLabel={`${moduleCode} — ${c.title.slice(0, 36)}`} pageNumber={p++}>
+      <ManuelPage key={`${moduleCode}-${c.id}`} pageLabel={`${moduleCode} — ${c.title.slice(0, 36)}`} pageNumber={p++} watermark={watermark}>
         <RunningHeader left={`Module ${moduleCode} · § ${ci + 1}`} right={roleLabel} />
         <h3 className="font-display text-2xl font-extrabold text-ew-green-900">{c.title}</h3>
         {c.intro && <p className="mt-2 text-justify text-[12px] leading-[1.7] italic text-gray-700">{c.intro}</p>}
@@ -768,14 +794,14 @@ export function ManuelModuleBlock({ moduleCode, roleLabel, icon: Icon, duration,
 /*  Auto-évaluation : QCM + exercices + synthèse formative                 */
 /* ---------------------------------------------------------------------- */
 
-export function ManuelAssessmentBlock({ assessment, startPage }: { assessment: ManuelAssessment; startPage: number }) {
+export function ManuelAssessmentBlock({ assessment, startPage, watermark }: { assessment: ManuelAssessment; startPage: number; watermark?: string }) {
   let p = startPage;
   const pages: React.ReactNode[] = [];
   const M = assessment.moduleCode;
 
   // Pré-test
   pages.push(
-    <ManuelPage key={`${M}-pretest`} pageLabel={`${M} — Pré-test`} pageNumber={p++}>
+    <ManuelPage key={`${M}-pretest`} pageLabel={`${M} — Pré-test`} pageNumber={p++} watermark={watermark}>
       <RunningHeader left={`Module ${M} · Évaluation diagnostique`} right={assessment.roleLabel} />
       <h3 className="font-display text-2xl font-extrabold text-ew-green-900">Pré-test diagnostique</h3>
       <p className="mt-1 text-[11px] italic text-gray-600">
@@ -799,7 +825,7 @@ export function ManuelAssessmentBlock({ assessment, startPage }: { assessment: M
   qcmPages.forEach((batch, batchIdx) => {
     const offset = batchIdx * 5;
     pages.push(
-      <ManuelPage key={`${M}-qcm-${batchIdx}`} pageLabel={`${M} — QCM`} pageNumber={p++}>
+      <ManuelPage key={`${M}-qcm-${batchIdx}`} pageLabel={`${M} — QCM`} pageNumber={p++} watermark={watermark}>
         <RunningHeader left={`Module ${M} · QCM d'auto-évaluation`} right={assessment.roleLabel} />
         {batchIdx === 0 && (
           <>
@@ -840,7 +866,7 @@ export function ManuelAssessmentBlock({ assessment, startPage }: { assessment: M
 
   // Exercice
   pages.push(
-    <ManuelPage key={`${M}-exo`} pageLabel={`${M} — Exercice pratique`} pageNumber={p++}>
+    <ManuelPage key={`${M}-exo`} pageLabel={`${M} — Exercice pratique`} pageNumber={p++} watermark={watermark}>
       <RunningHeader left={`Module ${M} · Exercice pratique`} right={assessment.roleLabel} />
       <h3 className="font-display text-2xl font-extrabold text-ew-green-900">{assessment.exercice.titre}</h3>
       <p className="mt-2 text-justify text-[12px] leading-[1.65] italic text-gray-700">
@@ -884,7 +910,7 @@ export function ManuelAssessmentBlock({ assessment, startPage }: { assessment: M
 
   // Synthèse formative
   pages.push(
-    <ManuelPage key={`${M}-synthese`} pageLabel={`${M} — Synthèse formative`} pageNumber={p++}>
+    <ManuelPage key={`${M}-synthese`} pageLabel={`${M} — Synthèse formative`} pageNumber={p++} watermark={watermark}>
       <RunningHeader left={`Module ${M} · Synthèse formative`} right={assessment.roleLabel} />
       <h3 className="font-display text-2xl font-extrabold text-ew-green-900">Synthèse formative</h3>
       <p className="mt-1 text-[11px] italic text-gray-600">
@@ -911,9 +937,9 @@ export function ManuelAssessmentBlock({ assessment, startPage }: { assessment: M
 /*  Annexe — Grille de progression (6 paliers)                              */
 /* ---------------------------------------------------------------------- */
 
-export function ManuelProgressionGrid({ progression, pageNumber }: { progression: ManuelProgression["grilleProgression"]; pageNumber: number }) {
+export function ManuelProgressionGrid({ progression, pageNumber, watermark }: { progression: ManuelProgression["grilleProgression"]; pageNumber: number; watermark?: string }) {
   return (
-    <ManuelPage pageLabel="Annexe — Grille de progression" pageNumber={pageNumber}>
+    <ManuelPage pageLabel="Annexe — Grille de progression" pageNumber={pageNumber} watermark={watermark}>
       <RunningHeader left="Annexe A · Grille de progression" right="EduWeb Planner" />
       <h2 className="font-display text-3xl font-extrabold text-ew-green-900">Grille de progression</h2>
       <p className="mt-1 text-[11px] italic text-gray-600">
@@ -944,9 +970,11 @@ export function ManuelProgressionGrid({ progression, pageNumber }: { progression
 export function ManuelGlossary({
   entries,
   startPage,
+  watermark,
 }: {
   entries: ManuelProgression["indexGeneral"];
   startPage: number;
+  watermark?: string;
 }) {
   let p = startPage;
   const pages: React.ReactNode[] = [];
@@ -956,7 +984,7 @@ export function ManuelGlossary({
 
   batches.forEach((batch, idx) => {
     pages.push(
-      <ManuelPage key={`glo-${idx}`} pageLabel="Annexe — Glossaire" pageNumber={p++}>
+      <ManuelPage key={`glo-${idx}`} pageLabel="Annexe — Glossaire" pageNumber={p++} watermark={watermark}>
         <RunningHeader left="Annexe B · Glossaire général" right="EduWeb Planner" />
         {idx === 0 && (
           <>
@@ -987,12 +1015,236 @@ export function ManuelGlossary({
 }
 
 /* ---------------------------------------------------------------------- */
+/*  PAGE — Signatures (formateur, apprenant, hiérarchie)                   */
+/* ---------------------------------------------------------------------- */
+
+export function ManuelSignaturesPage({
+  identification,
+  pageNumber,
+  watermark,
+}: {
+  identification: ManuelIdentification;
+  pageNumber: number;
+  watermark?: string;
+}) {
+  return (
+    <ManuelPage pageLabel="Page de signatures" pageNumber={pageNumber} watermark={watermark}>
+      <RunningHeader left="Page de signatures" right={identification.code} />
+      <h2 className="font-display text-3xl font-extrabold text-ew-green-900">Page de signatures</h2>
+      <p className="mt-2 text-[12px] italic text-gray-600">
+        À renseigner par le formateur, l&apos;apprenant et son autorité hiérarchique pour attester de la
+        bonne conduite de la formation.
+      </p>
+
+      <div className="mt-8 space-y-6">
+        <SignatureBlock
+          title="Formateur"
+          subtitle="Atteste de la conduite intégrale de la formation"
+          fields={[
+            "Nom et prénoms",
+            "Fonction / Institution",
+            "Date",
+          ]}
+          stamp
+        />
+        <SignatureBlock
+          title="Apprenant(e)"
+          subtitle="Confirme avoir suivi le présent support de formation"
+          fields={[
+            "Nom et prénoms",
+            "Rôle / Établissement",
+            "Date",
+          ]}
+        />
+        <SignatureBlock
+          title="Visa de la hiérarchie"
+          subtitle="Direction d'établissement, DRENA, CAFOP ou APFC selon le cas"
+          fields={[
+            "Nom et prénoms du visa",
+            "Fonction",
+            "Date",
+          ]}
+          stamp
+        />
+      </div>
+
+      <p className="mt-10 text-[10px] italic text-gray-500">
+        Ce feuillet est conservé dans le dossier de formation de l&apos;apprenant et, le cas échéant,
+        joint au registre de l&apos;institution organisatrice (DRENA, CAFOP, APFC). Une copie est remise
+        à l&apos;intéressé(e).
+      </p>
+    </ManuelPage>
+  );
+}
+
+function SignatureBlock({
+  title,
+  subtitle,
+  fields,
+  stamp,
+}: {
+  title: string;
+  subtitle: string;
+  fields: string[];
+  stamp?: boolean;
+}) {
+  return (
+    <div className="manuel-no-break rounded border border-gray-300 p-4">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="font-display text-base font-bold text-ew-green-900">{title}</p>
+        <p className="text-[10px] italic text-gray-600">{subtitle}</p>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-[11px]">
+        {fields.map((label) => (
+          <div key={label}>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-600">{label}</p>
+            <div className="mt-1 border-b border-black/60" style={{ minHeight: 18 }} />
+          </div>
+        ))}
+        <div className="col-span-2">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-600">
+            Signature{stamp && " et cachet"}
+          </p>
+          <div className="mt-1 flex h-20 items-end border border-dashed border-gray-300 p-2">
+            <span className="text-[9px] italic text-gray-400">Espace réservé</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/*  CERTIFICAT DE FIN DE FORMATION (page autonome, A4 paysage ou portrait) */
+/* ---------------------------------------------------------------------- */
+
+export function ManuelCertificate({
+  identification,
+  beneficiaryName,
+  beneficiaryRole,
+  duration,
+  issueDate,
+  validUntil,
+  certificateNumber,
+}: {
+  identification: ManuelIdentification;
+  beneficiaryName?: string;
+  beneficiaryRole?: string;
+  duration: string;
+  issueDate?: string;
+  validUntil?: string;
+  certificateNumber?: string;
+}) {
+  return (
+    <ManuelPage className="overflow-hidden border-double" pageLabel="Certificat" pageNumber={undefined}>
+      {/* Cadre décoratif double */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-[8mm] border-4 border-double border-ew-green-800"
+        style={{ borderRadius: 4 }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-[14mm] border border-ew-gold-500"
+        style={{ borderRadius: 2 }}
+      />
+
+      <div className="relative z-10 flex h-full min-h-[265mm] flex-col items-center text-center">
+        <p className="font-display text-[11px] font-bold uppercase tracking-[0.18em] text-gray-700">
+          République de Côte d&apos;Ivoire
+        </p>
+        <p className="mt-1 text-[10px] italic text-gray-700">Union — Discipline — Travail</p>
+        <p className="mt-3 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-gray-700">
+          Ministère de l&apos;Éducation Nationale
+        </p>
+
+        <div className="mt-6 flex items-center gap-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/logo.png"
+            alt="Logo EduWeb Planner"
+            className="h-24 w-24 object-contain"
+          />
+        </div>
+
+        <span className="mt-6 flex h-1 w-32 rounded-full bg-ew-gold-500" />
+        <p className="mt-4 font-display text-[13px] font-bold uppercase tracking-[0.3em] text-ew-gold-600">
+          Certificat de fin de formation
+        </p>
+        <span className="mt-2 flex h-1 w-32 rounded-full bg-ew-gold-500" />
+
+        <p className="mt-10 text-[12px] uppercase tracking-[0.18em] text-gray-700">
+          Il est certifié que
+        </p>
+
+        <div className="mt-3 w-[140mm] border-b-2 border-ew-green-900 pb-1">
+          <p
+            className="font-display text-3xl font-extrabold text-ew-green-900"
+            style={{ fontFamily: "'Fraunces', 'Times New Roman', Georgia, serif" }}
+          >
+            {beneficiaryName || "…………………………………………………………………"}
+          </p>
+        </div>
+        <p className="mt-2 text-[11px] italic text-gray-600">
+          {beneficiaryRole || "Rôle / fonction de l'apprenant(e)"}
+        </p>
+
+        <p className="mt-8 max-w-[150mm] text-justify text-[12px] leading-[1.7] text-gray-800">
+          a suivi avec succès le support de formation académique{" "}
+          <span className="font-bold">« {identification.intitule} »</span> (référence{" "}
+          <span className="font-mono font-bold">{identification.code}</span>, version{" "}
+          <span className="font-bold">{identification.version}</span>) d&apos;une durée totale indicative
+          de <span className="font-bold">{duration}</span>, mobilisant les huit modules de formation
+          aux rôles utilisateurs de la plateforme EduWeb Planner, et a satisfait aux modalités
+          d&apos;évaluation requises pour la délivrance du présent certificat.
+        </p>
+
+        <div className="mt-8 grid w-[150mm] grid-cols-3 gap-4 text-[10px]">
+          <div className="rounded border border-gray-400 p-2 text-center">
+            <p className="font-bold uppercase tracking-wide text-gray-600">N° du certificat</p>
+            <p className="mt-1 font-mono font-bold text-ew-green-800">
+              {certificateNumber || "________"}
+            </p>
+          </div>
+          <div className="rounded border border-gray-400 p-2 text-center">
+            <p className="font-bold uppercase tracking-wide text-gray-600">Délivré le</p>
+            <p className="mt-1 font-bold text-ew-green-800">{issueDate || "____ / ____ / ______"}</p>
+          </div>
+          <div className="rounded border border-gray-400 p-2 text-center">
+            <p className="font-bold uppercase tracking-wide text-gray-600">Validité</p>
+            <p className="mt-1 font-bold text-ew-green-800">{validUntil || identification.dateValidite}</p>
+          </div>
+        </div>
+
+        <div className="mt-10 grid w-[160mm] grid-cols-2 gap-10 text-[10px]">
+          <div className="text-center">
+            <p className="italic text-gray-700">Le formateur</p>
+            <div className="mt-12 border-t border-black" />
+            <p className="mt-1 text-[9px] italic text-gray-500">Nom, signature, date</p>
+          </div>
+          <div className="text-center">
+            <p className="italic text-gray-700">L&apos;autorité hiérarchique</p>
+            <p className="text-[9px] italic text-gray-500">(Cachet et signature)</p>
+            <div className="mt-12 border-t border-black" />
+            <p className="mt-1 text-[9px] italic text-gray-500">DRENA / CAFOP / APFC selon le cas</p>
+          </div>
+        </div>
+
+        <p className="mt-auto text-[9px] italic text-gray-500">
+          Document à conserver — toute reproduction frauduleuse est sanctionnée par la loi.
+        </p>
+      </div>
+    </ManuelPage>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
 /*  Pied final — Achèvement du document                                     */
 /* ---------------------------------------------------------------------- */
 
-export function ManuelEnd({ identification, pageNumber }: { identification: ManuelIdentification; pageNumber: number }) {
+export function ManuelEnd({ identification, pageNumber, watermark }: { identification: ManuelIdentification; pageNumber: number; watermark?: string }) {
   return (
-    <ManuelPage pageLabel="Fin du document" pageNumber={pageNumber}>
+    <ManuelPage pageLabel="Fin du document" pageNumber={pageNumber} watermark={watermark}>
       <RunningHeader left="Fin du manuel" right={identification.code} />
       <div className="flex h-[200mm] flex-col items-center justify-center text-center">
         <span className="flex h-2 w-32 rounded-full bg-ew-gold-500" />

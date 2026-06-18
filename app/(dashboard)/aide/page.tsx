@@ -13,6 +13,7 @@ import {
   Download,
   FileText,
   FileDown,
+  Award,
 } from "lucide-react";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Badge } from "@/components/ui/badge";
@@ -120,6 +121,9 @@ export default function AideIndexPage() {
 
       {/* Manuel académique téléchargeable en PDF (livrable « disponible à part ») */}
       <DownloadManualBanner />
+
+      {/* Certificat de fin de formation (modèle officiel) */}
+      <CertificateBanner />
 
 
       {/* Filtres */}
@@ -283,7 +287,50 @@ function DownloadManualBanner() {
       <p className="mt-2 text-xs italic text-muted-foreground">
         Le fichier Word inclut le logo, l&apos;entête et une <strong>table des matières automatique</strong>
         qui se met à jour à l&apos;ouverture (acceptez la mise à jour des champs à l&apos;ouverture, ou pressez F9).
+        Un <strong>filigrane d&apos;institution</strong> et une <strong>page de signatures</strong> sont
+        intégrés au support imprimable, en plus du certificat ci-dessous.
       </p>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Bandeau « Certificat de fin de formation »                              */
+/* ---------------------------------------------------------------------- */
+function CertificateBanner() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-ew-green-200 bg-gradient-to-r from-ew-green-50 via-card to-card p-5 shadow-sm">
+      <div className="flex flex-wrap items-center gap-4">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ew-green-700 text-white">
+          <Award className="h-6 w-6" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-ew-green-700">
+            Document officiel
+          </p>
+          <p className="mt-0.5 font-display text-lg font-bold text-foreground">
+            Certificat de fin de formation
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Modèle officiel à compléter et imprimer pour attester du suivi de la formation EduWeb Planner.
+            Personnalisable (nom, fonction, numéro, date) puis téléchargeable en Word ou imprimable en PDF.
+          </p>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link
+          href="/aide/certificat"
+          className="inline-flex items-center gap-2 rounded-lg bg-ew-green-700 px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+        >
+          <Award className="h-4 w-4" /> Ouvrir le certificat
+        </Link>
+        <a
+          href="/api/docx/certificat"
+          className="inline-flex items-center gap-2 rounded-lg border border-ew-green-700 bg-card px-4 py-2 text-sm font-semibold text-ew-green-700 transition-colors hover:bg-ew-green-50"
+        >
+          <FileDown className="h-4 w-4" /> Télécharger le modèle vierge (.docx)
+        </a>
+      </div>
     </div>
   );
 }

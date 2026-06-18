@@ -15,6 +15,8 @@ import {
   ManuelAssessmentBlock,
   ManuelProgressionGrid,
   ManuelGlossary,
+  ManuelSignaturesPage,
+  ManuelCertificate,
   ManuelEnd,
 } from "@/components/guides/training-manual";
 import { GUIDES } from "@/lib/guides";
@@ -93,18 +95,21 @@ export default function SupportFormationPage() {
     return entries;
   }, [MODULE_ORDER]);
 
+  // Texte de filigrane appliqué à toutes les pages du manuel.
+  const WATERMARK = "EduWeb Planner · Document de formation";
+
   // Assemblage des pages dans l'ordre du manuel (séquentiel pour préserver la numérotation).
   const pages: React.ReactNode[] = [];
 
   // Front matter (page I = couverture, numérotée à part)
   pages.push(<ManuelCover key="cover" identification={TRAINING_SYLLABUS.identification} />);
-  pages.push(<ManuelColophon key="colophon" identification={TRAINING_SYLLABUS.identification} />);
-  pages.push(<ManuelForeword key="foreword" syllabus={TRAINING_SYLLABUS} pageNumber="III" />);
-  pages.push(<ManuelTOC key="toc" entries={tocEntries} pageNumber="IV" />);
-  pages.push(<ManuelAbbreviations key="abbrev" abbreviations={TRAINING_ABBREVIATIONS} pageNumber="V" />);
+  pages.push(<ManuelColophon key="colophon" identification={TRAINING_SYLLABUS.identification} watermark={WATERMARK} />);
+  pages.push(<ManuelForeword key="foreword" syllabus={TRAINING_SYLLABUS} pageNumber="III" watermark={WATERMARK} />);
+  pages.push(<ManuelTOC key="toc" entries={tocEntries} pageNumber="IV" watermark={WATERMARK} />);
+  pages.push(<ManuelAbbreviations key="abbrev" abbreviations={TRAINING_ABBREVIATIONS} pageNumber="V" watermark={WATERMARK} />);
 
   // Syllabus (pages 1–4)
-  const syllabusBlock = ManuelSyllabusBlock({ syllabus: TRAINING_SYLLABUS, startPage: 1 });
+  const syllabusBlock = ManuelSyllabusBlock({ syllabus: TRAINING_SYLLABUS, startPage: 1, watermark: WATERMARK });
   syllabusBlock.pages.forEach((p) => pages.push(p));
   let currentPage = syllabusBlock.nextPage;
 
@@ -127,11 +132,12 @@ export default function SupportFormationPage() {
       prerequisites: guide.prerequisites,
       chapters: guide.chapters,
       startPage: currentPage,
+      watermark: WATERMARK,
     });
     moduleBlock.pages.forEach((p) => pages.push(p));
     currentPage = moduleBlock.nextPage;
 
-    const assessmentBlock = ManuelAssessmentBlock({ assessment: ass, startPage: currentPage });
+    const assessmentBlock = ManuelAssessmentBlock({ assessment: ass, startPage: currentPage, watermark: WATERMARK });
     assessmentBlock.pages.forEach((p) => pages.push(p));
     currentPage = assessmentBlock.nextPage;
   });
@@ -142,6 +148,7 @@ export default function SupportFormationPage() {
       key="annexe-progression"
       progression={TRAINING_PROGRESSION.grilleProgression}
       pageNumber={currentPage}
+      watermark={WATERMARK}
     />,
   );
   currentPage += 1;
@@ -149,12 +156,33 @@ export default function SupportFormationPage() {
   const glossaryBlock = ManuelGlossary({
     entries: TRAINING_PROGRESSION.indexGeneral,
     startPage: currentPage,
+    watermark: WATERMARK,
   });
   glossaryBlock.pages.forEach((p) => pages.push(p));
   currentPage = glossaryBlock.nextPage;
 
+  // Page de signatures (formateur, apprenant, hiérarchie)
   pages.push(
-    <ManuelEnd key="end" identification={TRAINING_SYLLABUS.identification} pageNumber={currentPage} />,
+    <ManuelSignaturesPage
+      key="signatures"
+      identification={TRAINING_SYLLABUS.identification}
+      pageNumber={currentPage}
+      watermark={WATERMARK}
+    />,
+  );
+  currentPage += 1;
+
+  // Certificat (modèle reproductible — page autonome avec cadre décoratif)
+  pages.push(
+    <ManuelCertificate
+      key="certificat"
+      identification={TRAINING_SYLLABUS.identification}
+      duration={TRAINING_SYLLABUS.volumeHoraire.dureeTotal}
+    />,
+  );
+
+  pages.push(
+    <ManuelEnd key="end" identification={TRAINING_SYLLABUS.identification} pageNumber={currentPage} watermark={WATERMARK} />,
   );
 
   return (
