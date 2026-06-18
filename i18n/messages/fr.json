@@ -96,7 +96,8 @@
       "parametrage": "Paramétrage",
       "vieScolaire": "Vie scolaire",
       "inspectionSupervision": "Inspection & Supervision",
-      "statistiques": "Statistiques"
+      "statistiques": "Statistiques",
+      "aide": "Aide & Formation"
     },
     "items": {
       "accueil": "Accueil",
@@ -139,7 +140,8 @@
       "analytics": "Analytics",
       "performanceEnseignants": "Performance des enseignants",
       "efficacitePedagogique": "Efficacité pédagogique",
-      "suiviRecommandations": "Suivi des recommandations"
+      "suiviRecommandations": "Suivi des recommandations",
+      "aide": "Aide & Formation"
     }
   },
   "topbar": {

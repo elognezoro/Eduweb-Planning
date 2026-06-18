@@ -96,7 +96,8 @@
       "parametrage": "Settings",
       "vieScolaire": "School life",
       "inspectionSupervision": "Inspection & Supervision",
-      "statistiques": "Statistics"
+      "statistiques": "Statistics",
+      "aide": "Help & Training"
     },
     "items": {
       "accueil": "Home",
@@ -139,7 +140,8 @@
       "analytics": "Analytics",
       "performanceEnseignants": "Teacher performance",
       "efficacitePedagogique": "Teaching effectiveness",
-      "suiviRecommandations": "Recommendations tracking"
+      "suiviRecommandations": "Recommendations tracking",
+      "aide": "Help & Training"
     }
   },
   "topbar": {

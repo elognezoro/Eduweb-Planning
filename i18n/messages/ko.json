@@ -96,7 +96,8 @@
       "parametrage": "설정",
       "vieScolaire": "학교 생활",
       "inspectionSupervision": "감독 및 검사",
-      "statistiques": "통계"
+      "statistiques": "통계",
+      "aide": "도움말 & 교육"
     },
     "items": {
       "accueil": "홈",
@@ -139,7 +140,8 @@
       "analytics": "분석",
       "performanceEnseignants": "교사 성과",
       "efficacitePedagogique": "교육 효과",
-      "suiviRecommandations": "권장 사항 추적"
+      "suiviRecommandations": "권장 사항 추적",
+      "aide": "도움말 & 교육"
     }
   },
   "topbar": {

@@ -96,7 +96,8 @@
       "parametrage": "Mipangilio",
       "vieScolaire": "Maisha ya shule",
       "inspectionSupervision": "Ukaguzi na Usimamizi",
-      "statistiques": "Takwimu"
+      "statistiques": "Takwimu",
+      "aide": "Msaada na Mafunzo"
     },
     "items": {
       "accueil": "Mwanzo",
@@ -139,7 +140,8 @@
       "analytics": "Uchanganuzi",
       "performanceEnseignants": "Utendaji wa walimu",
       "efficacitePedagogique": "Ufanisi wa kielimu",
-      "suiviRecommandations": "Ufuatiliaji wa mapendekezo"
+      "suiviRecommandations": "Ufuatiliaji wa mapendekezo",
+      "aide": "Msaada na Mafunzo"
     }
   },
   "topbar": {

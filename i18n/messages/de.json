@@ -96,7 +96,8 @@
       "parametrage": "Einstellungen",
       "vieScolaire": "Schulalltag",
       "inspectionSupervision": "Inspektion & Aufsicht",
-      "statistiques": "Statistiken"
+      "statistiques": "Statistiken",
+      "aide": "Hilfe & Schulung"
     },
     "items": {
       "accueil": "Startseite",
@@ -139,7 +140,8 @@
       "analytics": "Analytics",
       "performanceEnseignants": "Lehrerleistung",
       "efficacitePedagogique": "Pädagogische Effektivität",
-      "suiviRecommandations": "Empfehlungsverfolgung"
+      "suiviRecommandations": "Empfehlungsverfolgung",
+      "aide": "Hilfe & Schulung"
     }
   },
   "topbar": {

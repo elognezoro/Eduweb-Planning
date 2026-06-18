@@ -96,7 +96,8 @@
       "parametrage": "设置",
       "vieScolaire": "学校生活",
       "inspectionSupervision": "检查与监督",
-      "statistiques": "统计"
+      "statistiques": "统计",
+      "aide": "帮助与培训"
     },
     "items": {
       "accueil": "首页",
@@ -139,7 +140,8 @@
       "analytics": "分析",
       "performanceEnseignants": "教师表现",
       "efficacitePedagogique": "教学效率",
-      "suiviRecommandations": "建议跟踪"
+      "suiviRecommandations": "建议跟踪",
+      "aide": "帮助与培训"
     }
   },
   "topbar": {

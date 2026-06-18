@@ -41,6 +41,7 @@ import {
   Award,
   Target,
   ListTodo,
+  BookOpen,
 } from "lucide-react";
 import type { Permission } from "./permissions";
 
@@ -364,6 +365,21 @@ export const NAVIGATION: NavGroup[] = [
         label: "nav.items.suiviRecommandations",
         icon: ListTodo,
         permission: "recommendations:view",
+      },
+    ],
+  },
+  {
+    id: "aide",
+    label: "nav.groups.aide",
+    icon: BookOpen,
+    direct: true,
+    items: [
+      {
+        href: "/aide",
+        label: "nav.items.aide",
+        icon: BookOpen,
+        permission: "dashboard:view",
+        description: "Bibliothèque de guides de formation",
       },
     ],
   },

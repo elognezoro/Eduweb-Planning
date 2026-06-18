@@ -96,7 +96,8 @@
       "parametrage": "Настройки",
       "vieScolaire": "Школьная жизнь",
       "inspectionSupervision": "Инспекция и надзор",
-      "statistiques": "Статистика"
+      "statistiques": "Статистика",
+      "aide": "Справка и обучение"
     },
     "items": {
       "accueil": "Главная",
@@ -139,7 +140,8 @@
       "analytics": "Аналитика",
       "performanceEnseignants": "Эффективность учителей",
       "efficacitePedagogique": "Педагогическая эффективность",
-      "suiviRecommandations": "Отслеживание рекомендаций"
+      "suiviRecommandations": "Отслеживание рекомендаций",
+      "aide": "Справка и обучение"
     }
   },
   "topbar": {

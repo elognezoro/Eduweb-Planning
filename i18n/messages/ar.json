@@ -96,7 +96,8 @@
       "parametrage": "الإعدادات",
       "vieScolaire": "الحياة المدرسية",
       "inspectionSupervision": "التفتيش والإشراف",
-      "statistiques": "الإحصائيات"
+      "statistiques": "الإحصائيات",
+      "aide": "المساعدة والتكوين"
     },
     "items": {
       "accueil": "الرئيسية",
@@ -139,7 +140,8 @@
       "analytics": "تحليلات",
       "performanceEnseignants": "أداء المعلمين",
       "efficacitePedagogique": "الفعالية التربوية",
-      "suiviRecommandations": "متابعة التوصيات"
+      "suiviRecommandations": "متابعة التوصيات",
+      "aide": "المساعدة والتكوين"
     }
   },
   "topbar": {
