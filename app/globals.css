@@ -41,11 +41,21 @@
   --ew-green-800: #105234;
   --ew-green-700: #176b45;
   --ew-green-600: #218552;
+  --ew-green-500: #29a163;
+  --ew-green-300: #8ecfa9;
+  --ew-green-200: #bbe1cc;
   --ew-green-100: #dff4e9;
   --ew-green-50: #f0fbf5;
+  --ew-gold-700: #b07e15;
   --ew-gold-600: #d99a1e;
   --ew-gold-500: #eba52a;
+  --ew-gold-200: #fbd989;
   --ew-gold-100: #fff1cc;
+  --ew-gold-50: #fff8e5;
+  --ew-purple-700: #6d28d9;
+  --ew-purple-500: #7c3aed;
+  --ew-purple-200: #ddd6fe;
+  --ew-purple-50: #f5f3ff;
 
   /* Couleurs sémantiques */
   --ew-blue: #2563eb;
@@ -81,11 +91,21 @@
   --color-ew-green-800: var(--ew-green-800);
   --color-ew-green-700: var(--ew-green-700);
   --color-ew-green-600: var(--ew-green-600);
+  --color-ew-green-500: var(--ew-green-500);
+  --color-ew-green-300: var(--ew-green-300);
+  --color-ew-green-200: var(--ew-green-200);
   --color-ew-green-100: var(--ew-green-100);
   --color-ew-green-50: var(--ew-green-50);
+  --color-ew-gold-700: var(--ew-gold-700);
   --color-ew-gold-600: var(--ew-gold-600);
   --color-ew-gold-500: var(--ew-gold-500);
+  --color-ew-gold-200: var(--ew-gold-200);
   --color-ew-gold-100: var(--ew-gold-100);
+  --color-ew-gold-50: var(--ew-gold-50);
+  --color-ew-purple-700: var(--ew-purple-700);
+  --color-ew-purple-500: var(--ew-purple-500);
+  --color-ew-purple-200: var(--ew-purple-200);
+  --color-ew-purple-50: var(--ew-purple-50);
   --color-ew-blue: var(--ew-blue);
   --color-ew-red: var(--ew-red);
   --color-ew-orange: var(--ew-orange);
@@ -177,8 +197,34 @@ input::-ms-clear {
   #livret-print,
   #livret-print *,
   #manuel-print,
-  #manuel-print * {
+  #manuel-print *,
+  #seminaire-print,
+  #seminaire-print * {
     visibility: visible !important;
+  }
+  /* Livret de séminaire : document académique multi-pages A4. */
+  #seminaire-print {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .seminaire-page {
+    break-after: page;
+    page-break-after: always;
+  }
+  .seminaire-page:last-of-type {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .seminaire-page + .seminaire-page {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
   }
   /* Manuel de formation : document académique multi-pages. */
   #manuel-print {

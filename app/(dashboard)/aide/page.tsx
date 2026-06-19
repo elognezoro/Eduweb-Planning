@@ -125,6 +125,9 @@ export default function AideIndexPage() {
       {/* Certificat de fin de formation (modèle officiel) */}
       <CertificateBanner />
 
+      {/* Séminaire des écoles catholiques — Magnifica Humanitas */}
+      <SeminaireMagnificaBanner />
+
 
       {/* Filtres */}
       <SectionCard contentClassName="p-4">
@@ -337,6 +340,56 @@ function CertificateBanner() {
           className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/40"
         >
           <FileDown className="h-4 w-4" /> Modèle vierge (.docx)
+        </a>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Bandeau « Séminaire Magnifica Humanitas »                              */
+/* ---------------------------------------------------------------------- */
+function SeminaireMagnificaBanner() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-purple-200 bg-gradient-to-r from-purple-50 via-card to-card p-5 shadow-sm">
+      <div className="flex flex-wrap items-center gap-4">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-purple-700 text-white">
+          <BookOpen className="h-6 w-6" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-purple-700">
+            Séminaire des écoles catholiques
+          </p>
+          <p className="mt-0.5 font-display text-lg font-bold text-foreground">
+            Magnifica Humanitas — Rester humains à l&apos;ère de l&apos;intelligence artificielle
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Atelier interactif de 12 h sur l&apos;encyclique du Saint-Père Léon XIV (15 mai 2026) :
+            <strong> 9 modules</strong>, <strong>3 quiz auto-corrigés</strong>,{" "}
+            <strong>charte d&apos;usage responsable</strong>, grille d&apos;évaluation, glossaire et
+            livret académique exportable. Conçu pour les responsables éducatifs, enseignants, cadres
+            pastoraux, formateurs et parents.
+          </p>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link
+          href="/aide/seminaire/magnifica-humanitas"
+          className="inline-flex items-center gap-2 rounded-lg bg-purple-700 px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+        >
+          <BookOpen className="h-4 w-4" /> Ouvrir le séminaire
+        </Link>
+        <Link
+          href="/aide/seminaire/magnifica-humanitas/livret"
+          className="inline-flex items-center gap-2 rounded-lg border border-purple-700 bg-card px-4 py-2 text-sm font-semibold text-purple-700 transition-colors hover:bg-purple-50"
+        >
+          <FileText className="h-4 w-4" /> Livret imprimable (PDF)
+        </Link>
+        <a
+          href="/api/docx/seminaire/magnifica-humanitas"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/40"
+        >
+          <FileDown className="h-4 w-4" /> Livret Word (.docx)
         </a>
       </div>
     </div>
