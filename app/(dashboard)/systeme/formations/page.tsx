@@ -56,6 +56,12 @@ import {
   SUMMATIVE_QUIZ_ID,
 } from "@/lib/formations/course-completion";
 import { ImageDrop } from "@/components/forms/image-drop";
+import {
+  FORMATION_ROLES,
+  FORMATION_ROLE_META,
+  DEFAULT_FORMATION_ROLE,
+  type FormationRole,
+} from "@/lib/formations/formation-roles";
 import { ETAB_CONFIG_KEY, loadEtabConfig } from "@/lib/etab-config";
 import { cn } from "@/lib/utils";
 
@@ -257,6 +263,7 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
   const [cohortId, setCohortId] = React.useState<string>("");
   const [expiresAt, setExpiresAt] = React.useState<string>("");
   const [notes, setNotes] = React.useState("");
+  const [formationRole, setFormationRole] = React.useState<FormationRole>(DEFAULT_FORMATION_ROLE);
   const [toast, setToast] = React.useState<string | null>(null);
 
   const cohortsForCourse = store.courseCohorts.filter((c) => c.courseId === courseId);
@@ -303,8 +310,11 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
       cohortId: source === "cohort" ? cohortId || null : null,
       expiresAt: expiresAt ? new Date(expiresAt + "T23:59:59").toISOString() : null,
       notes: notes.trim() || undefined,
+      formationRole,
     });
-    setToast(`${picked.size} utilisateur(s) inscrit(s).`);
+    setToast(
+      `${picked.size} utilisateur(s) inscrit(s) comme ${FORMATION_ROLE_META[formationRole].label.toLowerCase()}.`,
+    );
     setPicked(new Set());
     setNotes("");
     window.setTimeout(() => setToast(null), 4000);
@@ -324,6 +334,23 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
           >
             <option value="individual">Nominative</option>
             <option value="cohort">Par cohorte</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            Rôle dans la formation
+          </label>
+          <select
+            value={formationRole}
+            onChange={(e) => setFormationRole(e.target.value as FormationRole)}
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+            title={FORMATION_ROLE_META[formationRole].description}
+          >
+            {FORMATION_ROLES.map((r) => (
+              <option key={r} value={r}>
+                {FORMATION_ROLE_META[r].label}
+              </option>
+            ))}
           </select>
         </div>
         {source === "cohort" ? (
@@ -521,7 +548,8 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
           <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-3 py-2 text-left font-bold">Nom</th>
-              <th className="px-3 py-2 text-left font-bold">Rôle</th>
+              <th className="px-3 py-2 text-left font-bold">Rôle global</th>
+              <th className="px-3 py-2 text-left font-bold">Rôle formation</th>
               <th className="px-3 py-2 text-left font-bold">Source</th>
               <th className="px-3 py-2 text-left font-bold">Inscrit le</th>
               <th className="px-3 py-2 text-left font-bold">Expire</th>
@@ -531,7 +559,7 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-3 py-6 text-center italic text-muted-foreground">
+                <td colSpan={7} className="px-3 py-6 text-center italic text-muted-foreground">
                   Aucun utilisateur inscrit à ce cours.
                 </td>
               </tr>
@@ -541,6 +569,34 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
                   <td className="px-3 py-1.5 font-medium text-foreground">{user.name}</td>
                   <td className="px-3 py-1.5">
                     <Badge tone="green">{user.role}</Badge>
+                  </td>
+                  <td className="px-3 py-1.5">
+                    {verdict.enrollment ? (
+                      <select
+                        value={verdict.enrollment.formationRole ?? DEFAULT_FORMATION_ROLE}
+                        onChange={(e) =>
+                          store.setEnrollmentFormationRole(
+                            verdict.enrollment!.id,
+                            e.target.value as FormationRole,
+                          )
+                        }
+                        className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+                        title="Modifier le rôle de ce participant dans la formation"
+                      >
+                        {FORMATION_ROLES.map((r) => (
+                          <option key={r} value={r}>
+                            {FORMATION_ROLE_META[r].label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span
+                        className="text-xs italic text-muted-foreground"
+                        title="Inscription par cohorte ou automatique : rôle « étudiant » par défaut. Pour attribuer un autre rôle, créez une inscription nominative."
+                      >
+                        {FORMATION_ROLE_META[DEFAULT_FORMATION_ROLE].label}
+                      </span>
+                    )}
                   </td>
                   <td className="px-3 py-1.5 text-xs">{enrollmentSourceLabel(verdict.source)}</td>
                   <td className="px-3 py-1.5 text-xs text-muted-foreground">

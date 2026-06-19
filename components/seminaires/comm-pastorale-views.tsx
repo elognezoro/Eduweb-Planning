@@ -33,6 +33,8 @@ import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
 import { generateMatrixCritique } from "@/lib/seminaires/matrix-critique";
 import { NarrationButton } from "@/components/seminaires/narration-button";
+import { useFormationRole } from "@/components/formations/use-formation-role";
+import { isFacilitatorRole } from "@/lib/formations/formation-roles";
 import type {
   CommSeminaire,
   CommSeminaireActivity,
@@ -2239,7 +2241,11 @@ function FillableMatrix({
       )
     : undefined;
 
-  const isAdmin = app.effectiveRole === "admin";
+  // Le panneau de critiques est réservé aux animateurs de la formation
+  // (enseignant, tuteur, gestionnaire, administrateur) — selon le rôle de
+  // formation, et non plus seulement le rôle applicatif global.
+  const formationRole = useFormationRole(courseId);
+  const canReview = isFacilitatorRole(formationRole);
 
   return (
     <div className="space-y-2">
@@ -2294,7 +2300,7 @@ function FillableMatrix({
       {/* Panneau de critiques — visible uniquement par les formateurs/admins.
           Liste les soumissions des autres participants ; possibilité de
           générer une critique, l'éditer, la publier ou la dépublier. */}
-      {isAdmin ? <FacilitatorReviewPanel activityId={activityId} /> : null}
+      {canReview ? <FacilitatorReviewPanel activityId={activityId} /> : null}
     </div>
   );
 }

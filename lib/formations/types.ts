@@ -1,4 +1,5 @@
 import type { UserRole } from "@/lib/roles";
+import type { FormationRole } from "@/lib/formations/formation-roles";
 
 /**
  * Modèle d'inscription aux formations EduWeb Planner.
@@ -74,6 +75,12 @@ export interface CourseEnrollment {
   /** ISO timestamp ou null = sans limite. */
   expiresAt?: string | null;
   notes?: string;
+  /**
+   * Rôle de l'utilisateur DANS cette formation (admin/gestionnaire/
+   * enseignant/tuteur/etudiant). Optionnel : absent = « etudiant ».
+   * Voir lib/formations/formation-roles.ts.
+   */
+  formationRole?: FormationRole;
 }
 
 /**

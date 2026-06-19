@@ -25,6 +25,7 @@ import type {
   ModuleAccessRule,
   ModuleCompletion,
 } from "@/lib/formations/types";
+import type { FormationRole } from "@/lib/formations/formation-roles";
 import { getCourseCompletionRule } from "@/lib/formations/course-completion";
 import { getCourseModuleList } from "@/lib/formations/module-access";
 
@@ -480,6 +481,8 @@ interface DataStore extends StoreState {
   ) => void;
   /** Supprime une inscription nominative. */
   removeEnrollment: (id: string) => void;
+  /** Change le rôle de formation d'une inscription (admin/enseignant/…). */
+  setEnrollmentFormationRole: (id: string, formationRole: FormationRole) => void;
   /** Crée une cohorte nommée pour un cours. */
   createCohort: (c: Omit<CourseCohort, "id" | "createdAt">) => void;
   /** Met à jour la liste des membres d'une cohorte. */
@@ -794,6 +797,13 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       setState((s) => ({
         ...s,
         courseEnrollments: s.courseEnrollments.filter((x) => x.id !== id),
+      })),
+    setEnrollmentFormationRole: (id, formationRole) =>
+      setState((s) => ({
+        ...s,
+        courseEnrollments: s.courseEnrollments.map((e) =>
+          e.id === id ? { ...e, formationRole } : e,
+        ),
       })),
     createCohort: (c) =>
       setState((s) => ({
