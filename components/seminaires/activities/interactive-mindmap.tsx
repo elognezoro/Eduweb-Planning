@@ -4,7 +4,10 @@ import * as React from "react";
 import {
   AlertTriangle,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Heart,
+  Info,
   Lightbulb,
   Plus,
   Sparkles,
@@ -129,6 +132,8 @@ export function InteractiveMindMap({
           {instructions}
         </p>
       ) : null}
+
+      <HowItWorks />
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
         <p className="flex items-center gap-1.5 font-bold uppercase tracking-wide text-ew-green-700">
@@ -407,6 +412,80 @@ function CategoryZone({
             })
         )}
       </ul>
+    </div>
+  );
+}
+
+/* ----- Principe de fonctionnement (pliable) ----- */
+function HowItWorks() {
+  const [open, setOpen] = React.useState(true);
+  return (
+    <div className="rounded-xl border border-ew-blue/30 bg-ew-blue/10">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left"
+      >
+        <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-ew-blue">
+          <Info aria-hidden className="h-3.5 w-3.5" /> Comment ça marche ?
+        </span>
+        {open ? (
+          <ChevronUp aria-hidden className="h-4 w-4 text-ew-blue" />
+        ) : (
+          <ChevronDown aria-hidden className="h-4 w-4 text-ew-blue" />
+        )}
+      </button>
+      {open ? (
+        <div className="space-y-1.5 border-t border-ew-blue/20 px-3 py-2 text-sm text-foreground/90">
+          <p>
+            La carte mentale oppose deux pôles complémentaires : la{" "}
+            <strong className="text-ew-gold-700">Babel numérique</strong> (à
+            gauche) et la <strong className="text-ew-green-800">Jérusalem
+            numérique</strong> (à droite). Pour chaque pôle, vous contribuez
+            à trois catégories : <strong>Mots-clés</strong>,{" "}
+            <strong>Exemples</strong> et <strong>Risques / opportunités</strong>.
+          </p>
+          <ul className="ml-4 list-disc space-y-0.5 text-[13px]">
+            <li>
+              Cliquez sur <strong>« + Ajouter »</strong> dans la catégorie de
+              votre choix, saisissez votre proposition, validez avec{" "}
+              <kbd className="rounded border border-border bg-card px-1 py-0.5 text-[10px] font-mono">
+                Entrée
+              </kbd>{" "}
+              ou avec le bouton <strong>Publier</strong>.
+            </li>
+            <li>
+              Votre contribution apparaît sous votre nom, dans une pastille
+              colorée — <span className="text-ew-gold-700">or</span> pour Babel,{" "}
+              <span className="text-ew-green-800">vert</span> pour Jérusalem.
+              Tous les participants voient les contributions des autres en
+              temps réel.
+            </li>
+            <li>
+              Le compteur <strong>N / 3 min.</strong> à côté de chaque catégorie
+              passe au vert dès que l&apos;objectif minimum (3 contributions) est
+              atteint.
+            </li>
+            <li>
+              Vous pouvez retirer vos propres contributions à tout moment via
+              l&apos;icône <Trash2 aria-hidden className="inline h-3 w-3" />.
+              L&apos;administrateur ou le formateur peut modérer l&apos;ensemble
+              du tableau.
+            </li>
+            <li>
+              Inspirez-vous des <strong>suggestions de démarrage</strong>{" "}
+              affichées dans l&apos;en-tête de chaque pôle, mais ajoutez vos
+              propres mots, exemples et constats issus de votre contexte
+              professionnel.
+            </li>
+          </ul>
+          <p className="text-[12px] italic text-muted-foreground">
+            Visez la diversité plutôt que le consensus : la richesse de la
+            carte naît de la confrontation des regards.
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }
