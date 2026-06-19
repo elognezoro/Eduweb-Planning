@@ -25,7 +25,11 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useApp } from "@/components/app-shell/app-context";
+import { useStore } from "@/components/app-shell/data-store";
+import { generateMatrixCritique } from "@/lib/seminaires/matrix-critique";
 import type {
   CommSeminaire,
   CommSeminaireActivity,
@@ -1317,12 +1321,42 @@ function FillableMatrix({
 }: {
   headers: string[];
   rowLabels: string[];
+  /** Sert d'activityId pour la persistance. */
   idPrefix: string;
 }) {
-  // 1re colonne = label en lecture seule, autres colonnes = textarea
-  const [cells, setCells] = React.useState<Record<string, string>>({});
+  // Persistance : la matrice est rattachée à (userId, activityId). Toute
+  // édition est immédiatement enregistrée dans le store. Le formateur peut
+  // ensuite consulter et critiquer les soumissions des participants.
+  const app = useApp();
+  const store = useStore();
+  const courseId = "communication-pastorale";
+  const moduleId = "senec-workshops";
+  const activityId = idPrefix;
+
+  const mine = React.useMemo(
+    () =>
+      store.matrixSubmissions.find(
+        (m) => m.userId === app.user.id && m.activityId === activityId,
+      ),
+    [store.matrixSubmissions, app.user.id, activityId],
+  );
+  const cells = mine?.cells ?? {};
+
   function key(r: number, c: number) {
     return `${r}-${c}`;
+  }
+  function updateCell(r: number, c: number, value: string) {
+    store.upsertMatrixSubmission({
+      userId: app.user.id,
+      userName: app.user.displayName,
+      userRole: app.effectiveRole,
+      courseId,
+      moduleId,
+      activityId,
+      headers,
+      rowLabels,
+      cells: { ...cells, [key(r, c)]: value },
+    });
   }
   function copy() {
     const lines: string[] = [];
@@ -1336,6 +1370,16 @@ function FillableMatrix({
     });
     navigator.clipboard.writeText(lines.join("\n")).catch(() => {});
   }
+
+  // Une critique m'est-elle adressée et publiée par un formateur ?
+  const publishedReview = mine
+    ? store.matrixReviews.find(
+        (r) => r.submissionId === mine.id && r.publishedToLearner,
+      )
+    : undefined;
+
+  const isAdmin = app.effectiveRole === "admin";
+
   return (
     <div className="space-y-2">
       <div className="overflow-x-auto rounded-lg border border-border">
@@ -1360,9 +1404,7 @@ function FillableMatrix({
                       <textarea
                         aria-label={`${headers[c]} pour ${rl}`}
                         value={cells[key(r, c)] || ""}
-                        onChange={(e) =>
-                          setCells((cs) => ({ ...cs, [key(r, c)]: e.target.value }))
-                        }
+                        onChange={(e) => updateCell(r, c, e.target.value)}
                         rows={1}
                         className="w-full resize-y rounded border border-transparent bg-transparent px-1 py-0.5 text-xs hover:border-border focus:border-ew-green-500 focus:outline-none focus:ring-1 focus:ring-ew-green-500"
                         placeholder="…"
@@ -1382,7 +1424,260 @@ function FillableMatrix({
       >
         Copier mon tableau
       </button>
+
+      {/* Critique du formateur publiée à mon attention */}
+      {publishedReview ? (
+        <PublishedReview review={publishedReview} />
+      ) : null}
+
+      {/* Panneau de critiques — visible uniquement par les formateurs/admins.
+          Liste les soumissions des autres participants ; possibilité de
+          générer une critique, l'éditer, la publier ou la dépublier. */}
+      {isAdmin ? <FacilitatorReviewPanel activityId={activityId} /> : null}
     </div>
+  );
+}
+
+/* ----- Critique publiée à destination du participant ----- */
+function PublishedReview({ review }: { review: ReturnType<typeof useStore>["matrixReviews"][number] }) {
+  return (
+    <div className="rounded-2xl border border-ew-purple-200 bg-ew-purple-50/60 p-4">
+      <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-purple-700">
+        <FileText aria-hidden className="h-4 w-4" /> Retour du formateur
+      </p>
+      <p className="mt-1 text-[11px] italic text-muted-foreground">
+        Par <strong className="not-italic text-foreground">{review.reviewerName}</strong>
+        {review.reviewerRole ? ` (${review.reviewerRole})` : ""} ·{" "}
+        {new Date(review.updatedAt).toLocaleString("fr-FR", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })}
+      </p>
+      <pre className="mt-2 whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground/90">
+        {review.content}
+      </pre>
+    </div>
+  );
+}
+
+/* ----- Panneau de critique réservé aux formateurs/admins ----- */
+function FacilitatorReviewPanel({ activityId }: { activityId: string }) {
+  const app = useApp();
+  const store = useStore();
+  const submissions = store.matrixSubmissions
+    .filter((m) => m.activityId === activityId && m.userId !== app.user.id)
+    .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+
+  if (submissions.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-border bg-background/60 p-3 text-xs italic text-muted-foreground">
+        Aucune autre soumission à critiquer pour le moment. Dès qu&apos;un
+        participant remplit sa matrice, elle apparaîtra ici pour évaluation.
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-ew-gold-200 bg-ew-gold-50/40 p-3">
+      <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-gold-700">
+        <Eye aria-hidden className="h-4 w-4" /> Espace formateur — {submissions.length}{" "}
+        soumission{submissions.length > 1 ? "s" : ""} à critiquer
+      </p>
+      <p className="mt-1 text-[11px] italic text-muted-foreground">
+        Réservé à l&apos;administrateur, à l&apos;enseignant ou au tuteur.
+        Générez une première critique objective, éditez-la si besoin, puis
+        publiez-la pour la rendre accessible au participant.
+      </p>
+      <div className="mt-2 space-y-2">
+        {submissions.map((sub) => (
+          <SubmissionReviewCard key={sub.id} submission={sub} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SubmissionReviewCard({
+  submission,
+}: {
+  submission: ReturnType<typeof useStore>["matrixSubmissions"][number];
+}) {
+  const app = useApp();
+  const store = useStore();
+  const [open, setOpen] = React.useState(false);
+  // Mes critiques sur cette soumission (un reviewer peut écrire une critique).
+  const myReview = React.useMemo(
+    () => store.matrixReviews.find(
+      (r) => r.submissionId === submission.id && r.reviewerId === app.user.id,
+    ),
+    [store.matrixReviews, submission.id, app.user.id],
+  );
+  const [content, setContent] = React.useState(myReview?.content ?? "");
+  const [published, setPublished] = React.useState(myReview?.publishedToLearner ?? false);
+
+  React.useEffect(() => {
+    setContent(myReview?.content ?? "");
+    setPublished(myReview?.publishedToLearner ?? false);
+  }, [myReview?.content, myReview?.publishedToLearner]);
+
+  const fillCount = Object.values(submission.cells).filter((v) => v && v.trim().length > 0).length;
+  const totalCells = submission.rowLabels.length * Math.max(0, submission.headers.length - 1);
+
+  function generateDraft() {
+    const draft = generateMatrixCritique(submission);
+    setContent(draft);
+  }
+
+  function save() {
+    if (!content.trim()) return;
+    store.upsertMatrixReview({
+      submissionId: submission.id,
+      reviewerId: app.user.id,
+      reviewerName: app.user.displayName,
+      reviewerRole: app.effectiveRole,
+      content: content.trim(),
+      publishedToLearner: published,
+    });
+  }
+
+  function togglePublication() {
+    if (!myReview) {
+      // Pas encore enregistré : on sauvegarde d'abord, puis on active la publication.
+      if (!content.trim()) return;
+      store.upsertMatrixReview({
+        submissionId: submission.id,
+        reviewerId: app.user.id,
+        reviewerName: app.user.displayName,
+        reviewerRole: app.effectiveRole,
+        content: content.trim(),
+        publishedToLearner: true,
+      });
+      setPublished(true);
+      return;
+    }
+    const next = !myReview.publishedToLearner;
+    store.setMatrixReviewPublished(myReview.id, next);
+    setPublished(next);
+  }
+
+  return (
+    <article className="overflow-hidden rounded-lg border border-border bg-card">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-muted/20"
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full bg-ew-green-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+            {submission.userName}
+          </span>
+          {submission.userRole ? (
+            <span className="rounded-full border border-border bg-background/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+              {submission.userRole}
+            </span>
+          ) : null}
+          <span className="text-xs text-muted-foreground">
+            {fillCount}/{totalCells} cellules remplies
+          </span>
+          {myReview ? (
+            myReview.publishedToLearner ? (
+              <span className="rounded-full border border-ew-green-300 bg-ew-green-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ew-green-800">
+                Publié
+              </span>
+            ) : (
+              <span className="rounded-full border border-ew-gold-200 bg-ew-gold-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ew-gold-700">
+                Brouillon
+              </span>
+            )
+          ) : null}
+        </div>
+        <ChevronRight
+          aria-hidden
+          className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-90")}
+        />
+      </button>
+      {open ? (
+        <div className="space-y-3 border-t border-border p-3">
+          {/* Aperçu de la matrice du participant */}
+          <div className="overflow-x-auto rounded border border-border bg-background/40">
+            <table className="w-full text-[11px]">
+              <thead className="bg-muted/40 uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  {submission.headers.map((h, i) => (
+                    <th key={i} className="px-2 py-1 text-left font-bold">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {submission.rowLabels.map((rl, r) => (
+                  <tr key={r} className="border-t border-border align-top">
+                    <td className="px-2 py-1 font-bold text-ew-green-800">{rl}</td>
+                    {Array.from({ length: submission.headers.length - 1 }).map((_, ci) => {
+                      const c = ci + 1;
+                      const v = submission.cells[`${r}-${c}`] || "";
+                      return (
+                        <td key={c} className="px-2 py-1">
+                          {v ? (
+                            <span>{v}</span>
+                          ) : (
+                            <span className="italic text-muted-foreground">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Génération + édition de la critique */}
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label className="text-xs font-bold uppercase tracking-wide text-ew-purple-700">
+                Critique objective
+              </label>
+              <button
+                type="button"
+                onClick={generateDraft}
+                className="inline-flex items-center gap-1 rounded-md bg-ew-purple-500 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-ew-purple-700"
+              >
+                <Sparkles aria-hidden className="h-3.5 w-3.5" />
+                {content ? "Régénérer le brouillon" : "Générer un premier jet"}
+              </button>
+            </div>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={10}
+              placeholder="Rédigez votre critique, ou cliquez sur « Générer un premier jet » pour démarrer."
+              className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[11px] italic text-muted-foreground">
+                Tant qu&apos;elle n&apos;est pas publiée, le participant ne voit pas votre critique.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={save} disabled={!content.trim()}>
+                  Enregistrer le brouillon
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={togglePublication}
+                  disabled={!content.trim()}
+                  variant={published ? "outline" : "default"}
+                >
+                  {published ? "Dépublier" : "Publier au participant"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </article>
   );
 }
 

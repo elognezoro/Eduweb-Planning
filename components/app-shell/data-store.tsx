@@ -300,6 +300,10 @@ interface StoreState {
   forumPosts: ForumPost[];
   /** Contributions aux cartes mentales collaboratives des activités. */
   mindMapContributions: MindMapContribution[];
+  /** Soumissions de matrices saisissables (matrice des publics, plans…). */
+  matrixSubmissions: MatrixSubmission[];
+  /** Critiques rédigées par les formateurs sur les soumissions de matrices. */
+  matrixReviews: MatrixReview[];
 }
 
 /** Réponse à un sondage d'activité (par ex. « 0.1 Sondage d'entrée »). */
@@ -314,6 +318,49 @@ export interface PollResponse {
   value: string;
   /** ISO timestamp. */
   createdAt: string;
+}
+
+/**
+ * Soumission d'une matrice / tableau saisissable par un participant
+ * (atelier « Matrice des publics », « Plan d'action »…). Persistée par
+ * (userId, activityId) et automatiquement enregistrée à chaque édition.
+ */
+export interface MatrixSubmission {
+  id: string;
+  userId: string;
+  userName: string;
+  userRole?: string;
+  courseId: string;
+  moduleId: string;
+  activityId: string;
+  /** En-têtes de colonnes du tableau. */
+  headers: string[];
+  /** Étiquettes des lignes (lecture seule). */
+  rowLabels: string[];
+  /** Map `row-col` → contenu de la cellule. */
+  cells: Record<string, string>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Critique d'une soumission de matrice, rédigée par un formateur/admin.
+ * Une critique est rattachée à une soumission précise et possède un état
+ * « publiée » qui détermine si le participant peut la voir.
+ */
+export interface MatrixReview {
+  id: string;
+  submissionId: string;
+  /** Reviewer (formateur, admin, tuteur). */
+  reviewerId: string;
+  reviewerName: string;
+  reviewerRole?: string;
+  /** Contenu de la critique (texte multi-ligne). */
+  content: string;
+  /** Si true : visible par le participant. */
+  publishedToLearner: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /** Contribution à une carte mentale collaborative. */
@@ -471,6 +518,18 @@ interface DataStore extends StoreState {
   postMindMapContribution: (input: Omit<MindMapContribution, "id" | "createdAt">) => void;
   /** Supprime une contribution (l'auteur ou l'admin). */
   removeMindMapContribution: (id: string) => void;
+  /** Crée ou met à jour la soumission de matrice de l'utilisateur. */
+  upsertMatrixSubmission: (
+    input: Omit<MatrixSubmission, "id" | "createdAt" | "updatedAt">,
+  ) => void;
+  /** Crée ou met à jour une critique de matrice. */
+  upsertMatrixReview: (
+    input: Omit<MatrixReview, "id" | "createdAt" | "updatedAt">,
+  ) => void;
+  /** Bascule l'état de publication d'une critique. */
+  setMatrixReviewPublished: (id: string, published: boolean) => void;
+  /** Supprime une critique. */
+  removeMatrixReview: (id: string) => void;
   reset: () => void;
 }
 
@@ -507,6 +566,8 @@ const DEFAULTS: StoreState = {
   pollResponses: [],
   forumPosts: [],
   mindMapContributions: [],
+  matrixSubmissions: [],
+  matrixReviews: [],
 };
 
 // Incrémenter la version à chaque changement de schéma persisté (nouveaux champs/tranches) :
@@ -975,6 +1036,64 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       setState((s) => ({
         ...s,
         mindMapContributions: s.mindMapContributions.filter((c) => c.id !== id),
+      })),
+    upsertMatrixSubmission: (input) =>
+      setState((s) => {
+        const now = new Date().toISOString();
+        const existing = s.matrixSubmissions.find(
+          (m) => m.userId === input.userId && m.activityId === input.activityId,
+        );
+        if (existing) {
+          return {
+            ...s,
+            matrixSubmissions: s.matrixSubmissions.map((m) =>
+              m.id === existing.id ? { ...existing, ...input, updatedAt: now } : m,
+            ),
+          };
+        }
+        return {
+          ...s,
+          matrixSubmissions: [
+            { ...input, id: genId("ms"), createdAt: now, updatedAt: now },
+            ...s.matrixSubmissions,
+          ],
+        };
+      }),
+    upsertMatrixReview: (input) =>
+      setState((s) => {
+        const now = new Date().toISOString();
+        const existing = s.matrixReviews.find(
+          (r) => r.submissionId === input.submissionId && r.reviewerId === input.reviewerId,
+        );
+        if (existing) {
+          return {
+            ...s,
+            matrixReviews: s.matrixReviews.map((r) =>
+              r.id === existing.id ? { ...existing, ...input, updatedAt: now } : r,
+            ),
+          };
+        }
+        return {
+          ...s,
+          matrixReviews: [
+            { ...input, id: genId("mr"), createdAt: now, updatedAt: now },
+            ...s.matrixReviews,
+          ],
+        };
+      }),
+    setMatrixReviewPublished: (id, published) =>
+      setState((s) => ({
+        ...s,
+        matrixReviews: s.matrixReviews.map((r) =>
+          r.id === id
+            ? { ...r, publishedToLearner: published, updatedAt: new Date().toISOString() }
+            : r,
+        ),
+      })),
+    removeMatrixReview: (id) =>
+      setState((s) => ({
+        ...s,
+        matrixReviews: s.matrixReviews.filter((r) => r.id !== id),
       })),
     setSecuritySettings: (patch) =>
       setState((s) => {
