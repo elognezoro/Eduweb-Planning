@@ -1,7 +1,21 @@
 "use client";
 
 import * as React from "react";
-import { CheckCircle2, GraduationCap, Plus, Search, Trash2, Users, UsersRound, BookOpen, Calendar } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Download,
+  FileSpreadsheet,
+  GraduationCap,
+  Plus,
+  Search,
+  Trash2,
+  Upload,
+  Users,
+  UsersRound,
+  BookOpen,
+  Calendar,
+} from "lucide-react";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +29,13 @@ import {
   getEnrollmentVerdict,
 } from "@/lib/formations/enrollment";
 import type { CourseCohort, CourseEnrollment } from "@/lib/formations/types";
+import {
+  COHORT_CSV_TEMPLATE,
+  COHORT_CSV_TEMPLATE_FILENAME,
+  groupRowsByCohort,
+  parseCohortsCsv,
+  type CohortDraft,
+} from "@/lib/formations/csv-import";
 import { cn } from "@/lib/utils";
 
 /**
@@ -547,6 +568,9 @@ function CohortsPanel({ courseId, actor }: { courseId: string; actor: string }) 
 
   return (
     <div className="space-y-4">
+      {/* Import CSV en lot — pratique pour créer plusieurs cohortes d'un coup. */}
+      <CsvImportZone courseId={courseId} actor={actor} />
+
       <div className="rounded-lg border border-dashed border-border bg-background/60 p-3">
         <p className="text-xs font-bold uppercase tracking-wide text-ew-green-700">
           Créer une nouvelle cohorte
@@ -754,5 +778,282 @@ function CohortCard({
         </div>
       </div>
     </article>
+  );
+}
+
+/* ============================================================================
+   IMPORT CSV — création groupée de cohortes par glisser/déposer
+   ========================================================================== */
+function CsvImportZone({ courseId, actor }: { courseId: string; actor: string }) {
+  const store = useStore();
+  const [drafts, setDrafts] = React.useState<CohortDraft[] | null>(null);
+  const [fileName, setFileName] = React.useState<string | null>(null);
+  const [parseErrors, setParseErrors] = React.useState<{ lineNumber: number; message: string }[]>([]);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [toast, setToast] = React.useState<string | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  // Pour chaque email du brouillon, on cherche l'utilisateur correspondant dans le store
+  // (insensible à la casse). On distingue les correspondances trouvées des emails inconnus.
+  const drafted = React.useMemo(() => {
+    if (!drafts) return null;
+    return drafts.map((draft) => {
+      const matchedIds: string[] = [];
+      const unknownEmails: string[] = [];
+      for (const email of draft.emails) {
+        const user = store.users.find(
+          (u) => (u.email ?? "").trim().toLowerCase() === email.trim().toLowerCase(),
+        );
+        if (user) matchedIds.push(user.id);
+        else unknownEmails.push(email);
+      }
+      const existing = store.courseCohorts.find(
+        (c) =>
+          c.courseId === courseId &&
+          c.name.trim().toLowerCase() === draft.name.trim().toLowerCase(),
+      );
+      return { draft, matchedIds, unknownEmails, existing };
+    });
+  }, [drafts, store.users, store.courseCohorts, courseId]);
+
+  function handleFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    const f = files[0];
+    if (!/\.csv$|text\/csv|application\/vnd\.ms-excel/.test(f.name + f.type)) {
+      setToast("Le fichier doit être un .csv.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result ?? "");
+      const result = parseCohortsCsv(text);
+      setDrafts(groupRowsByCohort(result.rows));
+      setParseErrors(result.errors);
+      setFileName(f.name);
+      setToast(null);
+    };
+    reader.onerror = () => setToast("Lecture du fichier impossible.");
+    reader.readAsText(f, "utf-8");
+  }
+
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+    handleFiles(e.dataTransfer.files);
+  }
+
+  function reset() {
+    setDrafts(null);
+    setFileName(null);
+    setParseErrors([]);
+    setToast(null);
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
+  function downloadTemplate() {
+    const blob = new Blob([COHORT_CSV_TEMPLATE], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = COHORT_CSV_TEMPLATE_FILENAME;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function importAll() {
+    if (!drafted) return;
+    let createdCohorts = 0;
+    let mergedCohorts = 0;
+    let addedMembers = 0;
+    for (const item of drafted) {
+      if (item.existing) {
+        // Cohorte existante : ajouter les nouveaux membres (déduplication).
+        const next = Array.from(new Set([...item.existing.memberUserIds, ...item.matchedIds]));
+        const delta = next.length - item.existing.memberUserIds.length;
+        if (delta > 0) {
+          store.updateCohortMembers(item.existing.id, next);
+          addedMembers += delta;
+          mergedCohorts++;
+        }
+      } else {
+        // Création d'une nouvelle cohorte avec les membres trouvés.
+        store.createCohort({
+          courseId,
+          name: item.draft.name,
+          description: item.draft.description || undefined,
+          createdBy: actor,
+          memberUserIds: item.matchedIds,
+        });
+        createdCohorts++;
+        addedMembers += item.matchedIds.length;
+      }
+    }
+    setToast(
+      `Import effectué : ${createdCohorts} cohorte(s) créée(s), ${mergedCohorts} fusionnée(s), ${addedMembers} membre(s) ajouté(s).`,
+    );
+    setDrafts(null);
+    setFileName(null);
+    setParseErrors([]);
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
+  // Vue idle : juste la dropzone + lien modèle.
+  if (!drafts) {
+    return (
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={onDrop}
+        className={cn(
+          "rounded-lg border-2 border-dashed p-4 transition-colors",
+          isDragging
+            ? "border-ew-green-500 bg-ew-green-50"
+            : "border-border bg-background/60 hover:border-ew-green-300",
+        )}
+      >
+        <div className="flex flex-wrap items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ew-green-700 text-white">
+            <Upload aria-hidden className="h-5 w-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-bold uppercase tracking-wide text-ew-green-700">
+              Importer plusieurs cohortes (CSV)
+            </p>
+            <p className="mt-0.5 text-sm">
+              Glissez un fichier <strong>.csv</strong> ici, ou{" "}
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="font-bold text-ew-green-700 underline hover:text-ew-green-900"
+              >
+                parcourez votre ordinateur
+              </button>
+              . Une ligne = une cohorte × un membre (par email).
+            </p>
+            <button
+              type="button"
+              onClick={downloadTemplate}
+              className="mt-2 inline-flex items-center gap-1 rounded-md border border-border bg-card px-2.5 py-1 text-xs font-bold hover:bg-muted/40"
+            >
+              <Download aria-hidden className="h-3.5 w-3.5" /> Télécharger le modèle CSV
+            </button>
+          </div>
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".csv,text/csv"
+          className="hidden"
+          onChange={(e) => handleFiles(e.target.files)}
+        />
+        {toast ? <p className="mt-2 text-xs text-destructive">{toast}</p> : null}
+      </div>
+    );
+  }
+
+  // Vue aperçu : récapitule ce qui sera créé / fusionné / ignoré.
+  const totalCohorts = drafted?.length ?? 0;
+  const totalMatched = drafted?.reduce((acc, d) => acc + d.matchedIds.length, 0) ?? 0;
+  const totalUnknown = drafted?.reduce((acc, d) => acc + d.unknownEmails.length, 0) ?? 0;
+
+  return (
+    <div className="rounded-lg border border-ew-green-300 bg-ew-green-50/40 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-green-700">
+          <FileSpreadsheet aria-hidden className="h-4 w-4" /> Aperçu de l&apos;import
+          {fileName ? <span className="font-normal text-muted-foreground">— {fileName}</span> : null}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={reset}>
+            Annuler
+          </Button>
+          <Button size="sm" onClick={importAll}>
+            <Plus className="h-4 w-4" /> Importer {totalCohorts} cohorte{totalCohorts > 1 ? "s" : ""}
+          </Button>
+        </div>
+      </div>
+
+      <div className="mt-2 grid gap-2 text-xs sm:grid-cols-3">
+        <span className="rounded-md border border-ew-green-200 bg-card px-2 py-1">
+          <strong className="text-ew-green-800">{totalCohorts}</strong> cohorte(s) trouvée(s)
+        </span>
+        <span className="rounded-md border border-ew-green-200 bg-card px-2 py-1">
+          <strong className="text-ew-green-800">{totalMatched}</strong> membre(s) reconnu(s)
+        </span>
+        <span
+          className={cn(
+            "rounded-md border bg-card px-2 py-1",
+            totalUnknown > 0 ? "border-ew-gold-500 text-ew-gold-700" : "border-border",
+          )}
+        >
+          <strong>{totalUnknown}</strong> email(s) non trouvé(s)
+        </span>
+      </div>
+
+      <div className="mt-3 max-h-[320px] space-y-2 overflow-y-auto">
+        {drafted?.map((item, i) => (
+          <article key={i} className="rounded-md border border-border bg-card p-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-bold text-foreground">
+                {item.draft.name}
+                {item.existing ? (
+                  <span className="ml-2 rounded-full bg-ew-gold-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ew-gold-700">
+                    Cohorte existante → fusion
+                  </span>
+                ) : (
+                  <span className="ml-2 rounded-full bg-ew-green-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ew-green-800">
+                    Nouvelle cohorte
+                  </span>
+                )}
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                {item.matchedIds.length} membre(s) reconnu(s)
+                {item.unknownEmails.length > 0 ? `, ${item.unknownEmails.length} email(s) inconnu(s)` : null}
+              </p>
+            </div>
+            {item.draft.description ? (
+              <p className="mt-0.5 text-xs italic text-muted-foreground">{item.draft.description}</p>
+            ) : null}
+            {item.unknownEmails.length > 0 ? (
+              <div className="mt-1.5 rounded border border-ew-gold-200 bg-ew-gold-50 px-2 py-1 text-[11px]">
+                <p className="flex items-center gap-1 font-bold text-ew-gold-700">
+                  <AlertTriangle aria-hidden className="h-3 w-3" /> Emails non trouvés dans
+                  l&apos;annuaire — ignorés
+                </p>
+                <p className="mt-0.5 text-muted-foreground">
+                  {item.unknownEmails.slice(0, 5).join(", ")}
+                  {item.unknownEmails.length > 5
+                    ? ` et ${item.unknownEmails.length - 5} autre(s)`
+                    : null}
+                </p>
+              </div>
+            ) : null}
+          </article>
+        ))}
+      </div>
+
+      {parseErrors.length > 0 ? (
+        <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/5 p-2">
+          <p className="flex items-center gap-1 text-xs font-bold text-destructive">
+            <AlertTriangle aria-hidden className="h-3.5 w-3.5" /> Lignes ignorées ({parseErrors.length})
+          </p>
+          <ul className="mt-1 space-y-0.5 text-[11px] text-destructive">
+            {parseErrors.slice(0, 6).map((e, i) => (
+              <li key={i}>
+                Ligne {e.lineNumber} : {e.message}
+              </li>
+            ))}
+            {parseErrors.length > 6 ? (
+              <li className="italic">… et {parseErrors.length - 6} autre(s) erreur(s).</li>
+            ) : null}
+          </ul>
+        </div>
+      ) : null}
+    </div>
   );
 }
