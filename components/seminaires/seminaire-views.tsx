@@ -579,9 +579,12 @@ function SurveyOptions({ options }: { options: string[] }) {
 function InteractiveQcm({
   questions,
   idPrefix,
+  onScored,
 }: {
   questions: { question: string; options: string[]; correctIdx: number }[];
   idPrefix: string;
+  /** Notifié à chaque vérification — score en pourcentage 0-100. */
+  onScored?: (percent: number, raw: number, total: number) => void;
 }) {
   const [answers, setAnswers] = React.useState<Record<number, number | null>>({});
   const [checked, setChecked] = React.useState(false);
@@ -592,6 +595,19 @@ function InteractiveQcm({
       questions.reduce((acc, q, i) => (answers[i] === q.correctIdx ? acc + 1 : acc), 0),
     [answers, questions],
   );
+
+  // Notifier le parent du score lors de la vérification.
+  const scoredRef = React.useRef<number | null>(null);
+  React.useEffect(() => {
+    if (!checked) {
+      scoredRef.current = null;
+      return;
+    }
+    if (scoredRef.current === score) return;
+    scoredRef.current = score;
+    const pct = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
+    onScored?.(pct, score, questions.length);
+  }, [checked, score, questions.length, onScored]);
 
   return (
     <div className="space-y-3">
@@ -1109,7 +1125,13 @@ function BlankTable({
 }
 
 /* -------- QUIZ INDÉPENDANTS -------- */
-export function SeminaireQuizCard({ quiz }: { quiz: SeminaireQuiz }) {
+export function SeminaireQuizCard({
+  quiz,
+  onScored,
+}: {
+  quiz: SeminaireQuiz;
+  onScored?: (percent: number, raw: number, total: number) => void;
+}) {
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-center gap-2">
@@ -1119,7 +1141,7 @@ export function SeminaireQuizCard({ quiz }: { quiz: SeminaireQuiz }) {
         </p>
       </div>
       <div className="mt-3">
-        <InteractiveQcm questions={quiz.questions} idPrefix={quiz.id} />
+        <InteractiveQcm questions={quiz.questions} idPrefix={quiz.id} onScored={onScored} />
       </div>
     </div>
   );

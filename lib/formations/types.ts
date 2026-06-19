@@ -100,6 +100,49 @@ export interface ModuleAccessRule {
   minQuizScore?: number;
 }
 
+/**
+ * Règle de réussite d'un cours dans son ensemble.
+ *
+ * Définie par l'administrateur, elle décrit la condition à remplir
+ * pour qu'un participant soit considéré comme ayant **achevé la
+ * formation** — ce qui débloque le téléchargement du livret PDF et
+ * la délivrance du certificat.
+ *
+ * Modes disponibles :
+ *  - `all-modules` : tous les modules du cours sont complétés
+ *  - `quiz-score` : score minimum atteint sur un quiz désigné
+ *  - `all-modules-and-quiz` : combinaison des deux (ET logique)
+ *  - `manual-admin` : seul l'administrateur peut prononcer la réussite
+ */
+export interface CourseCompletionRule {
+  id: string;
+  courseId: string;
+  mode: "all-modules" | "quiz-score" | "all-modules-and-quiz" | "manual-admin";
+  /** Pour `quiz-score` ou combiné : score minimum (par défaut 70). */
+  minQuizScore?: number;
+  /**
+   * Module portant le quiz comptant pour la réussite. Une valeur
+   * spéciale `"quiz-sommatif"` désigne le quiz global du séminaire.
+   */
+  quizModuleId?: string | null;
+  /** Réservé pour usage futur : délivrer automatiquement un certificat. */
+  certificateAuto?: boolean;
+}
+
+/** Trace de réussite d'un cours par un utilisateur. */
+export interface CourseCompletion {
+  id: string;
+  userId: string;
+  courseId: string;
+  /** ISO timestamp. */
+  completedAt: string;
+  source: "auto-modules" | "quiz" | "manual-admin";
+  /** Score atteint si source = quiz (en %). */
+  score?: number;
+  /** Indique si le certificat a déjà été délivré pour cette réussite. */
+  certificateDelivered?: boolean;
+}
+
 /** Trace de complétion d'un module par un utilisateur. */
 export interface ModuleCompletion {
   id: string;

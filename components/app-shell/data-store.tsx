@@ -19,10 +19,14 @@ import { generateUserUid } from "@/lib/uid";
 import type { UserRole } from "@/lib/roles";
 import type {
   CourseCohort,
+  CourseCompletion,
+  CourseCompletionRule,
   CourseEnrollment,
   ModuleAccessRule,
   ModuleCompletion,
 } from "@/lib/formations/types";
+import { getCourseCompletionRule } from "@/lib/formations/course-completion";
+import { getCourseModuleList } from "@/lib/formations/module-access";
 
 type LessonEntry = (typeof LESSON_BOOK_ENTRIES)[number];
 type Announcement = (typeof ANNOUNCEMENTS)[number];
@@ -284,6 +288,10 @@ interface StoreState {
   moduleAccessRules: ModuleAccessRule[];
   /** Traces de complétion par utilisateur, cours et module. */
   moduleCompletions: ModuleCompletion[];
+  /** Règle de réussite globale du cours (paramétrée par l'admin). */
+  courseCompletionRules: CourseCompletionRule[];
+  /** Traces de réussite globale du cours par utilisateur. */
+  courseCompletions: CourseCompletion[];
 }
 
 interface DataStore extends StoreState {
@@ -370,6 +378,14 @@ interface DataStore extends StoreState {
   markModuleCompleted: (input: Omit<ModuleCompletion, "id" | "completedAt">) => void;
   /** Retire toutes les complétions d'un module pour un utilisateur. */
   unmarkModuleCompleted: (userId: string, courseId: string, moduleId: string) => void;
+  /** Définit ou met à jour la règle de réussite d'un cours. */
+  setCourseCompletionRule: (rule: Omit<CourseCompletionRule, "id">) => void;
+  /** Supprime la règle de réussite d'un cours (retour au défaut). */
+  clearCourseCompletionRule: (courseId: string) => void;
+  /** Marque un cours comme réussi pour un utilisateur. */
+  markCourseCompleted: (input: Omit<CourseCompletion, "id" | "completedAt">) => void;
+  /** Retire toutes les traces de réussite d'un cours pour un utilisateur. */
+  unmarkCourseCompleted: (userId: string, courseId: string) => void;
   reset: () => void;
 }
 
@@ -400,6 +416,8 @@ const DEFAULTS: StoreState = {
   courseCohorts: [],
   moduleAccessRules: [],
   moduleCompletions: [],
+  courseCompletionRules: [],
+  courseCompletions: [],
 };
 
 // Incrémenter la version à chaque changement de schéma persisté (nouveaux champs/tranches) :
@@ -693,29 +711,123 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
             c.courseId === input.courseId &&
             c.moduleId === input.moduleId,
         );
-        if (already) return s;
-        return {
-          ...s,
-          moduleCompletions: [
+        let moduleCompletions = s.moduleCompletions;
+        if (!already) {
+          moduleCompletions = [
             {
               ...input,
               id: genId("mco"),
               completedAt: new Date().toISOString(),
             },
             ...s.moduleCompletions,
-          ],
-        };
+          ];
+        }
+        // Auto-détection de la réussite du cours quand tous les modules sont
+        // complétés (modes `all-modules` ou `all-modules-and-quiz` — pour ce
+        // dernier, le quiz reste à valider, donc on n'enregistre rien tant qu'il
+        // n'est pas réussi). Mode `manual-admin` : pas d'auto-détection.
+        const rule = getCourseCompletionRule(input.courseId, s.courseCompletionRules);
+        let courseCompletions = s.courseCompletions;
+        if (rule.mode === "all-modules") {
+          const list = getCourseModuleList(input.courseId);
+          if (list.length > 0) {
+            const allDone = list.every((m) =>
+              moduleCompletions.some(
+                (c) =>
+                  c.userId === input.userId &&
+                  c.courseId === input.courseId &&
+                  c.moduleId === m.id,
+              ),
+            );
+            const hasTrace = s.courseCompletions.some(
+              (c) => c.userId === input.userId && c.courseId === input.courseId,
+            );
+            if (allDone && !hasTrace) {
+              courseCompletions = [
+                {
+                  id: genId("cco"),
+                  userId: input.userId,
+                  courseId: input.courseId,
+                  completedAt: new Date().toISOString(),
+                  source: "auto-modules",
+                },
+                ...s.courseCompletions,
+              ];
+            }
+          }
+        }
+        return { ...s, moduleCompletions, courseCompletions };
       }),
     unmarkModuleCompleted: (userId, courseId, moduleId) =>
-      setState((s) => ({
-        ...s,
-        moduleCompletions: s.moduleCompletions.filter(
+      setState((s) => {
+        const moduleCompletions = s.moduleCompletions.filter(
           (c) =>
             !(
               c.userId === userId &&
               c.courseId === courseId &&
               c.moduleId === moduleId
             ),
+        );
+        // Si la règle est `all-modules` (réussite calculée à partir des
+        // modules) et qu'on retire un module, on retire aussi les éventuelles
+        // traces de réussite auto-modules pour ce cours/utilisateur.
+        const rule = getCourseCompletionRule(courseId, s.courseCompletionRules);
+        let courseCompletions = s.courseCompletions;
+        if (rule.mode === "all-modules") {
+          courseCompletions = s.courseCompletions.filter(
+            (c) =>
+              !(
+                c.userId === userId &&
+                c.courseId === courseId &&
+                c.source === "auto-modules"
+              ),
+          );
+        }
+        return { ...s, moduleCompletions, courseCompletions };
+      }),
+    setCourseCompletionRule: (rule) =>
+      setState((s) => {
+        const existing = s.courseCompletionRules.find((r) => r.courseId === rule.courseId);
+        if (existing) {
+          return {
+            ...s,
+            courseCompletionRules: s.courseCompletionRules.map((r) =>
+              r.id === existing.id ? { ...existing, ...rule } : r,
+            ),
+          };
+        }
+        return {
+          ...s,
+          courseCompletionRules: [
+            { ...rule, id: genId("ccr") },
+            ...s.courseCompletionRules,
+          ],
+        };
+      }),
+    clearCourseCompletionRule: (courseId) =>
+      setState((s) => ({
+        ...s,
+        courseCompletionRules: s.courseCompletionRules.filter((r) => r.courseId !== courseId),
+      })),
+    markCourseCompleted: (input) =>
+      setState((s) => {
+        const already = s.courseCompletions.find(
+          (c) => c.userId === input.userId && c.courseId === input.courseId,
+        );
+        if (already) return s;
+        return {
+          ...s,
+          courseCompletions: [
+            { ...input, id: genId("cco"), completedAt: new Date().toISOString() },
+            ...s.courseCompletions,
+          ],
+        };
+      }),
+    unmarkCourseCompleted: (userId, courseId) =>
+      setState((s) => ({
+        ...s,
+        courseCompletions: s.courseCompletions.filter(
+          (c) => !(c.userId === userId && c.courseId === courseId),
         ),
       })),
     reset: () => setState(DEFAULTS),

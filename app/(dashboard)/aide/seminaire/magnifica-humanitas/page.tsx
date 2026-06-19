@@ -31,6 +31,11 @@ import {
   getModuleCompletion,
   isModuleCompleted,
 } from "@/lib/formations/module-access";
+import {
+  evaluateCourseCompletion,
+  getCourseCompletionRule,
+  SUMMATIVE_QUIZ_ID,
+} from "@/lib/formations/course-completion";
 
 /**
  * Espace de formation Magnifica Humanitas — mode livre paginé.
@@ -266,18 +271,7 @@ export default function SeminaireMagnificaPage() {
   }
 
   function QuizPage() {
-    return (
-      <div className="space-y-3">
-        <div className="rounded-2xl border border-ew-green-200 bg-ew-green-50/30 p-4 text-base text-foreground/90">
-          <p>
-            Ce <strong>quiz sommatif</strong> regroupe les questions des 3 banques de quiz du
-            séminaire : compréhension générale, Doctrine sociale &amp; IA, risques &amp; solutions.
-            Validez chacune et vérifiez votre score global.
-          </p>
-        </div>
-        <SeminaireQuizCard quiz={sumQuiz} />
-      </div>
-    );
+    return <SummativeQuizPage quiz={sumQuiz} />;
   }
 
   function ChartePage() {
@@ -450,36 +444,115 @@ export default function SeminaireMagnificaPage() {
 
   return (
     <CourseGate courseId="magnifica-humanitas">
-      <div className="space-y-5">
-        {/* Barre d'actions */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/aide">
-              <ArrowLeft className="h-4 w-4" /> Bibliothèque
-            </Link>
-          </Button>
-          <div className="flex flex-wrap gap-2">
+      <MagnificaPageShell pages={pages} />
+    </CourseGate>
+  );
+}
+
+/* ============================================================================
+   Coque principale : barre d'actions conditionnée par la réussite + livre.
+   ========================================================================== */
+function MagnificaPageShell({ pages }: { pages: BookPage[] }) {
+  const app = useApp();
+  const store = useStore();
+  const courseId = MAGNIFICA_HUMANITAS.meta.slug;
+  const isAdmin = app.effectiveRole === "admin";
+  const rule = getCourseCompletionRule(courseId, store.courseCompletionRules);
+  const verdict = evaluateCourseCompletion(
+    app.user.id,
+    isAdmin,
+    courseId,
+    rule,
+    store.moduleCompletions,
+    store.courseCompletions,
+  );
+
+  // Conditions :
+  //  - Livret PDF + Certificat → débloqués si admin OU cours achevé
+  //  - Word (.docx) → réservé aux administrateurs (toujours)
+  const canPrintLivret = isAdmin || verdict.completed;
+  const canDeliverCertificate = isAdmin || verdict.completed;
+  const canDownloadWord = isAdmin;
+
+  const lockedTip = verdict.reason ?? `Achevez la formation pour débloquer ce livrable.`;
+
+  return (
+    <div className="space-y-5">
+      {/* Barre d'actions */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/aide">
+            <ArrowLeft className="h-4 w-4" /> Bibliothèque
+          </Link>
+        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {verdict.completed ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-ew-green-300 bg-ew-green-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-ew-green-800">
+              <CheckCircle2 aria-hidden className="h-3 w-3" /> Formation achevée
+            </span>
+          ) : (
+            <span
+              className="inline-flex items-center gap-1 rounded-full border border-ew-gold-200 bg-ew-gold-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-ew-gold-700"
+              title={lockedTip}
+            >
+              <Lock aria-hidden className="h-3 w-3" /> Formation en cours
+            </span>
+          )}
+          {canPrintLivret ? (
             <Button size="sm" variant="outline" asChild>
               <Link href="/aide/seminaire/magnifica-humanitas/livret">
                 <Printer className="h-4 w-4" /> Livret imprimable
               </Link>
             </Button>
+          ) : (
+            <Button size="sm" variant="outline" disabled title={lockedTip}>
+              <Lock className="h-4 w-4" /> Livret imprimable
+            </Button>
+          )}
+          {canDownloadWord ? (
             <Button size="sm" variant="outline" asChild>
               <a href="/api/docx/seminaire/magnifica-humanitas">
                 <FileDown className="h-4 w-4" /> Télécharger Word (.docx)
               </a>
             </Button>
+          ) : null}
+          {canDeliverCertificate ? (
             <Button size="sm" asChild>
               <Link href="/aide/certificat">
                 <Award className="h-4 w-4" /> Délivrer un certificat
               </Link>
             </Button>
+          ) : (
+            <Button size="sm" disabled title={lockedTip}>
+              <Lock className="h-4 w-4" /> Délivrer un certificat
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Indicateur de progression si pas encore achevé (non-admin uniquement) */}
+      {!isAdmin && !verdict.completed && verdict.progress.total > 0 ? (
+        <div className="rounded-xl border border-ew-gold-200 bg-ew-gold-50/60 px-4 py-3 text-sm">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="flex items-center gap-2 text-ew-gold-700">
+              <Lock aria-hidden className="h-4 w-4" />
+              <strong>{lockedTip}</strong>
+            </p>
+            <p className="text-xs font-mono font-bold text-ew-gold-700">
+              {verdict.progress.completed}/{verdict.progress.total} modules
+            </p>
+          </div>
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-card">
+            <div
+              className="h-full bg-ew-gold-500 transition-all duration-300"
+              style={{ width: `${Math.round(verdict.progress.ratio * 100)}%` }}
+            />
           </div>
         </div>
+      ) : null}
 
-        <MagnificaBook pages={pages} />
-      </div>
-    </CourseGate>
+      <MagnificaBook pages={pages} />
+    </div>
   );
 }
 
@@ -710,4 +783,58 @@ function LockedModuleView({
 
 function cn(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
+}
+
+/* ============================================================================
+   Page quiz sommatif — branche la réussite si la règle l'exige.
+   ========================================================================== */
+function SummativeQuizPage({
+  quiz,
+}: {
+  quiz: { id: string; num: number; title: string; questions: { question: string; options: string[]; correctIdx: number; rationale?: string }[] };
+}) {
+  const app = useApp();
+  const store = useStore();
+  const courseId = MAGNIFICA_HUMANITAS.meta.slug;
+  const rule = getCourseCompletionRule(courseId, store.courseCompletionRules);
+  const usesQuiz =
+    (rule.mode === "quiz-score" || rule.mode === "all-modules-and-quiz") &&
+    (rule.quizModuleId ?? SUMMATIVE_QUIZ_ID) === SUMMATIVE_QUIZ_ID;
+  const minScore = rule.minQuizScore ?? 70;
+  const [lastScore, setLastScore] = React.useState<number | null>(null);
+
+  function handleScored(pct: number) {
+    setLastScore(pct);
+    if (!usesQuiz) return;
+    if (pct < minScore) return;
+    store.markCourseCompleted({
+      userId: app.user.id,
+      courseId,
+      source: "quiz",
+      score: pct,
+    });
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-2xl border border-ew-green-200 bg-ew-green-50/30 p-4 text-base text-foreground/90">
+        <p>
+          Ce <strong>quiz sommatif</strong> regroupe les questions des 3 banques de quiz du
+          séminaire : compréhension générale, Doctrine sociale &amp; IA, risques &amp; solutions.
+          Validez chacune et vérifiez votre score global.
+        </p>
+        {usesQuiz ? (
+          <p className="mt-2 text-sm">
+            <strong className="text-ew-green-800">Score minimum requis pour valider la formation : {minScore}%.</strong>
+            {lastScore !== null ? (
+              <span className={cn("ml-2", lastScore >= minScore ? "text-ew-green-700 font-bold" : "text-ew-gold-700")}>
+                Votre dernier score : {lastScore}% {lastScore >= minScore ? "— formation validée !" : "— continuez !"}
+              </span>
+            ) : null}
+          </p>
+        ) : null}
+      </div>
+      <SeminaireQuizCard quiz={quiz as Parameters<typeof SeminaireQuizCard>[0]["quiz"]} onScored={handleScored} />
+    </div>
+  );
 }

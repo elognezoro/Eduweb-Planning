@@ -3,15 +3,20 @@
 import * as React from "react";
 import {
   AlertTriangle,
+  Award,
   CheckCircle2,
   Download,
   FileSpreadsheet,
   GraduationCap,
+  Image as ImageIcon,
   Lock,
+  PenLine,
   Plus,
   Save,
   Search,
+  Stamp,
   Trash2,
+  Trophy,
   Upload,
   Users,
   UsersRound,
@@ -45,6 +50,13 @@ import {
   getAccessRule,
   getCourseModuleList,
 } from "@/lib/formations/module-access";
+import {
+  completionRuleModeLabel,
+  getCourseCompletionRule,
+  SUMMATIVE_QUIZ_ID,
+} from "@/lib/formations/course-completion";
+import { ImageDrop } from "@/components/forms/image-drop";
+import { ETAB_CONFIG_KEY, loadEtabConfig } from "@/lib/etab-config";
 import { cn } from "@/lib/utils";
 
 /**
@@ -78,7 +90,7 @@ function FormationsContent() {
   const app = useApp();
   const courses = React.useMemo(() => sortedCourses(), []);
 
-  type Tab = "enrolled" | "cohorts" | "quick" | "access";
+  type Tab = "enrolled" | "cohorts" | "quick" | "access" | "completion" | "identity";
   const [tab, setTab] = React.useState<Tab>("quick");
   const [selectedCourseId, setSelectedCourseId] = React.useState<string>(courses[0]?.id ?? "");
 
@@ -168,6 +180,12 @@ function FormationsContent() {
           <TabButton active={tab === "access"} onClick={() => setTab("access")} icon={<GitBranch className="h-4 w-4" />}>
             Conditions d&apos;accès
           </TabButton>
+          <TabButton active={tab === "completion"} onClick={() => setTab("completion")} icon={<Trophy className="h-4 w-4" />}>
+            Réussite du cours
+          </TabButton>
+          <TabButton active={tab === "identity"} onClick={() => setTab("identity")} icon={<Stamp className="h-4 w-4" />}>
+            Identité visuelle
+          </TabButton>
         </div>
 
         {tab === "quick" ? (
@@ -176,8 +194,12 @@ function FormationsContent() {
           <EnrolledPanel courseId={selectedCourseId} />
         ) : tab === "cohorts" ? (
           <CohortsPanel courseId={selectedCourseId} actor={app.user.displayName} />
-        ) : (
+        ) : tab === "access" ? (
           <AccessRulesPanel courseId={selectedCourseId} />
+        ) : tab === "completion" ? (
+          <CompletionRulePanel courseId={selectedCourseId} />
+        ) : (
+          <IdentityPanel />
         )}
       </SectionCard>
     </div>
@@ -1297,6 +1319,289 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
           </ul>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/* ============================================================================
+   ONGLET 5 — RÈGLE DE RÉUSSITE DU COURS
+   ========================================================================== */
+function CompletionRulePanel({ courseId }: { courseId: string }) {
+  const store = useStore();
+  const modules = React.useMemo(() => getCourseModuleList(courseId), [courseId]);
+  const current = getCourseCompletionRule(courseId, store.courseCompletionRules);
+
+  const [mode, setMode] = React.useState<typeof current.mode>(current.mode);
+  const [minScore, setMinScore] = React.useState<number>(current.minQuizScore ?? 70);
+  const [quizModuleId, setQuizModuleId] = React.useState<string>(
+    current.quizModuleId ?? SUMMATIVE_QUIZ_ID,
+  );
+  const [savedAt, setSavedAt] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    setMode(current.mode);
+    setMinScore(current.minQuizScore ?? 70);
+    setQuizModuleId(current.quizModuleId ?? SUMMATIVE_QUIZ_ID);
+  }, [current.mode, current.minQuizScore, current.quizModuleId]);
+
+  if (modules.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-border bg-background/60 p-5 text-center text-sm italic text-muted-foreground">
+        Ce cours n&apos;est pas structuré en modules. Pour l&apos;instant, la
+        configuration de la réussite s&apos;applique aux cours modulaires
+        (Magnifica Humanitas).
+      </div>
+    );
+  }
+
+  function save() {
+    const usesQuiz = mode === "quiz-score" || mode === "all-modules-and-quiz";
+    store.setCourseCompletionRule({
+      courseId,
+      mode,
+      minQuizScore: usesQuiz ? minScore : undefined,
+      quizModuleId: usesQuiz ? quizModuleId : undefined,
+    });
+    setSavedAt(Date.now());
+  }
+
+  function reset() {
+    store.clearCourseCompletionRule(courseId);
+  }
+
+  const usesQuiz = mode === "quiz-score" || mode === "all-modules-and-quiz";
+  const hasChanges =
+    mode !== current.mode ||
+    (usesQuiz && (current.minQuizScore ?? 70) !== minScore) ||
+    (usesQuiz && (current.quizModuleId ?? SUMMATIVE_QUIZ_ID) !== quizModuleId);
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg border border-ew-green-200 bg-ew-green-50/40 p-3 text-xs">
+        <p className="flex items-center gap-1.5 font-bold uppercase tracking-wide text-ew-green-700">
+          <Trophy aria-hidden className="h-3.5 w-3.5" /> Réussite de la formation
+        </p>
+        <p className="mt-1 text-foreground/90">
+          La règle ci-dessous détermine à quel moment un participant a{" "}
+          <strong>achevé la formation avec succès</strong>. Tant que le critère n&apos;est
+          pas rempli :
+          <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-card px-1.5 py-0.5 font-bold text-ew-gold-700 border border-ew-gold-200">
+            Livret PDF
+          </span>{" "}
+          et{" "}
+          <span className="inline-flex items-center gap-1 rounded-md bg-card px-1.5 py-0.5 font-bold text-ew-gold-700 border border-ew-gold-200">
+            Délivrance du certificat
+          </span>{" "}
+          restent verrouillés pour le participant.
+        </p>
+        <p className="mt-1 text-muted-foreground italic">
+          Par défaut : tous les modules complétés. L&apos;administrateur garde toujours
+          un accès complet, quel que soit l&apos;état d&apos;avancement.
+        </p>
+      </div>
+
+      <article className="rounded-2xl border border-border bg-card p-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-ew-green-700">
+              Cours sélectionné
+            </p>
+            <p className="font-display text-base font-bold text-foreground">
+              Règle de réussite
+            </p>
+            <p className="text-xs italic text-muted-foreground">
+              {completionRuleModeLabel(mode)}
+              {usesQuiz ? ` · Score minimum ${minScore}%` : null}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-3 grid gap-4 lg:grid-cols-2">
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wide text-ew-green-700">
+              Critère de réussite
+            </label>
+            <select
+              value={mode}
+              onChange={(e) => setMode(e.target.value as typeof mode)}
+              className="mt-2 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="all-modules">Tous les modules complétés (par défaut)</option>
+              <option value="quiz-score">Quiz avec score minimum</option>
+              <option value="all-modules-and-quiz">Tous les modules + quiz</option>
+              <option value="manual-admin">Validation manuelle de l&apos;administrateur</option>
+            </select>
+          </div>
+          {usesQuiz ? (
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Quiz comptant pour la réussite
+                </label>
+                <select
+                  value={quizModuleId}
+                  onChange={(e) => setQuizModuleId(e.target.value)}
+                  className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value={SUMMATIVE_QUIZ_ID}>Quiz sommatif global du séminaire</option>
+                  {modules.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      Quiz du module {m.num} — {m.displayTitle ?? m.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Score minimum (%)
+                </label>
+                <input
+                  type="number"
+                  value={minScore}
+                  onChange={(e) =>
+                    setMinScore(Math.max(0, Math.min(100, Number(e.target.value))))
+                  }
+                  min={0}
+                  max={100}
+                  step={5}
+                  className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            {savedAt && !hasChanges ? (
+              <span className="text-ew-green-700">
+                ✓ Règle enregistrée à{" "}
+                {new Date(savedAt).toLocaleTimeString("fr-FR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            ) : hasChanges ? (
+              <span className="italic">Modifications non enregistrées.</span>
+            ) : (
+              <span className="italic">Configuration actuelle.</span>
+            )}
+          </p>
+          <div className="flex gap-2">
+            {mode !== "all-modules" ? (
+              <Button variant="outline" size="sm" onClick={reset}>
+                Réinitialiser
+              </Button>
+            ) : null}
+            <Button size="sm" onClick={save} disabled={!hasChanges}>
+              <Save className="h-4 w-4" /> Enregistrer
+            </Button>
+          </div>
+        </div>
+      </article>
+    </div>
+  );
+}
+
+/* ============================================================================
+   ONGLET 6 — IDENTITÉ VISUELLE (cachet & signature pour les attestations)
+   ========================================================================== */
+function IdentityPanel() {
+  const [stamp, setStamp] = React.useState<string | null>(null);
+  const [signature, setSignature] = React.useState<string | null>(null);
+  const [savedAt, setSavedAt] = React.useState<number | null>(null);
+  const [initialStamp, setInitialStamp] = React.useState<string | null>(null);
+  const [initialSignature, setInitialSignature] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const cfg = loadEtabConfig();
+    setStamp(cfg.stamp ?? null);
+    setSignature(cfg.signature ?? null);
+    setInitialStamp(cfg.stamp ?? null);
+    setInitialSignature(cfg.signature ?? null);
+  }, []);
+
+  function save() {
+    if (typeof window === "undefined") return;
+    try {
+      const existing = loadEtabConfig();
+      const next = { ...existing, stamp, signature };
+      localStorage.setItem(ETAB_CONFIG_KEY, JSON.stringify(next));
+      setInitialStamp(stamp);
+      setInitialSignature(signature);
+      setSavedAt(Date.now());
+    } catch {
+      /* ignore quota errors */
+    }
+  }
+
+  const hasChanges = stamp !== initialStamp || signature !== initialSignature;
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg border border-ew-green-200 bg-ew-green-50/40 p-3 text-xs">
+        <p className="flex items-center gap-1.5 font-bold uppercase tracking-wide text-ew-green-700">
+          <Stamp aria-hidden className="h-3.5 w-3.5" /> Cachet et signature
+        </p>
+        <p className="mt-1 text-foreground/90">
+          Téléversez l&apos;empreinte du cachet officiel et la signature numérisée du
+          responsable. Ces éléments sont automatiquement intégrés aux{" "}
+          <strong>certificats de fin de formation</strong> et aux exports Word de
+          l&apos;administrateur.
+        </p>
+        <p className="mt-1 text-muted-foreground italic">
+          Le logo est déjà géré au niveau de la plateforme. Les autres réglages
+          institutionnels (chef d&apos;établissement, ministère, armoiries) restent
+          dans{" "}
+          <a
+            href="/parametrage/configuration#documents"
+            className="font-bold text-ew-green-700 underline"
+          >
+            Paramétrage &gt; Configuration
+          </a>
+          .
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <ImageDrop
+            label="Cachet"
+            value={stamp}
+            onChange={setStamp}
+            icon={Stamp}
+          />
+          <ImageDrop
+            label="Signature"
+            value={signature}
+            onChange={setSignature}
+            icon={PenLine}
+          />
+        </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            {savedAt && !hasChanges ? (
+              <span className="text-ew-green-700">
+                ✓ Cachet et signature enregistrés à{" "}
+                {new Date(savedAt).toLocaleTimeString("fr-FR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            ) : hasChanges ? (
+              <span className="italic">Modifications non enregistrées.</span>
+            ) : (
+              <span className="italic">
+                Glissez les images aux emplacements ci-dessus, ou cliquez pour
+                ouvrir le sélecteur de fichier.
+              </span>
+            )}
+          </p>
+          <Button size="sm" onClick={save} disabled={!hasChanges}>
+            <Save className="h-4 w-4" /> Enregistrer
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
