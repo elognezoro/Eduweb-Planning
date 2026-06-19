@@ -6,6 +6,7 @@ import { ArrowLeft, FileDown, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommLivret } from "@/components/seminaires/comm-pastorale-livret";
 import { COMMUNICATION_PASTORALE } from "@/lib/seminaires/communication-pastorale";
+import { CourseGate } from "@/components/formations/course-gate";
 
 /**
  * Livret académique imprimable du séminaire « Communication pastorale ».
@@ -14,6 +15,7 @@ import { COMMUNICATION_PASTORALE } from "@/lib/seminaires/communication-pastoral
 export default function CommPastoraleLivretPage() {
   const s = COMMUNICATION_PASTORALE;
   return (
+    <CourseGate courseId="communication-pastorale">
     <div className="space-y-6">
       <div className="no-print sticky top-16 z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card/85 px-4 py-3 backdrop-blur sm:-mx-6">
         <div className="flex items-center gap-3">
@@ -46,5 +48,6 @@ export default function CommPastoraleLivretPage() {
 
       <CommLivret seminaire={s} />
     </div>
+    </CourseGate>
   );
 }

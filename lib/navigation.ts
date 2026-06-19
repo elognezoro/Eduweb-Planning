@@ -135,6 +135,13 @@ export const NAVIGATION: NavGroup[] = [
         permission: "system:manage_permissions",
       },
       {
+        href: "/systeme/formations",
+        label: "Inscriptions aux formations",
+        icon: GraduationCap,
+        permission: "system:manage_permissions",
+        description: "Inscrire des utilisateurs aux séminaires et formations.",
+      },
+      {
         href: "/systeme/comptes-utilisateurs",
         label: "nav.items.comptesUtilisateurs",
         icon: Users,

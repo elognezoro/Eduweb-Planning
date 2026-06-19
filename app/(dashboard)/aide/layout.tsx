@@ -29,7 +29,10 @@ export default function AideLayout({ children }: { children: React.ReactNode }) 
   const allowed = can("formations:access");
 
   if (allowed) {
-    return <>{children}</>;
+    // `formation-reader` agrandit confortablement la typographie de tout
+    // l'espace formation (séminaires, guides, manuel, certificats) pour
+    // soutenir les sessions longues sans modifier le code des composants.
+    return <div className="formation-reader">{children}</div>;
   }
 
   return <AccessDenied effectiveRole={effectiveRole} isPreview={isPreview} />;

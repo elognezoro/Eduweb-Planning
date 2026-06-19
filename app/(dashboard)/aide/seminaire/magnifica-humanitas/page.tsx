@@ -20,6 +20,7 @@ import {
   SeminaireQuizCard,
 } from "@/components/seminaires/seminaire-views";
 import { MAGNIFICA_HUMANITAS } from "@/lib/seminaires/magnifica-humanitas";
+import { CourseGate } from "@/components/formations/course-gate";
 
 /**
  * Espace de formation interactif du séminaire « Magnifica Humanitas ».
@@ -32,6 +33,7 @@ import { MAGNIFICA_HUMANITAS } from "@/lib/seminaires/magnifica-humanitas";
 export default function SeminaireMagnificaPage() {
   const s = MAGNIFICA_HUMANITAS;
   return (
+    <CourseGate courseId="magnifica-humanitas">
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button variant="outline" size="sm" asChild>
@@ -265,5 +267,6 @@ export default function SeminaireMagnificaPage() {
         </div>
       </section>
     </div>
+    </CourseGate>
   );
 }

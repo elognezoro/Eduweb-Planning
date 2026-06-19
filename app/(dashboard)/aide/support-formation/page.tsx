@@ -27,6 +27,7 @@ import {
   TRAINING_PROGRESSION,
   TRAINING_ABBREVIATIONS,
 } from "@/lib/guides/training-manual-data";
+import { CourseGate } from "@/components/formations/course-gate";
 
 /**
  * Manuel académique imprimable — assemble la couverture, le colophon,
@@ -186,6 +187,7 @@ export default function SupportFormationPage() {
   );
 
   return (
+    <CourseGate courseId="manuel-formation">
     <div className="space-y-6">
       {/* Barre d'actions (masquée à l'impression) */}
       <div className="no-print sticky top-16 z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card/85 px-4 py-3 backdrop-blur sm:-mx-6">
@@ -252,5 +254,6 @@ export default function SupportFormationPage() {
         {pages}
       </div>
     </div>
+    </CourseGate>
   );
 }

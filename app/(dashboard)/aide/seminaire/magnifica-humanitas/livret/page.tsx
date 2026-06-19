@@ -6,6 +6,7 @@ import { ArrowLeft, FileDown, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SeminaireLivret } from "@/components/seminaires/seminaire-livret";
 import { MAGNIFICA_HUMANITAS } from "@/lib/seminaires/magnifica-humanitas";
+import { CourseGate } from "@/components/formations/course-gate";
 
 /**
  * Livret académique imprimable du séminaire « Magnifica Humanitas ».
@@ -14,6 +15,7 @@ import { MAGNIFICA_HUMANITAS } from "@/lib/seminaires/magnifica-humanitas";
 export default function SeminaireMagnificaLivretPage() {
   const s = MAGNIFICA_HUMANITAS;
   return (
+    <CourseGate courseId="magnifica-humanitas">
     <div className="space-y-6">
       <div className="no-print sticky top-16 z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card/85 px-4 py-3 backdrop-blur sm:-mx-6">
         <div className="flex items-center gap-3">
@@ -46,5 +48,6 @@ export default function SeminaireMagnificaLivretPage() {
 
       <SeminaireLivret seminaire={s} />
     </div>
+    </CourseGate>
   );
 }

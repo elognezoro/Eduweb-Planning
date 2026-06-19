@@ -17,6 +17,7 @@ import type { Apfc, ApfcActivity, Cafop, Etablissement, Inspection } from "@/lib
 import { hasPermission, PERMISSION_LABELS, type Permission } from "@/lib/permissions";
 import { generateUserUid } from "@/lib/uid";
 import type { UserRole } from "@/lib/roles";
+import type { CourseCohort, CourseEnrollment } from "@/lib/formations/types";
 
 type LessonEntry = (typeof LESSON_BOOK_ENTRIES)[number];
 type Announcement = (typeof ANNOUNCEMENTS)[number];
@@ -270,6 +271,10 @@ interface StoreState {
   apfcActivities: ApfcActivity[];
   /** Journal des certificats de fin de formation délivrés. */
   certificates: DeliveredCertificate[];
+  /** Inscriptions nominatives aux formations (séminaires, manuel, guides). */
+  courseEnrollments: CourseEnrollment[];
+  /** Cohortes nommées d'utilisateurs inscrits à un cours. */
+  courseCohorts: CourseCohort[];
 }
 
 interface DataStore extends StoreState {
@@ -331,6 +336,23 @@ interface DataStore extends StoreState {
   addCertificate: (c: Omit<DeliveredCertificate, "id" | "registeredAt">) => void;
   /** Supprime une entrée du journal des certificats. */
   removeCertificate: (id: string) => void;
+  /** Inscrit un utilisateur à un cours (méthode nominative ou cohorte). */
+  enrollUser: (input: Omit<CourseEnrollment, "id" | "enrolledAt">) => void;
+  /** Inscrit plusieurs utilisateurs à un cours en une seule opération. */
+  enrollUsers: (
+    userIds: string[],
+    input: Omit<CourseEnrollment, "id" | "enrolledAt" | "userId">,
+  ) => void;
+  /** Supprime une inscription nominative. */
+  removeEnrollment: (id: string) => void;
+  /** Crée une cohorte nommée pour un cours. */
+  createCohort: (c: Omit<CourseCohort, "id" | "createdAt">) => void;
+  /** Met à jour la liste des membres d'une cohorte. */
+  updateCohortMembers: (cohortId: string, memberUserIds: string[]) => void;
+  /** Met à jour le nom / la description d'une cohorte. */
+  updateCohort: (cohortId: string, patch: Partial<Pick<CourseCohort, "name" | "description">>) => void;
+  /** Supprime une cohorte (les inscriptions individuelles restent). */
+  removeCohort: (cohortId: string) => void;
   reset: () => void;
 }
 
@@ -357,6 +379,8 @@ const DEFAULTS: StoreState = {
   apfcs: APFCS_SEED,
   apfcActivities: APFC_ACTIVITIES_SEED,
   certificates: [],
+  courseEnrollments: [],
+  courseCohorts: [],
 };
 
 // Incrémenter la version à chaque changement de schéma persisté (nouveaux champs/tranches) :
@@ -554,6 +578,64 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
           r.id === id
             ? { ...r, status: "rejected" as const, decidedBy: actor, decidedAt: new Date().toISOString(), reason }
             : r,
+        ),
+      })),
+    enrollUser: (input) =>
+      setState((s) => ({
+        ...s,
+        courseEnrollments: [
+          {
+            ...input,
+            id: genId("enr"),
+            enrolledAt: new Date().toISOString(),
+          },
+          ...s.courseEnrollments,
+        ],
+      })),
+    enrollUsers: (userIds, input) =>
+      setState((s) => {
+        const now = new Date().toISOString();
+        const rows: CourseEnrollment[] = userIds.map((uid) => ({
+          ...input,
+          userId: uid,
+          id: genId("enr"),
+          enrolledAt: now,
+        }));
+        return { ...s, courseEnrollments: [...rows, ...s.courseEnrollments] };
+      }),
+    removeEnrollment: (id) =>
+      setState((s) => ({
+        ...s,
+        courseEnrollments: s.courseEnrollments.filter((x) => x.id !== id),
+      })),
+    createCohort: (c) =>
+      setState((s) => ({
+        ...s,
+        courseCohorts: [
+          { ...c, id: genId("coh"), createdAt: new Date().toISOString() },
+          ...s.courseCohorts,
+        ],
+      })),
+    updateCohortMembers: (cohortId, memberUserIds) =>
+      setState((s) => ({
+        ...s,
+        courseCohorts: s.courseCohorts.map((c) =>
+          c.id === cohortId ? { ...c, memberUserIds } : c,
+        ),
+      })),
+    updateCohort: (cohortId, patch) =>
+      setState((s) => ({
+        ...s,
+        courseCohorts: s.courseCohorts.map((c) =>
+          c.id === cohortId ? { ...c, ...patch } : c,
+        ),
+      })),
+    removeCohort: (cohortId) =>
+      setState((s) => ({
+        ...s,
+        courseCohorts: s.courseCohorts.filter((c) => c.id !== cohortId),
+        courseEnrollments: s.courseEnrollments.map((e) =>
+          e.cohortId === cohortId ? { ...e, cohortId: null } : e,
         ),
       })),
     reset: () => setState(DEFAULTS),

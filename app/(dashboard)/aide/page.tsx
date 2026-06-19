@@ -22,6 +22,10 @@ import { useApp } from "@/components/app-shell/app-context";
 import { GUIDES, GUIDE_KEYS } from "@/lib/guides";
 import { GUIDE_ICONS } from "@/lib/guides/icons";
 import { cn } from "@/lib/utils";
+import {
+  EnrollmentStatusChip,
+  MyEnrollmentsPanel,
+} from "@/components/formations/enrollment-status";
 
 /* Mapping rôle → famille (pour le filtre et le tri) — repris de roles.ts. */
 const ROLE_FAMILY: Record<string, "administration" | "supervision" | "etablissement" | "communaute"> = {
@@ -116,6 +120,9 @@ export default function AideIndexPage() {
         },
       ]}
     >
+      {/* Mes formations actives — toujours en tête pour visibilité immédiate. */}
+      <MyEnrollmentsPanel />
+
       {/* Recommandation personnalisée selon le rôle effectif */}
       {myGuideKey && <RecommendedCard guideKey={myGuideKey} />}
 
@@ -267,9 +274,12 @@ function DownloadManualBanner() {
           <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-ew-gold-600">
             Manuel académique complet
           </p>
-          <p className="mt-0.5 font-display text-lg font-bold text-foreground">
-            Support de formation officiel
-          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-2">
+            <p className="font-display text-lg font-bold text-foreground">
+              Support de formation officiel
+            </p>
+            <EnrollmentStatusChip courseId="manuel-formation" />
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">
             Syllabus, 8 modules de formation (un par rôle), auto-évaluations, exercices pratiques, grille de
             progression et glossaire général — mise en page A4 conforme aux standards académiques.
@@ -363,9 +373,12 @@ function SeminaireMagnificaBanner() {
           <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-purple-700">
             Séminaire des écoles catholiques
           </p>
-          <p className="mt-0.5 font-display text-lg font-bold text-foreground">
-            Magnifica Humanitas — Rester humains à l&apos;ère de l&apos;intelligence artificielle
-          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-2">
+            <p className="font-display text-lg font-bold text-foreground">
+              Magnifica Humanitas — Rester humains à l&apos;ère de l&apos;intelligence artificielle
+            </p>
+            <EnrollmentStatusChip courseId="magnifica-humanitas" />
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">
             Atelier interactif de 12 h sur l&apos;encyclique du Saint-Père Léon XIV (15 mai 2026) :
             <strong> 9 modules</strong>, <strong>3 quiz auto-corrigés</strong>,{" "}
@@ -422,9 +435,12 @@ function SeminaireCommunicationBanner() {
           <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-ew-gold-200">
             Séminaire des communicateurs · SENEC
           </p>
-          <p className="mt-0.5 font-display text-lg font-bold">
-            Le numérique au service de la communication éducative et pastorale
-          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-2">
+            <p className="font-display text-lg font-bold">
+              Le numérique au service de la communication éducative et pastorale
+            </p>
+            <EnrollmentStatusChip courseId="communication-pastorale" className="border-ew-gold-200/80 bg-ew-gold-50/90 text-ew-gold-700" />
+          </div>
           <p className="mt-1 max-w-3xl text-sm text-ew-green-50">
             Présentation contextuelle de <strong>14 diapositives</strong> à feuilleter comme un livre
             numérique, <strong>7 ateliers interactifs</strong> (diagnostic, QCM, matrice des publics,

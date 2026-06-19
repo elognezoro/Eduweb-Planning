@@ -23,6 +23,7 @@ import {
   SlideDeck,
 } from "@/components/seminaires/comm-pastorale-views";
 import { COMMUNICATION_PASTORALE } from "@/lib/seminaires/communication-pastorale";
+import { CourseGate } from "@/components/formations/course-gate";
 
 /**
  * Espace interactif du séminaire « Le numérique au service de la communication
@@ -41,6 +42,7 @@ import { COMMUNICATION_PASTORALE } from "@/lib/seminaires/communication-pastoral
 export default function CommPastoralePage() {
   const s = COMMUNICATION_PASTORALE;
   return (
+    <CourseGate courseId="communication-pastorale">
     <div className="space-y-6">
       {/* Barre d'actions */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -174,6 +176,7 @@ export default function CommPastoralePage() {
         </div>
       </section>
     </div>
+    </CourseGate>
   );
 }
 
