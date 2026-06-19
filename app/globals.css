@@ -393,8 +393,17 @@ input::-ms-clear {
   from { opacity: 0; transform: translateX(-28px); }
   to   { opacity: 1; transform: translateX(0); }
 }
-.book-page-enter-next { animation: book-flip-in-next 0.32s ease both; }
-.book-page-enter-prev { animation: book-flip-in-prev 0.32s ease both; }
+/* PAS de `animation-fill-mode` (valeur par défaut `none`) : l'article ne
+   conserve AUCUN `transform` une fois l'animation terminée — et n'en applique
+   aucun avant qu'elle ne démarre. C'est essentiel : un `transform` ≠ `none`
+   (même l'identité `translateX(0)`) fait de l'élément le bloc englobant de ses
+   descendants `position: fixed`, ce qui cassait le plein écran du diaporama
+   (SlideDeck), confiné à l'article au lieu de couvrir le viewport. Avec `both`
+   l'article gardait `translateX(0)` ; avec `backwards` il aurait gardé
+   `translateX(28px)` sous reduced-motion. `none` ne laisse de transform que
+   pendant les 0,32 s de l'animation. */
+.book-page-enter-next { animation: book-flip-in-next 0.32s ease; }
+.book-page-enter-prev { animation: book-flip-in-prev 0.32s ease; }
 
 /* Animation douce d'apparition */
 @keyframes ew-fade-in {
@@ -463,7 +472,9 @@ input::-ms-clear {
   .ew-float-slow,
   .ew-pulse-soft,
   .ew-bob,
-  .ew-fade-in {
+  .ew-fade-in,
+  .book-page-enter-next,
+  .book-page-enter-prev {
     animation: none !important;
     transition: none !important;
     opacity: 1 !important;
