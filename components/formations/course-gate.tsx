@@ -88,8 +88,13 @@ function EnrollmentBadge({
 }
 
 function CourseAccessDenied({ courseId }: { courseId: string }) {
+  const app = useApp();
   const course = getCourse(courseId);
   if (!course) return null;
+  // Le lien vers /systeme/formations n'est rendu cliquable que pour les
+  // utilisateurs habilités à gérer les inscriptions ; sinon il est affiché
+  // comme une simple mention textuelle (le module n'est pas accessible).
+  const canManage = app.can("system:manage_permissions");
 
   const methodLabels: Record<string, string> = {
     individual: "inscription nominative",
@@ -152,9 +157,13 @@ function CourseAccessDenied({ courseId }: { courseId: string }) {
             <span>
               L&apos;administrateur procédera à votre inscription (nominative ou par
               cohorte) via le module{" "}
-              <Link href="/systeme/formations" className="underline">
-                Inscriptions aux formations
-              </Link>
+              {canManage ? (
+                <Link href="/systeme/formations" className="underline">
+                  Inscriptions aux formations
+                </Link>
+              ) : (
+                <strong className="text-ew-green-800">« Inscriptions aux formations »</strong>
+              )}
               .
             </span>
           </li>
