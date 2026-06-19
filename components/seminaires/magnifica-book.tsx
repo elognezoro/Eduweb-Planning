@@ -63,12 +63,19 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
     [idx, total],
   );
 
-  // Au changement de page : scroll en haut du contenu pour éviter la lecture
-  // à partir du milieu de la précédente.
+  // Au changement de page : (1) remettre le scroll interne du livre en haut,
+  // (2) faire défiler la fenêtre pour amener le haut du livre (titre de la
+  // page) dans la zone visible, (3) restaurer le focus sans déclencher un
+  // saut de scroll supplémentaire.
   React.useEffect(() => {
     pageRef.current?.scrollTo?.({ top: 0, behavior: "auto" });
+    // Si on n'est pas en plein écran, le livre est inséré dans la page
+    // dashboard : on amène son bandeau du haut juste sous le topbar de l'app.
+    if (!fullscreen) {
+      containerRef.current?.scrollIntoView?.({ block: "start", behavior: "smooth" });
+    }
     pageRef.current?.focus({ preventScroll: true });
-  }, [idx]);
+  }, [idx, fullscreen]);
 
   // Navigation clavier — seulement quand le livre est en plein écran ou
   // que le focus est à l'intérieur (les boutons / la zone de contenu).
@@ -130,8 +137,8 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
       )}
       aria-label="Livre du séminaire — naviguer page par page"
     >
-      {/* Bandeau : numéro de page, titre, plein écran */}
-      <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5">
+      {/* Bandeau : numéro de page, titre, navigation rapide, plein écran */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2.5">
         <div className="flex items-center gap-2 text-xs">
           <ListTree aria-hidden className="h-4 w-4 text-ew-green-700" />
           <span className="font-mono font-bold text-ew-green-700">
@@ -139,21 +146,46 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
           </span>
           <span className="hidden text-muted-foreground sm:inline">— {page?.shortTitle}</span>
         </div>
-        <button
-          type="button"
-          aria-label={fullscreen ? "Quitter le mode plein écran" : "Afficher en plein écran"}
-          aria-pressed={fullscreen}
-          onClick={() => setFullscreen((v) => !v)}
-          className="flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted/40"
-          title="Plein écran (F)"
-        >
-          {fullscreen ? (
-            <Minimize2 aria-hidden className="h-3.5 w-3.5" />
-          ) : (
-            <Maximize2 aria-hidden className="h-3.5 w-3.5" />
-          )}
-          {fullscreen ? "Réduire" : "Plein écran"}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={goPrev}
+            disabled={idx === 0}
+            aria-label="Page précédente"
+            className="flex items-center gap-1 rounded-md border border-border bg-card px-2.5 py-1 text-xs font-bold disabled:opacity-50 hover:bg-muted/40"
+            title="Page précédente (←)"
+          >
+            <ChevronLeft aria-hidden className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Précédente</span>
+          </button>
+          <button
+            type="button"
+            onClick={goNext}
+            disabled={idx === total - 1}
+            aria-label="Page suivante"
+            className="flex items-center gap-1 rounded-md bg-ew-green-700 px-2.5 py-1 text-xs font-bold text-white disabled:opacity-50"
+            title="Page suivante (→)"
+          >
+            <span className="hidden sm:inline">Page suivante</span>
+            <span className="sm:hidden">Suivante</span>
+            <ChevronRight aria-hidden className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            aria-label={fullscreen ? "Quitter le mode plein écran" : "Afficher en plein écran"}
+            aria-pressed={fullscreen}
+            onClick={() => setFullscreen((v) => !v)}
+            className="ml-1 flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted/40"
+            title="Plein écran (F)"
+          >
+            {fullscreen ? (
+              <Minimize2 aria-hidden className="h-3.5 w-3.5" />
+            ) : (
+              <Maximize2 aria-hidden className="h-3.5 w-3.5" />
+            )}
+            <span className="hidden sm:inline">{fullscreen ? "Réduire" : "Plein écran"}</span>
+          </button>
+        </div>
       </div>
 
       {/* Barre de progression */}
