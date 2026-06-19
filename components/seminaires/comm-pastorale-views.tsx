@@ -13,6 +13,8 @@ import {
   ClipboardCheck,
   Clock,
   Compass,
+  Copy,
+  Download,
   Eye,
   FileText,
   Layers,
@@ -700,7 +702,17 @@ function ActivityCard({
         ))}
 
         {a.kind === "qcm" || a.kind === "scenario" ? (
-          a.qcm ? <InteractiveQcm questions={a.qcm} idPrefix={a.id} /> : null
+          a.qcm ? (
+            <InteractiveQcm
+              questions={a.qcm}
+              idPrefix={a.id}
+              scenario={
+                a.kind === "scenario"
+                  ? { title: a.title, context: a.instructions }
+                  : undefined
+              }
+            />
+          ) : null
         ) : null}
 
         {a.kind === "diagnostic" && a.items ? (
@@ -737,9 +749,11 @@ function ActivityCard({
 function InteractiveQcm({
   questions,
   idPrefix,
+  scenario,
 }: {
   questions: { question: string; options: string[]; correctIdx: number; rationale?: string }[];
   idPrefix: string;
+  scenario?: { title: string; context: string[] };
 }) {
   const [answers, setAnswers] = React.useState<Record<number, number | null>>({});
   const [checked, setChecked] = React.useState(false);
@@ -842,6 +856,22 @@ function InteractiveQcm({
           answers={answers}
           score={score}
           total={questions.length}
+        />
+      ) : null}
+
+      {/* Compte-rendu de gestion de crise — généré uniquement pour les
+          activités de type scénario. Reprend le contexte, les décisions de
+          l'utilisateur, l'écart avec la conduite professionnelle attendue,
+          le bilan chiffré et les enseignements. Copiable et téléchargeable
+          pour archivage dans la mémoire institutionnelle. */}
+      {checked && scenario ? (
+        <ScenarioReport
+          title={scenario.title}
+          context={scenario.context}
+          questions={questions}
+          answers={answers}
+          score={score}
+          idPrefix={idPrefix}
         />
       ) : null}
     </div>
@@ -1002,6 +1032,224 @@ function appreciationLevel(pct: number): AppreciationLevel {
     recommendation:
       "Reprenez la formation depuis la présentation, n'hésitez pas à mobiliser un formateur ou un pair pour clarifier chaque notion, puis refaites ce quiz à tête reposée.",
   };
+}
+
+/* -------- Compte-rendu de gestion de crise (à archiver) -------- */
+function ScenarioReport({
+  title,
+  context,
+  questions,
+  answers,
+  score,
+  idPrefix,
+}: {
+  title: string;
+  context: string[];
+  questions: { question: string; options: string[]; correctIdx: number; rationale?: string }[];
+  answers: Record<number, number | null>;
+  score: number;
+  idPrefix: string;
+}) {
+  const app = useApp();
+  const total = questions.length;
+  const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+  const level = appreciationLevel(pct);
+  const [copied, setCopied] = React.useState(false);
+
+  // Date du compte-rendu — calculée à la volée. Cette branche n'est rendue
+  // qu'après un clic utilisateur (checked === true) donc pas de problème
+  // d'hydratation SSR.
+  const reportDate = React.useMemo(() => {
+    const d = new Date();
+    return d.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  }, []);
+
+  const decisions = questions.map((q, i) => {
+    const picked = answers[i];
+    const pickedText = picked != null ? q.options[picked] : "(aucune décision)";
+    const conform = picked === q.correctIdx;
+    const expected = q.options[q.correctIdx];
+    return {
+      etape: i + 1,
+      question: q.question,
+      pickedText,
+      conform,
+      expected,
+      rationale: q.rationale,
+    };
+  });
+
+  const conformes = decisions.filter((d) => d.conform).length;
+  const ecarts = decisions.filter((d) => !d.conform);
+
+  const enseignements: string[] = [];
+  if (ecarts.length === 0) {
+    enseignements.push(
+      "Toutes les décisions retenues sont conformes au protocole de gestion de crise. Capitalisez ce parcours comme cas-école interne.",
+    );
+  } else {
+    enseignements.push(
+      `${ecarts.length} décision${ecarts.length > 1 ? "s ont" : " a"} dévié${ecarts.length > 1 ? "" : ""} du protocole — à retravailler avant la prochaine crise réelle.`,
+    );
+    ecarts.forEach((e) => {
+      enseignements.push(
+        `Étape ${e.etape} : privilégier « ${e.expected} »${e.rationale ? ` — ${e.rationale}` : ""}.`,
+      );
+    });
+  }
+  enseignements.push(
+    "Protocole à retenir : documenter, vérifier les faits, reconnaître ce qui est avéré, signer institutionnellement, publier sur le canal d'origine.",
+  );
+
+  const buildText = () => {
+    const lines: string[] = [];
+    lines.push(`COMPTE-RENDU DE GESTION DE CRISE`);
+    lines.push(`${title}`);
+    lines.push("");
+    lines.push(`Date du compte-rendu : ${reportDate}`);
+    lines.push(`Participant : ${app.user.displayName}`);
+    lines.push(
+      `Bilan : ${score}/${total} décisions conformes (${pct} %) — ${level.title}.`,
+    );
+    lines.push("");
+    lines.push(`1. CONTEXTE`);
+    context.forEach((c) => lines.push(`   ${c}`));
+    lines.push("");
+    lines.push(`2. DÉCISIONS PRISES`);
+    decisions.forEach((d) => {
+      lines.push(`   Étape ${d.etape} — ${d.question}`);
+      lines.push(`      Décision retenue : ${d.pickedText}`);
+      lines.push(`      Statut : ${d.conform ? "CONFORME au protocole" : "ÉCART au protocole"}`);
+      if (!d.conform) {
+        lines.push(`      Conduite attendue : ${d.expected}`);
+      }
+      if (d.rationale) {
+        lines.push(`      Justification : ${d.rationale}`);
+      }
+    });
+    lines.push("");
+    lines.push(`3. ANALYSE CRITIQUE`);
+    lines.push(`   ${level.explanation}`);
+    lines.push(`   Recommandation : ${level.recommendation}`);
+    lines.push("");
+    lines.push(`4. ENSEIGNEMENTS À RETENIR`);
+    enseignements.forEach((e) => lines.push(`   • ${e}`));
+    lines.push("");
+    lines.push(
+      `Document à archiver dans la mémoire institutionnelle (cellule communication / direction).`,
+    );
+    return lines.join("\n");
+  };
+
+  const copyReport = async () => {
+    try {
+      await navigator.clipboard.writeText(buildText());
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  const downloadReport = () => {
+    const text = buildText();
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `compte-rendu-crise-${idPrefix}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="rounded-2xl border border-ew-purple-200 bg-card p-4" aria-live="polite">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-purple-700">
+          <FileText aria-hidden className="h-4 w-4" /> Compte-rendu de gestion de crise — à archiver
+        </p>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={copyReport}>
+            <Copy aria-hidden className="mr-1.5 h-3.5 w-3.5" />
+            {copied ? "Copié" : "Copier"}
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={downloadReport}>
+            <Download aria-hidden className="mr-1.5 h-3.5 w-3.5" />
+            Télécharger
+          </Button>
+        </div>
+      </div>
+
+      <div className="mt-3 space-y-3 text-sm leading-relaxed">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span><strong className="text-foreground">Date :</strong> {reportDate}</span>
+          <span><strong className="text-foreground">Participant :</strong> {app.user.displayName}</span>
+          <span>
+            <strong className="text-foreground">Bilan :</strong> {conformes}/{total} décisions conformes ({pct} %) — {level.title}
+          </span>
+        </div>
+
+        <section>
+          <p className="text-xs font-bold uppercase tracking-wide text-ew-purple-700">1. Contexte</p>
+          {context.map((c, i) => (
+            <p key={i} className="mt-1">{c}</p>
+          ))}
+        </section>
+
+        <section>
+          <p className="text-xs font-bold uppercase tracking-wide text-ew-purple-700">2. Décisions prises</p>
+          <ul className="mt-1 space-y-2">
+            {decisions.map((d) => (
+              <li
+                key={d.etape}
+                className={cn(
+                  "rounded-md border-l-2 px-3 py-2",
+                  d.conform ? "border-ew-green-500 bg-ew-green-50/60" : "border-red-500 bg-red-50/60",
+                )}
+              >
+                <p className="text-sm">
+                  <strong>Étape {d.etape}.</strong> {d.question}
+                </p>
+                <p className="mt-1 text-xs">
+                  Décision retenue : <em>{d.pickedText}</em>
+                </p>
+                <p className={cn("mt-0.5 text-xs font-bold", d.conform ? "text-ew-green-800" : "text-red-700")}>
+                  {d.conform ? "✓ Conforme au protocole" : `✗ Écart — attendu : « ${d.expected} »`}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section>
+          <p className="text-xs font-bold uppercase tracking-wide text-ew-purple-700">3. Analyse critique</p>
+          <p className="mt-1">{level.explanation}</p>
+          <p className="mt-1 rounded-md border-l-4 border-ew-purple-500 bg-muted/30 px-3 py-1.5">
+            <strong className="text-ew-purple-700">Recommandation :</strong> {level.recommendation}
+          </p>
+        </section>
+
+        <section>
+          <p className="text-xs font-bold uppercase tracking-wide text-ew-purple-700">4. Enseignements à retenir</p>
+          <ul className="mt-1 list-disc pl-5 space-y-0.5">
+            {enseignements.map((e, i) => (
+              <li key={i}>{e}</li>
+            ))}
+          </ul>
+        </section>
+
+        <p className="rounded-md border-l-4 border-ew-gold-500 bg-ew-gold-50 px-3 py-2 text-xs italic">
+          Document à archiver dans la mémoire institutionnelle (cellule communication / direction).
+        </p>
+      </div>
+    </div>
+  );
 }
 
 /* -------- Diagnostic flash (cases à cocher avec score) -------- */
@@ -1200,15 +1448,19 @@ function RapidChecklist({
   idPrefix: string;
 }) {
   const [checked, setChecked] = React.useState<Record<number, boolean>>({});
+  const [tested, setTested] = React.useState(false);
   const score = Object.values(checked).filter(Boolean).length;
+  const allGreen = score === items.length;
+  const showRed = tested && !allGreen;
   return (
     <div className="space-y-2">
       <p className="text-xs italic text-muted-foreground">
-        Cochez chaque critère vérifié. Le feu vert s&apos;allume seulement si les 6 critères sont au vert.
+        Cochez chaque critère vérifié, puis lancez le test. Le feu reste au rouge tant que les 6 critères ne sont pas tous au vert.
       </p>
       <ul className="grid gap-2 sm:grid-cols-2">
         {items.map((it, i) => {
           const c = !!checked[i];
+          const red = showRed && !c;
           return (
             <li key={i}>
               <label
@@ -1216,23 +1468,35 @@ function RapidChecklist({
                   "flex cursor-pointer items-start gap-2 rounded-md border p-2.5 text-sm transition-colors",
                   c
                     ? "border-ew-green-500 bg-ew-green-50"
-                    : "border-border bg-background/60 hover:bg-muted/20",
+                    : red
+                      ? "border-ew-red bg-ew-red/10"
+                      : "border-border bg-background/60 hover:bg-muted/20",
                 )}
               >
                 <input
                   type="checkbox"
                   checked={c}
-                  onChange={() => setChecked((p) => ({ ...p, [i]: !p[i] }))}
+                  onChange={() => {
+                    setChecked((p) => ({ ...p, [i]: !p[i] }));
+                    setTested(false);
+                  }}
                   className="mt-0.5 accent-ew-green-700"
                 />
                 <div className="flex-1">
-                  <p className={cn("font-display font-bold", c ? "text-ew-green-800" : "text-foreground")}>
+                  <p
+                    className={cn(
+                      "font-display font-bold",
+                      c ? "text-ew-green-800" : red ? "text-ew-red" : "text-foreground",
+                    )}
+                  >
                     {it.label}
                   </p>
                   {it.helper ? <p className="text-[11px] italic text-muted-foreground">{it.helper}</p> : null}
                 </div>
                 {c ? (
                   <CheckCircle2 aria-hidden className="h-5 w-5 text-ew-green-600" />
+                ) : red ? (
+                  <AlertTriangle aria-hidden className="h-5 w-5 text-ew-red" />
                 ) : (
                   <span aria-hidden className="h-5 w-5 rounded-full border-2 border-dashed border-muted-foreground/30" />
                 )}
@@ -1241,27 +1505,50 @@ function RapidChecklist({
           );
         })}
       </ul>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setTested(true)}
+          disabled={tested && !allGreen}
+        >
+          Tester la conformité RAPIDE
+        </Button>
+        <span className="text-xs text-muted-foreground">
+          {score}/{items.length} critère{items.length > 1 ? "s" : ""} validé{score > 1 ? "s" : ""}
+        </span>
+      </div>
       <div
         className={cn(
-          "flex items-center justify-between rounded-lg border p-3 text-sm font-medium",
-          score === items.length
+          "flex items-center gap-2 rounded-lg border p-3 text-sm font-medium",
+          allGreen
             ? "border-ew-green-500 bg-ew-green-100 text-ew-green-900"
-            : "border-ew-gold-500 bg-ew-gold-50 text-foreground",
+            : showRed
+              ? "border-ew-red bg-ew-red/10 text-ew-red"
+              : "border-ew-gold-500 bg-ew-gold-50 text-foreground",
         )}
         aria-live="polite"
       >
-        {score === items.length ? (
+        {allGreen ? (
           <>
             <CheckCircle2 aria-hidden className="h-5 w-5" />
             <span>
               <strong>Feu vert :</strong> publication autorisée selon RAPIDE.
             </span>
           </>
+        ) : showRed ? (
+          <>
+            <AlertTriangle aria-hidden className="h-5 w-5" />
+            <span>
+              <strong>Feu rouge :</strong> {items.length - score} critère{items.length - score > 1 ? "s" : ""} non validé{items.length - score > 1 ? "s" : ""} — corrigez avant publication.
+            </span>
+          </>
         ) : (
           <>
             <AlertTriangle aria-hidden className="h-5 w-5 text-ew-gold-700" />
             <span>
-              {score}/{items.length} critères validés — corrigez avant publication.
+              Vérifiez chaque critère puis lancez le test pour obtenir le feu vert.
             </span>
           </>
         )}

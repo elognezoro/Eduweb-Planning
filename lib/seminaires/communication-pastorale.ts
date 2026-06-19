@@ -720,7 +720,7 @@ const ACTIVITIES: CommSeminaireActivity[] = [
     title: "Check-list RAPIDE — relecture d'une publication",
     kind: "checklist",
     instructions: [
-      "Avant chaque publication, vérifiez les six critères RAPIDE. Si l'un est rouge, suspendez la publication et corrigez.",
+      "Avant chaque publication, vérifiez les six critères RAPIDE. Tant que l'un d'eux n'est pas validé, suspendez la publication et corrigez.",
     ],
     items: [
       { label: "R — Réel", helper: "Le fait est-il avéré et vérifié ?" },

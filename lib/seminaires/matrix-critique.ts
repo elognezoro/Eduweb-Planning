@@ -81,23 +81,23 @@ function analyze(submission: MatrixSubmission): MatrixAnalysis {
  */
 export function generateMatrixCritique(submission: MatrixSubmission): string {
   const a = analyze(submission);
+  const title = guessMatrixTitle(submission);
+  const isPlan = title === "Plan d'action";
   const lines: string[] = [];
 
   const fillPct = Math.round(a.fillRate * 100);
-  lines.push(`CRITIQUE — Matrice « ${guessMatrixTitle(submission)} »`);
+  lines.push(`CRITIQUE — ${isPlan ? title : `Matrice « ${title} »`}`);
   lines.push("");
 
-  // 1. Bilan général
   lines.push(
-    `Bilan général — La matrice est complétée à ${fillPct}% (${a.filledCells}/${a.totalCells} cellules remplies). ` +
+    `Bilan général — ${isPlan ? "Le plan" : "La matrice"} est complété${isPlan ? "" : "e"} à ${fillPct}% (${a.filledCells}/${a.totalCells} cellules remplies). ` +
       densityComment(a.meanCellLength) +
       ` ` +
       diversityComment(a.distinctWords, a.filledCells),
   );
   lines.push("");
 
-  // 2. Lecture ligne par ligne
-  lines.push(`Lecture par public :`);
+  lines.push(`Lecture ${isPlan ? "par action" : "par public"} :`);
   a.rows.forEach((row) => {
     const status =
       row.filled === 0
@@ -107,28 +107,41 @@ export function generateMatrixCritique(submission: MatrixSubmission): string {
           : `partiel (${row.filled}/${row.total})`;
     const detail =
       row.filled === 0
-        ? "À traiter — aucune information n'est encore proposée pour ce public."
+        ? isPlan
+          ? "À traiter — cette action n'est pas encore définie."
+          : "À traiter — aucune information n'est encore proposée pour ce public."
         : row.averageLength < 20
-          ? "Les réponses sont brèves — elles gagneraient à être précisées (canal nommément cité, message reformulé en une phrase complète, preuve concrète)."
+          ? isPlan
+            ? "Les colonnes sont trop laconiques — précisez le message, le public cible, le canal et un indicateur mesurable."
+            : "Les réponses sont brèves — elles gagneraient à être précisées (canal nommément cité, message reformulé en une phrase complète, preuve concrète)."
           : row.averageLength > 80
-            ? "Les réponses sont riches ; veillez à les rendre actionnables (un seul canal cible, un message en une phrase, une preuve tangible)."
-            : "Densité d'information adaptée. Vérifiez la cohérence canal-message-preuve.";
+            ? isPlan
+              ? "L'action est richement décrite ; resserrez sur l'essentiel : un objectif, un canal, un indicateur SMART."
+              : "Les réponses sont riches ; veillez à les rendre actionnables (un seul canal cible, un message en une phrase, une preuve tangible)."
+            : isPlan
+              ? "Densité adaptée. Vérifiez que l'indicateur est mesurable et qu'une échéance courte (30 jours) est tenable."
+              : "Densité d'information adaptée. Vérifiez la cohérence canal-message-preuve.";
     lines.push(`  • ${row.label} — ${status}. ${detail}`);
   });
   lines.push("");
 
-  // 3. Recommandations
   lines.push(`Recommandations :`);
-  const recos = buildRecommendations(a);
+  const recos = buildRecommendations(a, isPlan);
   recos.forEach((r) => lines.push(`  - ${r}`));
 
   return lines.join("\n");
 }
 
 function guessMatrixTitle(submission: MatrixSubmission): string {
-  if (submission.headers.some((h) => /public/i.test(h))) return "Matrice des publics";
-  if (submission.headers.some((h) => /message/i.test(h))) return "Plan de communication";
-  if (submission.headers.some((h) => /action/i.test(h))) return "Plan d'action";
+  const headers = submission.headers;
+  const rowLabels = submission.rowLabels;
+  // Plan d'action : reconnu à la présence d'un Indicateur ou Objectif,
+  // OU à des lignes nommées « Action 1/2/… ».
+  const hasIndicator = headers.some((h) => /indicateur|objectif|échéance|responsable|livrable/i.test(h));
+  const actionRows = rowLabels.some((r) => /^action\b/i.test(r.trim()));
+  if (hasIndicator || actionRows) return "Plan d'action";
+  if (headers.some((h) => /public/i.test(h))) return "Matrice des publics";
+  if (headers.some((h) => /message/i.test(h))) return "Plan de communication";
   return "Tableau de travail";
 }
 
@@ -150,11 +163,13 @@ function diversityComment(distinct: number, filled: number): string {
   return "Le vocabulaire utilisé est riche et témoigne d'une bonne adaptation aux publics.";
 }
 
-function buildRecommendations(a: MatrixAnalysis): string[] {
+function buildRecommendations(a: MatrixAnalysis, isPlan = false): string[] {
   const recos: string[] = [];
   if (a.fillRate < 0.5) {
     recos.push(
-      "Compléter en priorité les lignes encore vides : chaque public doit avoir au minimum un canal, un message et une preuve.",
+      isPlan
+        ? "Compléter chaque action : un message, un public cible, un objectif, un canal et un indicateur mesurable."
+        : "Compléter en priorité les lignes encore vides : chaque public doit avoir au minimum un canal, un message et une preuve.",
     );
   }
   const emptyRows = a.rows.filter((r) => r.filled === 0);
@@ -166,17 +181,23 @@ function buildRecommendations(a: MatrixAnalysis): string[] {
   const briefRows = a.rows.filter((r) => r.filled > 0 && r.averageLength < 15);
   if (briefRows.length > 0) {
     recos.push(
-      `Étoffer les réponses des lignes : ${briefRows.map((r) => r.label).join(", ")} — préciser le canal, formuler le message en une phrase, donner une preuve concrète.`,
+      isPlan
+        ? `Étoffer : ${briefRows.map((r) => r.label).join(", ")} — l'indicateur doit être chiffré ou observable (« X publications validées RAPIDE », « Y rencontres tenues »).`
+        : `Étoffer les réponses des lignes : ${briefRows.map((r) => r.label).join(", ")} — préciser le canal, formuler le message en une phrase, donner une preuve concrète.`,
     );
   }
   if (a.fillRate >= 0.8 && a.meanCellLength >= 30) {
     recos.push(
-      "Matrice solide : passer à l'étape suivante (transformer en plan d'action — un responsable, une échéance, un livrable par ligne).",
+      isPlan
+        ? "Plan solide : nommer un responsable pour chaque action et fixer une date de revue à 30 jours."
+        : "Matrice solide : passer à l'étape suivante (transformer en plan d'action — un responsable, une échéance, un livrable par ligne).",
     );
   }
   if (recos.length === 0) {
     recos.push(
-      "Continuer à affiner : relire à voix haute pour vérifier la cohérence canal-message-preuve par public.",
+      isPlan
+        ? "Continuer à affiner : vérifier que chaque action est SMART (Spécifique, Mesurable, Atteignable, Réaliste, Temporellement définie)."
+        : "Continuer à affiner : relire à voix haute pour vérifier la cohérence canal-message-preuve par public.",
     );
   }
   recos.push(
