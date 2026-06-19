@@ -629,17 +629,33 @@ function SlideBlockView({ block: b }: { block: CommSlideBlock }) {
    ACTIVITÉS
    ========================================================================== */
 export function ActivityList({ activities }: { activities: CommSeminaireActivity[] }) {
+  // Accordéon exclusif : un seul atelier ouvert à la fois. Le précédent se
+  // ferme automatiquement quand l'apprenant en ouvre un autre.
+  const [openId, setOpenId] = React.useState<string | null>(null);
   return (
     <div className="space-y-3">
       {activities.map((a) => (
-        <ActivityCard key={a.id} activity={a} />
+        <ActivityCard
+          key={a.id}
+          activity={a}
+          isOpen={openId === a.id}
+          onToggle={() => setOpenId((cur) => (cur === a.id ? null : a.id))}
+        />
       ))}
     </div>
   );
 }
 
-function ActivityCard({ activity: a }: { activity: CommSeminaireActivity }) {
-  const [open, setOpen] = React.useState(false);
+function ActivityCard({
+  activity: a,
+  isOpen,
+  onToggle,
+}: {
+  activity: CommSeminaireActivity;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  const open = isOpen;
   const buttonId = `cp-${a.id}-btn`;
   const panelId = `cp-${a.id}-panel`;
   return (
@@ -648,7 +664,7 @@ function ActivityCard({ activity: a }: { activity: CommSeminaireActivity }) {
         id={buttonId}
         aria-expanded={open}
         aria-controls={panelId}
-        onClick={() => setOpen(!open)}
+        onClick={onToggle}
         className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-muted/20"
       >
         <div className="flex items-center gap-3">

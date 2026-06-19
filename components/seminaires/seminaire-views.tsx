@@ -280,6 +280,8 @@ export function ModuleBody({
 }
 
 function ModuleBodyContent({ module: m }: { module: SeminaireModule }) {
+  // Accordéon exclusif des activités : ouvrir une activité ferme les autres.
+  const [openActivityId, setOpenActivityId] = React.useState<string | null>(null);
   return (
     <div className="border-t border-border p-5 space-y-5">
       <div className="rounded-xl bg-muted/30 p-3 text-xs text-muted-foreground">
@@ -327,7 +329,14 @@ function ModuleBodyContent({ module: m }: { module: SeminaireModule }) {
       <div className="space-y-3">
         <p className="font-display text-xs font-bold uppercase tracking-wide text-ew-green-700">Activités</p>
         {m.activities.map((a) => (
-          <ActivityCard key={a.id} activity={a} />
+          <ActivityCard
+            key={a.id}
+            activity={a}
+            isOpen={openActivityId === a.id}
+            onToggle={() =>
+              setOpenActivityId((cur) => (cur === a.id ? null : a.id))
+            }
+          />
         ))}
       </div>
 
@@ -493,9 +502,20 @@ function BlockView({ block: b }: { block: SeminaireBlock }) {
   }
 }
 
-/* -------- ACTIVITÉS -------- */
-function ActivityCard({ activity: a }: { activity: SeminaireActivity }) {
-  const [open, setOpen] = React.useState(false);
+/* -------- ACTIVITÉS --------
+   Comportement d'accordéon exclusif piloté par le parent (ModuleBodyContent
+   pour Magnifica) : isOpen + onToggle sont remontés au niveau de la liste
+   afin qu'ouvrir une activité ferme automatiquement les autres. */
+function ActivityCard({
+  activity: a,
+  isOpen,
+  onToggle,
+}: {
+  activity: SeminaireActivity;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  const open = isOpen;
   const buttonId = `act-${a.id}-btn`;
   const panelId = `act-${a.id}-panel`;
   return (
@@ -504,7 +524,7 @@ function ActivityCard({ activity: a }: { activity: SeminaireActivity }) {
         id={buttonId}
         aria-expanded={open}
         aria-controls={panelId}
-        onClick={() => setOpen(!open)}
+        onClick={onToggle}
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/20"
       >
         <div className="flex items-center gap-3">
