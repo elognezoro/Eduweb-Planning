@@ -292,7 +292,25 @@ interface StoreState {
   courseCompletionRules: CourseCompletionRule[];
   /** Traces de réussite globale du cours par utilisateur. */
   courseCompletions: CourseCompletion[];
+  /** Paramètres de sécurité globaux de la plateforme (admin). */
+  securitySettings: SecuritySettings;
 }
+
+/** Paramètres de sécurité — appliqués à tous les utilisateurs. */
+export interface SecuritySettings {
+  /** Déconnexion automatique après inactivité (toggle on/off). */
+  idleLogoutEnabled: boolean;
+  /** Durée d'inactivité en minutes avant déconnexion (1 à 240). */
+  idleLogoutMinutes: number;
+  /** Durée de l'avertissement préventif en secondes (10 à 120). */
+  idleWarningSeconds: number;
+}
+
+const DEFAULT_SECURITY: SecuritySettings = {
+  idleLogoutEnabled: false,
+  idleLogoutMinutes: 20,
+  idleWarningSeconds: 30,
+};
 
 interface DataStore extends StoreState {
   addUser: (u: Omit<DirectoryUser, "id">) => void;
@@ -386,6 +404,8 @@ interface DataStore extends StoreState {
   markCourseCompleted: (input: Omit<CourseCompletion, "id" | "completedAt">) => void;
   /** Retire toutes les traces de réussite d'un cours pour un utilisateur. */
   unmarkCourseCompleted: (userId: string, courseId: string) => void;
+  /** Met à jour les paramètres de sécurité (auto-déconnexion, etc.). */
+  setSecuritySettings: (patch: Partial<SecuritySettings>) => void;
   reset: () => void;
 }
 
@@ -418,6 +438,7 @@ const DEFAULTS: StoreState = {
   moduleCompletions: [],
   courseCompletionRules: [],
   courseCompletions: [],
+  securitySettings: DEFAULT_SECURITY,
 };
 
 // Incrémenter la version à chaque changement de schéma persisté (nouveaux champs/tranches) :
@@ -830,6 +851,24 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
           (c) => !(c.userId === userId && c.courseId === courseId),
         ),
       })),
+    setSecuritySettings: (patch) =>
+      setState((s) => {
+        const minutes = patch.idleLogoutMinutes;
+        const seconds = patch.idleWarningSeconds;
+        return {
+          ...s,
+          securitySettings: {
+            ...s.securitySettings,
+            ...patch,
+            ...(typeof minutes === "number"
+              ? { idleLogoutMinutes: Math.max(1, Math.min(240, Math.round(minutes))) }
+              : {}),
+            ...(typeof seconds === "number"
+              ? { idleWarningSeconds: Math.max(10, Math.min(120, Math.round(seconds))) }
+              : {}),
+          },
+        };
+      }),
     reset: () => setState(DEFAULTS),
   };
 

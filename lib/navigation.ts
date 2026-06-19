@@ -195,6 +195,13 @@ export const NAVIGATION: NavGroup[] = [
         icon: Wrench,
         permission: "system:view_installation",
       },
+      {
+        href: "/systeme/securite",
+        label: "Sécurité de session",
+        icon: ShieldCheck,
+        permission: "system:manage_permissions",
+        description: "Réglages globaux : auto-déconnexion par inactivité.",
+      },
     ],
   },
   {

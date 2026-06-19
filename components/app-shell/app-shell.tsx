@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { SidebarContent } from "./sidebar";
 import { Topbar } from "./topbar";
 import { RolePreviewBanner } from "./role-preview";
+import { IdleLogoutWatcher } from "./idle-logout-watcher";
 import { cn } from "@/lib/utils";
 
 const LS_COLLAPSED = "eduweb.sidebar.collapsed";
@@ -69,6 +70,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {t("footer.tagline")} · © {new Date().getFullYear()}
         </footer>
       </div>
+      {/* Surveillance d'inactivité globale : déconnexion automatique selon
+          la durée configurée par l'administrateur. */}
+      <IdleLogoutWatcher />
     </div>
   );
 }
