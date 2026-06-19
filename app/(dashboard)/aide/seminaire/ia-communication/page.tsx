@@ -108,6 +108,15 @@ export default function IaCommunicationPage() {
   const pages: BookPage[] = React.useMemo(
     () => [
       {
+        id: "schedule",
+        category: "schedule",
+        shortTitle: "Déroulé",
+        title: "Déroulé proposé",
+        subtitle: "Chronométrage de la session de 150 minutes",
+        content: <CommSchedule seminaire={s} />,
+        narration: narrations.schedule,
+      },
+      {
         id: "presentation",
         category: "presentation",
         shortTitle: "Présentation",
@@ -186,15 +195,6 @@ export default function IaCommunicationPage() {
         subtitle: "Le livrable de la formation, en 7 points",
         content: <IaProtocol seminaire={s} />,
         narration: narrations.protocol,
-      },
-      {
-        id: "schedule",
-        category: "schedule",
-        shortTitle: "Déroulé",
-        title: "Déroulé proposé",
-        subtitle: "Chronométrage de la session de 150 minutes",
-        content: <CommSchedule seminaire={s} />,
-        narration: narrations.schedule,
       },
       {
         id: "landmarks",
