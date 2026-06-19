@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
 import { generateMatrixCritique } from "@/lib/seminaires/matrix-critique";
+import { NarrationButton } from "@/components/seminaires/narration-button";
 import type {
   CommSeminaire,
   CommSeminaireActivity,
@@ -360,11 +361,70 @@ export function SlideDeck({ slides }: { slides: CommSlide[] }) {
   );
 }
 
+/* -------- Texte narratif d'une slide pour la lecture audio (TTS) -------- */
+function blockNarrationText(b: CommSlideBlock): string {
+  switch (b.kind) {
+    case "paragraph":
+    case "highlight":
+      return b.text;
+    case "bulletList":
+    case "numberedList":
+      return (b.intro ? `${b.intro}. ` : "") + b.items.join(". ");
+    case "pillars":
+      return b.items
+        .map((it) => `${it.label}. ${it.title}. ${it.description}`)
+        .join(" ");
+    case "principles":
+      return (
+        (b.title ? `${b.title}. ` : "") +
+        b.items
+          .map((it) => `${it.letter}, ${it.label}. ${it.points.join(". ")}.`)
+          .join(" ")
+      );
+    case "flow":
+      return b.items.join(", puis ");
+    case "channels":
+      return b.items.map((c) => `${c.name} : ${c.purpose}.`).join(" ");
+    case "publics":
+      return b.rows
+        .map(
+          (r) =>
+            `${r.public}. Verbes : ${r.verbs.join(", ")}. ${r.columns.join(". ")}.`,
+        )
+        .join(" ");
+    case "steps":
+      return b.items
+        .map((s) => `Étape ${s.num}. ${s.label}. ${s.detail}`)
+        .join(" ");
+    default: {
+      // Exhaustiveness check : si une nouvelle valeur est ajoutée à
+      // CommSlideBlock sans cas correspondant, TypeScript signalera ici.
+      const _exhaustive: never = b;
+      void _exhaustive;
+      return "";
+    }
+  }
+}
+
+function slideNarration(slide: CommSlide): string {
+  const parts: string[] = [];
+  parts.push(
+    `Diapositive ${slide.num} : ${slide.title}.${slide.subtitle ? ` ${slide.subtitle}.` : ""}`,
+  );
+  slide.blocks.forEach((b) => {
+    const t = blockNarrationText(b).trim();
+    if (t) parts.push(t);
+  });
+  if (slide.footer) parts.push(slide.footer);
+  return parts.join(" ");
+}
+
 /* -------- Rendu d'une slide selon son layout -------- */
 function SlideView({ slide }: { slide: CommSlide | undefined }) {
   if (!slide) return null;
   const isCover = slide.layout === "cover";
   const isClosing = slide.layout === "closing";
+  const narration = slideNarration(slide);
 
   return (
     <article
@@ -402,9 +462,16 @@ function SlideView({ slide }: { slide: CommSlide | undefined }) {
         </>
       ) : (
         <header>
-          <p className="font-display text-[11px] font-bold uppercase tracking-[0.18em] text-ew-green-700">
-            Diapositive {String(slide.num).padStart(2, "0")}
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <p className="font-display text-[11px] font-bold uppercase tracking-[0.18em] text-ew-green-700">
+              Diapositive {String(slide.num).padStart(2, "0")}
+            </p>
+            <NarrationButton
+              key={`slide-${slide.num}`}
+              text={narration}
+              label="Écouter la diapositive"
+            />
+          </div>
           <h2 className="mt-1 font-display text-xl font-extrabold leading-tight text-ew-green-900 sm:text-2xl lg:text-3xl">
             {slide.title}
           </h2>
@@ -695,11 +762,20 @@ function ActivityCard({
             <strong>Modalité :</strong> {a.recommendation}
           </p>
         ) : null}
-        {a.instructions.map((ins, i) => (
-          <p key={i} className="mb-2">
-            {ins}
-          </p>
-        ))}
+        <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
+          <div className="flex-1 space-y-2">
+            {a.instructions.map((ins, i) => (
+              <p key={i}>{ins}</p>
+            ))}
+          </div>
+          <NarrationButton
+            key={`act-${a.id}`}
+            text={`Atelier ${a.num}. ${a.title}. Consignes. ${a.instructions
+              .map((s) => s.replace(/[.!?]+$/, ""))
+              .join(". ")}.`}
+            label="Écouter la consigne"
+          />
+        </div>
 
         {a.kind === "qcm" || a.kind === "scenario" ? (
           a.qcm ? (
@@ -1566,12 +1642,29 @@ function ReflectionFields({
   idPrefix: string;
 }) {
   const [values, setValues] = React.useState<Record<number, string>>({});
+  // Snapshot des valeurs au moment où le participant a déclenché l'évaluation.
+  // Si l'apprenant continue à modifier ses réponses, l'évaluation se cache
+  // (elle n'est plus à jour) jusqu'à un nouveau clic.
+  const [evaluated, setEvaluated] = React.useState<Record<number, string> | null>(null);
+
+  React.useEffect(() => {
+    // Toute édition après évaluation invalide l'évaluation précédente.
+    if (evaluated == null) return;
+    const same = items.every((_, i) => (values[i] || "") === (evaluated[i] || ""));
+    if (!same) setEvaluated(null);
+  }, [values, evaluated, items]);
+
   function copy() {
     const text = items
       .map((it, i) => `${it.label} :\n${values[i] || "…"}\n`)
       .join("\n");
     navigator.clipboard.writeText(text).catch(() => {});
   }
+
+  const filledCount = items.filter((_, i) => (values[i] || "").trim().length > 0)
+    .length;
+  const canEvaluate = filledCount >= 1;
+
   return (
     <div className="space-y-2">
       {items.map((it, i) => (
@@ -1589,13 +1682,294 @@ function ReflectionFields({
           />
         </div>
       ))}
-      <button
-        type="button"
-        onClick={copy}
-        className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-bold hover:bg-muted/40"
-      >
-        Copier mon engagement
-      </button>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={copy}
+          className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-bold hover:bg-muted/40"
+        >
+          Copier mon engagement
+        </button>
+        <button
+          type="button"
+          onClick={() => setEvaluated({ ...values })}
+          disabled={!canEvaluate}
+          className="rounded-md bg-ew-purple-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-ew-purple-700 disabled:opacity-50"
+          title={
+            !canEvaluate
+              ? "Remplissez au moins une zone avant d'évaluer."
+              : "Générer une appréciation et une analyse critique encourageante de votre engagement."
+          }
+        >
+          Évaluer mon engagement
+        </button>
+        <span className="text-xs italic text-muted-foreground">
+          {filledCount}/{items.length} champ{items.length > 1 ? "s" : ""} rempli{items.length > 1 ? "s" : ""}
+        </span>
+      </div>
+
+      {/* Appréciation + analyse critique + encouragement — générée sur
+          demande, depuis un snapshot des valeurs. Toute édition ultérieure
+          invalide l'évaluation jusqu'à un nouveau clic. */}
+      {evaluated ? <EngagementAppreciation items={items} values={evaluated} /> : null}
+    </div>
+  );
+}
+
+interface EngagementSignals {
+  filled: number;
+  total: number;
+  totalChars: number;
+  meanChars: number;
+  hasTimeMarker: boolean;
+  hasActionVerb: boolean;
+  hasHumanAnchor: boolean;
+  hasSpecificDetail: boolean;
+  shortestLen: number;
+  longestLen: number;
+}
+
+/**
+ * Frontière de mot tolérante à l'unicode (lettres et chiffres accentués).
+ * `\b` natif de JavaScript ne reconnaît que l'ASCII : `\bévêque\b` ne
+ * matche pas " évêque " car ni `é` ni ` ` ne sont des « word chars ».
+ * On utilise `\p{L}\p{N}` avec le flag `u` pour s'aligner sur le français.
+ */
+function makeFrenchWordRegex(alternatives: string[]): RegExp {
+  return new RegExp(
+    `(?<![\\p{L}\\p{N}])(?:${alternatives.join("|")})(?![\\p{L}\\p{N}])`,
+    "iu",
+  );
+}
+
+const TIME_MARKERS = [
+  "\\d+\\s*(?:jours?|semaines?|mois|ans?|h|heures?|minutes?)",
+  "aujourd['’]hui",
+  "demain",
+  "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche",
+  "matin", "soir", "midi", "après-midi",
+  "janvier", "février", "mars", "avril", "mai", "juin",
+  "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+  "chaque", "tous\\s+les", "toutes\\s+les",
+  "trimestre", "semestre", "rentrée", "vacances", "week-end",
+  "toussaint", "avent", "noël", "carême", "pâques", "ascension", "pentecôte",
+  "retraite",
+];
+
+const ACTION_VERBS = [
+  // Verbes managériaux / professionnels
+  "changer", "faire", "mettre", "écrire", "partager", "publier",
+  "surveiller", "vérifier", "former", "relire", "appliquer", "réviser",
+  "réorganiser", "professionnaliser", "construire", "documenter", "signer",
+  "valider", "écouter", "rencontrer", "sensibiliser", "adopter", "déployer",
+  "planifier", "rédiger", "transmettre", "enseigner", "accueillir",
+  "organiser", "animer", "encourager",
+  // Verbes pastoraux
+  "prier", "célébrer", "accompagner", "témoigner", "annoncer",
+  "évangéliser", "méditer", "discerner", "servir",
+];
+
+const HUMAN_ANCHORS = [
+  "équipe", "collègue", "directrice", "directeur", "parent", "élève",
+  "enseignant", "tuteur", "formateur", "paroisse", "communauté",
+  "cellule", "service", "direction",
+  // Anchors pastoraux catholiques (SENEC / DDEC)
+  "évêque", "archevêque", "cardinal", "prêtre", "abbé", "curé", "vicaire",
+  "aumônier", "religieuse", "sœur", "frère", "séminariste", "catéchiste",
+  "fondation", "congrégation", "ddec", "senec", "enc", "ceic",
+  "conseil\\s+d['’]administration", "association\\s+de\\s+parents",
+  "apeec", "chef\\s+d['’]établissement", "chef\\s+d['’]école",
+];
+
+const PASTORAL_LEXICON = [
+  "messe", "sacrement[s]?", "eucharistie", "catéchèse", "foi",
+  "doctrine", "pastorale", "mission", "œuvre", "oeuvre", "évangile",
+  "vocation", "communion", "spiritualité", "diocèse", "archidiocèse",
+];
+
+const TIME_RE = makeFrenchWordRegex(TIME_MARKERS);
+const ACTION_RE = makeFrenchWordRegex(ACTION_VERBS);
+const HUMAN_RE = makeFrenchWordRegex(HUMAN_ANCHORS);
+const PASTORAL_RE = makeFrenchWordRegex(PASTORAL_LEXICON);
+
+function analyzeEngagement(
+  items: { label: string; helper?: string }[],
+  values: Record<number, string>,
+): EngagementSignals & { hasPastoralLexicon: boolean } {
+  const texts = items.map((_, i) => (values[i] || "").trim());
+  const filled = texts.filter((t) => t.length > 0);
+  const totalChars = filled.reduce((acc, t) => acc + t.length, 0);
+  // Normalise les apostrophes typographiques (U+2019) → ASCII pour
+  // robustesse contre les autocorrections Word / iOS / Android.
+  const joined = filled.join(" ").toLowerCase().replace(/[‘’]/g, "'");
+  return {
+    filled: filled.length,
+    total: items.length,
+    totalChars,
+    meanChars: filled.length > 0 ? Math.round(totalChars / filled.length) : 0,
+    hasTimeMarker: TIME_RE.test(joined),
+    hasActionVerb: ACTION_RE.test(joined),
+    hasHumanAnchor: HUMAN_RE.test(joined),
+    hasSpecificDetail: /\d/.test(joined) || /[A-Z]{3,}/.test(filled.join(" ")),
+    hasPastoralLexicon: PASTORAL_RE.test(joined),
+    shortestLen: filled.length > 0 ? Math.min(...filled.map((t) => t.length)) : 0,
+    longestLen: filled.length > 0 ? Math.max(...filled.map((t) => t.length)) : 0,
+  };
+}
+
+interface EngagementVerdict {
+  level: "remarquable" | "solide" | "amorcé" | "esquissé";
+  tone: "excellent" | "good" | "ok" | "weak";
+  appreciation: string;
+  critique: string[];
+  encouragement: string;
+}
+
+function evaluateEngagement(
+  s: EngagementSignals & { hasPastoralLexicon: boolean },
+): EngagementVerdict {
+  const completion = s.total > 0 ? s.filled / s.total : 0;
+  const richness = Math.min(1, s.meanChars / 80);
+  // 5 signaux : temporel, action, ancrage humain, détail spécifique, pastoral.
+  const signals =
+    Number(s.hasTimeMarker) +
+    Number(s.hasActionVerb) +
+    Number(s.hasHumanAnchor) +
+    Number(s.hasSpecificDetail) +
+    Number(s.hasPastoralLexicon);
+  const score = completion * 0.4 + richness * 0.3 + (signals / 5) * 0.3;
+
+  let level: EngagementVerdict["level"];
+  let tone: EngagementVerdict["tone"];
+  let appreciation: string;
+  if (score >= 0.75) {
+    level = "remarquable";
+    tone = "excellent";
+    appreciation =
+      "Engagement remarquable. Vos réponses sont à la fois personnelles, concrètes et orientées vers la mise en œuvre. Ce niveau de réflexion est précisément ce que la formation cherche à éveiller : un passage de la prise de conscience à la décision, et de la décision à un acte daté, partagé et qui porte du fruit dans la mission éducative confiée à votre établissement.";
+  } else if (score >= 0.55) {
+    level = "solide";
+    tone = "good";
+    appreciation =
+      "Engagement solide. Vous avez pris au sérieux le temps de réflexion : vos formulations laissent transparaître une vraie intention et une fidélité au charisme éducatif catholique. Avec quelques précisions supplémentaires, cet engagement deviendra pleinement opérationnel.";
+  } else if (score >= 0.35) {
+    level = "amorcé";
+    tone = "ok";
+    appreciation =
+      "Engagement amorcé. C'est déjà précieux d'avoir posé par écrit ce premier jet : la mise en mots est la première étape du passage à l'acte. Le contenu mérite à présent d'être étoffé pour devenir un vrai plan personnel au service de votre communauté éducative.";
+  } else {
+    level = "esquissé";
+    tone = "weak";
+    appreciation =
+      "Premier pas important. Le simple fait d'avoir formulé ne serait-ce qu'une ligne marque déjà une décision : celle de prendre cette formation au sérieux. Donnez-vous quelques minutes supplémentaires pour préciser ces premières intuitions — vous serez surpris de la clarté qui en émerge.";
+  }
+
+  const critique: string[] = [];
+  const missing = s.total - s.filled;
+  if (missing > 0) {
+    critique.push(
+      `${missing} champ${missing > 1 ? "s" : ""} sur ${s.total} reste${missing > 1 ? "nt" : ""} à compléter — chaque ligne ouvre une dimension différente (conviction, vigilance, pratique, canal, partage).`,
+    );
+  }
+  if (s.filled > 0 && s.meanChars < 30) {
+    critique.push(
+      "Vos réponses sont brèves. Précisez : un fait, un nom, une date, un canal — un engagement gagne en force quand il devient observable.",
+    );
+  }
+  if (!s.hasTimeMarker) {
+    critique.push(
+      "Aucune échéance n'est mentionnée. Ajoutez un horizon temporel précis (dans 7 jours, dans 30 jours, chaque lundi, dès la rentrée…) — un engagement sans date dérive.",
+    );
+  }
+  if (!s.hasActionVerb) {
+    critique.push(
+      "Les engagements manquent de verbes d'action. Préférez les verbes qui décrivent un geste concret (publier, relire, former, signer, partager, accompagner, célébrer) à un état général.",
+    );
+  }
+  if (!s.hasHumanAnchor) {
+    critique.push(
+      "Aucune personne ou équipe n'est nommée. Ancrer l'engagement à un interlocuteur (la directrice, mon adjoint, la cellule communication, l'aumônier, un parent référent…) augmente sa probabilité de tenue.",
+    );
+  }
+  if (critique.length === 0) {
+    critique.push(
+      "Pour aller encore plus loin : partagez cet engagement à l'oral avec un binôme dans les 48 heures et notez sa réaction — c'est ce qui transforme l'intention en alliance.",
+    );
+  }
+
+  // 5 messages d'encouragement alignés sur les paliers du verdict.
+  const encouragements: string[] = [
+    // remarquable (≥ 0.75)
+    "Bravo pour cet engagement abouti. Ce que vous avez écrit est un acte de leadership pastoral : prendre une responsabilité publique sur la communication de votre école n'est pas anodin. C'est une démarche qui honore la mission éducative confiée par l'Église à votre établissement.",
+    // solide (≥ 0.55)
+    "Bravo d'avoir pris le temps de vous engager personnellement. Ce que vous écrivez ici ne reste pas dans la formation : c'est la première brique d'une communication plus juste, plus cohérente et plus pastorale dans votre établissement.",
+    // amorcé (≥ 0.35)
+    "Votre engagement compte. Chaque communicateur catholique qui sort de cette session avec une décision claire renforce, à son échelle, la qualité de la parole de l'Église éducative en Côte d'Ivoire.",
+    // esquissé (< 0.35)
+    "Félicitations pour ce premier pas. Mettre par écrit, même brièvement, une intention au service de votre communauté éducative est déjà un acte de discernement. Reprenez ces lignes à tête reposée pour en faire un plan personnel solide.",
+  ];
+  const encouragement =
+    score >= 0.75
+      ? encouragements[0]
+      : score >= 0.55
+        ? encouragements[1]
+        : score >= 0.35
+          ? encouragements[2]
+          : encouragements[3];
+
+  return { level, tone, appreciation, critique, encouragement };
+}
+
+function EngagementAppreciation({
+  items,
+  values,
+}: {
+  items: { label: string; helper?: string }[];
+  values: Record<number, string>;
+}) {
+  const signals = React.useMemo(() => analyzeEngagement(items, values), [items, values]);
+  const verdict = React.useMemo(() => evaluateEngagement(signals), [signals]);
+
+  return (
+    <div
+      className="rounded-2xl border border-ew-purple-200 bg-ew-purple-50/60 p-4"
+      aria-live="polite"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-purple-700">
+          <Sparkles aria-hidden className="h-4 w-4" /> Appréciation de votre engagement
+        </p>
+        <span
+          className={cn(
+            "rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide",
+            verdict.tone === "excellent" && "bg-ew-green-100 text-ew-green-800",
+            verdict.tone === "good" && "bg-ew-green-50 text-ew-green-800",
+            verdict.tone === "ok" && "bg-ew-gold-50 text-ew-gold-700",
+            verdict.tone === "weak" && "bg-ew-gold-100 text-ew-gold-700",
+          )}
+        >
+          Engagement {verdict.level}
+        </span>
+      </div>
+
+      <div className="mt-3 space-y-3 text-sm leading-relaxed text-foreground/90">
+        <p>{verdict.appreciation}</p>
+
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-ew-purple-700">
+            Analyse critique pour aller plus loin
+          </p>
+          <ul className="mt-1 list-disc space-y-1 pl-5">
+            {verdict.critique.map((c, i) => (
+              <li key={i}>{c}</li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="rounded-md border-l-4 border-ew-gold-500 bg-card px-3 py-2">
+          <strong className="text-ew-gold-700">Encouragement :</strong> {verdict.encouragement}
+        </p>
+      </div>
     </div>
   );
 }

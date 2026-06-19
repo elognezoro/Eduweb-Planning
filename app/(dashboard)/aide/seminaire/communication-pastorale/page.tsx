@@ -39,22 +39,81 @@ import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-
  * livre, navigation au clavier (← →, Home, End, F), sommaire cliquable
  * au pied, plein écran.
  *
- * Rubriques :
- *   1. Présentation
- *   2. Objectifs & compétences
- *   3. Diapositives (visionneuse ePub des 14 slides)
- *   4. Méthodes (RAPIDE + 4V)
- *   5. Ateliers interactifs
- *   6. Déroulé chronométré
+ * Rubriques (Déroulé placé en tête pour orienter immédiatement
+ * l'apprenant sur la durée et le rythme de la session) :
+ *   1. Déroulé chronométré
+ *   2. Présentation
+ *   3. Objectifs & compétences
+ *   4. Diapositives (visionneuse ePub des 14 slides)
+ *   5. Méthodes (RAPIDE + 4V)
+ *   6. Ateliers interactifs
  *   7. Repères (10 repères + 5 verbes synthèse)
  *   8. Glossaire
  *   9. Clôture
+ *
+ * Chaque page reçoit un texte de narration (lu par le navigateur via
+ * SpeechSynthesis) construit à partir des données du séminaire.
  */
 export default function CommPastoralePage() {
   const s = COMMUNICATION_PASTORALE;
 
+  // Textes de narration audio par page — concaténés depuis les données
+  // du séminaire pour rester synchronisés avec le contenu réel.
+  const narrations = React.useMemo(() => {
+    const presentation = s.meta.presentation.join(" ");
+    const objectives =
+      `Objectifs pédagogiques. ${s.objectives.join(" ")} ` +
+      `Compétences visées. ${s.competences.join(" ")}`;
+    const slidesIntro =
+      `Présentation contextuelle. ${s.slides.length} diapositives à feuilleter comme un livre numérique. ` +
+      `Naviguez avec les flèches gauche et droite, F pour le plein écran, N pour afficher les notes du formateur.`;
+    const methods =
+      "Méthode RAPIDE pour relire une publication. " +
+      s.rapide.map((r) => `${r.letter}, ${r.label}.`).join(" ") +
+      " Règle des 4 V pour un usage responsable de l'intelligence artificielle. " +
+      s.fourV.map((v) => `${v.letter}, ${v.label}. ${v.detail}`).join(" ");
+    const workshopsIntro =
+      `Ateliers interactifs. ${s.activities.length} ateliers pour passer à la pratique. ` +
+      s.activities
+        .map((a) => `Atelier ${a.num}, ${a.title}.`)
+        .join(" ");
+    const schedule =
+      `Déroulé proposé pour la session de 2 heures, soit 120 minutes. ` +
+      s.schedule
+        .map((row) => `${row.hours}, ${row.activity}.`)
+        .join(" ");
+    const landmarks =
+      "Repères et synthèse de la formation. " +
+      s.references10.map((r) => `Repère ${r.num}. ${r.text}`).join(" ");
+    const glossary =
+      "Glossaire des termes clés. " +
+      s.glossary.map((g) => `${g.term}. ${g.definition}`).join(" ");
+    const closing = s.closingMessage.replace(/\n+/g, " ");
+    return {
+      presentation,
+      objectives,
+      slidesIntro,
+      methods,
+      workshopsIntro,
+      schedule,
+      landmarks,
+      glossary,
+      closing,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const pages: BookPage[] = React.useMemo(
     () => [
+      {
+        id: "schedule",
+        category: "schedule",
+        shortTitle: "Déroulé",
+        title: "Déroulé proposé",
+        subtitle: "Chronométrage de l'atelier de 120 minutes",
+        content: <CommSchedule seminaire={s} />,
+        narration: narrations.schedule,
+      },
       {
         id: "presentation",
         category: "presentation",
@@ -62,6 +121,7 @@ export default function CommPastoralePage() {
         title: s.meta.title,
         subtitle: s.meta.subtitle,
         content: <PresentationPage />,
+        narration: narrations.presentation,
       },
       {
         id: "objectives",
@@ -69,6 +129,7 @@ export default function CommPastoralePage() {
         shortTitle: "Objectifs & compétences",
         title: "Objectifs pédagogiques & compétences visées",
         content: <CommObjectives seminaire={s} />,
+        narration: narrations.objectives,
       },
       {
         id: "slides",
@@ -77,6 +138,7 @@ export default function CommPastoralePage() {
         title: "Présentation contextuelle",
         subtitle: `${s.slides.length} diapositives à feuilleter comme un livre numérique`,
         content: <DiapositivesPage />,
+        narration: narrations.slidesIntro,
       },
       {
         id: "methods",
@@ -89,6 +151,7 @@ export default function CommPastoralePage() {
             <CommFourVCard seminaire={s} />
           </div>
         ),
+        narration: narrations.methods,
       },
       {
         id: "workshops",
@@ -97,14 +160,7 @@ export default function CommPastoralePage() {
         title: "Ateliers interactifs",
         subtitle: `${s.activities.length} ateliers pour passer à la pratique`,
         content: <ActivityList activities={s.activities} />,
-      },
-      {
-        id: "schedule",
-        category: "schedule",
-        shortTitle: "Déroulé",
-        title: "Déroulé proposé",
-        subtitle: "Chronométrage de l'atelier de 120 minutes",
-        content: <CommSchedule seminaire={s} />,
+        narration: narrations.workshopsIntro,
       },
       {
         id: "landmarks",
@@ -113,6 +169,7 @@ export default function CommPastoralePage() {
         title: "Repères et synthèse",
         subtitle: "Les 10 repères + les 5 verbes de synthèse",
         content: <CommRepères seminaire={s} />,
+        narration: narrations.landmarks,
       },
       {
         id: "glossary",
@@ -120,6 +177,7 @@ export default function CommPastoralePage() {
         shortTitle: "Glossaire",
         title: "Glossaire",
         content: <CommGlossary seminaire={s} />,
+        narration: narrations.glossary,
       },
       {
         id: "closing",
@@ -127,6 +185,7 @@ export default function CommPastoralePage() {
         shortTitle: "Clôture",
         title: "Message de clôture",
         content: <ClosingPage />,
+        narration: narrations.closing,
       },
     ],
     // Sous-composants en closure sur s.

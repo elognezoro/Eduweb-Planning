@@ -3,6 +3,7 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight, ListTree, Maximize2, Minimize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NarrationButton } from "@/components/seminaires/narration-button";
 
 /* ============================================================================
    MagnificaBook — visionneuse de séminaire en mode livre.
@@ -41,6 +42,12 @@ export interface BookPage {
   subtitle?: string;
   /** Contenu de la page. */
   content: React.ReactNode;
+  /**
+   * Texte narratif lu à voix haute par le navigateur (TTS Web Speech API)
+   * lorsque l'apprenant clique sur « Écouter » dans l'en-tête de la page.
+   * Si omis, aucun bouton de lecture n'est rendu.
+   */
+  narration?: string;
 }
 
 export function MagnificaBook({ pages }: { pages: BookPage[] }) {
@@ -247,12 +254,20 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
             <>
               <header className="mb-5">
                 <p className="font-display text-[12px] font-bold uppercase tracking-[0.18em] text-ew-gold-600">
-                  Page {String(page.category === "identity" ? 1 : idx + 1).padStart(2, "0")} ·{" "}
-                  {categoryLabel(page.category)}
+                  Page {String(idx + 1).padStart(2, "0")} · {categoryLabel(page.category)}
                 </p>
-                <h2 className="mt-1 font-display text-2xl font-extrabold leading-tight text-ew-green-900 sm:text-3xl">
-                  {page.title}
-                </h2>
+                <div className="mt-1 flex flex-wrap items-start justify-between gap-3">
+                  <h2 className="font-display text-2xl font-extrabold leading-tight text-ew-green-900 sm:text-3xl">
+                    {page.title}
+                  </h2>
+                  {page.narration ? (
+                    <NarrationButton
+                      key={page.id}
+                      text={page.narration}
+                      label="Écouter la page"
+                    />
+                  ) : null}
+                </div>
                 {page.subtitle ? (
                   <p className="mt-1 text-sm italic text-muted-foreground">{page.subtitle}</p>
                 ) : null}
