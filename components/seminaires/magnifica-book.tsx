@@ -46,6 +46,13 @@ export interface BookPage {
 export function MagnificaBook({ pages }: { pages: BookPage[] }) {
   const [idx, setIdx] = React.useState(0);
   const [fullscreen, setFullscreen] = React.useState(false);
+  // Le pied (bandeau prev/next + sommaire) est rétractable. En plein écran,
+  // il est replié par défaut pour libérer toute la place à la diapositive ;
+  // l'utilisateur peut le faire réapparaître via le bouton « Sommaire ».
+  const [showFooter, setShowFooter] = React.useState(true);
+  React.useEffect(() => {
+    setShowFooter(!fullscreen);
+  }, [fullscreen]);
   const [direction, setDirection] = React.useState<"next" | "prev">("next");
   const containerRef = React.useRef<HTMLDivElement>(null);
   const pageRef = React.useRef<HTMLDivElement>(null);
@@ -178,6 +185,22 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
           </button>
           <button
             type="button"
+            aria-label={showFooter ? "Replier le sommaire" : "Afficher le sommaire"}
+            aria-pressed={showFooter}
+            onClick={() => setShowFooter((v) => !v)}
+            className={cn(
+              "ml-1 flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-bold uppercase tracking-wide hover:bg-muted/40",
+              showFooter
+                ? "border-border bg-card text-muted-foreground"
+                : "border-ew-green-300 bg-ew-green-50 text-ew-green-800",
+            )}
+            title="Plier / déplier le sommaire et la navigation du pied"
+          >
+            <ListTree aria-hidden className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Sommaire</span>
+          </button>
+          <button
+            type="button"
             aria-label={fullscreen ? "Quitter le mode plein écran" : "Afficher en plein écran"}
             aria-pressed={fullscreen}
             onClick={() => setFullscreen((v) => !v)}
@@ -240,8 +263,11 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
         </article>
       </div>
 
-      {/* Pied : précédent / suivant + table des matières */}
-      <div className="border-t border-border bg-muted/20">
+      {/* Pied : précédent / suivant + table des matières.
+          Repliable via le bouton « Sommaire » de la barre du haut, et
+          automatiquement replié en mode plein écran pour libérer toute la
+          place au contenu de la page (utile pour les diapositives SENEC). */}
+      <div className={cn("border-t border-border bg-muted/20", !showFooter && "hidden")}>
         <div className="flex items-center justify-between gap-3 px-3 py-2">
           <button
             type="button"
