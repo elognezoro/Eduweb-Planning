@@ -10,9 +10,11 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  ClipboardCheck,
   Clock,
   Compass,
   Eye,
+  FileText,
   Layers,
   Maximize2,
   Minimize2,
@@ -839,8 +841,43 @@ function DiagnosticChecklist({
   idPrefix: string;
 }) {
   const [checked, setChecked] = React.useState<Record<number, boolean>>({});
+  const [showNote, setShowNote] = React.useState(false);
   const score = Object.values(checked).filter(Boolean).length;
   const pct = Math.round((score / items.length) * 100);
+
+  // Les 3 premières pratiques NON cochées sont identifiées comme priorités
+  // (ce sont les chantiers à structurer en priorité pour consolider le socle).
+  const priorities = React.useMemo(
+    () => items.map((it, i) => ({ ...it, i })).filter((it) => !checked[it.i]).slice(0, 3),
+    [items, checked],
+  );
+
+  function noteText(): string {
+    const lines = [
+      `NOTE DE SYNTHÈSE — Diagnostic flash de maturité numérique`,
+      ``,
+      `Score : ${score}/${items.length} pratiques en place (${pct}%).`,
+      `Niveau : ${maturityLabel(pct)}`,
+      ``,
+      priorities.length === 0
+        ? `Bravo : toutes les pratiques sont déjà en place. Consolidez vos acquis et partagez vos bonnes pratiques avec d'autres établissements.`
+        : `Trois priorités à structurer dans les 30 prochains jours :`,
+    ];
+    priorities.forEach((p, idx) => {
+      lines.push(`  ${idx + 1}. ${p.label}${p.helper ? ` — ${p.helper}` : ""}`);
+    });
+    if (priorities.length > 0) {
+      lines.push(``);
+      lines.push(
+        `Recommandation : transformez ces trois priorités en un plan d'action court (un responsable, une échéance, un livrable par priorité).`,
+      );
+    }
+    return lines.join("\n");
+  }
+
+  function copyNote() {
+    navigator.clipboard.writeText(noteText()).catch(() => {});
+  }
 
   return (
     <div className="space-y-2">
@@ -880,6 +917,96 @@ function DiagnosticChecklist({
         </p>
         <p className="text-xs italic text-muted-foreground">{maturityLabel(pct)}</p>
       </div>
+
+      {/* Bouton de génération de la note de synthèse */}
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+        <p className="text-xs italic text-muted-foreground">
+          Cochez les pratiques en place, puis générez votre note personnalisée.
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowNote((v) => !v)}
+          aria-expanded={showNote}
+          className="inline-flex items-center gap-1.5 rounded-md bg-ew-purple-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-ew-purple-700"
+        >
+          <Sparkles aria-hidden className="h-3.5 w-3.5" />
+          {showNote ? "Masquer la note" : "Générer ma note de synthèse"}
+        </button>
+      </div>
+
+      {/* Note de synthèse */}
+      {showNote ? (
+        <div
+          className="rounded-2xl border border-ew-purple-200 bg-ew-purple-50/60 p-4"
+          aria-live="polite"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-purple-700">
+              <FileText aria-hidden className="h-4 w-4" /> Note de synthèse
+            </p>
+            <button
+              type="button"
+              onClick={copyNote}
+              className="inline-flex items-center gap-1 rounded-md border border-ew-purple-200 bg-card px-2 py-1 text-[11px] font-bold text-ew-purple-700 hover:bg-ew-purple-100"
+            >
+              <ClipboardCheck aria-hidden className="h-3 w-3" /> Copier
+            </button>
+          </div>
+
+          <div className="mt-3 space-y-2 text-sm leading-relaxed text-foreground/90">
+            <p>
+              <strong className="text-ew-purple-700">Score :</strong>{" "}
+              <strong className="text-ew-green-800">
+                {score}/{items.length}
+              </strong>{" "}
+              pratiques en place ({pct}%) —{" "}
+              <em className="text-muted-foreground">{maturityLabel(pct)}</em>
+            </p>
+
+            {priorities.length === 0 ? (
+              <p className="rounded-md border-l-4 border-ew-green-500 bg-ew-green-50 px-3 py-2">
+                <strong>Bravo</strong> — toutes les pratiques sont déjà en place. Consolidez
+                vos acquis et envisagez de partager vos bonnes pratiques avec d&apos;autres
+                établissements.
+              </p>
+            ) : (
+              <>
+                <p>
+                  <strong className="text-ew-purple-700">
+                    {priorities.length === 3
+                      ? "Trois priorités identifiées"
+                      : `${priorities.length} priorité${priorities.length > 1 ? "s" : ""} identifiée${priorities.length > 1 ? "s" : ""}`}{" "}
+                    à structurer dans les 30 prochains jours :
+                  </strong>
+                </p>
+                <ol className="space-y-1.5">
+                  {priorities.map((p, idx) => (
+                    <li key={p.i} className="flex items-start gap-2">
+                      <span
+                        aria-hidden
+                        className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ew-purple-500 text-xs font-bold text-white"
+                      >
+                        {idx + 1}
+                      </span>
+                      <div>
+                        <p className="font-bold text-foreground">{p.label}</p>
+                        {p.helper ? (
+                          <p className="text-xs italic text-muted-foreground">{p.helper}</p>
+                        ) : null}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+                <p className="rounded-md border-l-4 border-ew-purple-500 bg-card px-3 py-2 text-sm">
+                  <strong className="text-ew-purple-700">Recommandation :</strong> transformez
+                  ces priorités en un <strong>plan d&apos;action court</strong> — un responsable,
+                  une échéance et un livrable concret par priorité.
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
