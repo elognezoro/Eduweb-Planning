@@ -38,6 +38,20 @@ const LS_KEY = "eduweb.context.v1";
 const REAL_MODE = isSupabaseConfigured();
 
 /**
+ * Comptes super-administrateurs reconnus par l'application : ces emails
+ * obtiennent toujours le rôle `admin` à l'authentification, indépendamment
+ * de ce qui figure dans la table `profiles` (l'app aligne ensuite la base
+ * en best-effort pour éviter toute divergence persistante).
+ *
+ * Cette liste est volontairement minuscule et hard-codée : elle garantit
+ * qu'un super-administrateur ne peut pas être verrouillé hors de
+ * l'application par une manipulation accidentelle de la base.
+ */
+const SUPER_ADMIN_EMAILS: string[] = [
+  "elognezoro@gmail.com",
+];
+
+/**
  * Profil « invité » utilisé en mode réel AVANT le chargement du profil Supabase.
  * Rôle au plus faible privilège : aucune interface d'administration ne peut fuiter
  * pendant le chargement, et tout échec de chargement reste sans privilège (fail-closed).
@@ -88,25 +102,61 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setProfileState("error");
           return;
         }
+        const authEmail = (authUser.email ?? "").trim().toLowerCase();
+        const isSuperAdmin = SUPER_ADMIN_EMAILS.includes(authEmail);
+
         let { data: p } = await supabase.from("profiles").select("*").eq("id", authUser.id).maybeSingle();
         if (!active) return;
-        // Auto-provisionnement : compte authentifié sans profil (créé avant le trigger) →
-        // on crée un profil au plus faible privilège (élève / en attente), jamais admin.
+        // Auto-provisionnement : compte authentifié sans profil (créé avant le trigger).
+        // Par défaut on crée au plus faible privilège (élève / en attente). Exception :
+        // les super-administrateurs listés dans SUPER_ADMIN_EMAILS sont provisionnés
+        // directement avec le rôle `admin` actif.
         if (!p) {
+          const role: UserRole = isSuperAdmin ? "admin" : "eleve";
+          const status = isSuperAdmin ? "active" : "pending";
           const { data: created } = await supabase
             .from("profiles")
-            .insert({ id: authUser.id, email: authUser.email ?? null, role: "eleve", status: "pending" })
+            .insert({ id: authUser.id, email: authUser.email ?? null, role, status })
             .select("*")
             .maybeSingle();
           if (!active) return;
           p = created ?? null;
         }
         if (!p || !p.role) {
-          // Profil introuvable / illisible / sans rôle → fail-closed (aucun privilège).
+          // Profil introuvable / illisible / sans rôle → fail-closed (aucun privilège),
+          // SAUF pour un super-administrateur reconnu : on l'élève en mémoire pour ne
+          // pas le bloquer en cas de désynchronisation de la base.
+          if (isSuperAdmin) {
+            setUser((prev) => ({
+              ...prev,
+              id: authUser.id,
+              email: authUser.email ?? prev.email,
+              role: "admin",
+              status: "active",
+            }));
+            setProfileState("ready");
+            return;
+          }
           setProfileState("error");
           return;
         }
         const profile = p;
+        // Rôle effectif : valeur de la base, sauf pour un super-administrateur reconnu
+        // dont le rôle est élevé à `admin` même si la base contient autre chose.
+        const effectiveDbRole = (profile.role as UserRole) ?? null;
+        const resolvedRole: UserRole = isSuperAdmin ? "admin" : effectiveDbRole;
+        if (isSuperAdmin && effectiveDbRole !== "admin") {
+          // Aligner silencieusement la base sur le rôle administrateur pour éviter une
+          // divergence persistante entre l'override client et la valeur stockée.
+          try {
+            await supabase
+              .from("profiles")
+              .update({ role: "admin", status: "active" })
+              .eq("id", authUser.id);
+          } catch {
+            /* best effort : si l'écriture échoue, l'override client suffit pour ce tour. */
+          }
+        }
         setUser((prev) => ({
           ...prev,
           id: authUser.id,
@@ -120,9 +170,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             prev.displayName,
           phone: (profile.phone as string) ?? prev.phone,
           avatarUrl: (profile.avatar_url as string) ?? prev.avatarUrl,
-          // Rôle AUTORITAIRE issu de la base — plus aucun repli sur le rôle précédent.
-          role: profile.role as UserRole,
-          status: (profile.status as UserProfile["status"]) || prev.status,
+          // Rôle AUTORITAIRE issu de la base, avec exception explicite pour les
+          // super-administrateurs listés (cf. SUPER_ADMIN_EMAILS).
+          role: resolvedRole,
+          status: isSuperAdmin
+            ? "active"
+            : (profile.status as UserProfile["status"]) || prev.status,
           jobTitle: (profile.job_title as string) ?? prev.jobTitle,
         }));
         setProfileState("ready");
