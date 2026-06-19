@@ -31,6 +31,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
+import {
+  DirectoryUsersProvider,
+  useDirectoryUsers,
+} from "@/components/app-shell/use-directory-users";
 import { sortedCourses } from "@/lib/formations/catalog";
 import {
   countEnrolledUsers,
@@ -86,7 +90,9 @@ export default function FormationsAdminPage() {
       showContextBadge={false}
       kpis={[]}
     >
-      <FormationsContent />
+      <DirectoryUsersProvider>
+        <FormationsContent />
+      </DirectoryUsersProvider>
     </ModulePage>
   );
 }
@@ -94,6 +100,10 @@ export default function FormationsAdminPage() {
 function FormationsContent() {
   const store = useStore();
   const app = useApp();
+  // Annuaire des utilisateurs : vrais comptes Supabase en production, comptes
+  // de démonstration sinon. Source unique pour tous les panneaux (inscription,
+  // inscrits, cohortes, import CSV).
+  const { users: dirUsers, loading: usersLoading, realMode } = useDirectoryUsers();
   const courses = React.useMemo(() => sortedCourses(), []);
 
   type Tab = "enrolled" | "cohorts" | "quick" | "access" | "completion" | "identity";
@@ -101,12 +111,12 @@ function FormationsContent() {
   const [selectedCourseId, setSelectedCourseId] = React.useState<string>(courses[0]?.id ?? "");
 
   const totalEnrolled = React.useMemo(() => {
-    const users = store.users.map((u) => ({ id: u.id, role: u.role }));
+    const users = dirUsers.map((u) => ({ id: u.id, role: u.role }));
     return courses.map((c) => ({
       course: c,
       enrolled: countEnrolledUsers(c.id, users, store.courseEnrollments, store.courseCohorts),
     }));
-  }, [courses, store.users, store.courseEnrollments, store.courseCohorts]);
+  }, [courses, dirUsers, store.courseEnrollments, store.courseCohorts]);
 
   return (
     <div className="space-y-5">
@@ -119,7 +129,11 @@ function FormationsContent() {
           icon={<CheckCircle2 className="h-4 w-4" />}
         />
         <Kpi label="Cohortes" value={store.courseCohorts.length} icon={<UsersRound className="h-4 w-4" />} />
-        <Kpi label="Utilisateurs" value={store.users.length} icon={<Users className="h-4 w-4" />} />
+        <Kpi
+          label={realMode ? "Comptes inscrits" : "Utilisateurs"}
+          value={usersLoading ? "…" : dirUsers.length}
+          icon={<Users className="h-4 w-4" />}
+        />
       </div>
 
       {/* Synthèse par cours */}
@@ -212,7 +226,7 @@ function FormationsContent() {
   );
 }
 
-function Kpi({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
+function Kpi({ label, value, icon }: { label: string; value: number | string; icon: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-border bg-card p-3">
       <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
@@ -257,6 +271,7 @@ function TabButton({
    ========================================================================== */
 function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string }) {
   const store = useStore();
+  const { users: dirUsers, loading: usersLoading } = useDirectoryUsers();
   const [search, setSearch] = React.useState("");
   const [picked, setPicked] = React.useState<Set<string>>(new Set());
   const [source, setSource] = React.useState<"individual" | "cohort">("individual");
@@ -270,15 +285,15 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
 
   const filtered = React.useMemo(() => {
     const q = search.trim().toLowerCase();
-    return store.users.filter((u) => {
+    return dirUsers.filter((u) => {
       if (!q) return true;
       return (
         u.name.toLowerCase().includes(q) ||
-        u.email?.toLowerCase().includes(q) ||
+        (u.email ?? "").toLowerCase().includes(q) ||
         u.role.toLowerCase().includes(q)
       );
     });
-  }, [store.users, search]);
+  }, [dirUsers, search]);
 
   function toggle(uid: string) {
     setPicked((prev) => {
@@ -406,7 +421,8 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className="text-muted-foreground">
-            {picked.size}/{filtered.length} sélectionnés ({store.users.length} au total)
+            {picked.size}/{filtered.length} sélectionnés (
+            {usersLoading ? "chargement…" : `${dirUsers.length} au total`})
           </span>
           <button
             type="button"
@@ -439,7 +455,9 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={4} className="px-3 py-4 text-center text-muted-foreground italic">
-                  Aucun utilisateur ne correspond à la recherche.
+                  {usersLoading
+                    ? "Chargement des comptes…"
+                    : "Aucun utilisateur ne correspond à la recherche."}
                 </td>
               </tr>
             ) : (
@@ -493,10 +511,11 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
    ========================================================================== */
 function EnrolledPanel({ courseId }: { courseId: string }) {
   const store = useStore();
+  const { users: dirUsers } = useDirectoryUsers();
   const [search, setSearch] = React.useState("");
 
   const rows = React.useMemo(() => {
-    const allUsers = store.users.map((u) => ({ id: u.id, name: u.name, role: u.role, email: u.email }));
+    const allUsers = dirUsers.map((u) => ({ id: u.id, name: u.name, role: u.role, email: u.email }));
     return allUsers
       .map((u) => {
         const verdict = getEnrollmentVerdict(
@@ -518,7 +537,7 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
           user.role.toLowerCase().includes(q)
         );
       });
-  }, [store.users, store.courseEnrollments, store.courseCohorts, courseId, search]);
+  }, [dirUsers, store.courseEnrollments, store.courseCohorts, courseId, search]);
 
   function unenroll(enrollment: CourseEnrollment | undefined) {
     if (!enrollment) {
@@ -714,15 +733,21 @@ function CohortCard({
   onToggleEdit: () => void;
 }) {
   const store = useStore();
+  const { users: dirUsers } = useDirectoryUsers();
   const [name, setName] = React.useState(cohort.name);
   const [description, setDescription] = React.useState(cohort.description ?? "");
   const [search, setSearch] = React.useState("");
 
-  const members = store.users.filter((u) => cohort.memberUserIds.includes(u.id));
-  const others = store.users.filter((u) => !cohort.memberUserIds.includes(u.id));
+  const members = dirUsers.filter((u) => cohort.memberUserIds.includes(u.id));
+  const others = dirUsers.filter((u) => !cohort.memberUserIds.includes(u.id));
   const q = search.trim().toLowerCase();
   const candidates = q
-    ? others.filter((u) => u.name.toLowerCase().includes(q) || u.role.toLowerCase().includes(q))
+    ? others.filter(
+        (u) =>
+          u.name.toLowerCase().includes(q) ||
+          (u.email ?? "").toLowerCase().includes(q) ||
+          u.role.toLowerCase().includes(q),
+      )
     : others.slice(0, 12);
 
   function save() {
@@ -1107,6 +1132,7 @@ function AccessRuleCard({
    ========================================================================== */
 function CsvImportZone({ courseId, actor }: { courseId: string; actor: string }) {
   const store = useStore();
+  const { users: dirUsers } = useDirectoryUsers();
   const [drafts, setDrafts] = React.useState<CohortDraft[] | null>(null);
   const [fileName, setFileName] = React.useState<string | null>(null);
   const [parseErrors, setParseErrors] = React.useState<{ lineNumber: number; message: string }[]>([]);
@@ -1122,7 +1148,7 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
       const matchedIds: string[] = [];
       const unknownEmails: string[] = [];
       for (const email of draft.emails) {
-        const user = store.users.find(
+        const user = dirUsers.find(
           (u) => (u.email ?? "").trim().toLowerCase() === email.trim().toLowerCase(),
         );
         if (user) matchedIds.push(user.id);
@@ -1135,7 +1161,7 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
       );
       return { draft, matchedIds, unknownEmails, existing };
     });
-  }, [drafts, store.users, store.courseCohorts, courseId]);
+  }, [drafts, dirUsers, store.courseCohorts, courseId]);
 
   function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
