@@ -30,6 +30,7 @@ import {
 } from "./activity-context";
 import { InteractivePoll } from "./activities/interactive-poll";
 import { InteractiveForum } from "./activities/interactive-forum";
+import { InteractiveMindMap } from "./activities/interactive-mindmap";
 
 /* ============================================================================
    Composants d'affichage interactif d'un séminaire :
@@ -569,6 +570,12 @@ function ActivityCard({ activity: a }: { activity: SeminaireActivity }) {
           ) : null}
           {a.kind === "forum" ? (
             <ForumDispatcher
+              instructions={a.instructions?.[0]}
+              activityId={a.id}
+            />
+          ) : null}
+          {a.kind === "mindmap" ? (
+            <MindMapDispatcher
               instructions={a.instructions?.[0]}
               activityId={a.id}
             />
@@ -1226,6 +1233,27 @@ function ForumDispatcher({
   }
   return (
     <InteractiveForum
+      instructions={instructions}
+      courseId={ctx.courseId}
+      moduleId={ctx.moduleId}
+      activityId={activityId}
+    />
+  );
+}
+
+function MindMapDispatcher({
+  instructions,
+  activityId,
+}: {
+  instructions?: string;
+  activityId: string;
+}) {
+  const ctx = useSeminaireActivityContext();
+  if (!ctx) {
+    return null;
+  }
+  return (
+    <InteractiveMindMap
       instructions={instructions}
       courseId={ctx.courseId}
       moduleId={ctx.moduleId}

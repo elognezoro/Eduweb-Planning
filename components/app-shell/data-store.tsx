@@ -298,6 +298,8 @@ interface StoreState {
   pollResponses: PollResponse[];
   /** Messages des forums collaboratifs des activités de formation. */
   forumPosts: ForumPost[];
+  /** Contributions aux cartes mentales collaboratives des activités. */
+  mindMapContributions: MindMapContribution[];
 }
 
 /** Réponse à un sondage d'activité (par ex. « 0.1 Sondage d'entrée »). */
@@ -310,6 +312,23 @@ export interface PollResponse {
   activityId: string;
   /** Valeur sélectionnée par l'utilisateur (option du sondage). */
   value: string;
+  /** ISO timestamp. */
+  createdAt: string;
+}
+
+/** Contribution à une carte mentale collaborative. */
+export interface MindMapContribution {
+  id: string;
+  userId: string;
+  userName: string;
+  courseId: string;
+  moduleId: string;
+  activityId: string;
+  /** Pôle de la carte mentale (ex. « babel » ou « jerusalem »). */
+  pole: string;
+  /** Catégorie au sein du pôle (ex. « keywords », « examples », « risks »). */
+  category: string;
+  content: string;
   /** ISO timestamp. */
   createdAt: string;
 }
@@ -448,6 +467,10 @@ interface DataStore extends StoreState {
   postForumMessage: (input: Omit<ForumPost, "id" | "createdAt">) => void;
   /** Supprime un message du forum (l'auteur ou l'admin). */
   removeForumPost: (id: string) => void;
+  /** Ajoute une contribution à une carte mentale collaborative. */
+  postMindMapContribution: (input: Omit<MindMapContribution, "id" | "createdAt">) => void;
+  /** Supprime une contribution (l'auteur ou l'admin). */
+  removeMindMapContribution: (id: string) => void;
   reset: () => void;
 }
 
@@ -483,6 +506,7 @@ const DEFAULTS: StoreState = {
   securitySettings: DEFAULT_SECURITY,
   pollResponses: [],
   forumPosts: [],
+  mindMapContributions: [],
 };
 
 // Incrémenter la version à chaque changement de schéma persisté (nouveaux champs/tranches) :
@@ -938,6 +962,19 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         ...s,
         // Suppression du message + de ses réponses imbriquées.
         forumPosts: s.forumPosts.filter((p) => p.id !== id && p.parentId !== id),
+      })),
+    postMindMapContribution: (input) =>
+      setState((s) => ({
+        ...s,
+        mindMapContributions: [
+          { ...input, id: genId("mm"), createdAt: new Date().toISOString() },
+          ...s.mindMapContributions,
+        ],
+      })),
+    removeMindMapContribution: (id) =>
+      setState((s) => ({
+        ...s,
+        mindMapContributions: s.mindMapContributions.filter((c) => c.id !== id),
       })),
     setSecuritySettings: (patch) =>
       setState((s) => {
