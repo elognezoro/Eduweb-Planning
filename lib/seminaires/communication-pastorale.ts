@@ -82,7 +82,8 @@ export interface CommSeminaireActivity {
     | "checklist"
     | "plan"
     | "scenario"
-    | "reflection";
+    | "reflection"
+    | "ai-correction";
   /** Outil ou modalité recommandée. */
   recommendation?: string;
   instructions: string[];
@@ -93,6 +94,13 @@ export interface CommSeminaireActivity {
   /** Matrice à remplir (tableaux saisissables). */
   tableHeaders?: string[];
   tableRows?: string[];
+  /** Défi IA : message brut à corriger + correction modèle révélable. */
+  aiChallenge?: {
+    rawMessage: string;
+    problems: string[];
+    correctedMessage: string;
+    whyBetter: string[];
+  };
   deliverable?: string;
 }
 
@@ -823,6 +831,121 @@ const ACTIVITIES: CommSeminaireActivity[] = [
       { label: "Une personne avec qui je vais partager cette formation" },
     ],
     deliverable: "Un engagement à partager au sein de votre équipe de communication.",
+  },
+  {
+    id: "cas-canal",
+    num: "8",
+    title: "Cas pratique — Choisir le bon canal",
+    kind: "qcm",
+    recommendation: "5 situations concrètes, auto-corrigées.",
+    instructions: [
+      "Pour chaque situation, choisissez le canal (ou la combinaison de canaux) le plus adapté, puis cliquez sur Vérifier pour obtenir votre score et les justifications.",
+    ],
+    qcm: [
+      {
+        question:
+          "Situation 1 — Une réunion urgente avec les parents est prévue demain matin.",
+        options: [
+          "Site web uniquement",
+          "WhatsApp + note officielle",
+          "Vidéo YouTube",
+          "Article long",
+        ],
+        correctIdx: 1,
+        rationale:
+          "L'urgence nécessite un canal direct. La note officielle garantit la traçabilité.",
+      },
+      {
+        question:
+          "Situation 2 — Un établissement veut valoriser ses excellents résultats aux examens.",
+        options: [
+          "Facebook + site web + affiche numérique",
+          "Message vocal informel uniquement",
+          "Groupe privé des enseignants uniquement",
+          "Ne rien publier",
+        ],
+        correctIdx: 0,
+        rationale:
+          "Les résultats relèvent de l'image institutionnelle. Ils doivent être visibles, bien présentés et archivés.",
+      },
+      {
+        question:
+          "Situation 3 — Le diocèse veut diffuser une méditation pour le temps de l'Avent.",
+        options: [
+          "WhatsApp, Facebook, courte vidéo ou visuel méditatif",
+          "Communiqué administratif seulement",
+          "Tableau Excel",
+          "Message anonyme",
+        ],
+        correctIdx: 0,
+        rationale:
+          "Un message pastoral doit être accessible, chaleureux, partageable et visuellement soigné.",
+      },
+      {
+        question:
+          "Situation 4 — Une fausse information circule sur un établissement.",
+        options: [
+          "Réponse émotionnelle immédiate sur Facebook",
+          "Silence total quelle que soit la gravité",
+          "Vérification, concertation, message officiel si nécessaire",
+          "Publication d'accusations contre les auteurs",
+        ],
+        correctIdx: 2,
+        rationale:
+          "En période de crise, la parole doit être officielle, mesurée et validée.",
+      },
+      {
+        question:
+          "Situation 5 — Une école veut présenter son projet éducatif aux nouveaux parents.",
+        options: [
+          "Site web + brochure PDF + vidéo courte de présentation",
+          "Simple message WhatsApp de trois lignes",
+          "TikTok humoristique seulement",
+          "Affiche sans explication",
+        ],
+        correctIdx: 0,
+        rationale:
+          "Le projet éducatif est un contenu de fond. Il demande un support stable, structuré et valorisant.",
+      },
+    ],
+    deliverable:
+      "Une règle personnelle : à chaque message, se demander « quel public, quel canal, quelle preuve ? ».",
+  },
+  {
+    id: "defi-ia-correction",
+    num: "9",
+    title: "Défi IA — Corriger un message avant publication",
+    kind: "ai-correction",
+    recommendation: "Analyse critique d'un texte généré par IA.",
+    instructions: [
+      "Voici un message généré par une IA. Identifiez d'abord ses problèmes, puis proposez votre propre version corrigée. Comparez ensuite avec la correction modèle.",
+    ],
+    aiChallenge: {
+      rawMessage:
+        "Notre école est la meilleure de toute la région. Aucun autre établissement n'offre une formation aussi excellente. Tous les parents sérieux doivent inscrire leurs enfants chez nous. Nous garantissons la réussite totale de tous les élèves. Les inscriptions sont ouvertes. Venez vite avant qu'il ne soit trop tard.",
+      problems: [
+        "Ton trop commercial et excessif.",
+        "Affirmations non vérifiées : « la meilleure de toute la région ».",
+        "Comparaison dévalorisante avec les autres établissements.",
+        "Promesse irréaliste : « réussite totale de tous les élèves ».",
+        "Pression maladroite sur les parents.",
+        "Absence de dimension éducative et pastorale.",
+        "Manque de sobriété institutionnelle.",
+      ],
+      correctedMessage:
+        "Les inscriptions sont ouvertes dans notre établissement catholique.\n\nNous accueillons les familles désireuses d'offrir à leurs enfants un cadre éducatif fondé sur l'exigence, l'accompagnement, la discipline, les valeurs humaines et l'ouverture spirituelle.\n\nNotre équipe éducative reste disponible pour présenter le projet d'établissement, les conditions d'inscription et les dispositifs d'accompagnement des élèves.\n\nParents, élèves et partenaires sont cordialement invités à nous contacter ou à visiter l'établissement aux horaires indiqués.",
+      whyBetter: [
+        "Elle est professionnelle.",
+        "Elle ne dénigre personne.",
+        "Elle ne promet pas l'impossible.",
+        "Elle valorise l'identité catholique.",
+        "Elle respecte les familles.",
+        "Elle invite sans manipuler.",
+        "Elle reste crédible.",
+      ],
+    },
+    deliverable:
+      "Un réflexe : relire tout texte généré par IA avec la grille RAPIDE avant publication.",
   },
 ];
 

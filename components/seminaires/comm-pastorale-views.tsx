@@ -811,6 +811,10 @@ function ActivityCard({
           />
         ) : null}
 
+        {a.kind === "ai-correction" && a.aiChallenge ? (
+          <AiCorrectionChallenge challenge={a.aiChallenge} idPrefix={a.id} />
+        ) : null}
+
         {a.deliverable ? (
           <p className="mt-3 rounded-md border-l-4 border-ew-green-500 bg-ew-green-50 px-3 py-2 text-xs">
             <strong>Livrable :</strong> {a.deliverable}
@@ -1647,6 +1651,182 @@ function RapidChecklist({
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+/* -------- Défi IA : corriger un message avant publication -------- */
+function AiCorrectionChallenge({
+  challenge,
+  idPrefix,
+}: {
+  challenge: {
+    rawMessage: string;
+    problems: string[];
+    correctedMessage: string;
+    whyBetter: string[];
+  };
+  idPrefix: string;
+}) {
+  const [problemsText, setProblemsText] = React.useState("");
+  const [correctionText, setCorrectionText] = React.useState("");
+  const [revealed, setRevealed] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
+
+  const attempted =
+    problemsText.trim().length > 0 || correctionText.trim().length > 0;
+
+  async function copyCorrected() {
+    try {
+      await navigator.clipboard.writeText(challenge.correctedMessage);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Message brut généré par IA */}
+      <div className="rounded-xl border border-ew-gold-300 bg-ew-gold-50/50 p-3">
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-gold-700">
+          <AlertTriangle aria-hidden className="h-4 w-4" /> Message brut généré par IA — à corriger
+        </p>
+        <p className="mt-2 whitespace-pre-line text-sm italic text-foreground/90">
+          {challenge.rawMessage}
+        </p>
+        <div className="mt-2">
+          <NarrationButton
+            key={`ai-raw-${idPrefix}`}
+            text={`Message généré par intelligence artificielle, à corriger. ${challenge.rawMessage}`}
+            label="Écouter le message"
+          />
+        </div>
+      </div>
+
+      {/* Saisie de l'apprenant */}
+      <div className="space-y-2">
+        <div>
+          <label
+            htmlFor={`${idPrefix}-problems`}
+            className="text-xs font-bold uppercase tracking-wide text-muted-foreground"
+          >
+            Les problèmes que j&apos;identifie
+          </label>
+          <textarea
+            id={`${idPrefix}-problems`}
+            value={problemsText}
+            onChange={(e) => setProblemsText(e.target.value)}
+            rows={3}
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:border-ew-green-500 focus:outline-none focus:ring-1 focus:ring-ew-green-500"
+            placeholder="Listez ce qui ne va pas dans ce message…"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor={`${idPrefix}-correction`}
+            className="text-xs font-bold uppercase tracking-wide text-muted-foreground"
+          >
+            Ma version corrigée
+          </label>
+          <textarea
+            id={`${idPrefix}-correction`}
+            value={correctionText}
+            onChange={(e) => setCorrectionText(e.target.value)}
+            rows={4}
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:border-ew-green-500 focus:outline-none focus:ring-1 focus:ring-ew-green-500"
+            placeholder="Réécrivez le message de façon professionnelle, sobre et respectueuse…"
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="button" onClick={() => setRevealed(true)}>
+          <Eye aria-hidden className="mr-1.5 h-4 w-4" /> Voir la correction modèle
+        </Button>
+        {!attempted ? (
+          <span className="text-xs italic text-muted-foreground">
+            Astuce : tentez d&apos;abord votre propre correction, puis comparez.
+          </span>
+        ) : null}
+      </div>
+
+      {/* Correction modèle révélée */}
+      {revealed ? (
+        <div
+          className="rounded-2xl border border-ew-green-200 bg-ew-green-50/40 p-4"
+          aria-live="polite"
+        >
+          <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-green-700">
+            <Sparkles aria-hidden className="h-4 w-4" /> Correction modèle
+          </p>
+
+          <div className="mt-3 space-y-3 text-sm leading-relaxed text-foreground/90">
+            {/* Problèmes à identifier */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-ew-gold-700">
+                Problèmes à identifier ({challenge.problems.length})
+              </p>
+              <ul className="mt-1 space-y-1">
+                {challenge.problems.map((p, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <XCircle aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Version corrigée */}
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs font-bold uppercase tracking-wide text-ew-green-700">
+                  Version corrigée proposée
+                </p>
+                <div className="flex items-center gap-2">
+                  <NarrationButton
+                    key={`ai-fixed-${idPrefix}`}
+                    text={`Version corrigée. ${challenge.correctedMessage}`}
+                    label="Écouter"
+                  />
+                  <Button type="button" variant="outline" size="sm" onClick={copyCorrected}>
+                    <Copy aria-hidden className="mr-1.5 h-3.5 w-3.5" />
+                    {copied ? "Copié" : "Copier"}
+                  </Button>
+                </div>
+              </div>
+              <p className="mt-2 whitespace-pre-line rounded-md border border-ew-green-200 bg-card px-3 py-2">
+                {challenge.correctedMessage}
+              </p>
+            </div>
+
+            {/* Pourquoi c'est mieux */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-ew-green-700">
+                Pourquoi cette version est meilleure
+              </p>
+              <ul className="mt-1 space-y-1">
+                {challenge.whyBetter.map((w, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <CheckCircle2 aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-ew-green-600" />
+                    <span>{w}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {attempted ? (
+              <p className="rounded-md border-l-4 border-ew-purple-500 bg-card px-3 py-2 text-sm">
+                <strong className="text-ew-purple-700">Comparez :</strong> relisez votre
+                version à la lumière de la correction modèle. Avez-vous repéré tous les
+                problèmes ? Votre reformulation respecte-t-elle la sobriété institutionnelle
+                et l&apos;identité catholique ?
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
