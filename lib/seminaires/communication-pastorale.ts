@@ -119,6 +119,20 @@ export interface CommSeminaire {
   glossary: { term: string; definition: string }[];
   references10: { num: number; text: string }[];
   schedule: { hours: string; activity: string }[];
+  /**
+   * Auto-évaluation finale (Séquence 7) — chaque participant coche son
+   * niveau pour chaque compétence visée, et signale celles à renforcer
+   * collectivement (chez les autres / dans l'équipe).
+   */
+  finalSelfEvaluation: {
+    durationMin: number;
+    objective: string;
+    /** Échelle de progression personnelle (radio par ligne). */
+    levels: string[];
+    /** Libellé de la colonne « flag collectif » (case à cocher). */
+    reinforceLabel: string;
+    competences: string[];
+  };
   closingMessage: string;
 }
 
@@ -992,8 +1006,24 @@ export const COMMUNICATION_PASTORALE: CommSeminaire = {
     { hours: "40 min — 70 min", activity: "Atelier : matrice des publics + écosystème numérique" },
     { hours: "70 min — 90 min", activity: "Atelier : check-list RAPIDE + scénario de gestion de crise" },
     { hours: "90 min — 110 min", activity: "Quiz d'autoévaluation + plan d'action" },
-    { hours: "110 min — 120 min", activity: "Engagement personnel et clôture" },
+    { hours: "110 min — 120 min", activity: "Auto-évaluation finale, engagement personnel et clôture" },
   ],
+  finalSelfEvaluation: {
+    durationMin: 10,
+    objective:
+      "Vérifier les acquis et engager chaque participant à une action concrète.",
+    levels: ["Pas encore", "En progrès", "Acquis"],
+    reinforceLabel: "À renforcer chez les autres",
+    competences: [
+      "Je sais diagnostiquer la présence numérique de ma structure.",
+      "Je sais définir une ligne éditoriale cohérente.",
+      "Je sais choisir un canal selon le public et le message.",
+      "Je sais rédiger un message numérique clair et responsable.",
+      "Je sais protéger l'image des personnes et de l'institution.",
+      "Je sais utiliser l'IA avec prudence et discernement.",
+      "Je sais concevoir un plan d'action numérique pastoral.",
+    ],
+  },
   closingMessage:
     "La présence numérique de l'Éducation Catholique devient missionnaire lorsqu'elle unit compétence professionnelle, responsabilité éthique et sens du service.\n\nQue chaque communicateur reparte avec une boussole simple : clarté, cohérence, crédibilité, communion — et un plan d'action concret prêt à être engagé dès les 30 prochains jours.",
 };

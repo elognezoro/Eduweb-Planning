@@ -1515,6 +1515,24 @@ function maturityLabel(pct: number): string {
   return "À structurer — un atelier d'urgence est conseillé.";
 }
 
+/**
+ * Variante personnelle du label de maturité, adaptée à l'auto-évaluation
+ * d'un participant sur ses propres compétences (registre à la 2e personne,
+ * encourageant). Distincte de maturityLabel() qui vise le diagnostic
+ * institutionnel.
+ */
+function maturityLabelPersonnel(pct: number): string {
+  if (pct >= 80)
+    return "Maîtrise affirmée — consolidez et partagez votre expérience avec un collègue.";
+  if (pct >= 60)
+    return "Bonne maîtrise — visez les quelques compétences encore fragiles.";
+  if (pct >= 40)
+    return "En progression — choisissez 2 compétences à travailler en priorité.";
+  if (pct >= 20)
+    return "Premiers acquis — appuyez-vous sur vos forces pour progresser pas à pas.";
+  return "Début de parcours — vous repartez avec des priorités claires et un premier engagement.";
+}
+
 /* -------- Check-list RAPIDE (6 critères à cocher) -------- */
 function RapidChecklist({
   items,
@@ -2406,6 +2424,369 @@ export function CommSchedule({ seminaire }: { seminaire: CommSeminaire }) {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+/* ============================================================================
+   AUTO-ÉVALUATION FINALE (Séquence 7) — grille de compétences + bilan.
+   Chaque participant coche son niveau (Pas encore / En progrès / Acquis)
+   pour chaque compétence, et signale celles à renforcer collectivement.
+   Un bilan personnalisé est généré : maturité, forces, priorités,
+   compétences à porter en équipe, et un engagement d'action à 30 jours.
+   ========================================================================== */
+export function FinalSelfEvaluation({
+  data,
+}: {
+  data: CommSeminaire["finalSelfEvaluation"];
+}) {
+  const app = useApp();
+  const { competences, levels, reinforceLabel, objective, durationMin } = data;
+  const maxLevel = Math.max(1, levels.length - 1);
+
+  // Niveau choisi par compétence (index dans `levels`), et drapeau collectif.
+  const [picked, setPicked] = React.useState<Record<number, number>>({});
+  const [reinforce, setReinforce] = React.useState<Record<number, boolean>>({});
+  const [shown, setShown] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
+
+  const answered = Object.keys(picked).length;
+  const allAnswered = answered === competences.length;
+
+  // Le bilan reste masqué tant qu'il n'a pas été généré une première fois ;
+  // une fois affiché, il se met à jour en direct si l'apprenant ajuste.
+  const bilan = React.useMemo(() => {
+    const totalWeight = competences.reduce((acc, _, i) => acc + (picked[i] ?? 0), 0);
+    const denom = Math.max(1, competences.length) * maxLevel;
+    const pct = Math.round((totalWeight / denom) * 100);
+    const acquis: number[] = [];
+    const enProgres: number[] = [];
+    const pasEncore: number[] = [];
+    competences.forEach((_, i) => {
+      const lvl = picked[i];
+      if (lvl == null || lvl === 0) pasEncore.push(i);
+      else if (lvl >= maxLevel) acquis.push(i);
+      else enProgres.push(i);
+    });
+    const collectifs = competences
+      .map((_, i) => i)
+      .filter((i) => reinforce[i]);
+    // L'engagement d'action cible la compétence personnelle la plus fragile.
+    const priorityIdx =
+      pasEncore[0] ?? enProgres[0] ?? null;
+    return { pct, acquis, enProgres, pasEncore, collectifs, priorityIdx };
+  }, [competences, picked, reinforce, maxLevel]);
+
+  function levelName(i: number): string {
+    const lvl = picked[i];
+    return lvl != null ? levels[lvl] : "Non évalué";
+  }
+
+  function buildText(): string {
+    // Date calculée au clic (handler) — sans risque d'hydratation SSR.
+    const reportDate = new Date().toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+    const lines: string[] = [];
+    lines.push("AUTO-ÉVALUATION FINALE — Communication éducative et pastorale");
+    lines.push(`Participant : ${app.user.displayName}`);
+    lines.push(`Date : ${reportDate}`);
+    lines.push(`Maturité déclarée : ${bilan.pct}% — ${maturityLabelPersonnel(bilan.pct)}`);
+    lines.push("");
+    lines.push("NIVEAUX DÉCLARÉS");
+    competences.forEach((c, i) => {
+      lines.push(`  • ${c} → ${levelName(i)}${reinforce[i] ? ` [${reinforceLabel}]` : ""}`);
+    });
+    lines.push("");
+    if (bilan.acquis.length > 0) {
+      lines.push("FORCES (compétences acquises)");
+      bilan.acquis.forEach((i) => lines.push(`  + ${competences[i]}`));
+      lines.push("");
+    }
+    const aTravailler = [...bilan.pasEncore, ...bilan.enProgres];
+    if (aTravailler.length > 0) {
+      lines.push("PRIORITÉS PERSONNELLES");
+      aTravailler.forEach((i) => lines.push(`  - ${competences[i]} (${levelName(i)})`));
+      lines.push("");
+    }
+    if (bilan.collectifs.length > 0) {
+      lines.push("À PORTER COLLECTIVEMENT (renforcer dans l'équipe)");
+      bilan.collectifs.forEach((i) => lines.push(`  → ${competences[i]}`));
+      lines.push("");
+    }
+    if (bilan.priorityIdx != null) {
+      lines.push("ENGAGEMENT D'ACTION (30 prochains jours)");
+      lines.push(
+        `  Je m'engage à progresser sur : « ${competences[bilan.priorityIdx]} »`,
+      );
+      lines.push("");
+    }
+    return lines.join("\n");
+  }
+
+  async function copyReport() {
+    try {
+      await navigator.clipboard.writeText(buildText());
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-ew-purple-200 bg-ew-purple-50/40 px-4 py-3 text-sm">
+        <p className="flex items-center gap-2 font-display text-xs font-bold uppercase tracking-wide text-ew-purple-700">
+          <ClipboardCheck aria-hidden className="h-4 w-4" /> Durée : {durationMin} minutes
+        </p>
+        <p className="mt-1 text-foreground/90">
+          <strong>Objectif :</strong> {objective}
+        </p>
+        <p className="mt-1 text-xs italic text-muted-foreground">
+          Pour chaque compétence, cochez votre niveau. Signalez aussi celles que vous
+          jugez « {reinforceLabel.toLowerCase()} » : ce sont les compétences à porter
+          collectivement dans votre établissement.
+        </p>
+      </div>
+
+      {/* Grille */}
+      <div className="overflow-x-auto rounded-xl border border-border">
+        <table className="w-full min-w-[640px] text-sm">
+          <thead className="bg-ew-green-50 text-ew-green-800">
+            <tr>
+              <th className="border-b border-border px-3 py-2 text-left font-bold">Compétence</th>
+              {levels.map((lvl) => (
+                <th key={lvl} className="border-b border-border px-2 py-2 text-center font-bold">
+                  {lvl}
+                </th>
+              ))}
+              <th className="border-b border-border px-2 py-2 text-center font-bold text-ew-purple-700">
+                {reinforceLabel}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {competences.map((c, i) => {
+              const rowName = `selfeval-${i}`;
+              const done = picked[i] != null;
+              return (
+                <tr
+                  key={i}
+                  className={cn(
+                    "border-t border-border align-top",
+                    done ? "bg-background" : "bg-ew-gold-50/30",
+                  )}
+                >
+                  <td className="px-3 py-2.5">
+                    <span className="font-medium text-foreground">{c}</span>
+                  </td>
+                  {levels.map((lvl, j) => (
+                    <td key={j} className="px-2 py-2.5 text-center">
+                      <input
+                        type="radio"
+                        name={rowName}
+                        aria-label={`${c} — ${lvl}`}
+                        checked={picked[i] === j}
+                        onChange={() => setPicked((p) => ({ ...p, [i]: j }))}
+                        className="h-4 w-4 accent-ew-green-700"
+                      />
+                    </td>
+                  ))}
+                  <td className="px-2 py-2.5 text-center">
+                    <input
+                      type="checkbox"
+                      aria-label={`${c} — ${reinforceLabel}`}
+                      checked={!!reinforce[i]}
+                      onChange={() => setReinforce((r) => ({ ...r, [i]: !r[i] }))}
+                      className="h-4 w-4 accent-ew-purple-600"
+                    />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          type="button"
+          onClick={() => setShown(true)}
+          disabled={!allAnswered}
+          title={!allAnswered ? "Évaluez toutes les compétences pour générer le bilan." : undefined}
+        >
+          <Sparkles aria-hidden className="mr-1.5 h-4 w-4" /> Générer mon bilan
+        </Button>
+        <span className="text-xs italic text-muted-foreground">
+          {answered}/{competences.length} compétence{answered > 1 ? "s" : ""} évaluée{answered > 1 ? "s" : ""}
+        </span>
+      </div>
+
+      {shown ? (
+        <FinalSelfEvaluationBilan
+          competences={competences}
+          levels={levels}
+          reinforceLabel={reinforceLabel}
+          picked={picked}
+          reinforce={reinforce}
+          bilan={bilan}
+          onCopy={copyReport}
+          copied={copied}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function FinalSelfEvaluationBilan({
+  competences,
+  levels,
+  reinforceLabel,
+  picked,
+  reinforce,
+  bilan,
+  onCopy,
+  copied,
+}: {
+  competences: string[];
+  levels: string[];
+  reinforceLabel: string;
+  picked: Record<number, number>;
+  reinforce: Record<number, boolean>;
+  bilan: {
+    pct: number;
+    acquis: number[];
+    enProgres: number[];
+    pasEncore: number[];
+    collectifs: number[];
+    priorityIdx: number | null;
+  };
+  onCopy: () => void;
+  copied: boolean;
+}) {
+  return (
+    <div className="rounded-2xl border border-ew-purple-200 bg-ew-purple-50/60 p-4" aria-live="polite">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-purple-700">
+          <Sparkles aria-hidden className="h-4 w-4" /> Bilan de votre auto-évaluation
+        </p>
+        <Button type="button" variant="outline" size="sm" onClick={onCopy}>
+          <Copy aria-hidden className="mr-1.5 h-3.5 w-3.5" />
+          {copied ? "Copié" : "Copier le bilan"}
+        </Button>
+      </div>
+
+      <div className="mt-3 space-y-3 text-sm leading-relaxed text-foreground/90">
+        {/* Maturité */}
+        <div>
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold uppercase tracking-wide text-ew-green-700">
+              Maturité déclarée
+            </span>
+            <span className="font-mono font-bold text-ew-green-800">{bilan.pct}%</span>
+          </div>
+          <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted/50" aria-hidden>
+            <div
+              className="h-full bg-ew-green-600 transition-all duration-500"
+              style={{ width: `${bilan.pct}%` }}
+            />
+          </div>
+          <p className="mt-1 text-xs italic text-muted-foreground">{maturityLabelPersonnel(bilan.pct)}</p>
+        </div>
+
+        {/* Compteurs */}
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="rounded-lg border border-ew-green-200 bg-ew-green-50 px-2 py-1.5">
+            <p className="font-display text-lg font-extrabold text-ew-green-800">{bilan.acquis.length}</p>
+            <p className="text-[11px] uppercase tracking-wide text-ew-green-700">{levels[levels.length - 1]}</p>
+          </div>
+          <div className="rounded-lg border border-ew-gold-200 bg-ew-gold-50 px-2 py-1.5">
+            <p className="font-display text-lg font-extrabold text-ew-gold-700">{bilan.enProgres.length}</p>
+            <p className="text-[11px] uppercase tracking-wide text-ew-gold-700">{levels[1] ?? "En progrès"}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-card px-2 py-1.5">
+            <p className="font-display text-lg font-extrabold text-muted-foreground">{bilan.pasEncore.length}</p>
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{levels[0]}</p>
+          </div>
+        </div>
+
+        {/* Forces */}
+        {bilan.acquis.length > 0 ? (
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-ew-green-700">
+              Vos forces ({bilan.acquis.length})
+            </p>
+            <ul className="mt-1 space-y-1">
+              {bilan.acquis.map((i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <CheckCircle2 aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-ew-green-600" />
+                  <span>{competences[i]}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {/* Priorités personnelles */}
+        {bilan.pasEncore.length + bilan.enProgres.length > 0 ? (
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-ew-gold-700">
+              Priorités personnelles à travailler
+            </p>
+            <ul className="mt-1 space-y-1">
+              {[...bilan.pasEncore, ...bilan.enProgres].map((i) => (
+                <li key={i} className="rounded-md border-l-2 border-ew-gold-400 bg-card/80 px-2 py-1">
+                  {competences[i]}{" "}
+                  <span className="text-[11px] italic text-muted-foreground">
+                    ({picked[i] != null ? levels[picked[i]] : levels[0]})
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {/* À porter collectivement */}
+        {bilan.collectifs.length > 0 ? (
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-ew-purple-700">
+              À porter collectivement — {reinforceLabel}
+            </p>
+            <ul className="mt-1 space-y-1">
+              {bilan.collectifs.map((i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <Users aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-ew-purple-600" />
+                  <span>{competences[i]}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {/* Engagement d'action */}
+        {bilan.priorityIdx != null ? (
+          <div className="rounded-md border-l-4 border-ew-green-500 bg-card px-3 py-2">
+            <p className="text-xs font-bold uppercase tracking-wide text-ew-green-700">
+              Engagement d'action — 30 prochains jours
+            </p>
+            <p className="mt-1">
+              Je m'engage à progresser sur :{" "}
+              <strong className="text-ew-green-900">« {competences[bilan.priorityIdx]} »</strong>
+            </p>
+            <p className="mt-1 text-xs italic text-muted-foreground">
+              Fixez une première action concrète cette semaine et une date de revue à 30 jours.
+            </p>
+          </div>
+        ) : (
+          <p className="rounded-md border-l-4 border-ew-green-500 bg-ew-green-50 px-3 py-2 text-sm">
+            <strong className="text-ew-green-800">Toutes les compétences sont acquises.</strong>{" "}
+            Engagez-vous à accompagner un collègue sur l'une d'elles dans les 30 prochains jours.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

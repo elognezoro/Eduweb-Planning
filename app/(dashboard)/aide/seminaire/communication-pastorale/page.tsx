@@ -26,6 +26,7 @@ import {
   CommRapideCard,
   CommRepères,
   CommSchedule,
+  FinalSelfEvaluation,
   SlideDeck,
 } from "@/components/seminaires/comm-pastorale-views";
 import { COMMUNICATION_PASTORALE } from "@/lib/seminaires/communication-pastorale";
@@ -47,9 +48,10 @@ import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-
  *   4. Diapositives (visionneuse ePub des 14 slides)
  *   5. Méthodes (RAPIDE + 4V)
  *   6. Ateliers interactifs
- *   7. Repères (10 repères + 5 verbes synthèse)
- *   8. Glossaire
- *   9. Clôture
+ *   7. Auto-évaluation finale & engagement d'action (grille de compétences)
+ *   8. Repères (10 repères + 5 verbes synthèse)
+ *   9. Glossaire
+ *  10. Clôture
  *
  * Chaque page reçoit un texte de narration (lu par le navigateur via
  * SpeechSynthesis) construit à partir des données du séminaire.
@@ -88,6 +90,12 @@ export default function CommPastoralePage() {
     const glossary =
       "Glossaire des termes clés. " +
       s.glossary.map((g) => `${g.term}. ${g.definition}`).join(" ");
+    const selfEvaluation =
+      `Auto-évaluation finale et engagement d'action. Durée ${s.finalSelfEvaluation.durationMin} minutes. ` +
+      `Objectif : ${s.finalSelfEvaluation.objective} ` +
+      `Pour chaque compétence, cochez votre niveau : ${s.finalSelfEvaluation.levels.join(", ")}. ` +
+      `Les compétences évaluées sont les suivantes. ` +
+      s.finalSelfEvaluation.competences.map((c) => c).join(" ");
     const closing = s.closingMessage.replace(/\n+/g, " ");
     return {
       presentation,
@@ -98,6 +106,7 @@ export default function CommPastoralePage() {
       schedule,
       landmarks,
       glossary,
+      selfEvaluation,
       closing,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -161,6 +170,15 @@ export default function CommPastoralePage() {
         subtitle: `${s.activities.length} ateliers pour passer à la pratique`,
         content: <ActivityList activities={s.activities} />,
         narration: narrations.workshopsIntro,
+      },
+      {
+        id: "self-evaluation",
+        category: "evaluation",
+        shortTitle: "Auto-évaluation",
+        title: "Auto-évaluation finale & engagement d'action",
+        subtitle: `${s.finalSelfEvaluation.durationMin} minutes — vérifiez vos acquis et engagez une action concrète`,
+        content: <FinalSelfEvaluation data={s.finalSelfEvaluation} />,
+        narration: narrations.selfEvaluation,
       },
       {
         id: "landmarks",
