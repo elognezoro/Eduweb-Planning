@@ -1150,17 +1150,27 @@ export function CommRapideCard({ seminaire }: { seminaire: CommSeminaire }) {
         <Eye aria-hidden className="h-4 w-4" /> Méthode RAPIDE — boussole quotidienne
       </p>
       <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-        {seminaire.rapide.map((r) => (
-          <li key={r.letter} className="flex items-start gap-3">
-            <span
-              aria-hidden
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ew-green-700 font-display text-sm font-extrabold text-white"
-            >
-              {r.letter}
-            </span>
-            <span className="text-sm">{r.label}</span>
-          </li>
-        ))}
+        {seminaire.rapide.map((r) => {
+          // « Réel — le fait est-il vrai et vérifié ? » : isoler le mot-clé
+          // (avant le tiret cadratin) pour le mettre en gras.
+          const dashIdx = r.label.indexOf(" — ");
+          const keyword = dashIdx >= 0 ? r.label.slice(0, dashIdx) : r.label;
+          const rest = dashIdx >= 0 ? r.label.slice(dashIdx) : "";
+          return (
+            <li key={r.letter} className="flex items-start gap-3">
+              <span
+                aria-hidden
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ew-green-700 font-display text-sm font-extrabold text-white"
+              >
+                {r.letter}
+              </span>
+              <span className="text-sm">
+                <strong className="font-bold text-ew-green-900">{keyword}</strong>
+                {rest}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
