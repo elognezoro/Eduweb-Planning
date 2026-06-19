@@ -632,7 +632,7 @@ function GatedModulePage({ module: m }: { module: (typeof MAGNIFICA_HUMANITAS.mo
   return (
     <div className="space-y-3">
       <div className="rounded-2xl border border-border bg-card p-1">
-        <ModuleBody module={m} />
+        <ModuleBody module={m} courseId={courseId} />
       </div>
       <CompletionBar
         completed={completed}

@@ -294,6 +294,40 @@ interface StoreState {
   courseCompletions: CourseCompletion[];
   /** Paramètres de sécurité globaux de la plateforme (admin). */
   securitySettings: SecuritySettings;
+  /** Réponses aux sondages des activités de formation. */
+  pollResponses: PollResponse[];
+  /** Messages des forums collaboratifs des activités de formation. */
+  forumPosts: ForumPost[];
+}
+
+/** Réponse à un sondage d'activité (par ex. « 0.1 Sondage d'entrée »). */
+export interface PollResponse {
+  id: string;
+  userId: string;
+  userName: string;
+  courseId: string;
+  moduleId: string;
+  activityId: string;
+  /** Valeur sélectionnée par l'utilisateur (option du sondage). */
+  value: string;
+  /** ISO timestamp. */
+  createdAt: string;
+}
+
+/** Message d'un forum collaboratif d'activité. */
+export interface ForumPost {
+  id: string;
+  userId: string;
+  userName: string;
+  /** Rôle de l'auteur au moment de la publication (pour l'affichage). */
+  userRole?: string;
+  courseId: string;
+  moduleId: string;
+  activityId: string;
+  /** Si non nul : ID du message parent (réponse imbriquée). */
+  parentId: string | null;
+  content: string;
+  createdAt: string;
 }
 
 /** Paramètres de sécurité — appliqués à tous les utilisateurs. */
@@ -406,6 +440,14 @@ interface DataStore extends StoreState {
   unmarkCourseCompleted: (userId: string, courseId: string) => void;
   /** Met à jour les paramètres de sécurité (auto-déconnexion, etc.). */
   setSecuritySettings: (patch: Partial<SecuritySettings>) => void;
+  /** Soumet ou met à jour la réponse au sondage pour l'activité donnée. */
+  submitPollResponse: (input: Omit<PollResponse, "id" | "createdAt">) => void;
+  /** Retire la réponse au sondage pour cet utilisateur et cette activité. */
+  removePollResponse: (userId: string, activityId: string) => void;
+  /** Publie un nouveau message dans le forum d'une activité. */
+  postForumMessage: (input: Omit<ForumPost, "id" | "createdAt">) => void;
+  /** Supprime un message du forum (l'auteur ou l'admin). */
+  removeForumPost: (id: string) => void;
   reset: () => void;
 }
 
@@ -439,6 +481,8 @@ const DEFAULTS: StoreState = {
   courseCompletionRules: [],
   courseCompletions: [],
   securitySettings: DEFAULT_SECURITY,
+  pollResponses: [],
+  forumPosts: [],
 };
 
 // Incrémenter la version à chaque changement de schéma persisté (nouveaux champs/tranches) :
@@ -850,6 +894,50 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         courseCompletions: s.courseCompletions.filter(
           (c) => !(c.userId === userId && c.courseId === courseId),
         ),
+      })),
+    submitPollResponse: (input) =>
+      setState((s) => {
+        const existing = s.pollResponses.find(
+          (r) => r.userId === input.userId && r.activityId === input.activityId,
+        );
+        if (existing) {
+          return {
+            ...s,
+            pollResponses: s.pollResponses.map((r) =>
+              r.id === existing.id
+                ? { ...existing, ...input, createdAt: new Date().toISOString() }
+                : r,
+            ),
+          };
+        }
+        return {
+          ...s,
+          pollResponses: [
+            { ...input, id: genId("poll"), createdAt: new Date().toISOString() },
+            ...s.pollResponses,
+          ],
+        };
+      }),
+    removePollResponse: (userId, activityId) =>
+      setState((s) => ({
+        ...s,
+        pollResponses: s.pollResponses.filter(
+          (r) => !(r.userId === userId && r.activityId === activityId),
+        ),
+      })),
+    postForumMessage: (input) =>
+      setState((s) => ({
+        ...s,
+        forumPosts: [
+          { ...input, id: genId("forum"), createdAt: new Date().toISOString() },
+          ...s.forumPosts,
+        ],
+      })),
+    removeForumPost: (id) =>
+      setState((s) => ({
+        ...s,
+        // Suppression du message + de ses réponses imbriquées.
+        forumPosts: s.forumPosts.filter((p) => p.id !== id && p.parentId !== id),
       })),
     setSecuritySettings: (patch) =>
       setState((s) => {

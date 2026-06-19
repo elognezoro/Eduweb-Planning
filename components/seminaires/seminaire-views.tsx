@@ -24,6 +24,12 @@ import type {
   SeminaireModule,
   SeminaireQuiz,
 } from "@/lib/seminaires/types";
+import {
+  SeminaireActivityProvider,
+  useSeminaireActivityContext,
+} from "./activity-context";
+import { InteractivePoll } from "./activities/interactive-poll";
+import { InteractiveForum } from "./activities/interactive-forum";
 
 /* ============================================================================
    Composants d'affichage interactif d'un séminaire :
@@ -253,7 +259,26 @@ export function SeminaireModulesList({ modules }: { modules: SeminaireModule[] }
   );
 }
 
-export function ModuleBody({ module: m }: { module: SeminaireModule }) {
+export function ModuleBody({
+  module: m,
+  courseId,
+}: {
+  module: SeminaireModule;
+  /** Identifiant du cours parent — active les activités interactives
+      (sondage, forum) en fournissant le contexte de persistance. */
+  courseId?: string;
+}) {
+  if (courseId) {
+    return (
+      <SeminaireActivityProvider value={{ courseId, moduleId: m.id }}>
+        <ModuleBodyContent module={m} />
+      </SeminaireActivityProvider>
+    );
+  }
+  return <ModuleBodyContent module={m} />;
+}
+
+function ModuleBodyContent({ module: m }: { module: SeminaireModule }) {
   return (
     <div className="border-t border-border p-5 space-y-5">
       <div className="rounded-xl bg-muted/30 p-3 text-xs text-muted-foreground">
@@ -531,7 +556,23 @@ function ActivityCard({ activity: a }: { activity: SeminaireActivity }) {
           {a.tableHeaders ? (
             <BlankTable headers={a.tableHeaders} example={a.example} activityId={a.id} />
           ) : null}
-          {a.options ? <SurveyOptions options={a.options} /> : null}
+          {/* Sondage interactif si un contexte cours/module est fourni ; sinon
+              affichage statique des options (compatibilité ascendante). */}
+          {a.kind === "survey" && a.options ? (
+            <SurveyDispatcher
+              question={a.question ?? ""}
+              options={a.options}
+              activityId={a.id}
+            />
+          ) : a.options ? (
+            <SurveyOptions options={a.options} />
+          ) : null}
+          {a.kind === "forum" ? (
+            <ForumDispatcher
+              instructions={a.instructions?.[0]}
+              activityId={a.id}
+            />
+          ) : null}
           {a.exploitation ? (
             <p className="rounded-md border-l-4 border-ew-blue bg-ew-blue/10 px-3 py-2 text-xs">
               <strong>Exploitation pédagogique :</strong> {a.exploitation}
@@ -1144,5 +1185,51 @@ export function SeminaireQuizCard({
         <InteractiveQcm questions={quiz.questions} idPrefix={quiz.id} onScored={onScored} />
       </div>
     </div>
+  );
+}
+
+/* ----- Dispatchers : versions interactives quand le contexte est fourni ----- */
+function SurveyDispatcher({
+  question,
+  options,
+  activityId,
+}: {
+  question: string;
+  options: string[];
+  activityId: string;
+}) {
+  const ctx = useSeminaireActivityContext();
+  if (!ctx) {
+    return <SurveyOptions options={options} />;
+  }
+  return (
+    <InteractivePoll
+      question={question || "Sélectionnez une réponse"}
+      options={options}
+      courseId={ctx.courseId}
+      moduleId={ctx.moduleId}
+      activityId={activityId}
+    />
+  );
+}
+
+function ForumDispatcher({
+  instructions,
+  activityId,
+}: {
+  instructions?: string;
+  activityId: string;
+}) {
+  const ctx = useSeminaireActivityContext();
+  if (!ctx) {
+    return null;
+  }
+  return (
+    <InteractiveForum
+      instructions={instructions}
+      courseId={ctx.courseId}
+      moduleId={ctx.moduleId}
+      activityId={activityId}
+    />
   );
 }
