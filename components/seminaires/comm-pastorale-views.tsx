@@ -828,8 +828,176 @@ function InteractiveQcm({
           </button>
         )}
       </div>
+
+      {/* Justification cohérente du score : apparaît après vérification.
+          Présente un niveau d'appréciation, une explication, les thèmes
+          maîtrisés et ceux à consolider, et une recommandation personnalisée. */}
+      {checked ? (
+        <QuizJustification
+          questions={questions}
+          answers={answers}
+          score={score}
+          total={questions.length}
+        />
+      ) : null}
     </div>
   );
+}
+
+function QuizJustification({
+  questions,
+  answers,
+  score,
+  total,
+}: {
+  questions: { question: string; options: string[]; correctIdx: number; rationale?: string }[];
+  answers: Record<number, number | null>;
+  score: number;
+  total: number;
+}) {
+  const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+  const level = appreciationLevel(pct);
+  const masteredIdx = questions.map((_, i) => i).filter((i) => answers[i] === questions[i].correctIdx);
+  const toConsolidateIdx = questions.map((_, i) => i).filter((i) => answers[i] !== questions[i].correctIdx);
+
+  const shortify = (s: string) => (s.length > 95 ? s.slice(0, 92).trimEnd() + "…" : s);
+
+  return (
+    <div className="rounded-2xl border border-ew-purple-200 bg-ew-purple-50/60 p-4" aria-live="polite">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-purple-700">
+          <Sparkles aria-hidden className="h-4 w-4" /> Justification de votre score
+        </p>
+        <span
+          className={cn(
+            "rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide",
+            level.tone === "excellent" && "bg-ew-green-100 text-ew-green-800",
+            level.tone === "good" && "bg-ew-green-50 text-ew-green-800",
+            level.tone === "ok" && "bg-ew-gold-50 text-ew-gold-700",
+            level.tone === "weak" && "bg-ew-gold-100 text-ew-gold-700",
+            level.tone === "redo" && "bg-red-100 text-red-700",
+          )}
+        >
+          {level.title}
+        </span>
+      </div>
+
+      <div className="mt-3 space-y-3 text-sm leading-relaxed text-foreground/90">
+        <p>
+          <strong className="text-ew-purple-700">Votre score :</strong>{" "}
+          <strong className="text-ew-green-800">{score}/{total}</strong> ({pct}%). {level.explanation}
+        </p>
+
+        {masteredIdx.length > 0 ? (
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-ew-green-700">
+              Thèmes maîtrisés ({masteredIdx.length})
+            </p>
+            <ul className="mt-1 space-y-1">
+              {masteredIdx.map((i) => (
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  <CheckCircle2 aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-ew-green-600" />
+                  <span>
+                    <strong>Q{i + 1}.</strong> {shortify(questions[i].question)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {toConsolidateIdx.length > 0 ? (
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-ew-gold-700">
+              Thèmes à consolider ({toConsolidateIdx.length})
+            </p>
+            <ul className="mt-1 space-y-1.5">
+              {toConsolidateIdx.map((i) => {
+                const q = questions[i];
+                const correct = q.options[q.correctIdx];
+                return (
+                  <li key={i} className="rounded-md border-l-2 border-ew-gold-400 bg-card/80 px-2 py-1.5">
+                    <p className="flex items-start gap-2 text-sm">
+                      <XCircle aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+                      <span>
+                        <strong>Q{i + 1}.</strong> {shortify(q.question)}
+                      </span>
+                    </p>
+                    <p className="mt-0.5 pl-6 text-[12px] italic text-muted-foreground">
+                      Réponse attendue : <strong className="not-italic text-ew-green-800">{correct}</strong>
+                      {q.rationale ? ` — ${q.rationale}` : ""}
+                    </p>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : null}
+
+        <p className="rounded-md border-l-4 border-ew-purple-500 bg-card px-3 py-2 text-sm">
+          <strong className="text-ew-purple-700">Recommandation :</strong> {level.recommendation}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+interface AppreciationLevel {
+  title: string;
+  tone: "excellent" | "good" | "ok" | "weak" | "redo";
+  explanation: string;
+  recommendation: string;
+}
+
+function appreciationLevel(pct: number): AppreciationLevel {
+  if (pct >= 87.5) {
+    return {
+      title: "Excellent",
+      tone: "excellent",
+      explanation:
+        "Vous démontrez une excellente maîtrise des repères structurants de la communication éducative et pastorale : présence cohérente, méthode RAPIDE, règle des 4V appliquée à l'IA.",
+      recommendation:
+        "Capitalisez : transformez ces acquis en charte d'équipe, partagez-les en formation auprès de vos collègues et appliquez-les systématiquement à chaque publication.",
+    };
+  }
+  if (pct >= 62.5) {
+    return {
+      title: "Très bon",
+      tone: "good",
+      explanation:
+        "Vous avez intégré la majorité des principes-clés. Quelques notions méritent encore d'être consolidées pour gagner en réflexe professionnel.",
+      recommendation:
+        "Revisez les questions manquées en revenant à la diapositive correspondante. Ancrez ces notions par une mise en situation concrète dans votre établissement.",
+    };
+  }
+  if (pct >= 50) {
+    return {
+      title: "Satisfaisant",
+      tone: "ok",
+      explanation:
+        "Vous avez saisi les grandes lignes, mais certaines règles fondamentales (RAPIDE, 4V, gestion de crise) restent à approfondir.",
+      recommendation:
+        "Reprenez les diapositives liées aux thèmes à consolider, échangez avec un pair de référence sur ces points, puis refaites le quiz dans la semaine.",
+    };
+  }
+  if (pct >= 25) {
+    return {
+      title: "À consolider",
+      tone: "weak",
+      explanation:
+        "Les fondamentaux méritent d'être revisités. Plusieurs principes structurants de la formation n'ont pas encore été identifiés correctement.",
+      recommendation:
+        "Reprenez la présentation contextuelle dans son intégralité, puis travaillez les notions une à une avec les ateliers correspondants. Refaites ensuite ce quiz.",
+    };
+  }
+  return {
+    title: "À reprendre",
+    tone: "redo",
+    explanation:
+      "Les principes clés de la formation n'ont pas encore été assimilés. C'est normal pour une première lecture — il est important de prendre le temps de revisiter les bases.",
+    recommendation:
+      "Reprenez la formation depuis la présentation, n'hésitez pas à mobiliser un formateur ou un pair pour clarifier chaque notion, puis refaites ce quiz à tête reposée.",
+  };
 }
 
 /* -------- Diagnostic flash (cases à cocher avec score) -------- */
