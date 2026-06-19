@@ -67,6 +67,7 @@ export const PERMISSIONS = [
   "exports:pdf",
   "exports:word",
   "imports:csv",
+  "formations:access",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -174,6 +175,11 @@ export const PERMISSION_DOMAINS: { id: string; label: string; permissions: Permi
     label: "Outils transverses",
     permissions: ["role_preview:use", "exports:pdf", "exports:word", "imports:csv"],
   },
+  {
+    id: "formation",
+    label: "Formation & accompagnement",
+    permissions: ["formations:access"],
+  },
 ];
 
 export const PERMISSION_LABELS: Record<Permission, string> = {
@@ -239,6 +245,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "exports:pdf": "Exporter en PDF",
   "exports:word": "Exporter en Word",
   "imports:csv": "Importer des CSV",
+  "formations:access": "Accéder à l'espace formation",
 };
 
 const ALL: Permission[] = [...PERMISSIONS];
@@ -283,6 +290,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "exports:word",
     "imports:csv",
     "role_preview:use",
+    "formations:access",
   ],
   cafop_admin: [
     "dashboard:view",
@@ -297,6 +305,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "exports:pdf",
     "exports:word",
     "imports:csv",
+    "formations:access",
   ],
   apfc_admin: [
     "dashboard:view",
@@ -319,6 +328,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "exports:pdf",
     "exports:word",
     "imports:csv",
+    "formations:access",
   ],
   drena: [
     "dashboard:view",
@@ -343,6 +353,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "exports:pdf",
     "exports:word",
     "role_preview:use",
+    "formations:access",
   ],
   inspecteur: [
     "dashboard:view",
@@ -366,6 +377,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "statistics:pedagogical_effectiveness",
     "exports:pdf",
     "exports:word",
+    "formations:access",
   ],
   conseiller_pedagogique: [
     "dashboard:view",
@@ -387,6 +399,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "statistics:pedagogical_effectiveness",
     "exports:pdf",
     "exports:word",
+    "formations:access",
   ],
   chef_antenne: [
     "dashboard:view",
@@ -404,6 +417,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "statistics:analytics",
     "exports:pdf",
     "exports:word",
+    "formations:access",
   ],
   chef_etablissement: [
     "dashboard:view",
@@ -447,6 +461,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "exports:word",
     "imports:csv",
     "role_preview:use",
+    "formations:access",
   ],
   enseignant: [
     "dashboard:view",
@@ -467,6 +482,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "appointments:manage",
     "statistics:class",
     "exports:pdf",
+    "formations:access",
   ],
   educateur: [
     "dashboard:view",
@@ -485,6 +501,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "sms:send",
     "statistics:class",
     "exports:pdf",
+    "formations:access",
   ],
   parent: [
     "dashboard:view",

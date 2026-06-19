@@ -378,7 +378,7 @@ export const NAVIGATION: NavGroup[] = [
         href: "/aide",
         label: "nav.items.aide",
         icon: BookOpen,
-        permission: "dashboard:view",
+        permission: "formations:access",
         description: "Bibliothèque de guides de formation",
       },
     ],
