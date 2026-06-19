@@ -26,7 +26,13 @@ export interface BookPage {
     | "charte"
     | "evaluation"
     | "glossary"
-    | "closing";
+    | "closing"
+    | "presentation"
+    | "slides"
+    | "methods"
+    | "workshops"
+    | "schedule"
+    | "landmarks";
   /** Titre court affiché dans la TOC (chips). */
   shortTitle: string;
   /** Titre long affiché en haut de la page. */
@@ -308,8 +314,20 @@ function categoryLabel(c: BookPage["category"]): string {
     case "evaluation":
       return "Évaluation";
     case "glossary":
-      return "Glossaire et repères";
+      return "Glossaire";
     case "closing":
       return "Message de clôture";
+    case "presentation":
+      return "Présentation";
+    case "slides":
+      return "Diapositives";
+    case "methods":
+      return "Méthodes";
+    case "workshops":
+      return "Ateliers interactifs";
+    case "schedule":
+      return "Déroulé";
+    case "landmarks":
+      return "Repères et synthèse";
   }
 }

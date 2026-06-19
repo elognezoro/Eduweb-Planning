@@ -329,9 +329,9 @@ input::-ms-clear {
    formation.
    -------------------------------------------------------------------------- */
 .formation-reader {
-  /* Base de lecture confortable pour sessions longues */
-  font-size: 18px;
-  line-height: 1.7;
+  /* Base de lecture confortable pour sessions longues + vidéoprojection */
+  font-size: 19.5px;
+  line-height: 1.75;
 }
 .formation-reader p,
 .formation-reader li,
@@ -349,24 +349,24 @@ input::-ms-clear {
    Limités à l'écran : à l'impression, les livrets A4 conservent leurs
    tailles d'origine pour préserver la mise en page paginée. */
 @media screen {
-  .formation-reader .text-xs { font-size: 0.95rem; line-height: 1.6; }
-  .formation-reader .text-\[10px\] { font-size: 0.875rem; line-height: 1.55; }
-  .formation-reader .text-\[10\.5px\] { font-size: 0.875rem; line-height: 1.55; }
-  .formation-reader .text-\[11px\] { font-size: 0.9rem; line-height: 1.6; }
-  .formation-reader .text-\[11\.5px\] { font-size: 0.95rem; line-height: 1.6; }
-  .formation-reader .text-\[12px\] { font-size: 0.95rem; line-height: 1.6; }
-  .formation-reader .text-\[13px\] { font-size: 1rem; line-height: 1.6; }
-  .formation-reader .text-sm { font-size: 1.0625rem; line-height: 1.7; }
-  .formation-reader .text-base { font-size: 1.1875rem; line-height: 1.75; }
-  .formation-reader .text-lg { font-size: 1.4375rem; line-height: 1.6; }
-  .formation-reader .text-xl { font-size: 1.6875rem; line-height: 1.45; }
-  .formation-reader .text-2xl { font-size: 2.0625rem; line-height: 1.35; }
-  .formation-reader .text-3xl { font-size: 2.4375rem; line-height: 1.25; }
-  .formation-reader .text-4xl { font-size: 2.8125rem; line-height: 1.2; }
+  .formation-reader .text-xs { font-size: 1.05rem; line-height: 1.6; }
+  .formation-reader .text-\[10px\] { font-size: 0.95rem; line-height: 1.55; }
+  .formation-reader .text-\[10\.5px\] { font-size: 0.95rem; line-height: 1.55; }
+  .formation-reader .text-\[11px\] { font-size: 1rem; line-height: 1.6; }
+  .formation-reader .text-\[11\.5px\] { font-size: 1.05rem; line-height: 1.6; }
+  .formation-reader .text-\[12px\] { font-size: 1.05rem; line-height: 1.6; }
+  .formation-reader .text-\[13px\] { font-size: 1.125rem; line-height: 1.6; }
+  .formation-reader .text-sm { font-size: 1.1875rem; line-height: 1.7; }
+  .formation-reader .text-base { font-size: 1.3125rem; line-height: 1.75; }
+  .formation-reader .text-lg { font-size: 1.5625rem; line-height: 1.6; }
+  .formation-reader .text-xl { font-size: 1.875rem; line-height: 1.45; }
+  .formation-reader .text-2xl { font-size: 2.25rem; line-height: 1.35; }
+  .formation-reader .text-3xl { font-size: 2.625rem; line-height: 1.25; }
+  .formation-reader .text-4xl { font-size: 3rem; line-height: 1.2; }
   /* Garder les chips/mentions sticky lisibles sans casser leur compacité. */
   .formation-reader nav.sticky button,
   .formation-reader nav.sticky a {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
   }
 }
 
