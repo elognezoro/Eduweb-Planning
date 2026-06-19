@@ -118,12 +118,6 @@ export function MyEnrollmentsPanel() {
             </p>
           </div>
         </div>
-        <Link
-          href="/aide/mes-formations"
-          className="inline-flex items-center gap-1 text-xs font-bold text-ew-green-700 hover:underline"
-        >
-          Voir tout <ArrowRight aria-hidden className="h-3.5 w-3.5" />
-        </Link>
       </div>
 
       {mine.length === 0 ? (
