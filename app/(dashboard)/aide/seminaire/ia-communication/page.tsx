@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Award, FileDown, FileText } from "lucide-react";
+import { ArrowLeft, Award, FileDown, FileText, Presentation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   ActivityList,
@@ -291,6 +291,11 @@ export default function IaCommunicationPage() {
             <Button size="sm" variant="outline" asChild>
               <a href="/api/docx/seminaire/ia-communication">
                 <FileDown className="h-4 w-4" /> Livret Word (.docx)
+              </a>
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <a href={s.pptxAsset} download>
+                <Presentation className="h-4 w-4" /> Support PowerPoint
               </a>
             </Button>
             <Button size="sm" asChild>

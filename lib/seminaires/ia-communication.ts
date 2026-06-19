@@ -23,190 +23,264 @@ const SLIDES: CommSlide[] = [
   {
     num: 1,
     title: "L'intelligence artificielle au service de la communication éducative et pastorale",
-    subtitle: "Produire, adapter, vérifier et sécuriser ses messages avec discernement",
+    subtitle: "Construire des usages compétents, responsables et féconds pour la mission.",
     layout: "cover",
     facilitatorNote:
-      "Ouverture (20 min). Rappeler que cette session prolonge le séminaire sur le numérique : de la présence cohérente à l'efficacité assistée par l'IA, sans perdre le discernement.",
+      "Session introductive (20 minutes). Poser le cadre : compétence, discernement, responsabilité.",
     blocks: [
       {
         kind: "paragraph",
         tone: "lead",
-        text: "Une suite naturelle : après avoir construit une présence numérique cohérente, apprenons à utiliser l'IA pour mieux produire, adapter, structurer, traduire, corriger et sécuriser nos messages.",
+        text: "Session introductive — 20 minutes. SENEC, Séminaire des communicateurs.",
       },
     ],
-    footer: "SENEC — Secrétariat National de l'Enseignement Catholique",
+    footer: "SENEC • Communiquer · Éduquer · Évangéliser",
   },
   {
     num: 2,
-    title: "Pourquoi maintenant ?",
+    title: "Pourquoi cette session vient après le numérique ?",
+    subtitle:
+      "La présence numérique a posé le terrain ; l'IA apporte maintenant une méthode de production et d'amélioration.",
     layout: "standard",
-    facilitatorNote:
-      "Poser l'enjeu : l'IA est déjà présente dans les pratiques. La question n'est pas « si » mais « comment ».",
     blocks: [
       {
-        kind: "paragraph",
-        text: "L'intelligence artificielle s'impose aujourd'hui dans la rédaction, la recherche, la traduction, la synthèse, la planification et la création de contenus. Élèves, parents, enseignants, partenaires et institutions y sont déjà exposés.",
-      },
-      {
-        kind: "highlight",
-        tone: "pastoral",
-        text: "L'enjeu pour l'Éducation Catholique n'est pas de savoir si l'IA existe, mais comment l'utiliser avec compétence, prudence et fidélité à sa mission.",
+        kind: "pillars",
+        items: [
+          { label: "1", title: "Présence numérique", description: "Identité, canaux, cohérence, régularité." },
+          { label: "2", title: "Production assistée", description: "Prompts, reformulation, adaptation, traduction." },
+          { label: "3", title: "Discernement pastoral", description: "Vérité, dignité, prudence, validation." },
+        ],
       },
     ],
+    footer: "L'IA ne remplace pas la stratégie numérique : elle l'équipe.",
   },
   {
     num: 3,
-    title: "Ce que l'IA peut faire",
-    subtitle: "Un assistant de préparation, pas une autorité de décision",
+    title: "La question de départ",
+    subtitle: "Face à l'IA, la bonne posture n'est ni la peur, ni l'enthousiasme naïf.",
     layout: "standard",
     blocks: [
       {
-        kind: "bulletList",
-        intro: "L'IA peut aider à :",
+        kind: "highlight",
+        tone: "pastoral",
+        text: "Comment utiliser l'intelligence artificielle pour mieux communiquer, sans perdre la vérité, l'âme pastorale et la responsabilité humaine ?",
+      },
+      {
+        kind: "pillars",
+        align: "horizontal",
         items: [
-          "écrire plus vite et reformuler plus clairement",
-          "adapter un message à différents publics et canaux",
-          "traduire et résumer un document",
-          "préparer une foire aux questions ou un calendrier éditorial",
-          "produire des idées de publications et de capsules",
+          { label: "01", title: "Compétence", description: "Savoir utiliser." },
+          { label: "02", title: "Discernement", description: "Savoir choisir." },
+          { label: "03", title: "Validation", description: "Savoir publier." },
         ],
       },
     ],
   },
   {
     num: 4,
-    title: "Ce que l'IA peut rater",
+    title: "Comprendre simplement l'IA générative",
+    subtitle:
+      "Un assistant qui produit des contenus à partir d'une consigne, mais qui ne porte aucune responsabilité morale.",
     layout: "standard",
-    facilitatorNote: "Équilibrer : montrer les limites sans diaboliser l'outil.",
     blocks: [
       {
-        kind: "bulletList",
-        intro: "Mais elle peut aussi :",
-        items: [
-          "produire des erreurs et inventer des informations",
-          "adopter un ton inadapté à l'institution",
-          "exposer des données sensibles",
-          "banaliser la parole institutionnelle",
-        ],
+        kind: "paragraph",
+        text: "Elle peut rédiger, résumer, reformuler, traduire, organiser et proposer.",
+      },
+      {
+        kind: "paragraph",
+        text: "Elle peut aussi inventer, exagérer, se tromper ou adopter un ton inadapté.",
       },
       {
         kind: "highlight",
-        tone: "warning",
-        text: "Elle peut être convaincante sans être exacte, élégante sans être juste, rapide sans être prudente.",
+        tone: "success",
+        text: "Elle propose. L'humain discerne. L'institution valide.",
       },
     ],
   },
   {
     num: 5,
-    title: "Garder la maîtrise",
-    subtitle: "La bonne articulation entre la machine et l'humain",
-    layout: "standard",
-    blocks: [
-      {
-        kind: "flow",
-        items: [
-          "L'IA propose",
-          "l'humain discerne",
-          "l'IA génère",
-          "l'institution valide",
-          "l'IA accélère",
-          "la mission oriente",
-        ],
-      },
-    ],
-  },
-  {
-    num: 6,
-    title: "Message clé",
-    layout: "standard",
-    blocks: [
-      {
-        kind: "highlight",
-        tone: "success",
-        text: "L'intelligence artificielle est un outil puissant ; elle devient utile lorsqu'elle sert la vérité, la clarté, la dignité humaine et la mission éducative. Elle devient dangereuse lorsqu'elle remplace le discernement, la prudence et la responsabilité.",
-      },
-    ],
-  },
-  {
-    num: 7,
-    title: "La bonne posture face à l'IA",
+    title: "Ce que l'IA peut apporter à la communication",
+    subtitle: "Des gains concrets : clarté, rapidité, adaptation et régularité.",
     layout: "standard",
     blocks: [
       {
         kind: "pillars",
-        align: "horizontal",
         items: [
-          {
-            label: "Ni rejet",
-            title: "Ne pas refuser par principe",
-            description: "Le rejet systématique prive l'institution d'un levier d'efficacité réel.",
-          },
-          {
-            label: "Ni naïveté",
-            title: "Ne pas adopter sans recul",
-            description: "L'enthousiasme naïf expose à l'erreur, à la manipulation et à la perte d'identité.",
-          },
-          {
-            label: "Compétence",
-            title: "Compétence + discernement",
-            description: "La bonne posture associe la maîtrise technique au jugement humain et pastoral.",
-          },
+          { label: "Produire", title: "Rédiger", description: "Premier jet de communiqué ou invitation." },
+          { label: "Organiser", title: "Structurer", description: "Plan de campagne ou calendrier éditorial." },
+          { label: "Décliner", title: "Adapter", description: "WhatsApp, Facebook, site web, affiche." },
+          { label: "Ouvrir", title: "Traduire", description: "Versions pour partenaires ou communautés." },
+          { label: "Soigner", title: "Corriger", description: "Orthographe, style, clarté." },
+          { label: "Anticiper", title: "Préparer", description: "FAQ parents, questions-réponses, messages clés." },
         ],
       },
     ],
+    footer: "L'objectif n'est pas de publier plus. C'est de communiquer mieux.",
+  },
+  {
+    num: 6,
+    title: "Deux champs d'application immédiats",
+    subtitle: "L'IA peut soutenir à la fois la mission éducative et la mission pastorale.",
+    layout: "standard",
+    blocks: [
+      {
+        kind: "bulletList",
+        intro: "Communication éducative",
+        items: [
+          "Inscriptions et rentrée",
+          "Résultats et réussites",
+          "Notes aux parents",
+          "Orientation et discipline",
+          "Activités pédagogiques",
+        ],
+      },
+      {
+        kind: "bulletList",
+        intro: "Communication pastorale",
+        items: [
+          "Méditations courtes",
+          "Temps liturgiques",
+          "Invitations aux messes",
+          "Messages d'espérance",
+          "Supports de retraite",
+        ],
+      },
+    ],
+    footer: "Dans les deux cas : l'IA assiste, la personne humaine assume.",
+  },
+  {
+    num: 7,
+    title: "La méthode de travail : 3 verbes",
+    subtitle: "Un usage responsable suit toujours une chaîne humaine.",
+    layout: "standard",
+    blocks: [
+      {
+        kind: "steps",
+        items: [
+          { num: 1, label: "Orienter", detail: "Donner un rôle, un contexte, une cible et des limites." },
+          { num: 2, label: "Contrôler", detail: "Vérifier les faits, le ton, les données et les risques." },
+          { num: 3, label: "Humaniser", detail: "Ajouter la chaleur, le contexte local et la sensibilité pastorale." },
+        ],
+      },
+    ],
+    footer: "Produire vite n'est pas suffisant : il faut publier juste.",
   },
   {
     num: 8,
-    title: "De la présence à l'efficacité",
-    subtitle: "Le prolongement du séminaire précédent",
+    title: "Bien prompter : la méthode P.A.S.T.O.R.A.L.",
+    subtitle: "Un bon prompt donne à l'IA une mission claire et des garde-fous.",
+    layout: "standard",
+    blocks: [
+      {
+        kind: "principles",
+        title: "Huit repères pour un prompt efficace",
+        items: [
+          { letter: "P", label: "Public", points: ["À qui parle-t-on ?"] },
+          { letter: "A", label: "Action", points: ["Que doit faire la cible ?"] },
+          { letter: "S", label: "Situation", points: ["Quel contexte ?"] },
+          { letter: "T", label: "Ton", points: ["Quel style ?"] },
+          { letter: "O", label: "Objectif", points: ["Quel but ?"] },
+          { letter: "R", label: "Règles", points: ["Quelles limites ?"] },
+          { letter: "A", label: "Adaptation", points: ["Quels formats ?"] },
+          { letter: "L", label: "Lecture", points: ["Qui relit ?"] },
+        ],
+      },
+    ],
+    footer:
+      "Exigence clé : « N'invente aucune information ; utilise des crochets pour les éléments manquants. »",
+  },
+  {
+    num: 9,
+    title: "Exemple d'usage : transformer une intention en message publiable",
+    subtitle: "Le prompt doit préciser le cadre avant de demander le texte.",
     layout: "standard",
     blocks: [
       {
         kind: "paragraph",
-        text: "Une fois que les acteurs savent pourquoi communiquer, à qui, où et selon quelle ligne éditoriale, ils peuvent utiliser l'IA pour mieux produire, adapter, structurer, traduire, corriger, planifier et sécuriser leurs messages.",
+        tone: "muted",
+        text: "Intention — Annoncer les inscriptions dans un établissement catholique.",
       },
       {
         kind: "highlight",
         tone: "info",
-        text: "L'IA est un assistant intelligent — non un décideur, encore moins une autorité morale.",
+        text: "Prompt — Agis comme un assistant de communication pour une école catholique. Rédige une publication destinée aux parents. Ton professionnel, chaleureux et pastoral. Ne promets pas la réussite automatique. N'invente aucune date. Prévois une version WhatsApp et une version Facebook.",
       },
     ],
+    footer: "Le résultat final sera relu, corrigé et validé avant publication.",
   },
   {
-    num: 9,
-    title: "Deux boussoles pour la session",
-    subtitle: "P.A.S.T.O.R.A.L. pour produire · les 5 V pour valider",
+    num: 10,
+    title: "Les risques à maîtriser",
+    subtitle: "Ce qui est généré rapidement peut se diffuser rapidement — avec ses erreurs.",
     layout: "standard",
     blocks: [
       {
         kind: "pillars",
         items: [
-          {
-            label: "Produire",
-            title: "Méthode P.A.S.T.O.R.A.L.",
-            description: "Public, Action attendue, Situation, Ton, Objectif, Règles, Adaptation, Lecture humaine — pour rédiger un bon prompt.",
-          },
-          {
-            label: "Valider",
-            title: "Règle des 5 V",
-            description: "Vérité, Valeurs, Voix, Vie privée, Validation — avant toute publication assistée par IA.",
-          },
+          { label: "Risque", title: "Fausse information", description: "Dates, chiffres, citations inventés." },
+          { label: "Risque", title: "Ton inadapté", description: "Froid, commercial, agressif." },
+          { label: "Risque", title: "Confidentialité", description: "Données d'élèves, conflits, santé." },
+          { label: "Risque", title: "Manipulation", description: "Promesses irréalistes, pression." },
+          { label: "Risque", title: "Perte d'identité", description: "Texte générique sans âme pastorale." },
         ],
       },
     ],
+    footer: "Aucune production IA ne doit devenir officielle sans contrôle humain.",
   },
   {
-    num: 10,
-    title: "Au service de la mission",
+    num: 11,
+    title: "La règle des 5 V avant publication",
+    subtitle: "Un filtre simple pour sécuriser les contenus aidés par IA.",
+    layout: "standard",
+    blocks: [
+      {
+        kind: "principles",
+        items: [
+          { letter: "V", label: "Vérité", points: ["Les faits sont-ils exacts ?"] },
+          { letter: "V", label: "Valeurs", points: ["Le message respecte-t-il l'identité catholique ?"] },
+          { letter: "V", label: "Voix", points: ["Le ton ressemble-t-il à notre institution ?"] },
+          { letter: "V", label: "Vie privée", points: ["Aucune donnée sensible n'est-elle exposée ?"] },
+          { letter: "V", label: "Validation", points: ["Une autorité a-t-elle relu ?"] },
+        ],
+      },
+    ],
+    footer: "Ce filtre transforme l'IA en outil sûr au service de la mission.",
+  },
+  {
+    num: 12,
+    title: "Pendant la formation de 2 h 30, les participants apprendront à…",
+    subtitle: "La session sera pratique, guidée et orientée vers des productions utilisables.",
+    layout: "standard",
+    blocks: [
+      {
+        kind: "numberedList",
+        items: [
+          "Diagnostiquer leur maturité IA",
+          "Rédiger des prompts efficaces",
+          "Produire un message multicanal",
+          "Corriger un texte généré",
+          "Repérer les risques éthiques",
+          "Construire un protocole IA",
+        ],
+      },
+    ],
+    footer:
+      "Livrable final : une charte simple d'usage responsable de l'IA pour une cellule de communication.",
+  },
+  {
+    num: 13,
+    title: "Entrer dans l'atelier",
+    subtitle: "2 h 30 • Formation pratique",
     layout: "closing",
     blocks: [
       {
         kind: "highlight",
         tone: "pastoral",
-        text: "L'IA peut aider à écrire plus vite, organiser plus clairement et rejoindre plus largement. Mais seule l'intelligence humaine — éclairée par la responsabilité, la foi, la prudence et la charité — fait de cette communication un véritable service éducatif et pastoral.",
+        text: "L'IA peut accélérer la communication ; seule l'intelligence humaine, éclairée par la responsabilité et la foi, peut l'orienter vers la vérité, la prudence et la charité.",
       },
     ],
-    footer: "Place à la pratique : diagnostic, modules, ateliers et engagement.",
+    footer: "Transition vers le diagnostic interactif et les exercices pratiques.",
   },
 ];
 
@@ -454,7 +528,7 @@ export const IA_COMMUNICATION: CommSeminaire = {
     ],
   },
   heroImage: "/seminaires/ia-communication/header.png",
-  pptxAsset: "",
+  pptxAsset: "/seminaires/ia-communication/support.pptx",
   slides: SLIDES,
   objectives: [
     "Utiliser l'IA de manière efficace, responsable et éthique pour concevoir, améliorer, adapter, vérifier et diffuser des contenus de communication éducative et pastorale.",
