@@ -128,6 +128,9 @@ export default function AideIndexPage() {
       {/* Séminaire des écoles catholiques — Magnifica Humanitas */}
       <SeminaireMagnificaBanner />
 
+      {/* Séminaire des communicateurs catholiques — Communication pastorale */}
+      <SeminaireCommunicationBanner />
+
 
       {/* Filtres */}
       <SectionCard contentClassName="p-4">
@@ -390,6 +393,72 @@ function SeminaireMagnificaBanner() {
           className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/40"
         >
           <FileDown className="h-4 w-4" /> Livret Word (.docx)
+        </a>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Bandeau « Séminaire SENEC — Communication pastorale »                  */
+/* ---------------------------------------------------------------------- */
+function SeminaireCommunicationBanner() {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-ew-green-200 shadow-sm">
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url(/seminaires/communication-pastorale/header.png)" }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-r from-ew-green-950/90 via-ew-green-900/80 to-ew-green-900/20"
+      />
+      <div className="relative z-10 flex flex-wrap items-center gap-4 p-5 text-white">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ew-gold-500 text-ew-green-900">
+          <BookOpen className="h-6 w-6" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-ew-gold-200">
+            Séminaire des communicateurs · SENEC
+          </p>
+          <p className="mt-0.5 font-display text-lg font-bold">
+            Le numérique au service de la communication éducative et pastorale
+          </p>
+          <p className="mt-1 max-w-3xl text-sm text-ew-green-50">
+            Présentation contextuelle de <strong>14 diapositives</strong> à feuilleter comme un livre
+            numérique, <strong>7 ateliers interactifs</strong> (diagnostic, QCM, matrice des publics,
+            check-list RAPIDE, scénario de crise, plan d&apos;action, engagement personnel),
+            <strong> livret académique imprimable</strong>, support PowerPoint téléchargeable.
+            Construire une présence cohérente, moderne et engageante.
+          </p>
+        </div>
+      </div>
+      <div className="relative z-10 flex flex-wrap gap-2 bg-card p-4">
+        <Link
+          href="/aide/seminaire/communication-pastorale"
+          className="inline-flex items-center gap-2 rounded-lg bg-ew-green-700 px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+        >
+          <BookOpen className="h-4 w-4" /> Ouvrir le séminaire
+        </Link>
+        <Link
+          href="/aide/seminaire/communication-pastorale/livret"
+          className="inline-flex items-center gap-2 rounded-lg border border-ew-green-700 bg-card px-4 py-2 text-sm font-semibold text-ew-green-700 transition-colors hover:bg-ew-green-50"
+        >
+          <FileText className="h-4 w-4" /> Livret imprimable (PDF)
+        </Link>
+        <a
+          href="/api/docx/seminaire/communication-pastorale"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/40"
+        >
+          <FileDown className="h-4 w-4" /> Livret Word (.docx)
+        </a>
+        <a
+          href="/seminaires/communication-pastorale/support.pptx"
+          download
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/40"
+        >
+          <Download className="h-4 w-4" /> Support PowerPoint
         </a>
       </div>
     </div>
