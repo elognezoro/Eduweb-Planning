@@ -277,7 +277,11 @@ export function SlideDeck({ slides }: { slides: CommSlide[] }) {
       {/* Slide */}
       <div
         className={cn(
-          "relative flex-1 overflow-y-auto",
+          // Fond crème/parchemin doux : effet « papier ancien », contraste >12:1
+          // avec text-ew-green-900. Met en valeur les sous-zones colorées
+          // (pillars vert, principles violet, highlight gold) et fait paraître
+          // les cartes bg-card (channels, steps) comme des fiches posées dessus.
+          "relative flex-1 overflow-y-auto bg-[#F6F2EA]",
           fullscreen ? "px-6 py-8 sm:px-10 sm:py-12" : "p-5 sm:p-8",
         )}
         onTouchStart={handleTouchStart}
