@@ -138,6 +138,9 @@ export default function AideIndexPage() {
       {/* Séminaire des communicateurs catholiques — Communication pastorale */}
       <SeminaireCommunicationBanner />
 
+      {/* Formation IA & communication (suite du séminaire numérique) */}
+      <SeminaireIaCommunicationBanner />
+
 
       {/* Filtres */}
       <SectionCard contentClassName="p-4">
@@ -475,6 +478,65 @@ function SeminaireCommunicationBanner() {
           className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/40"
         >
           <Download className="h-4 w-4" /> Support PowerPoint
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function SeminaireIaCommunicationBanner() {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-ew-purple-200 shadow-sm">
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url(/seminaires/ia-communication/header.png)" }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-r from-ew-purple-950/90 via-ew-purple-900/80 to-ew-purple-900/20"
+      />
+      <div className="relative z-10 flex flex-wrap items-center gap-4 p-5 text-white">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ew-gold-500 text-ew-purple-900">
+          <BookOpen className="h-6 w-6" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-ew-gold-200">
+            Séminaire des communicateurs · SENEC
+          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-2">
+            <p className="font-display text-lg font-bold">
+              L&apos;intelligence artificielle au service de la communication éducative et pastorale
+            </p>
+            <EnrollmentStatusChip courseId="ia-communication" className="border-ew-gold-200/80 bg-ew-gold-50/90 text-ew-gold-700" />
+          </div>
+          <p className="mt-1 max-w-3xl text-sm text-purple-50">
+            Formation de <strong>2 h 30</strong>, suite du séminaire sur le numérique :
+            diagnostic de maturité IA, <strong>3 modules</strong> (usages, méthode de prompt
+            <strong> P.A.S.T.O.R.A.L.</strong>, éthique &amp; règle des <strong>5 V</strong>),
+            ateliers de correction de contenus générés par IA, auto-évaluation finale et
+            <strong> protocole d&apos;usage responsable</strong>. Produire avec discernement.
+          </p>
+        </div>
+      </div>
+      <div className="relative z-10 flex flex-wrap gap-2 bg-card p-4">
+        <Link
+          href="/aide/seminaire/ia-communication"
+          className="inline-flex items-center gap-2 rounded-lg bg-ew-purple-600 px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+        >
+          <BookOpen className="h-4 w-4" /> Ouvrir la formation
+        </Link>
+        <Link
+          href="/aide/seminaire/ia-communication/livret"
+          className="inline-flex items-center gap-2 rounded-lg border border-ew-purple-600 bg-card px-4 py-2 text-sm font-semibold text-ew-purple-700 transition-colors hover:bg-ew-purple-50"
+        >
+          <FileText className="h-4 w-4" /> Livret imprimable (PDF)
+        </Link>
+        <a
+          href="/api/docx/seminaire/ia-communication"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/40"
+        >
+          <FileDown className="h-4 w-4" /> Livret Word (.docx)
         </a>
       </div>
     </div>

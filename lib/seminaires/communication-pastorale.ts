@@ -96,6 +96,8 @@ export interface CommSeminaireActivity {
   tableRows?: string[];
   /** Défi IA : message brut à corriger + correction modèle révélable. */
   aiChallenge?: {
+    /** Libellé de l'encadré du message source (défaut : généré par IA). */
+    sourceLabel?: string;
     rawMessage: string;
     problems: string[];
     correctedMessage: string;
@@ -114,31 +116,51 @@ export interface CommSeminaire {
   objectives: string[];
   competences: string[];
   activities: CommSeminaireActivity[];
-  /** Plan d'action structuré « 1 message – 1 public – 1 objectif – 1 canal – 1 indicateur ». */
-  actionPlanTemplate: {
+  /**
+   * Plan d'action structuré « 1 message – 1 public – 1 objectif – 1 canal – 1 indicateur ».
+   * Optionnel : présent pour le séminaire SENEC numérique, absent pour
+   * d'autres formations (ex. IA) qui n'ont pas de plan d'action matriciel.
+   */
+  actionPlanTemplate?: {
     intro: string;
     columns: string[];
     examples: { values: string[] }[];
   };
-  /** Méthode RAPIDE. */
-  rapide: { letter: string; label: string }[];
-  /** Règle des 4V (IA). */
-  fourV: { letter: string; label: string; detail: string }[];
+  /** Méthode RAPIDE (optionnelle, séminaire numérique). */
+  rapide?: { letter: string; label: string }[];
+  /** Règle des 4V — IA (optionnelle, séminaire numérique). */
+  fourV?: { letter: string; label: string; detail: string }[];
+  /**
+   * Méthode de prompt P.A.S.T.O.R.A.L. (formation IA). Chaque lettre porte
+   * un libellé et une question/exemple guidant la rédaction d'un prompt.
+   */
+  promptMethod?: { letter: string; label: string; detail: string }[];
+  /** Règle des 5 V de validation avant publication (formation IA). */
+  fiveV?: { letter: string; label: string; detail: string }[];
+  /** Carte des usages utiles de l'IA en communication (formation IA). */
+  usageCategories?: { title: string; items: string[] }[];
+  /** Protocole d'usage responsable de l'IA en N points (formation IA). */
+  protocol?: { num: number; title: string; items: string[] }[];
+  /** Exemple commenté de mauvais vs bon prompt (formation IA). */
+  promptExamples?: { bad: string; good: string };
   glossary: { term: string; definition: string }[];
   references10: { num: number; text: string }[];
   schedule: { hours: string; activity: string }[];
   /**
    * Auto-évaluation finale (Séquence 7) — chaque participant coche son
-   * niveau pour chaque compétence visée, et signale celles à renforcer
-   * collectivement (chez les autres / dans l'équipe).
+   * niveau pour chaque compétence visée, et (optionnellement) signale
+   * celles à renforcer collectivement (chez les autres / dans l'équipe).
    */
   finalSelfEvaluation: {
     durationMin: number;
     objective: string;
     /** Échelle de progression personnelle (radio par ligne). */
     levels: string[];
-    /** Libellé de la colonne « flag collectif » (case à cocher). */
-    reinforceLabel: string;
+    /**
+     * Libellé de la colonne « flag collectif » (case à cocher). Optionnel :
+     * si absent, la grille n'affiche que l'échelle de niveau.
+     */
+    reinforceLabel?: string;
     competences: string[];
   };
   closingMessage: string;

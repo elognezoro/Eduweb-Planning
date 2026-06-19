@@ -43,6 +43,9 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
   const logo = await loadLogoBuffer();
   const m = seminaire.meta;
   const watermark = `EduWeb Planner · Séminaire SENEC — usage interne`;
+  // Libellé court pour entête/pied, dérivé du séminaire (SENEC numérique vs IA).
+  const shortLabel =
+    m.slug === "ia-communication" ? "IA & communication" : "Communication pastorale";
 
   // -------- COUVERTURE --------
   const cover: Paragraph[] = [
@@ -113,8 +116,11 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
     }) as unknown as Paragraph,
   ];
 
-  // -------- SLIDES (14 diapositives) --------
-  const slidesContent: Paragraph[] = [pageBreak(), heading1("Présentation contextuelle — 14 diapositives")];
+  // -------- SLIDES --------
+  const slidesContent: Paragraph[] = [
+    pageBreak(),
+    heading1(`Présentation contextuelle — ${seminaire.slides.length} diapositives`),
+  ];
   seminaire.slides.forEach((s) => {
     slidesContent.push(pageBreak());
     slidesContent.push(
@@ -143,34 +149,64 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
     }
   });
 
-  // -------- MÉTHODES (RAPIDE + 4V) --------
-  const methodesContent: Paragraph[] = [
-    pageBreak(),
-    heading1("Méthodes & règles d'or"),
-
-    heading2("Méthode RAPIDE — grille de relecture en 6 critères"),
-    ...seminaire.rapide.map(
-      (r) =>
+  // -------- MÉTHODES --------
+  // Formation IA : P.A.S.T.O.R.A.L. (prompt) + 5 V (validation).
+  // Séminaire numérique : RAPIDE + 4V.
+  const methodesContent: Paragraph[] = [pageBreak(), heading1("Méthodes & règles d'or")];
+  if (seminaire.promptMethod || seminaire.fiveV) {
+    if (seminaire.promptMethod) {
+      methodesContent.push(
+        heading2("Méthode P.A.S.T.O.R.A.L. — rédiger un bon prompt"),
+        ...seminaire.promptMethod.flatMap((p) => [
+          new Paragraph({
+            spacing: { after: 40 },
+            children: [
+              new TextRun({ text: `${p.letter} — ${p.label}`, bold: true, color: COLOR_GREEN, size: 22 }),
+            ],
+          }),
+          bodyText(p.detail),
+        ]),
+      );
+    }
+    if (seminaire.fiveV) {
+      methodesContent.push(
+        heading2("Règle des 5 V — avant toute publication assistée par IA"),
+        ...seminaire.fiveV.flatMap((v) => [
+          new Paragraph({
+            spacing: { after: 40 },
+            children: [
+              new TextRun({ text: `${v.letter} ${v.label}`, bold: true, color: COLOR_GREEN, size: 22 }),
+            ],
+          }),
+          bodyText(v.detail),
+        ]),
+      );
+    }
+  } else {
+    methodesContent.push(
+      heading2("Méthode RAPIDE — grille de relecture en 6 critères"),
+      ...(seminaire.rapide ?? []).map(
+        (r) =>
+          new Paragraph({
+            spacing: { after: 60 },
+            children: [
+              new TextRun({ text: `${r.letter} — `, bold: true, color: COLOR_GREEN, size: 22 }),
+              new TextRun({ text: r.label, size: 22 }),
+            ],
+          }),
+      ),
+      heading2("Règle des 4V — avant toute publication assistée par IA"),
+      ...(seminaire.fourV ?? []).flatMap((v) => [
         new Paragraph({
-          spacing: { after: 60 },
+          spacing: { after: 40 },
           children: [
-            new TextRun({ text: `${r.letter} — `, bold: true, color: COLOR_GREEN, size: 22 }),
-            new TextRun({ text: r.label, size: 22 }),
+            new TextRun({ text: `${v.letter} ${v.label}`, bold: true, color: COLOR_GREEN, size: 22 }),
           ],
         }),
-    ),
-
-    heading2("Règle des 4V — avant toute publication assistée par IA"),
-    ...seminaire.fourV.flatMap((v) => [
-      new Paragraph({
-        spacing: { after: 40 },
-        children: [
-          new TextRun({ text: `${v.letter} ${v.label}`, bold: true, color: COLOR_GREEN, size: 22 }),
-        ],
-      }),
-      bodyText(v.detail),
-    ]),
-  ];
+        bodyText(v.detail),
+      ]),
+    );
+  }
 
   // -------- ATELIERS --------
   const activitiesContent: Paragraph[] = [pageBreak(), heading1("Ateliers interactifs")];
@@ -178,35 +214,58 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
     activitiesContent.push(...renderActivity(a));
   });
 
-  // -------- PLAN D'ACTION --------
-  const planContent: Paragraph[] = [
-    pageBreak(),
-    heading1("Modèle de plan d'action"),
-    bodyText(seminaire.actionPlanTemplate.intro, { italic: true }),
-    new Paragraph({
-      spacing: { after: 80 },
-      children: [
-        new TextRun({
-          text: seminaire.actionPlanTemplate.columns.join(" | "),
-          bold: true,
-          color: COLOR_GREEN,
-          size: 22,
-        }),
-      ],
-    }),
-    ...seminaire.actionPlanTemplate.examples.map(
-      (row) =>
+  // -------- PLAN D'ACTION / PROTOCOLE --------
+  // Formation IA : protocole d'usage responsable. Séminaire numérique : plan d'action.
+  let planContent: Paragraph[] = [];
+  if (seminaire.protocol) {
+    planContent = [
+      pageBreak(),
+      heading1("Protocole d'usage responsable de l'IA"),
+      bodyText(
+        "Cadre simple à adopter dans votre cellule de communication avant tout usage de l'intelligence artificielle.",
+        { italic: true },
+      ),
+      ...seminaire.protocol.flatMap((p) => [
         new Paragraph({
-          spacing: { after: 40 },
-          children: [new TextRun({ text: row.values.join(" | "), size: 22 })],
+          spacing: { before: 80, after: 40 },
+          children: [
+            new TextRun({ text: `${p.num}. ${p.title}`, bold: true, color: COLOR_GREEN, size: 22 }),
+          ],
         }),
-    ),
-  ];
+        ...p.items.map((it) => bodyText(`• ${it}`)),
+      ]),
+    ];
+  } else if (seminaire.actionPlanTemplate) {
+    const plan = seminaire.actionPlanTemplate;
+    planContent = [
+      pageBreak(),
+      heading1("Modèle de plan d'action"),
+      bodyText(plan.intro, { italic: true }),
+      new Paragraph({
+        spacing: { after: 80 },
+        children: [
+          new TextRun({
+            text: plan.columns.join(" | "),
+            bold: true,
+            color: COLOR_GREEN,
+            size: 22,
+          }),
+        ],
+      }),
+      ...plan.examples.map(
+        (row) =>
+          new Paragraph({
+            spacing: { after: 40 },
+            children: [new TextRun({ text: row.values.join(" | "), size: 22 })],
+          }),
+      ),
+    ];
+  }
 
   // -------- DÉROULÉ --------
   const scheduleContent: Paragraph[] = [
     pageBreak(),
-    heading1("Déroulé proposé — 120 minutes"),
+    heading1(`Déroulé proposé — ${m.duration}`),
     ...seminaire.schedule.map(
       (s) =>
         new Paragraph({
@@ -246,7 +305,7 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
     ...multiParagraph(seminaire.closingMessage),
     spacer(200),
     centeredLine("Fin du livret académique", { bold: true, size: 24, color: COLOR_GREEN }),
-    centeredLine("EduWeb Planner · Séminaire SENEC · 24 juin 2026", {
+    centeredLine(`EduWeb Planner · Séminaire SENEC · ${m.referenceDate}`, {
       italic: true,
       size: 18,
       color: COLOR_GRAY,
@@ -272,13 +331,13 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
           first: undefined,
           default: buildHeader({
             logoBuffer: logo,
-            centerLabel: "Communication pastorale",
+            centerLabel: shortLabel,
             rightLabel: "SENEC",
             watermark,
           }),
         },
         footers: {
-          default: buildFooter({ reference: "Séminaire SENEC — Communication pastorale" }),
+          default: buildFooter({ reference: `Séminaire SENEC — ${shortLabel}` }),
         },
         children: [
           ...cover,

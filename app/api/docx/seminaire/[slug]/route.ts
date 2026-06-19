@@ -3,6 +3,7 @@ import { buildSeminaireDocx } from "@/lib/docx/seminaire";
 import { buildCommPastoraleDocx } from "@/lib/docx/comm-pastorale";
 import { SEMINAIRES_REGISTRY } from "@/lib/seminaires/magnifica-humanitas";
 import { COMMUNICATION_PASTORALE } from "@/lib/seminaires/communication-pastorale";
+import { IA_COMMUNICATION } from "@/lib/seminaires/ia-communication";
 
 export const runtime = "nodejs";
 
@@ -11,6 +12,7 @@ export const runtime = "nodejs";
  * Les slugs reconnus sont :
  *  - "magnifica-humanitas" → livret académique modulaire (9 modules)
  *  - "communication-pastorale" → livret SENEC (14 diapositives + 7 ateliers)
+ *  - "ia-communication" → livret IA (diapositives + modules + ateliers)
  */
 export async function GET(
   _req: Request,
@@ -23,6 +25,13 @@ export async function GET(
     if (slug === COMMUNICATION_PASTORALE.meta.slug) {
       const buffer = await buildCommPastoraleDocx(COMMUNICATION_PASTORALE);
       const filename = `Seminaire-Communication-Pastorale-Livret.docx`;
+      return docxResponse(buffer, filename);
+    }
+
+    // Formation IA & communication (réutilise le même builder générique).
+    if (slug === IA_COMMUNICATION.meta.slug) {
+      const buffer = await buildCommPastoraleDocx(IA_COMMUNICATION);
+      const filename = `Formation-IA-Communication-Livret.docx`;
       return docxResponse(buffer, filename);
     }
 

@@ -51,6 +51,27 @@ export const COURSE_CATALOG: Course[] = [
     order: 2,
   },
   {
+    id: "ia-communication",
+    type: "seminaire",
+    title:
+      "L'intelligence artificielle au service de la communication éducative et pastorale",
+    shortTitle: "IA & communication",
+    description:
+      "Formation SENEC : utiliser l'IA pour produire, adapter, vérifier et sécuriser ses messages, avec discernement.",
+    longDescription:
+      "Formation de 2 h 30, suite du séminaire sur le numérique : présentation contextuelle, diagnostic de maturité IA, 3 modules (usages, méthode de prompt P.A.S.T.O.R.A.L., éthique et règle des 5 V), ateliers de correction de contenus générés par IA, auto-évaluation finale et protocole d'usage responsable à adopter dans sa cellule de communication.",
+    route: "/aide/seminaire/ia-communication",
+    livretRoute: "/aide/seminaire/ia-communication/livret",
+    image: "/seminaires/ia-communication/header.png",
+    accent: "purple",
+    duration: "2 heures 30 minutes",
+    audience:
+      "Communicateurs diocésains, responsables de la communication des établissements catholiques, chefs d'établissement, cadres pastoraux, équipes web et réseaux sociaux des écoles catholiques.",
+    level: "Initiation professionnelle approfondie",
+    enrollmentMethods: ["individual", "cohort"],
+    order: 3,
+  },
+  {
     id: "manuel-formation",
     type: "manuel",
     title: "Manuel académique de formation EduWeb Planner",
@@ -66,7 +87,7 @@ export const COURSE_CATALOG: Course[] = [
     level: "Auto-formation accompagnée",
     enrollmentMethods: ["individual", "cohort", "role-auto"],
     autoEnrollRoles: ["admin", "etablissements_admin", "chef_etablissement"],
-    order: 3,
+    order: 4,
   },
   {
     id: "guides-utilisateurs",
@@ -96,7 +117,7 @@ export const COURSE_CATALOG: Course[] = [
       "enseignant",
       "educateur",
     ],
-    order: 4,
+    order: 5,
   },
 ];
 

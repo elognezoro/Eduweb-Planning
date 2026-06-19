@@ -63,7 +63,7 @@ export function CommHero({
       <div className="relative h-[260px] w-full sm:h-[320px] lg:h-[380px]">
         <Image
           src={seminaire.heroImage}
-          alt="Séminaire SENEC — Communication éducative et pastorale"
+          alt={seminaire.meta.title}
           fill
           priority
           sizes="100vw"
@@ -1661,6 +1661,7 @@ function AiCorrectionChallenge({
   idPrefix,
 }: {
   challenge: {
+    sourceLabel?: string;
     rawMessage: string;
     problems: string[];
     correctedMessage: string;
@@ -1668,6 +1669,7 @@ function AiCorrectionChallenge({
   };
   idPrefix: string;
 }) {
+  const sourceLabel = challenge.sourceLabel ?? "Message brut généré par IA — à corriger";
   const [problemsText, setProblemsText] = React.useState("");
   const [correctionText, setCorrectionText] = React.useState("");
   const [revealed, setRevealed] = React.useState(false);
@@ -1688,10 +1690,10 @@ function AiCorrectionChallenge({
 
   return (
     <div className="space-y-3">
-      {/* Message brut généré par IA */}
+      {/* Message brut à corriger */}
       <div className="rounded-xl border border-ew-gold-300 bg-ew-gold-50/50 p-3">
         <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-gold-700">
-          <AlertTriangle aria-hidden className="h-4 w-4" /> Message brut généré par IA — à corriger
+          <AlertTriangle aria-hidden className="h-4 w-4" /> {sourceLabel}
         </p>
         <p className="mt-2 whitespace-pre-line text-sm italic text-foreground/90">
           {challenge.rawMessage}
@@ -2622,6 +2624,9 @@ export function FinalSelfEvaluation({
 }) {
   const app = useApp();
   const { competences, levels, reinforceLabel, objective, durationMin } = data;
+  // La colonne « à renforcer chez les autres » est optionnelle : certaines
+  // formations (ex. IA) n'ont qu'une échelle de niveau.
+  const hasReinforce = !!reinforceLabel;
   const maxLevel = Math.max(1, levels.length - 1);
 
   // Niveau choisi par compétence (index dans `levels`), et drapeau collectif.
@@ -2726,9 +2731,10 @@ export function FinalSelfEvaluation({
           <strong>Objectif :</strong> {objective}
         </p>
         <p className="mt-1 text-xs italic text-muted-foreground">
-          Pour chaque compétence, cochez votre niveau. Signalez aussi celles que vous
-          jugez « {reinforceLabel.toLowerCase()} » : ce sont les compétences à porter
-          collectivement dans votre établissement.
+          Pour chaque compétence, cochez votre niveau.
+          {hasReinforce
+            ? ` Signalez aussi celles que vous jugez « ${reinforceLabel!.toLowerCase()} » : ce sont les compétences à porter collectivement dans votre établissement.`
+            : ""}
         </p>
       </div>
 
@@ -2743,9 +2749,11 @@ export function FinalSelfEvaluation({
                   {lvl}
                 </th>
               ))}
-              <th className="border-b border-border px-2 py-2 text-center font-bold text-ew-purple-700">
-                {reinforceLabel}
-              </th>
+              {hasReinforce ? (
+                <th className="border-b border-border px-2 py-2 text-center font-bold text-ew-purple-700">
+                  {reinforceLabel}
+                </th>
+              ) : null}
             </tr>
           </thead>
           <tbody>
@@ -2775,15 +2783,17 @@ export function FinalSelfEvaluation({
                       />
                     </td>
                   ))}
-                  <td className="px-2 py-2.5 text-center">
-                    <input
-                      type="checkbox"
-                      aria-label={`${c} — ${reinforceLabel}`}
-                      checked={!!reinforce[i]}
-                      onChange={() => setReinforce((r) => ({ ...r, [i]: !r[i] }))}
-                      className="h-4 w-4 accent-ew-purple-600"
-                    />
-                  </td>
+                  {hasReinforce ? (
+                    <td className="px-2 py-2.5 text-center">
+                      <input
+                        type="checkbox"
+                        aria-label={`${c} — ${reinforceLabel}`}
+                        checked={!!reinforce[i]}
+                        onChange={() => setReinforce((r) => ({ ...r, [i]: !r[i] }))}
+                        className="h-4 w-4 accent-ew-purple-600"
+                      />
+                    </td>
+                  ) : null}
                 </tr>
               );
             })}
@@ -2833,7 +2843,7 @@ function FinalSelfEvaluationBilan({
 }: {
   competences: string[];
   levels: string[];
-  reinforceLabel: string;
+  reinforceLabel?: string;
   picked: Record<number, number>;
   reinforce: Record<number, boolean>;
   bilan: {
@@ -2978,7 +2988,7 @@ export function CommRapideCard({ seminaire }: { seminaire: CommSeminaire }) {
         <Eye aria-hidden className="h-4 w-4" /> Méthode RAPIDE — boussole quotidienne
       </p>
       <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-        {seminaire.rapide.map((r) => {
+        {(seminaire.rapide ?? []).map((r) => {
           // « Réel — le fait est-il vrai et vérifié ? » : isoler le mot-clé
           // (avant le tiret cadratin) pour le mettre en gras.
           const dashIdx = r.label.indexOf(" — ");
@@ -3011,7 +3021,7 @@ export function CommFourVCard({ seminaire }: { seminaire: CommSeminaire }) {
         <MessageSquare aria-hidden className="h-4 w-4" /> Règle des 4V — avant toute publication par IA
       </p>
       <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-        {seminaire.fourV.map((v, i) => (
+        {(seminaire.fourV ?? []).map((v, i) => (
           <li key={i} className="flex items-start gap-3">
             <span
               aria-hidden

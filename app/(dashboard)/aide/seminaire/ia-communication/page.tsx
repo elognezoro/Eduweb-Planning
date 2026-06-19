@@ -2,65 +2,53 @@
 
 import * as React from "react";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Award,
-  CheckCircle2,
-  Clock,
-  FileDown,
-  FileText,
-  GraduationCap,
-  Lock,
-  Presentation,
-  Sparkles,
-  Target,
-  Users,
-} from "lucide-react";
+import { ArrowLeft, Award, FileDown, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   ActivityList,
-  CommFourVCard,
   CommGlossary,
   CommHero,
   CommObjectives,
-  CommRapideCard,
   CommRepères,
   CommSchedule,
   FinalSelfEvaluation,
   SlideDeck,
 } from "@/components/seminaires/comm-pastorale-views";
-import { COMMUNICATION_PASTORALE } from "@/lib/seminaires/communication-pastorale";
+import {
+  IaFiveV,
+  IaPromptMethod,
+  IaProtocol,
+  IaUsageMap,
+} from "@/components/seminaires/ia-communication-views";
+import { IA_COMMUNICATION } from "@/lib/seminaires/ia-communication";
 import { CourseGate } from "@/components/formations/course-gate";
 import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-book";
 
 /**
- * Espace de formation SENEC en mode livre paginé.
+ * Espace de formation « L'intelligence artificielle au service de la
+ * communication éducative et pastorale » (SENEC, 2 h 30), en mode livre
+ * numérique paginé.
  *
- * Une page = une rubrique. L'apprenant tourne les pages comme dans un
- * livre, navigation au clavier (← →, Home, End, F), sommaire cliquable
- * au pied, plein écran.
+ * Rubriques :
+ *   1. Présentation contextuelle
+ *   2. Objectifs & compétences
+ *   3. Diapositives (visionneuse ePub)
+ *   4. Module 1 — Comprendre l'IA et ses usages
+ *   5. Module 2 — Bien prompter (méthode P.A.S.T.O.R.A.L.)
+ *   6. Module 3 — Éthique, risques & règle des 5 V
+ *   7. Ateliers interactifs
+ *   8. Auto-évaluation finale & engagement
+ *   9. Protocole d'usage responsable de l'IA (livrable)
+ *  10. Déroulé chronométré
+ *  11. Repères
+ *  12. Glossaire
+ *  13. Clôture
  *
- * Rubriques (Déroulé placé en tête pour orienter immédiatement
- * l'apprenant sur la durée et le rythme de la session) :
- *   1. Déroulé chronométré
- *   2. Présentation
- *   3. Objectifs & compétences
- *   4. Diapositives (visionneuse ePub des 14 slides)
- *   5. Méthodes (RAPIDE + 4V)
- *   6. Ateliers interactifs
- *   7. Auto-évaluation finale & engagement d'action (grille de compétences)
- *   8. Repères (10 repères + 5 verbes synthèse)
- *   9. Glossaire
- *  10. Clôture
- *
- * Chaque page reçoit un texte de narration (lu par le navigateur via
- * SpeechSynthesis) construit à partir des données du séminaire.
+ * Chaque page reçoit un texte de narration lu par le navigateur (TTS).
  */
-export default function CommPastoralePage() {
-  const s = COMMUNICATION_PASTORALE;
+export default function IaCommunicationPage() {
+  const s = IA_COMMUNICATION;
 
-  // Textes de narration audio par page — concaténés depuis les données
-  // du séminaire pour rester synchronisés avec le contenu réel.
   const narrations = React.useMemo(() => {
     const presentation = s.meta.presentation.join(" ");
     const objectives =
@@ -69,44 +57,49 @@ export default function CommPastoralePage() {
     const slidesIntro =
       `Présentation contextuelle. ${s.slides.length} diapositives à feuilleter comme un livre numérique. ` +
       `Naviguez avec les flèches gauche et droite, F pour le plein écran, N pour afficher les notes du formateur.`;
-    const methods =
-      "Méthode RAPIDE pour relire une publication. " +
-      (s.rapide ?? []).map((r) => `${r.letter}, ${r.label}.`).join(" ") +
-      " Règle des 4 V pour un usage responsable de l'intelligence artificielle. " +
-      (s.fourV ?? []).map((v) => `${v.letter}, ${v.label}. ${v.detail}`).join(" ");
+    const usages =
+      "Module 1 : comprendre l'IA et ses usages. " +
+      (s.usageCategories ?? []).map((c) => c.title + ".").join(" ");
+    const prompt =
+      "Module 2 : bien prompter et produire. Méthode P.A.S.T.O.R.A.L. " +
+      (s.promptMethod ?? []).map((p) => `${p.letter}, ${p.label}. ${p.detail}`).join(" ");
+    const fiveV =
+      "Module 3 : éthique, risques, image et validation. La règle des 5 V. " +
+      (s.fiveV ?? []).map((v) => `${v.letter}, ${v.label}. ${v.detail}`).join(" ");
     const workshopsIntro =
       `Ateliers interactifs. ${s.activities.length} ateliers pour passer à la pratique. ` +
-      s.activities
-        .map((a) => `Atelier ${a.num}, ${a.title}.`)
-        .join(" ");
+      s.activities.map((a) => `Atelier ${a.num}, ${a.title}.`).join(" ");
+    const selfEvaluation =
+      `Auto-évaluation finale et engagement. Durée ${s.finalSelfEvaluation.durationMin} minutes. ` +
+      `Objectif : ${s.finalSelfEvaluation.objective} ` +
+      `Pour chaque compétence, cochez votre niveau : ${s.finalSelfEvaluation.levels.join(", ")}. ` +
+      s.finalSelfEvaluation.competences.join(" ");
+    const protocol =
+      "Protocole d'usage responsable de l'intelligence artificielle. " +
+      (s.protocol ?? []).map((p) => `${p.num}. ${p.title}. ${p.items.join(", ")}.`).join(" ");
     const schedule =
-      `Déroulé proposé pour la session de 2 heures, soit 120 minutes. ` +
-      s.schedule
-        .map((row) => `${row.hours}, ${row.activity}.`)
-        .join(" ");
+      `Déroulé proposé pour la session de 2 heures 30 minutes, soit 150 minutes. ` +
+      s.schedule.map((row) => `${row.hours}, ${row.activity}.`).join(" ");
     const landmarks =
-      "Repères et synthèse de la formation. " +
+      "Repères de l'usage de l'IA en communication. " +
       s.references10.map((r) => `Repère ${r.num}. ${r.text}`).join(" ");
     const glossary =
       "Glossaire des termes clés. " +
       s.glossary.map((g) => `${g.term}. ${g.definition}`).join(" ");
-    const selfEvaluation =
-      `Auto-évaluation finale et engagement d'action. Durée ${s.finalSelfEvaluation.durationMin} minutes. ` +
-      `Objectif : ${s.finalSelfEvaluation.objective} ` +
-      `Pour chaque compétence, cochez votre niveau : ${s.finalSelfEvaluation.levels.join(", ")}. ` +
-      `Les compétences évaluées sont les suivantes. ` +
-      s.finalSelfEvaluation.competences.map((c) => c).join(" ");
     const closing = s.closingMessage.replace(/\n+/g, " ");
     return {
       presentation,
       objectives,
       slidesIntro,
-      methods,
+      usages,
+      prompt,
+      fiveV,
       workshopsIntro,
+      selfEvaluation,
+      protocol,
       schedule,
       landmarks,
       glossary,
-      selfEvaluation,
       closing,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,15 +107,6 @@ export default function CommPastoralePage() {
 
   const pages: BookPage[] = React.useMemo(
     () => [
-      {
-        id: "schedule",
-        category: "schedule",
-        shortTitle: "Déroulé",
-        title: "Déroulé proposé",
-        subtitle: "Chronométrage de l'atelier de 120 minutes",
-        content: <CommSchedule seminaire={s} />,
-        narration: narrations.schedule,
-      },
       {
         id: "presentation",
         category: "presentation",
@@ -150,17 +134,31 @@ export default function CommPastoralePage() {
         narration: narrations.slidesIntro,
       },
       {
-        id: "methods",
+        id: "module-usages",
+        category: "module",
+        shortTitle: "Module 1 — Usages",
+        title: "Module 1 — Comprendre l'IA et ses usages",
+        subtitle: "Les apports concrets de l'IA pour la communication",
+        content: <IaUsageMap seminaire={s} />,
+        narration: narrations.usages,
+      },
+      {
+        id: "module-prompt",
         category: "methods",
-        shortTitle: "Méthodes",
-        title: "Méthodes — RAPIDE & règle des 4V",
-        content: (
-          <div className="grid gap-4 lg:grid-cols-2">
-            <CommRapideCard seminaire={s} />
-            <CommFourVCard seminaire={s} />
-          </div>
-        ),
-        narration: narrations.methods,
+        shortTitle: "Module 2 — Prompter",
+        title: "Module 2 — Bien prompter et produire",
+        subtitle: "La méthode P.A.S.T.O.R.A.L.",
+        content: <IaPromptMethod seminaire={s} />,
+        narration: narrations.prompt,
+      },
+      {
+        id: "module-ethique",
+        category: "charte",
+        shortTitle: "Module 3 — Éthique & 5 V",
+        title: "Module 3 — Éthique, risques, image et validation",
+        subtitle: "La règle des 5 V avant toute publication",
+        content: <IaFiveV seminaire={s} />,
+        narration: narrations.fiveV,
       },
       {
         id: "workshops",
@@ -175,17 +173,35 @@ export default function CommPastoralePage() {
         id: "self-evaluation",
         category: "evaluation",
         shortTitle: "Auto-évaluation",
-        title: "Auto-évaluation finale & engagement d'action",
+        title: "Auto-évaluation finale & engagement",
         subtitle: `${s.finalSelfEvaluation.durationMin} minutes — vérifiez vos acquis et engagez une action concrète`,
         content: <FinalSelfEvaluation data={s.finalSelfEvaluation} />,
         narration: narrations.selfEvaluation,
       },
       {
+        id: "protocol",
+        category: "charte",
+        shortTitle: "Protocole IA",
+        title: "Protocole d'usage responsable de l'IA",
+        subtitle: "Le livrable de la formation, en 7 points",
+        content: <IaProtocol seminaire={s} />,
+        narration: narrations.protocol,
+      },
+      {
+        id: "schedule",
+        category: "schedule",
+        shortTitle: "Déroulé",
+        title: "Déroulé proposé",
+        subtitle: "Chronométrage de la session de 150 minutes",
+        content: <CommSchedule seminaire={s} />,
+        narration: narrations.schedule,
+      },
+      {
         id: "landmarks",
         category: "landmarks",
         shortTitle: "Repères",
-        title: "Repères et synthèse",
-        subtitle: "Les 10 repères + les 5 verbes de synthèse",
+        title: "Repères de l'usage de l'IA",
+        subtitle: "Les 10 repères du communicateur catholique face à l'IA",
         content: <CommRepères seminaire={s} />,
         narration: narrations.landmarks,
       },
@@ -201,12 +217,12 @@ export default function CommPastoralePage() {
         id: "closing",
         category: "closing",
         shortTitle: "Clôture",
-        title: "Message de clôture",
+        title: "Formule de clôture",
         content: <ClosingPage />,
         narration: narrations.closing,
       },
     ],
-    // Sous-composants en closure sur s.
+    // Sous-composants en closure sur s (constante de module).
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
@@ -222,7 +238,7 @@ export default function CommPastoralePage() {
           ))}
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <FactCell label="Référence" value={s.meta.reference} />
-            <FactCell label="Date" value={s.meta.referenceDate} />
+            <FactCell label="Durée" value={s.meta.duration} />
             <FactCell label="Format" value={s.meta.format} />
             <FactCell label="Organisateur" value={s.meta.organiser} />
           </div>
@@ -235,10 +251,9 @@ export default function CommPastoralePage() {
     return (
       <div className="space-y-3">
         <p className="rounded-md border border-ew-green-200 bg-ew-green-50/40 px-3 py-2 text-sm text-foreground/90">
-          Astuce : utilisez ← → à l&apos;intérieur de la visionneuse pour
-          naviguer entre les diapositives, F pour le plein écran, N pour
-          afficher les notes du formateur. Cliquez sur une miniature pour
-          aller directement à une diapositive.
+          Astuce : utilisez ← → à l&apos;intérieur de la visionneuse pour naviguer entre les
+          diapositives, F pour le plein écran, N pour afficher les notes du formateur. Cliquez
+          sur une miniature pour aller directement à une diapositive.
         </p>
         <SlideDeck slides={s.slides} />
       </div>
@@ -258,7 +273,7 @@ export default function CommPastoralePage() {
   }
 
   return (
-    <CourseGate courseId="communication-pastorale">
+    <CourseGate courseId="ia-communication">
       <div className="space-y-5">
         {/* Barre d'actions */}
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -269,18 +284,13 @@ export default function CommPastoralePage() {
           </Button>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" asChild>
-              <Link href="/aide/seminaire/communication-pastorale/livret">
+              <Link href="/aide/seminaire/ia-communication/livret">
                 <FileText className="h-4 w-4" /> Livret imprimable
               </Link>
             </Button>
             <Button size="sm" variant="outline" asChild>
-              <a href="/api/docx/seminaire/communication-pastorale">
+              <a href="/api/docx/seminaire/ia-communication">
                 <FileDown className="h-4 w-4" /> Livret Word (.docx)
-              </a>
-            </Button>
-            <Button size="sm" variant="outline" asChild>
-              <a href={s.pptxAsset} download>
-                <Presentation className="h-4 w-4" /> Support PowerPoint
               </a>
             </Button>
             <Button size="sm" asChild>
@@ -301,9 +311,7 @@ export default function CommPastoralePage() {
 function FactCell({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-dashed border-border bg-background/60 p-3">
-      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
+      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="mt-0.5 text-sm font-bold text-foreground">{value}</p>
     </div>
   );

@@ -52,9 +52,15 @@
   --ew-gold-200: #fbd989;
   --ew-gold-100: #fff1cc;
   --ew-gold-50: #fff8e5;
+  --ew-purple-950: #2e1065;
+  --ew-purple-900: #4c1d95;
+  --ew-purple-800: #5b21b6;
   --ew-purple-700: #6d28d9;
+  --ew-purple-600: #6d28d9;
   --ew-purple-500: #7c3aed;
+  --ew-purple-300: #c4b5fd;
   --ew-purple-200: #ddd6fe;
+  --ew-purple-100: #ede9fe;
   --ew-purple-50: #f5f3ff;
 
   /* Couleurs sémantiques */
@@ -102,9 +108,15 @@
   --color-ew-gold-200: var(--ew-gold-200);
   --color-ew-gold-100: var(--ew-gold-100);
   --color-ew-gold-50: var(--ew-gold-50);
+  --color-ew-purple-950: var(--ew-purple-950);
+  --color-ew-purple-900: var(--ew-purple-900);
+  --color-ew-purple-800: var(--ew-purple-800);
   --color-ew-purple-700: var(--ew-purple-700);
+  --color-ew-purple-600: var(--ew-purple-600);
   --color-ew-purple-500: var(--ew-purple-500);
+  --color-ew-purple-300: var(--ew-purple-300);
   --color-ew-purple-200: var(--ew-purple-200);
+  --color-ew-purple-100: var(--ew-purple-100);
   --color-ew-purple-50: var(--ew-purple-50);
   --color-ew-blue: var(--ew-blue);
   --color-ew-red: var(--ew-red);

@@ -13,12 +13,37 @@ import type {
    - Couverture + présentation + 14 slides + ateliers + méthodes + glossaire
    ========================================================================== */
 
-const WATERMARK = "Séminaire EduWeb · Communication pastorale";
+/**
+ * Branding du livret (filigrane, entête, pied de page). Valeurs par défaut =
+ * séminaire « Communication pastorale » (SENEC) — préservées à l'identique.
+ * Une autre formation (ex. IA) peut fournir ses propres libellés via la prop
+ * `branding` de CommLivret.
+ */
+export interface LivretBranding {
+  watermark: string;
+  headerLabel: string;
+  footerLine: string;
+}
 
-export function CommLivret({ seminaire }: { seminaire: CommSeminaire }) {
+const DEFAULT_BRANDING: LivretBranding = {
+  watermark: "Séminaire EduWeb · Communication pastorale",
+  headerLabel: "Communication pastorale — SENEC",
+  footerLine: "EduWeb Planner · Séminaire SENEC · 24 juin 2026",
+};
+
+const BrandingContext = React.createContext<LivretBranding>(DEFAULT_BRANDING);
+
+export function CommLivret({
+  seminaire,
+  branding,
+}: {
+  seminaire: CommSeminaire;
+  branding?: LivretBranding;
+}) {
   let p = 0;
   const next = () => ++p;
   return (
+    <BrandingContext.Provider value={branding ?? DEFAULT_BRANDING}>
     <div id="seminaire-print" className="space-y-6">
       <CoverPage seminaire={seminaire} />
       <PresentationPage seminaire={seminaire} pageNumber={next()} />
@@ -33,6 +58,7 @@ export function CommLivret({ seminaire }: { seminaire: CommSeminaire }) {
       <ReperesGlossaryPage seminaire={seminaire} pageNumber={next()} />
       <ClosingPage seminaire={seminaire} pageNumber={next()} />
     </div>
+    </BrandingContext.Provider>
   );
 }
 
@@ -48,6 +74,7 @@ function Page({
   withCover?: boolean;
   className?: string;
 }) {
+  const branding = React.useContext(BrandingContext);
   return (
     <section
       className={cn(
@@ -67,7 +94,7 @@ function Page({
             className="whitespace-nowrap font-display text-[60px] font-extrabold uppercase tracking-[0.18em] text-gray-300"
             style={{ opacity: 0.07, transform: "rotate(-32deg)" }}
           >
-            {WATERMARK}
+            {branding.watermark}
           </span>
         </div>
       ) : null}
@@ -80,7 +107,7 @@ function Page({
             <span className="font-bold uppercase tracking-wide text-ew-green-800">EduWeb Planner</span>
           </div>
           <span className="font-display font-bold uppercase tracking-wide text-gray-700">
-            Communication pastorale — SENEC
+            {branding.headerLabel}
           </span>
           <span className="text-gray-500">{`Page ${pageNumber}`}</span>
         </header>
@@ -90,7 +117,7 @@ function Page({
 
       {!withCover ? (
         <footer className="absolute bottom-[10mm] left-[18mm] right-[18mm] flex items-center justify-between border-t border-gray-300 pt-1 text-[9px] text-gray-500">
-          <span>EduWeb Planner · Séminaire SENEC · 24 juin 2026</span>
+          <span>{branding.footerLine}</span>
           <span>Page {pageNumber}</span>
         </footer>
       ) : null}
@@ -483,13 +510,53 @@ function ActivitiesPage({ seminaire, pageNumber }: { seminaire: CommSeminaire; p
 }
 
 function MethodesPage({ seminaire, pageNumber }: { seminaire: CommSeminaire; pageNumber: number }) {
+  // Formation IA : méthode P.A.S.T.O.R.A.L. (prompt) + règle des 5 V.
+  if (seminaire.promptMethod || seminaire.fiveV) {
+    return (
+      <Page pageNumber={pageNumber}>
+        <H1>Méthodes &amp; règles d&apos;or</H1>
+        {seminaire.promptMethod ? (
+          <>
+            <H2>Méthode P.A.S.T.O.R.A.L. — rédiger un bon prompt</H2>
+            <p className="italic text-gray-700">
+              Huit repères pour formuler une consigne claire, contextualisée et exploitable.
+            </p>
+            <ul className="mt-2 grid grid-cols-2 gap-2">
+              {seminaire.promptMethod.map((p, i) => (
+                <li key={i} className="rounded border border-ew-green-200 bg-ew-green-50/40 p-2 text-[10.5px]">
+                  <p className="font-display text-lg font-extrabold text-ew-green-700">{p.letter}</p>
+                  <p className="font-bold text-ew-green-800">{p.label}</p>
+                  <p className="text-gray-700">{p.detail}</p>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+        {seminaire.fiveV ? (
+          <>
+            <H2 className="mt-4">Règle des 5 V — avant toute publication assistée par IA</H2>
+            <ul className="mt-2 grid grid-cols-2 gap-2">
+              {seminaire.fiveV.map((v, i) => (
+                <li key={i} className="rounded border border-purple-200 bg-purple-50 p-2 text-[10.5px]">
+                  <p className="font-display text-lg font-extrabold text-purple-700">{v.letter}</p>
+                  <p className="font-bold text-purple-700">{v.label}</p>
+                  <p className="text-gray-700">{v.detail}</p>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+      </Page>
+    );
+  }
+  // Séminaire numérique : méthode RAPIDE + règle des 4V.
   return (
     <Page pageNumber={pageNumber}>
       <H1>Méthodes &amp; règles d&apos;or</H1>
       <H2>Méthode RAPIDE</H2>
       <p className="italic text-gray-700">Grille de relecture en six critères avant toute publication.</p>
       <ul className="mt-2 grid grid-cols-2 gap-2">
-        {seminaire.rapide.map((r) => (
+        {(seminaire.rapide ?? []).map((r) => (
           <li key={r.letter} className="rounded border border-ew-green-200 bg-ew-green-50/40 p-2 text-[10.5px]">
             <p className="font-display text-lg font-extrabold text-ew-green-700">{r.letter}</p>
             <p>{r.label}</p>
@@ -498,7 +565,7 @@ function MethodesPage({ seminaire, pageNumber }: { seminaire: CommSeminaire; pag
       </ul>
       <H2 className="mt-4">Règle des 4V — publication assistée par IA</H2>
       <ul className="mt-2 grid grid-cols-2 gap-2">
-        {seminaire.fourV.map((v, i) => (
+        {(seminaire.fourV ?? []).map((v, i) => (
           <li key={i} className="rounded border border-purple-200 bg-purple-50 p-2 text-[10.5px]">
             <p className="font-display text-lg font-extrabold text-purple-700">{v.letter}</p>
             <p className="font-bold text-purple-700">{v.label}</p>
@@ -511,14 +578,43 @@ function MethodesPage({ seminaire, pageNumber }: { seminaire: CommSeminaire; pag
 }
 
 function PlanPage({ seminaire, pageNumber }: { seminaire: CommSeminaire; pageNumber: number }) {
+  // Formation IA : protocole d'usage responsable en N points.
+  if (seminaire.protocol) {
+    return (
+      <Page pageNumber={pageNumber}>
+        <H1>Protocole d&apos;usage responsable de l&apos;IA</H1>
+        <p className="italic text-gray-700">
+          Cadre simple à adopter dans votre cellule de communication avant tout usage de
+          l&apos;intelligence artificielle.
+        </p>
+        <div className="mt-3 space-y-2">
+          {seminaire.protocol.map((p) => (
+            <div key={p.num} className="rounded border border-ew-green-200 bg-ew-green-50/40 p-2 text-[10.5px]">
+              <p className="font-bold text-ew-green-800">
+                {p.num}. {p.title}
+              </p>
+              <ul className="mt-1 list-disc pl-4 text-gray-700">
+                {p.items.map((it, j) => (
+                  <li key={j}>{it}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </Page>
+    );
+  }
+  // Séminaire numérique : modèle de plan d'action.
+  if (!seminaire.actionPlanTemplate) return null;
+  const plan = seminaire.actionPlanTemplate;
   return (
     <Page pageNumber={pageNumber}>
       <H1>Modèle de plan d&apos;action</H1>
-      <p className="italic text-gray-700">{seminaire.actionPlanTemplate.intro}</p>
+      <p className="italic text-gray-700">{plan.intro}</p>
       <table className="mt-3 w-full border-collapse text-[10.5px]">
         <thead>
           <tr className="bg-ew-green-50 text-ew-green-800">
-            {seminaire.actionPlanTemplate.columns.map((c, i) => (
+            {plan.columns.map((c, i) => (
               <th key={i} className="border border-gray-300 px-2 py-1 text-left">
                 {c}
               </th>
@@ -526,7 +622,7 @@ function PlanPage({ seminaire, pageNumber }: { seminaire: CommSeminaire; pageNum
           </tr>
         </thead>
         <tbody>
-          {seminaire.actionPlanTemplate.examples.map((row, i) => (
+          {plan.examples.map((row, i) => (
             <tr key={i}>
               {row.values.map((v, j) => (
                 <td key={j} className="border border-gray-300 px-2 py-1">
@@ -538,7 +634,7 @@ function PlanPage({ seminaire, pageNumber }: { seminaire: CommSeminaire; pageNum
           {/* 3 lignes vides à remplir */}
           {Array.from({ length: 3 }).map((_, i) => (
             <tr key={`empty-${i}`}>
-              {seminaire.actionPlanTemplate.columns.map((_, j) => (
+              {plan.columns.map((_, j) => (
                 <td key={j} className="h-6 border border-gray-300 px-2 italic text-gray-400">
                   …
                 </td>
