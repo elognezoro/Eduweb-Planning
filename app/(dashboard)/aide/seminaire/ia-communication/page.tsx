@@ -15,12 +15,15 @@ import {
   SlideDeck,
 } from "@/components/seminaires/comm-pastorale-views";
 import {
+  IaAtelierPratique,
+  IaDiagnostic,
   IaFiveV,
   IaPromptMethod,
   IaProtocol,
   IaUsageMap,
 } from "@/components/seminaires/ia-communication-views";
-import { IA_COMMUNICATION } from "@/lib/seminaires/ia-communication";
+import { IA_COMMUNICATION, IA_CONTENT } from "@/lib/seminaires/ia-communication";
+import type { CommSeminaireActivity } from "@/lib/seminaires/communication-pastorale";
 import { CourseGate } from "@/components/formations/course-gate";
 import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-book";
 
@@ -29,51 +32,72 @@ import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-
  * communication éducative et pastorale » (SENEC, 2 h 30), en mode livre
  * numérique paginé.
  *
- * Rubriques :
- *   1. Présentation contextuelle
- *   2. Objectifs & compétences
- *   3. Diapositives (visionneuse ePub)
- *   4. Module 1 — Comprendre l'IA et ses usages
- *   5. Module 2 — Bien prompter (méthode P.A.S.T.O.R.A.L.)
- *   6. Module 3 — Éthique, risques & règle des 5 V
- *   7. Ateliers interactifs
- *   8. Auto-évaluation finale & engagement
- *   9. Protocole d'usage responsable de l'IA (livrable)
- *  10. Déroulé chronométré
- *  11. Repères
- *  12. Glossaire
- *  13. Clôture
+ * Rubriques (déroulé en tête, puis séquences scénarisées) :
+ *   1. Déroulé chronométré
+ *   2. Présentation contextuelle (Séq. 1)
+ *   3. Objectifs & compétences
+ *   4. Diapositives (visionneuse ePub)
+ *   5. Diagnostic de maturité IA (Séq. 2)
+ *   6. Module 1 — Comprendre l'IA et ses usages (Séq. 3)
+ *   7. Module 2 — Bien prompter (Séq. 4)
+ *   8. Module 3 — Éthique, risques & règle des 5 V (Séq. 5)
+ *   9. Atelier pratique (Séq. 6)
+ *  10. Auto-évaluation finale & engagement (Séq. 7)
+ *  11. Évaluations interactives — QCM
+ *  12. Protocole d'usage responsable (livrable)
+ *  13. Repères · 14. Glossaire · 15. Clôture
  *
  * Chaque page reçoit un texte de narration lu par le navigateur (TTS).
  */
 export default function IaCommunicationPage() {
   const s = IA_COMMUNICATION;
 
+  /** Récupère une activité interactive par son identifiant. */
+  const act = React.useCallback(
+    (id: string): CommSeminaireActivity[] => {
+      const found = s.activities.find((a) => a.id === id);
+      return found ? [found] : [];
+    },
+    [s.activities],
+  );
+
   const narrations = React.useMemo(() => {
-    const presentation = s.meta.presentation.join(" ");
+    const presentation =
+      s.meta.presentation.join(" ") + " Message clé. " + IA_CONTENT.presentationMessage;
     const objectives =
       `Objectifs pédagogiques. ${s.objectives.join(" ")} ` +
       `Compétences visées. ${s.competences.join(" ")}`;
     const slidesIntro =
       `Présentation contextuelle. ${s.slides.length} diapositives à feuilleter comme un livre numérique. ` +
       `Naviguez avec les flèches gauche et droite, F pour le plein écran, N pour afficher les notes du formateur.`;
+    const diagnostic =
+      `Séquence 2. Diagnostic interactif de maturité IA. ${IA_CONTENT.diagnostic.objective} ` +
+      IA_CONTENT.diagnostic.messageCle;
     const usages =
       "Module 1 : comprendre l'IA et ses usages. " +
-      (s.usageCategories ?? []).map((c) => c.title + ".").join(" ");
+      IA_CONTENT.module1.narrative.join(" ") +
+      " " +
+      IA_CONTENT.module1.synthesis;
     const prompt =
       "Module 2 : bien prompter et produire. Méthode P.A.S.T.O.R.A.L. " +
+      IA_CONTENT.module2.narrative.join(" ") +
+      " " +
       (s.promptMethod ?? []).map((p) => `${p.letter}, ${p.label}. ${p.detail}`).join(" ");
     const fiveV =
-      "Module 3 : éthique, risques, image et validation. La règle des 5 V. " +
+      "Module 3 : éthique, risques, image et validation. " +
+      IA_CONTENT.module3.narrative.join(" ") +
+      " La règle des 5 V. " +
       (s.fiveV ?? []).map((v) => `${v.letter}, ${v.label}. ${v.detail}`).join(" ");
-    const workshopsIntro =
-      `Ateliers interactifs. ${s.activities.length} ateliers pour passer à la pratique. ` +
-      s.activities.map((a) => `Atelier ${a.num}, ${a.title}.`).join(" ");
+    const atelierPratique =
+      "Séquence 6. Atelier pratique : produire, corriger et adapter un message. " +
+      IA_CONTENT.atelierPratique.consigne;
     const selfEvaluation =
       `Auto-évaluation finale et engagement. Durée ${s.finalSelfEvaluation.durationMin} minutes. ` +
       `Objectif : ${s.finalSelfEvaluation.objective} ` +
       `Pour chaque compétence, cochez votre niveau : ${s.finalSelfEvaluation.levels.join(", ")}. ` +
       s.finalSelfEvaluation.competences.join(" ");
+    const evaluations =
+      "Évaluations interactives. Un pré-test de 8 questions à choix multiples, auto-corrigées.";
     const protocol =
       "Protocole d'usage responsable de l'intelligence artificielle. " +
       (s.protocol ?? []).map((p) => `${p.num}. ${p.title}. ${p.items.join(", ")}.`).join(" ");
@@ -91,11 +115,13 @@ export default function IaCommunicationPage() {
       presentation,
       objectives,
       slidesIntro,
+      diagnostic,
       usages,
       prompt,
       fiveV,
-      workshopsIntro,
+      atelierPratique,
       selfEvaluation,
+      evaluations,
       protocol,
       schedule,
       landmarks,
@@ -143,12 +169,31 @@ export default function IaCommunicationPage() {
         narration: narrations.slidesIntro,
       },
       {
+        id: "diagnostic",
+        category: "diagnostic",
+        shortTitle: "Diagnostic IA",
+        title: "Diagnostic de maturité IA",
+        subtitle: "Séquence 2 — identifiez votre niveau d'usage actuel",
+        content: (
+          <div className="space-y-6">
+            <IaDiagnostic />
+            <ActivityList activities={act("diag-ia")} />
+          </div>
+        ),
+        narration: narrations.diagnostic,
+      },
+      {
         id: "module-usages",
         category: "module",
         shortTitle: "Module 1 — Usages",
         title: "Module 1 — Comprendre l'IA et ses usages",
-        subtitle: "Les apports concrets de l'IA pour la communication",
-        content: <IaUsageMap seminaire={s} />,
+        subtitle: "Séquence 3 — les apports concrets de l'IA pour la communication",
+        content: (
+          <div className="space-y-6">
+            <IaUsageMap seminaire={s} />
+            <ActivityList activities={act("reformuler-ia")} />
+          </div>
+        ),
         narration: narrations.usages,
       },
       {
@@ -156,36 +201,55 @@ export default function IaCommunicationPage() {
         category: "methods",
         shortTitle: "Module 2 — Prompter",
         title: "Module 2 — Bien prompter et produire",
-        subtitle: "La méthode P.A.S.T.O.R.A.L.",
+        subtitle: "Séquence 4 — la méthode P.A.S.T.O.R.A.L.",
         content: <IaPromptMethod seminaire={s} />,
         narration: narrations.prompt,
       },
       {
         id: "module-ethique",
-        category: "charte",
+        category: "module",
         shortTitle: "Module 3 — Éthique & 5 V",
         title: "Module 3 — Éthique, risques, image et validation",
-        subtitle: "La règle des 5 V avant toute publication",
+        subtitle: "Séquence 5 — la règle des 5 V avant toute publication",
         content: <IaFiveV seminaire={s} />,
         narration: narrations.fiveV,
       },
       {
-        id: "workshops",
+        id: "atelier-pratique",
         category: "workshops",
-        shortTitle: "Ateliers",
-        title: "Ateliers interactifs",
-        subtitle: `${s.activities.length} ateliers pour passer à la pratique`,
-        content: <ActivityList activities={s.activities} />,
-        narration: narrations.workshopsIntro,
+        shortTitle: "Atelier pratique",
+        title: "Atelier pratique — produire, corriger et adapter",
+        subtitle: "Séquence 6 — mettre en pratique les acquis de la formation",
+        content: (
+          <div className="space-y-6">
+            <IaAtelierPratique />
+            <ActivityList activities={act("corriger-promo-ia")} />
+          </div>
+        ),
+        narration: narrations.atelierPratique,
       },
       {
         id: "self-evaluation",
         category: "evaluation",
         shortTitle: "Auto-évaluation",
         title: "Auto-évaluation finale & engagement",
-        subtitle: `${s.finalSelfEvaluation.durationMin} minutes — vérifiez vos acquis et engagez une action concrète`,
-        content: <FinalSelfEvaluation data={s.finalSelfEvaluation} />,
+        subtitle: `Séquence 7 — ${s.finalSelfEvaluation.durationMin} minutes : vérifiez vos acquis et engagez une action concrète`,
+        content: (
+          <div className="space-y-6">
+            <FinalSelfEvaluation data={s.finalSelfEvaluation} />
+            <ActivityList activities={act("engagement-ia")} />
+          </div>
+        ),
         narration: narrations.selfEvaluation,
+      },
+      {
+        id: "evaluations",
+        category: "quiz",
+        shortTitle: "Évaluations",
+        title: "Évaluations interactives",
+        subtitle: "Pré-test — 8 QCM rapides auto-corrigés",
+        content: <ActivityList activities={act("qcm-ia")} />,
+        narration: narrations.evaluations,
       },
       {
         id: "protocol",
@@ -242,6 +306,14 @@ export default function IaCommunicationPage() {
             <FactCell label="Format" value={s.meta.format} />
             <FactCell label="Organisateur" value={s.meta.organiser} />
           </div>
+        </div>
+        <div className="rounded-2xl border-l-4 border-ew-gold-500 bg-ew-gold-50 px-5 py-4">
+          <p className="font-display text-xs font-bold uppercase tracking-wide text-ew-gold-700">
+            Message clé
+          </p>
+          <p className="mt-1 text-base font-medium leading-relaxed text-foreground/90">
+            {IA_CONTENT.presentationMessage}
+          </p>
         </div>
       </div>
     );

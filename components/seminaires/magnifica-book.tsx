@@ -24,6 +24,7 @@ export interface BookPage {
     | "architecture"
     | "module"
     | "quiz"
+    | "diagnostic"
     | "charte"
     | "evaluation"
     | "glossary"
@@ -350,6 +351,8 @@ function categoryLabel(c: BookPage["category"]): string {
       return "Module";
     case "quiz":
       return "Quiz sommatif";
+    case "diagnostic":
+      return "Diagnostic";
     case "charte":
       return "Charte d'usage responsable";
     case "evaluation":

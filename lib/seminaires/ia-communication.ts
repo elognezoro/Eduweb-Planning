@@ -690,3 +690,154 @@ export const IA_COMMUNICATION: CommSeminaire = {
   closingMessage:
     "L'intelligence artificielle peut aider à écrire plus vite, à organiser plus clairement et à rejoindre plus largement.\n\nMais seule l'intelligence humaine, éclairée par la responsabilité, la foi, la prudence et la charité, peut faire de cette communication un véritable service éducatif et pastoral.",
 };
+
+/* ============================================================================
+   CONTENU SCÉNARISÉ DES SÉQUENCES
+   Narratifs, activités guidées, synthèses, barèmes et études de cas, rendus
+   par les vues dédiées (ia-communication-views.tsx). Séparé des données
+   structurelles ci-dessus pour garder le contenu pédagogique au même endroit.
+   ========================================================================== */
+export const IA_CONTENT = {
+  /** Séquence 1 — message clé de la présentation contextuelle. */
+  presentationMessage:
+    "L'intelligence artificielle est un outil puissant ; elle devient utile lorsqu'elle sert la vérité, la clarté, la dignité humaine et la mission éducative. Elle devient dangereuse lorsqu'elle remplace le discernement, la prudence et la responsabilité.",
+
+  /** Séquence 2 — diagnostic interactif de maturité IA. */
+  diagnostic: {
+    durationMin: 15,
+    objective:
+      "Permettre aux participants d'identifier leur niveau actuel d'usage de l'IA.",
+    bareme: [
+      { range: "0 à 3", level: "Débutant", interpretation: "Découverte de l'IA ; besoin de bases solides." },
+      { range: "4 à 6", level: "Utilisateur occasionnel", interpretation: "Usage existant, mais encore peu structuré." },
+      { range: "7 à 8", level: "Utilisateur prudent", interpretation: "Bonne base ; besoin de formalisation." },
+      { range: "9 à 10", level: "Utilisateur stratégique", interpretation: "Capacité à encadrer ou accompagner d'autres acteurs." },
+    ],
+    exploitation: [
+      "Quelle utilisation de l'IA vous semble la plus utile ?",
+      "Quelle utilisation vous paraît la plus dangereuse ?",
+      "Votre structure dispose-t-elle déjà de règles d'usage ?",
+      "Que faudrait-il interdire absolument ?",
+    ],
+    messageCle:
+      "La bonne posture face à l'IA n'est ni le rejet systématique, ni l'enthousiasme naïf. La bonne posture est la compétence accompagnée de discernement.",
+  },
+
+  /** Séquence 3 — Module 1 : comprendre l'IA et ses usages. */
+  module1: {
+    narrative: [
+      "L'intelligence artificielle générative est un outil capable de produire ou d'améliorer des contenus à partir d'une consigne appelée prompt. Elle peut générer du texte, proposer un plan, reformuler une phrase, résumer un document, traduire un message, produire des idées ou adapter un contenu à plusieurs publics.",
+      "Cependant, l'IA ne comprend pas le monde comme un être humain. Elle produit des réponses à partir de modèles statistiques. Elle peut donc être convaincante sans être exacte. Elle peut être élégante sans être juste. Elle peut être rapide sans être prudente.",
+      "Dans la communication éducative et pastorale, elle doit donc être utilisée comme un assistant de préparation, jamais comme une autorité de décision.",
+    ],
+    guidedActivity: {
+      rawPhrase: "Réunion parents vendredi venez nombreux c'est important pour vos enfants.",
+      canDo: [
+        "corriger",
+        "reformuler",
+        "rendre plus institutionnel",
+        "adapter à WhatsApp",
+        "adapter à une affiche",
+        "rendre plus pastoral",
+      ],
+      expectedReformulation:
+        "Chers parents,\nVous êtes cordialement invités à une réunion d'échange prévue le vendredi [date] à [heure]. Cette rencontre portera sur l'accompagnement éducatif des élèves et la collaboration entre les familles et l'établissement. Votre présence est vivement souhaitée.",
+    },
+    synthesis:
+      "L'IA permet de gagner du temps, mais le gain de temps ne doit jamais se faire au détriment de la vérité, de la prudence et de la qualité institutionnelle.",
+  },
+
+  /** Séquence 4 — Module 2 : bien prompter et produire. */
+  module2: {
+    narrative: [
+      "La qualité d'une réponse produite par IA dépend largement de la qualité de la demande formulée. Une demande vague produit souvent un résultat vague. Une demande précise, contextualisée et contrainte produit généralement un contenu plus utile.",
+      "Dans une communication éducative et pastorale, un prompt doit préciser le public, le contexte, l'objectif, le ton, le canal, les limites et les informations à ne pas inventer.",
+    ],
+    badPrompt: "Fais-moi un message pour les parents.",
+    whyWeak: [
+      "le contexte",
+      "le public exact",
+      "le ton",
+      "l'objectif",
+      "le canal",
+      "la longueur",
+      "les informations à éviter",
+      "les éléments à compléter",
+    ],
+    goodPrompt:
+      "Agis comme un assistant de communication pour un établissement catholique. Rédige un message destiné aux parents d'élèves pour les inviter à une réunion sur la discipline et le suivi scolaire. Le ton doit être institutionnel, respectueux, chaleureux et pastoral. Le message doit être court, adapté à WhatsApp, sans culpabiliser les parents. N'invente aucune date ni aucun lieu. Utilise des crochets pour les informations manquantes.",
+    exerciseSituations: [
+      "Annoncer une journée portes ouvertes.",
+      "Inviter les parents à une messe de rentrée.",
+      "Valoriser les résultats d'un établissement.",
+      "Annoncer une formation des enseignants.",
+      "Préparer un message pastoral pour le temps de l'Avent.",
+    ],
+    exampleAnswer:
+      "Agis comme un assistant de communication institutionnelle pour une école catholique. Rédige une publication Facebook annonçant une journée portes ouvertes. Le public visé est composé de parents d'élèves et de partenaires éducatifs. Le ton doit être professionnel, accueillant, chaleureux et pastoral. Le message doit valoriser l'accompagnement, la discipline, l'excellence et les valeurs humaines. Ne promets pas la réussite automatique. N'invente aucune date ni aucun lieu. Utilise des crochets pour les informations à compléter.",
+    synthesis:
+      "Un bon prompt est une consigne complète. Il donne à l'IA un rôle, un contexte, une cible, un objectif, un ton, des limites et un format attendu.",
+  },
+
+  /** Séquence 5 — Module 3 : éthique, risques, image et validation. */
+  module3: {
+    narrative: [
+      "L'IA peut donner une impression de facilité. Elle rédige vite, propose des phrases élégantes et donne parfois l'impression d'être sûre d'elle. Pourtant, elle peut se tromper, inventer, exagérer, simplifier abusivement ou adopter un ton contraire à l'identité d'une institution catholique.",
+      "L'enjeu éthique est donc majeur. Dans le contexte éducatif et pastoral, toute communication engage l'image de l'Église, la confiance des familles, la dignité des élèves et la crédibilité de l'institution.",
+    ],
+    tripleExigence: [
+      { label: "Exigence de vérité", detail: "ne pas publier de fausses informations." },
+      { label: "Exigence de dignité", detail: "respecter les personnes, surtout les mineurs." },
+      { label: "Exigence de responsabilité", detail: "ne jamais publier sans validation humaine." },
+    ],
+    majorRisks: [
+      { title: "Erreur factuelle", items: ["dates inventées", "noms inexacts", "chiffres approximatifs", "citations non authentifiées"] },
+      { title: "Ton inadapté", items: ["trop commercial", "trop froid", "trop autoritaire", "trop promotionnel", "trop émotionnel"] },
+      { title: "Atteinte à la confidentialité", items: ["données d'élèves", "cas disciplinaires", "informations médicales", "situations familiales", "conflits internes"] },
+      { title: "Manipulation ou exagération", items: ["promesse de réussite garantie", "comparaison dévalorisante", "pression psychologique", "dramatisation excessive"] },
+      { title: "Perte d'identité pastorale", items: ["texte générique", "absence de chaleur humaine", "vocabulaire inadapté", "message sans profondeur éducative ou spirituelle"] },
+    ],
+    caseStudy: {
+      rawMessage:
+        "Notre école garantit la réussite de tous les élèves grâce à une méthode unique et supérieure à celle des autres établissements. Inscrivez vite vos enfants, sinon ils risquent de perdre leur avenir.",
+      problems: [
+        "promesse irréaliste",
+        "ton anxiogène",
+        "comparaison dévalorisante",
+        "pression sur les parents",
+        "absence de sobriété",
+        "manque de vérité",
+        "risque de décrédibilisation",
+      ],
+      correctedMessage:
+        "Les inscriptions sont ouvertes à [nom de l'établissement] pour l'année scolaire [année].\nNotre établissement catholique accueille les élèves dans un cadre éducatif fondé sur l'accompagnement, la discipline, l'exigence académique, les valeurs humaines et l'ouverture spirituelle.\nLes familles intéressées peuvent se rapprocher de l'administration pour connaître les modalités d'inscription.\nContact : [contact]\nAdresse : [adresse]",
+    },
+    synthesis:
+      "L'IA peut proposer un texte séduisant, mais seul le communicateur responsable peut garantir qu'il est vrai, juste, prudent et conforme à la mission.",
+  },
+
+  /** Séquence 6 — atelier pratique : produire, corriger et adapter. */
+  atelierPratique: {
+    durationMin: 20,
+    consigne:
+      "Un établissement catholique veut annoncer l'ouverture des inscriptions pour la nouvelle année scolaire. Il souhaite publier un message sur WhatsApp et Facebook. Le message doit être attractif, sobre, vrai, professionnel et pastoral.",
+    step1Prompt:
+      "Agis comme un assistant de communication pour un établissement catholique. Rédige un message annonçant l'ouverture des inscriptions pour la nouvelle année scolaire. Le message doit être destiné aux parents d'élèves. Le ton doit être professionnel, chaleureux, sobre et pastoral. Il doit valoriser l'accompagnement, la discipline, l'excellence, les valeurs humaines et spirituelles. Ne promets pas la réussite automatique. Ne dénigre aucun autre établissement. Prévois une version courte pour WhatsApp et une version plus développée pour Facebook. Utilise des crochets pour les informations à compléter : année scolaire, date, contacts, lieu et horaires.",
+    step2RawMessage:
+      "Notre école catholique est la meilleure solution pour garantir l'avenir de vos enfants. Avec nous, la réussite est certaine. Aucun autre établissement n'offre un encadrement aussi sérieux. Inscrivez vite vos enfants avant qu'il ne soit trop tard.",
+    step2Problems: [
+      "promesse excessive",
+      "comparaison dévalorisante",
+      "ton commercial",
+      "pression inutile",
+      "absence de données concrètes",
+      "manque de sobriété",
+      "risque de perte de crédibilité",
+    ],
+    versionWhatsapp:
+      "Chers parents,\nLes inscriptions pour l'année scolaire [année] sont ouvertes à [nom de l'établissement].\nNous accueillons les familles dans un cadre éducatif catholique fondé sur l'accompagnement, la discipline, l'excellence, les valeurs humaines et spirituelles.\nInformations et inscriptions : [contact] / [lieu] / [horaires].\nMerci de partager l'information autour de vous.",
+    versionFacebook:
+      "Les inscriptions sont ouvertes à [nom de l'établissement] pour l'année scolaire [année].\nNotre établissement catholique accueille les élèves dans un cadre éducatif qui associe exigence académique, accompagnement humain, discipline, vie communautaire et ouverture spirituelle.\nLes familles intéressées peuvent se rapprocher de l'administration pour obtenir les informations relatives aux niveaux disponibles, aux pièces à fournir et aux modalités d'inscription.\nContact : [contact]\nLieu : [adresse]\nHoraires : [horaires]\nEnsemble, construisons un environnement éducatif favorable à la croissance intellectuelle, humaine et spirituelle des enfants.",
+    criteres: ["clarté", "vérité", "ton pastoral", "prudence institutionnelle"],
+  },
+} as const;
