@@ -158,11 +158,17 @@ export function SlideDeck({ slides }: { slides: CommSlide[] }) {
     [slides.length],
   );
 
-  // Navigation clavier (← →, Home/End, F pour plein écran, N pour notes)
+  // Navigation clavier : seulement quand on est en plein écran ou quand le
+  // focus est à l'intérieur du conteneur (pour ne pas voler Espace/F/← → à
+  // la page entière). Le conteneur est focusable via tabIndex={0}.
   React.useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      const focusedInside =
+        containerRef.current?.contains(document.activeElement) ?? false;
+      if (!fullscreen && !focusedInside) return;
+
       if (e.key === "ArrowLeft" || e.key === "PageUp") {
         e.preventDefault();
         goPrev();
