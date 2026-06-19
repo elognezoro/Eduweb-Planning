@@ -329,9 +329,9 @@ input::-ms-clear {
    formation.
    -------------------------------------------------------------------------- */
 .formation-reader {
-  /* Base de lecture plus généreuse + interligne aéré */
-  font-size: 16.5px;
-  line-height: 1.65;
+  /* Base de lecture confortable pour sessions longues */
+  font-size: 18px;
+  line-height: 1.7;
 }
 .formation-reader p,
 .formation-reader li,
@@ -344,26 +344,41 @@ input::-ms-clear {
   letter-spacing: 0.005em;
 }
 /* Bumps spécifiques sur les utilities Tailwind utilisés dans les composants
-   de formation (les composants gardent leurs classes ; on agrandit juste
-   leur rendu dans ce scope sans changer le code). */
-.formation-reader .text-xs { font-size: 0.875rem; line-height: 1.55; }
-.formation-reader .text-\[10px\] { font-size: 0.8125rem; line-height: 1.5; }
-.formation-reader .text-\[10\.5px\] { font-size: 0.8125rem; line-height: 1.55; }
-.formation-reader .text-\[11px\] { font-size: 0.875rem; line-height: 1.55; }
-.formation-reader .text-\[11\.5px\] { font-size: 0.9rem; line-height: 1.6; }
-.formation-reader .text-\[12px\] { font-size: 0.9rem; line-height: 1.6; }
-.formation-reader .text-sm { font-size: 1rem; line-height: 1.65; }
-.formation-reader .text-base { font-size: 1.0625rem; line-height: 1.7; }
-.formation-reader .text-lg { font-size: 1.25rem; line-height: 1.6; }
-.formation-reader .text-xl { font-size: 1.5rem; line-height: 1.45; }
-.formation-reader .text-2xl { font-size: 1.85rem; line-height: 1.35; }
-.formation-reader .text-3xl { font-size: 2.15rem; line-height: 1.25; }
-.formation-reader .text-4xl { font-size: 2.5rem; line-height: 1.2; }
+   de formation (les composants gardent leurs classes ; on agrandit leur
+   rendu dans ce scope sans changer le code). */
+.formation-reader .text-xs { font-size: 0.95rem; line-height: 1.6; }
+.formation-reader .text-\[10px\] { font-size: 0.875rem; line-height: 1.55; }
+.formation-reader .text-\[10\.5px\] { font-size: 0.875rem; line-height: 1.55; }
+.formation-reader .text-\[11px\] { font-size: 0.9rem; line-height: 1.6; }
+.formation-reader .text-\[11\.5px\] { font-size: 0.95rem; line-height: 1.6; }
+.formation-reader .text-\[12px\] { font-size: 0.95rem; line-height: 1.6; }
+.formation-reader .text-\[13px\] { font-size: 1rem; line-height: 1.6; }
+.formation-reader .text-sm { font-size: 1.0625rem; line-height: 1.7; }
+.formation-reader .text-base { font-size: 1.1875rem; line-height: 1.75; }
+.formation-reader .text-lg { font-size: 1.4375rem; line-height: 1.6; }
+.formation-reader .text-xl { font-size: 1.6875rem; line-height: 1.45; }
+.formation-reader .text-2xl { font-size: 2.0625rem; line-height: 1.35; }
+.formation-reader .text-3xl { font-size: 2.4375rem; line-height: 1.25; }
+.formation-reader .text-4xl { font-size: 2.8125rem; line-height: 1.2; }
 /* Garder les chips/mentions sticky lisibles sans casser leur compacité. */
 .formation-reader nav.sticky button,
 .formation-reader nav.sticky a {
-  font-size: 0.78125rem;
+  font-size: 0.85rem;
 }
+
+/* ----------------------------------------------------------------------------
+   Animation page-turn pour les espaces de formation en mode livre
+   -------------------------------------------------------------------------- */
+@keyframes book-flip-in-next {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes book-flip-in-prev {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.book-page-enter-next { animation: book-flip-in-next 0.32s ease both; }
+.book-page-enter-prev { animation: book-flip-in-prev 0.32s ease both; }
 
 /* Animation douce d'apparition */
 @keyframes ew-fade-in {

@@ -150,7 +150,7 @@ export function SeminaireArchitecture({ seminaire }: { seminaire: Seminaire }) {
     <section className="overflow-hidden rounded-2xl border border-border bg-card">
       <div className="border-b border-border p-4">
         <p className="flex items-center gap-2 font-display text-sm font-bold uppercase tracking-wide text-ew-green-700">
-          <ListChecks className="h-4 w-4" /> Architecture pédagogique recommandée (LMS)
+          <ListChecks className="h-4 w-4" /> Architecture pédagogique
         </p>
       </div>
       <div className="overflow-x-auto">
@@ -253,7 +253,7 @@ export function SeminaireModulesList({ modules }: { modules: SeminaireModule[] }
   );
 }
 
-function ModuleBody({ module: m }: { module: SeminaireModule }) {
+export function ModuleBody({ module: m }: { module: SeminaireModule }) {
   return (
     <div className="border-t border-border p-5 space-y-5">
       <div className="rounded-xl bg-muted/30 p-3 text-xs text-muted-foreground">
