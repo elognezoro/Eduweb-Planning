@@ -17,7 +17,12 @@ import type { Apfc, ApfcActivity, Cafop, Etablissement, Inspection } from "@/lib
 import { hasPermission, PERMISSION_LABELS, type Permission } from "@/lib/permissions";
 import { generateUserUid } from "@/lib/uid";
 import type { UserRole } from "@/lib/roles";
-import type { CourseCohort, CourseEnrollment } from "@/lib/formations/types";
+import type {
+  CourseCohort,
+  CourseEnrollment,
+  ModuleAccessRule,
+  ModuleCompletion,
+} from "@/lib/formations/types";
 
 type LessonEntry = (typeof LESSON_BOOK_ENTRIES)[number];
 type Announcement = (typeof ANNOUNCEMENTS)[number];
@@ -275,6 +280,10 @@ interface StoreState {
   courseEnrollments: CourseEnrollment[];
   /** Cohortes nommées d'utilisateurs inscrits à un cours. */
   courseCohorts: CourseCohort[];
+  /** Règles d'accès configurées par module (prérequis, mode de complétion). */
+  moduleAccessRules: ModuleAccessRule[];
+  /** Traces de complétion par utilisateur, cours et module. */
+  moduleCompletions: ModuleCompletion[];
 }
 
 interface DataStore extends StoreState {
@@ -353,6 +362,14 @@ interface DataStore extends StoreState {
   updateCohort: (cohortId: string, patch: Partial<Pick<CourseCohort, "name" | "description">>) => void;
   /** Supprime une cohorte (les inscriptions individuelles restent). */
   removeCohort: (cohortId: string) => void;
+  /** Définit ou met à jour la règle d'accès d'un module (upsert). */
+  setModuleAccessRule: (rule: Omit<ModuleAccessRule, "id">) => void;
+  /** Supprime la règle d'accès d'un module (retour au comportement par défaut). */
+  clearModuleAccessRule: (courseId: string, moduleId: string) => void;
+  /** Marque un module comme terminé pour un utilisateur. */
+  markModuleCompleted: (input: Omit<ModuleCompletion, "id" | "completedAt">) => void;
+  /** Retire toutes les complétions d'un module pour un utilisateur. */
+  unmarkModuleCompleted: (userId: string, courseId: string, moduleId: string) => void;
   reset: () => void;
 }
 
@@ -381,6 +398,8 @@ const DEFAULTS: StoreState = {
   certificates: [],
   courseEnrollments: [],
   courseCohorts: [],
+  moduleAccessRules: [],
+  moduleCompletions: [],
 };
 
 // Incrémenter la version à chaque changement de schéma persisté (nouveaux champs/tranches) :
@@ -636,6 +655,67 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         courseCohorts: s.courseCohorts.filter((c) => c.id !== cohortId),
         courseEnrollments: s.courseEnrollments.map((e) =>
           e.cohortId === cohortId ? { ...e, cohortId: null } : e,
+        ),
+      })),
+    setModuleAccessRule: (rule) =>
+      setState((s) => {
+        const existing = s.moduleAccessRules.find(
+          (r) => r.courseId === rule.courseId && r.moduleId === rule.moduleId,
+        );
+        if (existing) {
+          return {
+            ...s,
+            moduleAccessRules: s.moduleAccessRules.map((r) =>
+              r.id === existing.id ? { ...existing, ...rule } : r,
+            ),
+          };
+        }
+        return {
+          ...s,
+          moduleAccessRules: [
+            { ...rule, id: genId("mar") },
+            ...s.moduleAccessRules,
+          ],
+        };
+      }),
+    clearModuleAccessRule: (courseId, moduleId) =>
+      setState((s) => ({
+        ...s,
+        moduleAccessRules: s.moduleAccessRules.filter(
+          (r) => !(r.courseId === courseId && r.moduleId === moduleId),
+        ),
+      })),
+    markModuleCompleted: (input) =>
+      setState((s) => {
+        const already = s.moduleCompletions.find(
+          (c) =>
+            c.userId === input.userId &&
+            c.courseId === input.courseId &&
+            c.moduleId === input.moduleId,
+        );
+        if (already) return s;
+        return {
+          ...s,
+          moduleCompletions: [
+            {
+              ...input,
+              id: genId("mco"),
+              completedAt: new Date().toISOString(),
+            },
+            ...s.moduleCompletions,
+          ],
+        };
+      }),
+    unmarkModuleCompleted: (userId, courseId, moduleId) =>
+      setState((s) => ({
+        ...s,
+        moduleCompletions: s.moduleCompletions.filter(
+          (c) =>
+            !(
+              c.userId === userId &&
+              c.courseId === courseId &&
+              c.moduleId === moduleId
+            ),
         ),
       })),
     reset: () => setState(DEFAULTS),

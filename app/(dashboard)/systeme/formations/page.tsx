@@ -7,7 +7,9 @@ import {
   Download,
   FileSpreadsheet,
   GraduationCap,
+  Lock,
   Plus,
+  Save,
   Search,
   Trash2,
   Upload,
@@ -15,6 +17,8 @@ import {
   UsersRound,
   BookOpen,
   Calendar,
+  GitBranch,
+  Unlock,
 } from "lucide-react";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Button } from "@/components/ui/button";
@@ -36,6 +40,11 @@ import {
   parseCohortsCsv,
   type CohortDraft,
 } from "@/lib/formations/csv-import";
+import {
+  completionModeLabel,
+  getAccessRule,
+  getCourseModuleList,
+} from "@/lib/formations/module-access";
 import { cn } from "@/lib/utils";
 
 /**
@@ -69,7 +78,7 @@ function FormationsContent() {
   const app = useApp();
   const courses = React.useMemo(() => sortedCourses(), []);
 
-  type Tab = "enrolled" | "cohorts" | "quick";
+  type Tab = "enrolled" | "cohorts" | "quick" | "access";
   const [tab, setTab] = React.useState<Tab>("quick");
   const [selectedCourseId, setSelectedCourseId] = React.useState<string>(courses[0]?.id ?? "");
 
@@ -156,14 +165,19 @@ function FormationsContent() {
           <TabButton active={tab === "cohorts"} onClick={() => setTab("cohorts")} icon={<UsersRound className="h-4 w-4" />}>
             Cohortes
           </TabButton>
+          <TabButton active={tab === "access"} onClick={() => setTab("access")} icon={<GitBranch className="h-4 w-4" />}>
+            Conditions d&apos;accès
+          </TabButton>
         </div>
 
         {tab === "quick" ? (
           <QuickEnrollPanel courseId={selectedCourseId} actor={app.user.displayName} />
         ) : tab === "enrolled" ? (
           <EnrolledPanel courseId={selectedCourseId} />
-        ) : (
+        ) : tab === "cohorts" ? (
           <CohortsPanel courseId={selectedCourseId} actor={app.user.displayName} />
+        ) : (
+          <AccessRulesPanel courseId={selectedCourseId} />
         )}
       </SectionCard>
     </div>
@@ -775,6 +789,235 @@ function CohortCard({
               ))}
             </ul>
           )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/* ============================================================================
+   ONGLET 4 — CONDITIONS D'ACCÈS PAR MODULE
+   ========================================================================== */
+function AccessRulesPanel({ courseId }: { courseId: string }) {
+  const modules = React.useMemo(() => getCourseModuleList(courseId), [courseId]);
+
+  if (modules.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-border bg-background/60 p-5 text-center text-sm italic text-muted-foreground">
+        Ce cours n&apos;est pas structuré en modules indépendants. Les conditions
+        d&apos;accès s&apos;appliquent aux cours modulaires (Magnifica Humanitas).
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg border border-ew-green-200 bg-ew-green-50/40 p-3 text-xs">
+        <p className="flex items-center gap-1.5 font-bold uppercase tracking-wide text-ew-green-700">
+          <Lock aria-hidden className="h-3.5 w-3.5" /> Comment ça marche ?
+        </p>
+        <p className="mt-1 text-foreground/90">
+          Pour chaque module, vous pouvez exiger qu&apos;un ou plusieurs autres modules
+          soient <strong>terminés</strong> avant que les apprenants ne puissent y accéder.
+          La complétion peut être <strong>validée manuellement</strong> par l&apos;apprenant,
+          <strong> automatique</strong> à la lecture, ou exiger un{" "}
+          <strong>score minimum à un quiz</strong>.
+        </p>
+        <p className="mt-1 text-muted-foreground italic">
+          Par défaut, tous les modules sont accessibles librement (aucun prérequis,
+          validation manuelle). L&apos;administrateur passe toujours, quel que soit
+          l&apos;état d&apos;avancement.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        {modules.map((m) => (
+          <AccessRuleCard key={m.id} courseId={courseId} module={m} modules={modules} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AccessRuleCard({
+  courseId,
+  module,
+  modules,
+}: {
+  courseId: string;
+  module: { id: string; num: number; title: string; displayTitle?: string };
+  modules: { id: string; num: number; title: string; displayTitle?: string }[];
+}) {
+  const store = useStore();
+  const current = getAccessRule(courseId, module.id, store.moduleAccessRules);
+  const [prereq, setPrereq] = React.useState<string[]>(current.prerequisiteModuleIds);
+  const [mode, setMode] = React.useState<typeof current.completionMode>(current.completionMode);
+  const [minScore, setMinScore] = React.useState<number>(current.minQuizScore ?? 70);
+  const [savedAt, setSavedAt] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    setPrereq(current.prerequisiteModuleIds);
+    setMode(current.completionMode);
+    setMinScore(current.minQuizScore ?? 70);
+  }, [current.prerequisiteModuleIds, current.completionMode, current.minQuizScore]);
+
+  function togglePrereq(id: string) {
+    setPrereq((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
+  function save() {
+    store.setModuleAccessRule({
+      courseId,
+      moduleId: module.id,
+      prerequisiteModuleIds: prereq,
+      completionMode: mode,
+      minQuizScore: mode === "quiz" ? minScore : undefined,
+    });
+    setSavedAt(Date.now());
+  }
+
+  function reset() {
+    store.clearModuleAccessRule(courseId, module.id);
+  }
+
+  const hasChanges =
+    JSON.stringify(prereq.slice().sort()) !==
+      JSON.stringify(current.prerequisiteModuleIds.slice().sort()) ||
+    mode !== current.completionMode ||
+    (mode === "quiz" && (current.minQuizScore ?? 70) !== minScore);
+
+  const eligible = modules.filter((m) => m.id !== module.id);
+
+  return (
+    <article className="rounded-2xl border border-border bg-card p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-wide text-ew-green-700">
+            Module {module.num}
+          </p>
+          <p className="font-display text-base font-bold text-foreground">{module.title}</p>
+          {module.displayTitle ? (
+            <p className="text-xs italic text-muted-foreground">{module.displayTitle}</p>
+          ) : null}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {prereq.length === 0 ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-ew-green-300 bg-ew-green-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-ew-green-800">
+              <Unlock aria-hidden className="h-3 w-3" /> Libre
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full border border-ew-gold-200 bg-ew-gold-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-ew-gold-700">
+              <Lock aria-hidden className="h-3 w-3" />
+              {prereq.length} prérequis
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1 rounded-full border border-border bg-background/60 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            Complétion · {completionModeLabel(mode)}
+          </span>
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-4 lg:grid-cols-3">
+        {/* Prérequis */}
+        <div className="lg:col-span-2">
+          <p className="text-xs font-bold uppercase tracking-wide text-ew-green-700">
+            Prérequis (modules à compléter avant celui-ci)
+          </p>
+          <div className="mt-2 flex max-h-[180px] flex-wrap gap-1 overflow-y-auto rounded-md border border-border bg-background/60 p-2">
+            {eligible.length === 0 ? (
+              <p className="text-xs italic text-muted-foreground">
+                Aucun autre module dans le cours.
+              </p>
+            ) : (
+              eligible.map((other) => {
+                const picked = prereq.includes(other.id);
+                return (
+                  <label
+                    key={other.id}
+                    className={cn(
+                      "flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 text-[11px]",
+                      picked
+                        ? "border-ew-green-600 bg-ew-green-100 text-ew-green-900"
+                        : "border-border bg-card text-foreground hover:bg-muted/40",
+                    )}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={picked}
+                      onChange={() => togglePrereq(other.id)}
+                      className="accent-ew-green-700"
+                    />
+                    <span>
+                      M{other.num} —{" "}
+                      {other.displayTitle ?? other.title.replace(/^Module \d+ — /, "")}
+                    </span>
+                  </label>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Critère de complétion */}
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-ew-green-700">
+            Critère de complétion du module
+          </p>
+          <select
+            value={mode}
+            onChange={(e) => setMode(e.target.value as typeof mode)}
+            className="mt-2 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="manual">Validation manuelle (par défaut)</option>
+            <option value="auto">Automatique à la lecture</option>
+            <option value="quiz">Quiz avec score minimum</option>
+          </select>
+          {mode === "quiz" ? (
+            <div className="mt-2">
+              <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                Score minimum requis (%)
+              </label>
+              <input
+                type="number"
+                value={minScore}
+                onChange={(e) =>
+                  setMinScore(Math.max(0, Math.min(100, Number(e.target.value))))
+                }
+                min={0}
+                max={100}
+                step={5}
+                className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+              />
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">
+          {savedAt && !hasChanges ? (
+            <span className="text-ew-green-700">
+              ✓ Règle enregistrée à{" "}
+              {new Date(savedAt).toLocaleTimeString("fr-FR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          ) : hasChanges ? (
+            <span className="italic">Modifications non enregistrées.</span>
+          ) : (
+            <span className="italic">Configuration actuelle.</span>
+          )}
+        </p>
+        <div className="flex gap-2">
+          {prereq.length > 0 || mode !== "manual" ? (
+            <Button variant="outline" size="sm" onClick={reset}>
+              Réinitialiser
+            </Button>
+          ) : null}
+          <Button size="sm" onClick={save} disabled={!hasChanges}>
+            <Save className="h-4 w-4" /> Enregistrer
+          </Button>
         </div>
       </div>
     </article>

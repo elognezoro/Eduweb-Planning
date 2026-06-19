@@ -10,7 +10,9 @@ import {
   Clock,
   FileDown,
   GraduationCap,
+  Lock,
   Printer,
+  RotateCcw,
   ScrollText,
   Sparkles,
   Target,
@@ -21,6 +23,14 @@ import { SeminaireQuizCard, ModuleBody } from "@/components/seminaires/seminaire
 import { MAGNIFICA_HUMANITAS } from "@/lib/seminaires/magnifica-humanitas";
 import { CourseGate } from "@/components/formations/course-gate";
 import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-book";
+import { useApp } from "@/components/app-shell/app-context";
+import { useStore } from "@/components/app-shell/data-store";
+import {
+  checkModuleAccess,
+  getAccessRule,
+  getModuleCompletion,
+  isModuleCompleted,
+} from "@/lib/formations/module-access";
 
 /**
  * Espace de formation Magnifica Humanitas — mode livre paginé.
@@ -252,11 +262,7 @@ export default function SeminaireMagnificaPage() {
   }
 
   function ModulePage({ module: m }: { module: (typeof s.modules)[number] }) {
-    return (
-      <div className="rounded-2xl border border-border bg-card p-1">
-        <ModuleBody module={m} />
-      </div>
-    );
+    return <GatedModulePage module={m} />;
   }
 
   function QuizPage() {
@@ -493,4 +499,215 @@ function KpiTile({ icon, label, value }: { icon: React.ReactNode; label: string;
 function shorten(s: string, max: number): string {
   if (s.length <= max) return s;
   return s.slice(0, max - 1).trimEnd() + "…";
+}
+
+/* ============================================================================
+   Page de module avec garde d'accès (prérequis) et bouton de complétion.
+   - Vérifie la règle d'accès configurée pour ce module dans le cours.
+   - Si bloqué : écran de verrou listant les prérequis non encore terminés.
+   - Si accessible : ModuleBody + barre de complétion en bas, dépendante du
+     mode (manuel / auto / quiz).
+   ========================================================================== */
+function GatedModulePage({ module: m }: { module: (typeof MAGNIFICA_HUMANITAS.modules)[number] }) {
+  const app = useApp();
+  const store = useStore();
+  const courseId = MAGNIFICA_HUMANITAS.meta.slug;
+  const isAdmin = app.effectiveRole === "admin";
+
+  const verdict = checkModuleAccess(
+    app.user.id,
+    isAdmin,
+    courseId,
+    m.id,
+    store.moduleAccessRules,
+    store.moduleCompletions,
+  );
+  const rule = getAccessRule(courseId, m.id, store.moduleAccessRules);
+  const completed = isModuleCompleted(app.user.id, courseId, m.id, store.moduleCompletions);
+  const completion = getModuleCompletion(app.user.id, courseId, m.id, store.moduleCompletions);
+
+  // Mode `auto` : marquer comme complété au premier rendu accessible.
+  React.useEffect(() => {
+    if (!verdict.accessible || isAdmin) return;
+    if (rule.completionMode !== "auto") return;
+    if (completed) return;
+    store.markModuleCompleted({
+      userId: app.user.id,
+      courseId,
+      moduleId: m.id,
+      source: "auto",
+    });
+  }, [verdict.accessible, isAdmin, rule.completionMode, completed, app.user.id, courseId, m.id, store]);
+
+  if (!verdict.accessible) {
+    return <LockedModuleView module={m} missingIds={verdict.missingPrerequisites} />;
+  }
+
+  function toggleCompletion() {
+    if (completed) {
+      store.unmarkModuleCompleted(app.user.id, courseId, m.id);
+    } else {
+      store.markModuleCompleted({
+        userId: app.user.id,
+        courseId,
+        moduleId: m.id,
+        source: "manual",
+      });
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-2xl border border-border bg-card p-1">
+        <ModuleBody module={m} />
+      </div>
+      <CompletionBar
+        completed={completed}
+        completedAt={completion?.completedAt}
+        mode={rule.completionMode}
+        minQuizScore={rule.minQuizScore ?? 70}
+        isAdmin={isAdmin}
+        onToggle={toggleCompletion}
+      />
+    </div>
+  );
+}
+
+function CompletionBar({
+  completed,
+  completedAt,
+  mode,
+  minQuizScore,
+  isAdmin,
+  onToggle,
+}: {
+  completed: boolean;
+  completedAt?: string;
+  mode: "manual" | "auto" | "quiz";
+  minQuizScore: number;
+  isAdmin: boolean;
+  onToggle: () => void;
+}) {
+  const date = completedAt
+    ? new Date(completedAt).toLocaleDateString("fr-FR", { dateStyle: "long" })
+    : null;
+
+  return (
+    <div
+      className={cn(
+        "flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-4",
+        completed
+          ? "border-ew-green-300 bg-ew-green-50/60"
+          : "border-border bg-card",
+      )}
+    >
+      <div className="flex items-start gap-3">
+        <span
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+            completed
+              ? "bg-ew-green-700 text-white"
+              : "bg-ew-gold-100 text-ew-gold-700",
+          )}
+        >
+          <CheckCircle2 aria-hidden className="h-5 w-5" />
+        </span>
+        <div>
+          <p className="font-display text-sm font-bold text-foreground">
+            {completed ? "Module terminé" : "Validation de la complétion"}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {completed ? (
+              <>
+                Marqué comme terminé{date ? ` le ${date}` : ""}. Les modules suivants
+                qui dépendaient de celui-ci sont désormais accessibles.
+              </>
+            ) : mode === "manual" ? (
+              <>
+                Lorsque vous estimez avoir terminé ce module, cliquez sur «&nbsp;Marquer
+                comme terminé&nbsp;» pour débloquer les modules qui en dépendent.
+              </>
+            ) : mode === "auto" ? (
+              <>Ce module est marqué comme terminé automatiquement à la lecture.</>
+            ) : (
+              <>
+                Pour valider ce module, atteignez un score d&apos;au moins{" "}
+                <strong>{minQuizScore}%</strong> à son quiz. Vous pouvez aussi le
+                marquer comme terminé manuellement après vérification.
+              </>
+            )}
+          </p>
+        </div>
+      </div>
+      <Button
+        size="sm"
+        variant={completed ? "outline" : "default"}
+        onClick={onToggle}
+        disabled={!isAdmin && completed && mode === "auto"}
+      >
+        {completed ? (
+          <>
+            <RotateCcw className="h-4 w-4" /> Marquer comme non terminé
+          </>
+        ) : (
+          <>
+            <CheckCircle2 className="h-4 w-4" /> Marquer comme terminé
+          </>
+        )}
+      </Button>
+    </div>
+  );
+}
+
+function LockedModuleView({
+  module: m,
+  missingIds,
+}: {
+  module: (typeof MAGNIFICA_HUMANITAS.modules)[number];
+  missingIds: string[];
+}) {
+  const missingModules = MAGNIFICA_HUMANITAS.modules.filter((other) =>
+    missingIds.includes(other.id),
+  );
+  return (
+    <div className="mx-auto flex max-w-2xl flex-col items-center gap-5 py-10 text-center">
+      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-ew-gold-100 text-ew-gold-700">
+        <Lock aria-hidden className="h-7 w-7" />
+      </span>
+      <div>
+        <h2 className="font-display text-2xl font-extrabold text-foreground">Module verrouillé</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          L&apos;accès au <strong>Module {m.num}</strong> nécessite que vous ayez
+          d&apos;abord terminé le(s) module(s) suivant(s) :
+        </p>
+      </div>
+      <ul className="w-full space-y-2 text-left">
+        {missingModules.map((mm) => (
+          <li
+            key={mm.id}
+            className="flex items-start gap-3 rounded-xl border border-border bg-card p-3"
+          >
+            <span
+              aria-hidden
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ew-gold-100 text-ew-gold-700"
+            >
+              <Lock className="h-4 w-4" />
+            </span>
+            <div>
+              <p className="font-display font-bold text-foreground">{mm.title}</p>
+              <p className="text-xs italic text-muted-foreground">{mm.displayTitle}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs italic text-muted-foreground">
+        Revenez aux pages des prérequis avec ← ou via le sommaire au pied du livre,
+        terminez-les, puis ce module sera automatiquement déverrouillé.
+      </p>
+    </div>
+  );
+}
+
+function cn(...classes: (string | false | null | undefined)[]): string {
+  return classes.filter(Boolean).join(" ");
 }

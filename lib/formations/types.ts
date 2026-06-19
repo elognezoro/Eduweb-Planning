@@ -76,6 +76,44 @@ export interface CourseEnrollment {
   notes?: string;
 }
 
+/**
+ * Règle d'accès à un module d'un cours.
+ *
+ * Si `prerequisiteModuleIds` est non vide, l'utilisateur doit avoir
+ * complété tous les modules listés pour pouvoir accéder à ce module.
+ * Le critère de complétion (`completionMode`) détermine comment un
+ * module est considéré comme terminé :
+ *  - `manual` : l'utilisateur clique sur « Marquer comme terminé »
+ *  - `auto`   : marqué automatiquement à la première visite
+ *  - `quiz`   : nécessite un score minimum à un quiz du module
+ *
+ * L'administrateur peut configurer ces règles par cours et par module
+ * via la page `/systeme/formations` (onglet Conditions d'accès).
+ */
+export interface ModuleAccessRule {
+  id: string;
+  courseId: string;
+  moduleId: string;
+  prerequisiteModuleIds: string[];
+  completionMode: "manual" | "auto" | "quiz";
+  /** Pour `quiz` : score minimum requis en %. Par défaut 70. */
+  minQuizScore?: number;
+}
+
+/** Trace de complétion d'un module par un utilisateur. */
+export interface ModuleCompletion {
+  id: string;
+  userId: string;
+  courseId: string;
+  moduleId: string;
+  /** ISO timestamp. */
+  completedAt: string;
+  /** Source de l'enregistrement. */
+  source: "manual" | "auto" | "quiz" | "admin";
+  /** Score atteint si source = quiz (en %). */
+  score?: number;
+}
+
 /** Cohorte = groupe nommé d'utilisateurs inscrits à un cours. */
 export interface CourseCohort {
   id: string;
