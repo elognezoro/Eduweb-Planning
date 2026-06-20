@@ -277,6 +277,35 @@ export const guideParent: Omit<GuideContent, "icon"> = {
         },
       ],
     },
+    {
+      id: "centre-formation",
+      title: "8. Centre de formation",
+      intro: "Le Centre de formation est la bibliothèque de ressources d'accompagnement d'EduWeb Planner. Pour un parent, il sert avant tout à retrouver le présent guide et à consulter la documentation qui vous concerne ; les séminaires interactifs y sont surtout destinés au personnel de l'établissement.",
+      sections: [
+        {
+          title: "Accéder au Centre de formation et à votre guide",
+          body: "Le Centre de formation est accessible depuis l'Aide. Il rassemble trois types de ressources : des séminaires interactifs, un manuel académique et les guides utilisateurs par rôle. En tant que parent, vous y consultez le guide qui vous est dédié — celui-ci — pour retrouver à tout moment la marche à suivre sur chaque module. L'accès au guide et au manuel vous est ouvert automatiquement selon votre rôle, sans inscription préalable.",
+          steps: [
+            {
+              instruction: "Ouvrez le Centre de formation depuis le menu.",
+              navigation: "Accueil → Aide",
+            },
+            {
+              instruction: "Dans la bibliothèque, repérez la section des guides utilisateurs et ouvrez le guide Parent d'élève.",
+              tip: "Conservez ce guide en favori : c'est la référence pour toutes vos consultations courantes.",
+            },
+            {
+              instruction: "Parcourez le sommaire pour atteindre directement le chapitre recherché (emploi du temps, notes, communication…).",
+            },
+          ],
+          bestPractices: [
+            "Revenez au Centre de formation chaque fois qu'une manipulation vous échappe : le guide y est mis à jour au fil des évolutions de l'application.",
+            "Réservez les séminaires interactifs au personnel : l'accès aux formations nécessite une inscription, le plus souvent gérée par l'établissement.",
+          ],
+          caveat: "L'accès à une formation (séminaire) requiert une inscription, attribuée par un administrateur ou un gestionnaire. Le guide et le manuel restent, eux, accessibles directement selon votre rôle.",
+        },
+      ],
+    },
   ],
   faq: [
     {
@@ -319,6 +348,14 @@ export const guideParent: Omit<GuideContent, "icon"> = {
       question: "Puis-je consulter EduWeb Planner depuis mon téléphone ?",
       answer: "Oui. L'interface s'adapte automatiquement aux écrans mobiles. Utilisez votre navigateur habituel avec la même adresse que sur ordinateur.",
     },
+    {
+      question: "Où trouver le guide d'utilisation de l'espace parent ?",
+      answer: "Dans le Centre de formation, accessible via Accueil → Aide. Ouvrez la section des guides utilisateurs et sélectionnez le guide Parent d'élève : il est mis à jour au fil des évolutions de l'application.",
+    },
+    {
+      question: "Puis-je m'inscrire aux séminaires interactifs du Centre de formation ?",
+      answer: "Les séminaires sont surtout destinés au personnel de l'établissement et leur accès nécessite une inscription gérée par un administrateur ou un gestionnaire. En tant que parent, vous accédez librement au guide et au manuel, sans inscription.",
+    },
   ],
   glossary: [
     {
@@ -360,6 +397,14 @@ export const guideParent: Omit<GuideContent, "icon"> = {
     {
       term: "Académie Premium",
       definition: "Offre optionnelle de ressources pédagogiques complémentaires, accessible après souscription distincte du suivi scolaire standard.",
+    },
+    {
+      term: "Centre de formation",
+      definition: "Bibliothèque de ressources d'accompagnement accessible via Accueil → Aide, regroupant les séminaires interactifs, le manuel académique et les guides utilisateurs par rôle.",
+    },
+    {
+      term: "Séminaire interactif",
+      definition: "Formation en ligne paginée (diapositives, ateliers auto-corrigés, livret et certificat) proposée dans le Centre de formation. Son accès requiert une inscription et vise surtout le personnel de l'établissement.",
     },
   ],
 };

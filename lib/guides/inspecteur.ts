@@ -431,6 +431,103 @@ export const guideInspecteur: Omit<GuideContent, "icon"> = {
         },
       ],
     },
+    {
+      id: "centre-formation",
+      title: "8. Centre de formation",
+      intro: "EduWeb Planner met à disposition un Centre de formation accessible depuis le menu Accueil → Aide. Pour l'inspecteur, cet espace remplit une double fonction : se perfectionner en suivant des séminaires interactifs, et superviser la montée en compétence des acteurs de son périmètre. Ce chapitre vous guide pour suivre une formation jusqu'à l'obtention du certificat, et pour accompagner les apprenants dans leur progression.",
+      sections: [
+        {
+          title: "8.1 Découvrir le Centre de formation",
+          body: "Le Centre de formation est une bibliothèque de ressources de perfectionnement. On y trouve trois types de contenus : des séminaires interactifs (présentés sous forme de « livre numérique » paginé), un manuel académique, et les guides utilisateurs par rôle — dont celui que vous consultez actuellement. Trois séminaires sont disponibles : « Magnifica Humanitas », « Le numérique au service de la communication éducative et pastorale » (SENEC) et « L'intelligence artificielle au service de la communication éducative et pastorale » (SENEC, d'une durée de 2 h 30).",
+          steps: [
+            {
+              instruction: "Ouvrez le Centre de formation.",
+              navigation: "Menu Accueil → Aide",
+            },
+            {
+              instruction: "Repérez les trois espaces : séminaires interactifs, manuel académique et guides par rôle.",
+            },
+            {
+              instruction: "Parcourez le sommaire de chaque séminaire pour situer les contenus utiles à votre supervision.",
+              tip: "Le manuel et les guides sont accessibles automatiquement selon votre rôle ; les séminaires requièrent une inscription.",
+            },
+          ],
+          bestPractices: [
+            "Réservez régulièrement un temps de perfectionnement pour rester à jour sur les pratiques pédagogiques et numériques.",
+            "Repérez en amont les séminaires pertinents pour les enseignants de votre périmètre afin de pouvoir les orienter.",
+          ],
+        },
+        {
+          title: "8.2 S'inscrire à un séminaire de perfectionnement",
+          body: "L'accès à un séminaire requiert une inscription. Celle-ci est réalisée par un administrateur ou un gestionnaire de la formation : inscription nominative, par cohorte, ou par import CSV d'adresses e-mail. Certaines ressources (manuel académique, guides par rôle) sont en revanche ouvertes automatiquement selon votre rôle, sans démarche particulière. Si un séminaire que vous souhaitez suivre n'apparaît pas dans votre espace, sollicitez votre administrateur ou gestionnaire pour être inscrit.",
+          steps: [
+            {
+              instruction: "Vérifiez dans le Centre de formation les séminaires auxquels vous avez accès.",
+              navigation: "Menu Accueil → Aide",
+            },
+            {
+              instruction: "Si un séminaire est verrouillé, demandez votre inscription à votre administrateur ou gestionnaire de formation.",
+              tip: "Précisez l'intitulé exact du séminaire et l'adresse e-mail de votre compte pour faciliter l'inscription.",
+            },
+            {
+              instruction: "Une fois inscrit, ouvrez le séminaire : vous y entrez avec le rôle de formation Étudiant (apprenant).",
+            },
+          ],
+          caveat: "Les rôles de formation sont propres aux espaces de formation et attribués par inscription. Votre rôle d'Inspecteur sur la plateforme ne vous confère aucun privilège particulier dans un séminaire : vous y êtes apprenant tant que vous n'avez pas été inscrit avec un rôle supérieur.",
+        },
+        {
+          title: "8.3 Suivre un séminaire et obtenir son certificat",
+          body: "Chaque séminaire fonctionne en mode « livre numérique » paginé : vous naviguez au clavier avec les flèches ← et →, ouvrez le sommaire et passez en plein écran avec la touche F. Un séminaire combine des diapositives (visionneuse ePub, support PowerPoint téléchargeable, lecture audio des pages et des consignes) et des ateliers interactifs auto-corrigés : diagnostic de maturité, QCM, matrice ou check-list, scénario, correction d'un message généré par IA, et une auto-évaluation finale assortie d'un bilan. À l'issue du parcours, vous disposez d'un livret académique imprimable (PDF via Ctrl+P), d'un export Word (.docx) et de la délivrance d'un certificat de fin.",
+          steps: [
+            {
+              instruction: "Ouvrez le séminaire et progressez page par page avec les flèches ← et →.",
+              navigation: "Menu Accueil → Aide → un séminaire",
+              tip: "La touche F ouvre le sommaire et le plein écran ; la lecture audio facilite le suivi des consignes.",
+            },
+            {
+              instruction: "Réalisez chaque atelier interactif : diagnostic, QCM, matrice, scénario et correction de message IA.",
+            },
+            {
+              instruction: "Terminez par l'auto-évaluation finale et consultez votre bilan.",
+            },
+            {
+              instruction: "Imprimez le livret académique (Ctrl+P) ou exportez-le en Word, puis récupérez votre certificat de fin.",
+              tip: "Conservez le certificat : il atteste de votre perfectionnement auprès de votre DRENA.",
+            },
+          ],
+          bestPractices: [
+            "Réalisez les ateliers auto-corrigés sérieusement : le bilan final reflète votre réelle maîtrise.",
+            "Archivez le livret et le certificat dans votre dossier professionnel pour valoriser votre formation continue.",
+          ],
+        },
+        {
+          title: "8.4 Superviser la montée en compétence des apprenants",
+          body: "En tant qu'inspecteur, vous pouvez être inscrit sur un séminaire avec un rôle de formation supérieur à celui d'Étudiant. Les rôles de formation, par ordre décroissant, sont : Admin (contrôle total), Gestionnaire (gère participants et cohortes, attribue les rôles jusqu'à enseignant/tuteur, valide la réussite), Enseignant (anime : consulte et critique les productions, publie ses appréciations, valide la réussite et délivre les certificats), Tuteur (accompagne : consulte et critique les productions, publie ses retours, mais ne valide pas la réussite) et Étudiant (réalise les activités et soumet ses productions). Un même utilisateur peut être étudiant sur une formation et enseignant sur une autre. La gestion des inscriptions et des rôles s'effectue dans Système → Inscriptions aux formations, espace réservé aux profils habilités.",
+          steps: [
+            {
+              instruction: "Ouvrez la gestion des inscriptions aux formations (si vous y êtes habilité).",
+              navigation: "Menu Système → Inscriptions aux formations",
+            },
+            {
+              instruction: "Inscrivez les stagiaires comme Étudiants et les collaborateurs habilités comme Enseignants ou Tuteurs.",
+              tip: "La recherche d'un utilisateur fonctionne par nom, par e-mail ou par rôle.",
+            },
+            {
+              instruction: "En tant qu'Enseignant ou Tuteur de la formation, consultez et critiquez les productions des apprenants, puis publiez vos retours.",
+            },
+            {
+              instruction: "Si vous validez la réussite (rôle Enseignant ou Gestionnaire), délivrez les certificats aux apprenants ayant atteint les objectifs.",
+              warning: "Le Tuteur publie des retours mais ne valide pas la réussite : seuls les rôles Enseignant et supérieurs délivrent les certificats.",
+            },
+          ],
+          bestPractices: [
+            "Articulez le suivi des séminaires avec vos recommandations d'inspection : une formation peut constituer un axe de progrès actionnable.",
+            "Privilégiez des retours constructifs et factuels sur les productions, dans le même esprit que vos restitutions d'inspection.",
+          ],
+          caveat: "L'accès à Système → Inscriptions aux formations et la validation de la réussite dépendent du rôle de formation qui vous a été attribué par inscription, et non de votre rôle d'Inspecteur sur la plateforme.",
+        },
+      ],
+    },
   ],
   faq: [
     {
@@ -468,6 +565,14 @@ export const guideInspecteur: Omit<GuideContent, "icon"> = {
     {
       question: "Puis-je consulter les anciens rapports d'inspection d'un enseignant ?",
       answer: "Oui, depuis le module Rapports d'inspection, en filtrant par enseignant. L'historique vous permet d'apprécier la trajectoire professionnelle et l'évolution des recommandations dans le temps.",
+    },
+    {
+      question: "Comment accéder à un séminaire de perfectionnement et obtenir un certificat ?",
+      answer: "Rendez-vous dans le Centre de formation (Menu Accueil → Aide). L'accès à un séminaire requiert une inscription, réalisée par un administrateur ou un gestionnaire (nominative, par cohorte ou par import CSV). Une fois inscrit, suivez le séminaire en mode livre numérique (navigation au clavier ← →, touche F pour le sommaire), réalisez les ateliers auto-corrigés et l'auto-évaluation finale, puis récupérez votre livret académique (PDF via Ctrl+P ou export Word) et votre certificat de fin.",
+    },
+    {
+      question: "Mon rôle d'Inspecteur me donne-t-il un statut particulier dans une formation ?",
+      answer: "Non. Les rôles de formation sont propres aux espaces de formation et attribués par inscription. Vous êtes apprenant (Étudiant) par défaut. Pour superviser des apprenants — consulter et critiquer leurs productions, publier des retours, voire valider la réussite et délivrer des certificats — vous devez être inscrit avec un rôle supérieur (Tuteur, Enseignant, Gestionnaire) via Système → Inscriptions aux formations. Un même utilisateur peut être étudiant sur une formation et enseignant sur une autre.",
     },
   ],
   glossary: [
@@ -518,6 +623,18 @@ export const guideInspecteur: Omit<GuideContent, "icon"> = {
     {
       term: "Plan annuel d'inspection",
       definition: "Programmation prévisionnelle des missions sur une année scolaire, articulant inspections ordinaires, visites de suivi et missions thématiques.",
+    },
+    {
+      term: "Séminaire interactif",
+      definition: "Formation de perfectionnement du Centre de formation, présentée en mode « livre numérique » paginé (navigation au clavier ← →, touche F pour le sommaire). Elle combine diapositives (visionneuse ePub, support PowerPoint, lecture audio) et ateliers auto-corrigés, et débouche sur un livret académique imprimable, un export Word et un certificat de fin.",
+    },
+    {
+      term: "Rôle de formation",
+      definition: "Rôle propre aux espaces de formation, attribué par inscription et indépendant du rôle sur la plateforme. Par ordre décroissant : Admin, Gestionnaire, Enseignant, Tuteur et Étudiant (apprenant). Un même utilisateur peut être étudiant sur une formation et enseignant sur une autre.",
+    },
+    {
+      term: "Inscription aux formations",
+      definition: "Démarche, réalisée par un administrateur ou un gestionnaire (nominative, par cohorte ou par import CSV d'e-mails), qui ouvre l'accès à un séminaire et fixe le rôle de formation du participant. Elle se gère dans Système → Inscriptions aux formations.",
     },
   ],
 };

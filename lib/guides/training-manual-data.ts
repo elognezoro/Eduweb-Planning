@@ -2143,6 +2143,18 @@ export const TRAINING_PROGRESSION: ManuelProgression = {
       references: ["M05", "M06"],
     },
     {
+      terme: "Centre de formation",
+      definition:
+        "Bibliothèque de formation d'EduWeb Planner, accessible depuis Accueil → Aide (route /aide), regroupant les séminaires interactifs, le manuel académique et les guides utilisateurs par rôle.",
+      references: ["Syllabus", "M01"],
+    },
+    {
+      terme: "Certificat de fin",
+      definition:
+        "Attestation délivrée à l'issue d'un séminaire interactif validé, portant l'identité visuelle de l'institution (cachet et signature).",
+      references: ["Syllabus", "M01"],
+    },
+    {
       terme: "Circonscription",
       definition:
         "Échelon territorial de pilotage pédagogique placé sous la responsabilité d'un inspecteur.",
@@ -2242,6 +2254,12 @@ export const TRAINING_PROGRESSION: ManuelProgression = {
       references: ["Syllabus", "M01"],
     },
     {
+      terme: "Inscriptions aux formations",
+      definition:
+        "Page du menu Système, réservée aux profils habilités, où l'on inscrit les participants à une formation (nominativement, par cohorte ou par import CSV d'adresses e-mail) et où l'on attribue les rôles de formation. La recherche d'un utilisateur s'effectue par nom, e-mail ou rôle.",
+      references: ["Syllabus", "M01"],
+    },
+    {
       terme: "Inspecteur",
       definition:
         "Cadre chargé du contrôle pédagogique et de la rédaction des rapports d'inspection.",
@@ -2320,9 +2338,21 @@ export const TRAINING_PROGRESSION: ManuelProgression = {
       references: ["M05", "M06"],
     },
     {
+      terme: "Rôle de formation",
+      definition:
+        "Habilitation propre aux espaces de formation (admin, gestionnaire, enseignant, tuteur, étudiant), attribuée par inscription et indépendante du rôle métier de la plateforme : un même utilisateur peut être étudiant sur une formation et enseignant sur une autre.",
+      references: ["Syllabus", "M01"],
+    },
+    {
       terme: "Sanction",
       definition: "Mesure disciplinaire enregistrée par l'éducateur dans le dossier de l'élève.",
       references: ["M06"],
+    },
+    {
+      terme: "Séminaire interactif",
+      definition:
+        "Ressource du Centre de formation présentée en mode livre numérique paginé (navigation au clavier : flèches, F pour le plein écran, sommaire), combinant diapositives (visionneuse ePub, support PowerPoint, lecture audio), ateliers auto-corrigés, livret académique imprimable, export Word et certificat de fin. Exemples : « Magnifica Humanitas » et les séminaires SENEC (numérique, intelligence artificielle).",
+      references: ["Syllabus", "M01"],
     },
     {
       terme: "Signature numérique",
@@ -2424,4 +2454,6 @@ export const TRAINING_ABBREVIATIONS: { code: string; meaning: string }[] = [
   { code: "CSV", meaning: "Comma-Separated Values — fichier de données tabulaires" },
   { code: "SMS", meaning: "Short Message Service — message texte court" },
   { code: "i18n", meaning: "Internationalisation (basculement multilingue)" },
+  { code: "SENEC", meaning: "Service du Numérique pour l'Éducation et la Communication (séminaires)" },
+  { code: "ePub", meaning: "Electronic Publication — format de livre numérique" },
 ];

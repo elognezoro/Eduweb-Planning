@@ -474,6 +474,108 @@ export const guideChefEtablissement: Omit<GuideContent, "icon"> = {
         },
       ],
     },
+    {
+      id: "centre-formation",
+      title: "9. Centre de formation",
+      intro: "Le Centre de formation est la bibliothèque pédagogique d'EduWeb Planner : séminaires interactifs, manuel académique et guides utilisateurs par rôle. En tant que chef d'établissement, vous y avez une double posture : apprenant qui suit lui-même les séminaires et obtient un certificat, et responsable de formation de votre équipe, à qui vous pouvez inscrire vos collaborateurs, animer un séminaire et valider leur réussite.",
+      sections: [
+        {
+          title: "Accéder au Centre de formation et explorer les ressources",
+          body: "Le Centre de formation s'ouvre depuis le menu Accueil, rubrique Aide. Vous y trouvez trois familles de ressources : les séminaires interactifs (formations animées, présentées en mode « livre numérique » paginé), le manuel académique et les guides utilisateurs par rôle. Les séminaires disponibles couvrent « Magnifica Humanitas », « Le numérique au service de la communication éducative et pastorale » (SENEC) et « L'intelligence artificielle au service de la communication éducative et pastorale » (SENEC, d'une durée de 2 h 30).",
+          steps: [
+            {
+              instruction: "Ouvrir le Centre de formation depuis le menu d'accueil.",
+              navigation: "Menu Accueil → Aide",
+            },
+            {
+              instruction: "Parcourir la bibliothèque : séminaires interactifs, manuel académique et guides par rôle.",
+            },
+            {
+              instruction: "Ouvrir un séminaire pour le feuilleter en mode livre numérique paginé.",
+              tip: "Naviguez au clavier avec les flèches ← et →, la touche F pour le plein écran, et le sommaire pour atteindre directement une page ou un atelier.",
+            },
+          ],
+          caveat: "L'accès à une formation requiert une inscription préalable. Le manuel et les guides peuvent être ouverts automatiquement selon votre rôle ; les séminaires supposent une inscription nominative.",
+        },
+        {
+          title: "Suivre un séminaire et obtenir votre certificat",
+          body: "Chaque séminaire combine des diapositives (visionneuse ePub, support PowerPoint téléchargeable, lecture audio des pages et des consignes) et des ateliers interactifs auto-corrigés : diagnostic de maturité, QCM, matrice ou check-list, scénario, correction d'un message généré par IA, et auto-évaluation finale avec bilan. À l'issue du parcours, un livret académique imprimable, un export Word et un certificat de fin attestent votre formation. Suivre vous-même un séminaire vous met en position de mieux l'animer ensuite auprès de votre équipe.",
+          steps: [
+            {
+              instruction: "Depuis le Centre de formation, ouvrir un séminaire auquel vous êtes inscrit.",
+              navigation: "Menu Accueil → Aide → Séminaires interactifs",
+            },
+            {
+              instruction: "Lire les diapositives et écouter, au besoin, la lecture audio des pages et des consignes.",
+            },
+            {
+              instruction: "Réaliser les ateliers interactifs : diagnostic, QCM, matrice, scénario, correction de message IA, puis l'auto-évaluation finale.",
+              tip: "Le bilan de l'auto-évaluation vous indique les points à consolider avant de vous présenter comme animateur.",
+            },
+            {
+              instruction: "Imprimer le livret académique avec Ctrl+P ou télécharger l'export Word (.docx).",
+            },
+            {
+              instruction: "Récupérer le certificat de fin une fois le parcours achevé.",
+            },
+          ],
+          bestPractices: [
+            "Suivez intégralement un séminaire avant de l'animer pour votre équipe : vous en maîtriserez les ateliers et les pièges.",
+            "Conservez votre certificat dans votre dossier professionnel et dans les archives de l'établissement.",
+          ],
+        },
+        {
+          title: "Inscrire et suivre vos collaborateurs (rôle Gestionnaire)",
+          body: "L'accès à une formation passe par une inscription, réalisée par un administrateur ou un gestionnaire. En tant que chef d'établissement, vous pouvez être désigné gestionnaire d'une formation destinée à votre équipe : vous inscrivez alors vos collaborateurs, organisez les cohortes et attribuez les rôles de formation. L'inscription se fait de façon nominative, par cohorte, ou par import CSV d'adresses e-mail. Tout se pilote dans Système → Inscriptions aux formations, réservé aux profils habilités.",
+          steps: [
+            {
+              instruction: "Ouvrir Inscriptions aux formations depuis le menu Système.",
+              navigation: "Menu Système → Inscriptions aux formations",
+            },
+            {
+              instruction: "Sélectionner la formation concernée, puis rechercher l'utilisateur par nom, e-mail ou rôle.",
+            },
+            {
+              instruction: "Inscrire vos stagiaires comme étudiants, et vos collaborateurs comme enseignants ou tuteurs selon leur mission.",
+              tip: "Pour une promotion entière, utilisez l'inscription par cohorte ou l'import CSV d'adresses e-mail.",
+            },
+            {
+              instruction: "Suivre la progression des inscrits et ajuster les rôles si nécessaire.",
+              warning: "Les rôles de formation sont propres à chaque formation : un même collaborateur peut être étudiant sur l'une et enseignant sur une autre.",
+            },
+          ],
+          bestPractices: [
+            "Constituez des cohortes cohérentes (par cycle, par discipline) pour simplifier le suivi et la validation.",
+            "Vérifiez l'orthographe des adresses e-mail avant un import CSV pour éviter les inscriptions perdues.",
+          ],
+        },
+        {
+          title: "Animer un séminaire et valider la réussite (rôle Enseignant ou Tuteur)",
+          body: "Sur une formation où vous êtes inscrit comme enseignant, vous animez : vous consultez et critiquez les productions des apprenants, publiez vos appréciations, validez la réussite et délivrez les certificats. Comme tuteur, vous accompagnez de la même façon — consultation et critique des productions, publication de vos retours — mais sans valider la réussite ni délivrer de certificat. La hiérarchie des rôles de formation est, par ordre décroissant : Admin, Gestionnaire, Enseignant, Tuteur, Étudiant.",
+          steps: [
+            {
+              instruction: "Ouvrir la formation que vous animez depuis le Centre de formation.",
+              navigation: "Menu Accueil → Aide → Séminaires interactifs",
+            },
+            {
+              instruction: "Consulter les productions soumises par les apprenants et formuler vos critiques.",
+            },
+            {
+              instruction: "Publier vos appréciations afin que chaque apprenant en prenne connaissance.",
+            },
+            {
+              instruction: "En tant qu'enseignant, valider la réussite et délivrer les certificats de fin aux apprenants ayant atteint les objectifs.",
+              warning: "Le rôle Tuteur publie des retours mais ne valide pas la réussite : seuls l'enseignant, le gestionnaire ou l'admin peuvent valider et certifier.",
+            },
+          ],
+          bestPractices: [
+            "Critiquez les productions de façon constructive et datée pour garder une trace pédagogique exploitable.",
+            "Ne validez la réussite qu'après vérification de l'auto-évaluation finale et des ateliers attendus.",
+          ],
+          caveat: "Les rôles de formation s'attribuent par inscription et restent indépendants de votre rôle applicatif dans EduWeb Planner : être chef d'établissement ne vous donne pas automatiquement le rôle Enseignant sur une formation.",
+        },
+      ],
+    },
   ],
   faq: [
     {
@@ -515,6 +617,14 @@ export const guideChefEtablissement: Omit<GuideContent, "icon"> = {
     {
       question: "Que faire si la configuration du calendrier est erronée après le démarrage de l'année ?",
       answer: "Corrigez-la avec prudence depuis Configuration et vérifiez l'impact sur les bulletins déjà générés. En cas de doute, contactez le support avant toute modification.",
+    },
+    {
+      question: "Comment inscrire mon équipe à un séminaire du Centre de formation ?",
+      answer: "Si vous êtes gestionnaire de la formation, ouvrez Système → Inscriptions aux formations, sélectionnez le séminaire, puis inscrivez vos collaborateurs nominativement, par cohorte ou par import CSV d'adresses e-mail. Vous pouvez les inscrire comme étudiants, ou comme enseignants et tuteurs s'ils doivent animer.",
+    },
+    {
+      question: "Suis-je automatiquement enseignant d'un séminaire parce que je suis chef d'établissement ?",
+      answer: "Non. Les rôles de formation (admin, gestionnaire, enseignant, tuteur, étudiant) s'attribuent par inscription et sont propres à chaque formation. Vous pouvez être étudiant sur l'une et enseignant sur une autre ; seul l'enseignant, le gestionnaire ou l'admin valide la réussite et délivre les certificats.",
     },
   ],
   glossary: [
@@ -565,6 +675,14 @@ export const guideChefEtablissement: Omit<GuideContent, "icon"> = {
     {
       term: "Branding documentaire",
       definition: "Ensemble des éléments d'identité visuelle (logo, cachet, signature) appliqués automatiquement aux documents officiels exportés.",
+    },
+    {
+      term: "Séminaire interactif",
+      definition: "Formation du Centre de formation présentée en mode livre numérique paginé, associant diapositives (ePub, support PowerPoint, lecture audio), ateliers auto-corrigés, livret imprimable, export Word et certificat de fin.",
+    },
+    {
+      term: "Rôle de formation",
+      definition: "Rôle attribué par inscription au sein d'une formation, indépendant du rôle applicatif. Par ordre décroissant : admin, gestionnaire, enseignant, tuteur, étudiant. Un même utilisateur peut être étudiant sur une formation et enseignant sur une autre.",
     },
   ],
 };

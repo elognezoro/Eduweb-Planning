@@ -318,6 +318,51 @@ export const guideEleve: Omit<GuideContent, "icon"> = {
         },
       ],
     },
+    {
+      id: "centre-formation",
+      title: "8. Centre de formation",
+      intro: "Le Centre de formation est une bibliothèque de ressources accessible depuis l'Aide. Vous y trouvez des guides adaptés à votre rôle et, si votre établissement vous y inscrit, des formations à suivre en autonomie.",
+      sections: [
+        {
+          title: "8.1 Accéder aux guides et aux ressources",
+          body: "Depuis le menu Accueil, l'item Aide ouvre le Centre de formation. Il rassemble les guides utilisateurs par rôle (dont le vôtre), un manuel académique et des séminaires interactifs présentés sous forme de livre numérique paginé. Les guides et le manuel vous sont ouverts automatiquement selon votre rôle : aucune démarche n'est nécessaire pour les consulter.",
+          steps: [
+            {
+              instruction: "Ouvrez le Centre de formation depuis le menu.",
+              navigation: "Accueil → Aide",
+            },
+            {
+              instruction: "Sélectionnez le guide Élève ou la ressource qui vous intéresse.",
+            },
+            {
+              instruction: "Dans un séminaire en mode livre numérique, tournez les pages avec les flèches ← et →, et ouvrez le sommaire pour vous repérer.",
+              tip: "La touche F bascule en lecture plein écran ; certaines pages proposent une lecture audio des contenus et des consignes.",
+            },
+          ],
+          bestPractices: [
+            "Gardez le guide Élève à portée de main : c'est la réponse la plus rapide à « comment fait-on déjà pour… ? ».",
+          ],
+        },
+        {
+          title: "8.2 Suivre une formation où vous êtes inscrit",
+          body: "Votre établissement peut vous inscrire comme étudiant à une formation (par exemple un séminaire interactif). L'inscription est nécessaire pour accéder à ces espaces : elle est réalisée par un administrateur ou un gestionnaire, et c'est elle qui vous attribue le rôle de formation « étudiant ». En tant qu'apprenant, vous suivez les diapositives, réalisez les ateliers interactifs auto-corrigés (QCM, scénarios, auto-évaluation) et soumettez vos productions ; un enseignant ou un tuteur peut ensuite les consulter et publier ses retours. À la fin, un certificat peut vous être délivré.",
+          steps: [
+            {
+              instruction: "Ouvrez le Centre de formation et repérez la formation à laquelle vous avez été inscrit.",
+              navigation: "Accueil → Aide",
+            },
+            {
+              instruction: "Parcourez les diapositives, puis réalisez chaque atelier interactif à votre rythme.",
+            },
+            {
+              instruction: "Soumettez vos productions lorsque l'atelier le demande et consultez les retours de l'enseignant ou du tuteur.",
+              tip: "Un livret académique imprimable (Ctrl+P) et un export Word peuvent accompagner certains séminaires pour réviser hors ligne.",
+            },
+          ],
+          caveat: "Vous ne pouvez pas vous inscrire seul à une formation : si une ressource vous semble manquer, demandez à votre établissement de vous y inscrire.",
+        },
+      ],
+    },
   ],
   faq: [
     {
@@ -360,6 +405,14 @@ export const guideEleve: Omit<GuideContent, "icon"> = {
       question: "Mes données scolaires sont-elles confidentielles ?",
       answer: "Oui. Seuls vous, vos responsables légaux et les personnels habilités de votre établissement (et de la supervision académique) accèdent à votre dossier, dans le respect du cadre réglementaire applicable.",
     },
+    {
+      question: "Où trouver les guides et les formations dans l'application ?",
+      answer: "Tout est rassemblé dans le Centre de formation, accessible via Accueil → Aide. Vous y consultez librement le guide Élève et le manuel académique ; les séminaires interactifs, eux, nécessitent que votre établissement vous y inscrive.",
+    },
+    {
+      question: "On m'a inscrit à un séminaire mais je ne sais pas comment commencer.",
+      answer: "Ouvrez Accueil → Aide, sélectionnez la formation concernée, puis parcourez les diapositives page par page (flèches ← →) et réalisez les ateliers interactifs à votre rythme. Vos productions sont relues par un enseignant ou un tuteur, et un certificat peut clôturer la formation.",
+    },
   ],
   glossary: [
     {
@@ -401,6 +454,18 @@ export const guideEleve: Omit<GuideContent, "icon"> = {
     {
       term: "Statut de présence",
       definition: "Indication portée sur chaque séance (présent, absent, retard) et complétée éventuellement d'une mention de justification.",
+    },
+    {
+      term: "Centre de formation",
+      definition: "Bibliothèque de ressources accessible via Accueil → Aide, regroupant les guides utilisateurs par rôle, le manuel académique et les séminaires interactifs.",
+    },
+    {
+      term: "Séminaire interactif",
+      definition: "Formation présentée en mode livre numérique paginé, combinant diapositives, ateliers auto-corrigés et certificat de fin, à laquelle l'élève accède après inscription par son établissement.",
+    },
+    {
+      term: "Rôle de formation",
+      definition: "Rôle attribué par inscription dans un espace de formation (étudiant, tuteur, enseignant, gestionnaire, admin). L'élève y est le plus souvent inscrit comme étudiant, indépendamment de son rôle scolaire.",
     },
   ],
 };

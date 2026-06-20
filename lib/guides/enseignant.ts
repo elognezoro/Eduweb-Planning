@@ -412,6 +412,111 @@ export const guideEnseignant: Omit<GuideContent, "icon"> = {
         },
       ],
     },
+    {
+      id: "centre-formation",
+      title: "9. Centre de formation",
+      intro: "Au-delà de ses classes, l'enseignant est aussi un apprenant et, parfois, un animateur. Le Centre de formation est la bibliothèque de formations d'EduWeb Planner : il réunit des séminaires interactifs, un manuel académique et les guides utilisateurs par rôle. Ce chapitre explique comment suivre un séminaire de bout en bout, puis comment intervenir lorsque le rôle d'Enseignant ou de Tuteur d'une formation vous est attribué.",
+      sections: [
+        {
+          title: "Accéder au Centre de formation",
+          body: "Le Centre de formation se trouve dans le menu Accueil, à la rubrique Aide. Il rassemble trois familles de ressources : les séminaires interactifs (présentés comme des livres numériques paginés), le manuel académique et les guides utilisateurs adaptés à chaque rôle. L'accès à une formation suppose une inscription préalable : certaines ressources comme le manuel ou les guides vous sont ouvertes automatiquement selon votre rôle, tandis que les séminaires requièrent une inscription faite par un administrateur ou un gestionnaire.",
+          steps: [
+            {
+              instruction: "Ouvrir le menu Accueil puis cliquer sur Aide.",
+              navigation: "Accueil → Aide",
+            },
+            {
+              instruction: "Parcourir la bibliothèque : séminaires interactifs, manuel académique, guides par rôle.",
+            },
+            {
+              instruction: "Ouvrir une ressource pour laquelle vous êtes inscrit ou habilité.",
+              tip: "Si un séminaire reste verrouillé, c'est qu'aucune inscription n'a encore été enregistrée à votre nom : demandez-la à un administrateur ou à un gestionnaire.",
+            },
+          ],
+          caveat: "L'accès à un séminaire est conditionné par une inscription nominative. Sans inscription, le contenu n'apparaît pas dans votre bibliothèque.",
+        },
+        {
+          title: "Suivre un séminaire interactif (apprenant)",
+          body: "Trois séminaires sont disponibles : « Magnifica Humanitas », « Le numérique au service de la communication éducative et pastorale » (SENEC) et « L'intelligence artificielle au service de la communication éducative et pastorale » (SENEC, 2 h 30). Chaque séminaire s'ouvre comme un livre numérique paginé que l'on parcourt au clavier : flèches ← et → pour tourner les pages, touche F pour le plein écran, et un sommaire pour naviguer directement vers une partie. Un séminaire combine des diapositives (visionneuse ePub, support PowerPoint téléchargeable, lecture audio des pages et des consignes) et des ateliers interactifs auto-corrigés.",
+          steps: [
+            {
+              instruction: "Depuis Aide, ouvrir le séminaire dans lequel vous êtes inscrit.",
+              navigation: "Accueil → Aide → Séminaires interactifs",
+            },
+            {
+              instruction: "Commencer par le diagnostic de maturité : il situe votre niveau de départ et oriente votre parcours.",
+            },
+            {
+              instruction: "Parcourir les diapositives page à page (flèches ← →, touche F pour le plein écran), en vous appuyant au besoin sur la lecture audio des pages et des consignes.",
+              tip: "Le support PowerPoint et la visionneuse ePub permettent de réviser les diapositives hors connexion.",
+            },
+            {
+              instruction: "Réaliser les ateliers auto-corrigés au fil des modules : QCM, matrice ou check-list, scénario, correction d'un message généré par IA.",
+            },
+            {
+              instruction: "Terminer par l'auto-évaluation finale, qui produit un bilan de votre progression.",
+            },
+            {
+              instruction: "Récupérer le livret académique imprimable (PDF via Ctrl+P) et, si besoin, l'export Word (.docx) du contenu.",
+            },
+            {
+              instruction: "Une fois le parcours validé, obtenir le certificat de fin de séminaire.",
+            },
+          ],
+          bestPractices: [
+            "Faire le diagnostic de maturité avant les modules : il évite de survoler des notions à consolider et personnalise le parcours.",
+            "Conserver le livret académique (PDF) et le certificat : ils attestent de votre formation continue.",
+          ],
+          caveat: "Le certificat n'est délivré qu'après réalisation des ateliers et de l'auto-évaluation finale. Un parcours interrompu reste enregistré et peut être repris plus tard.",
+        },
+        {
+          title: "Animer une formation (rôle Enseignant ou Tuteur)",
+          body: "Les rôles de formation sont propres aux espaces de formation et s'attribuent par inscription : un même utilisateur peut être étudiant sur un séminaire et enseignant sur un autre. Si l'on vous inscrit comme Enseignant d'une formation, vous l'animez : vous consultez et critiquez les productions des apprenants, publiez vos appréciations, validez la réussite et délivrez les certificats. Comme Tuteur, vous accompagnez : vous consultez et critiquez les productions et publiez vos retours, mais vous ne validez pas la réussite. La hiérarchie complète, par ordre décroissant, est : Admin, Gestionnaire, Enseignant, Tuteur, Étudiant.",
+          steps: [
+            {
+              instruction: "Ouvrir la formation pour laquelle vous disposez du rôle Enseignant ou Tuteur depuis votre bibliothèque.",
+              navigation: "Accueil → Aide → Séminaires interactifs",
+            },
+            {
+              instruction: "Consulter les productions soumises par les apprenants (ateliers, scénarios, auto-évaluations).",
+            },
+            {
+              instruction: "Rédiger vos critiques et publier vos appréciations sur chaque production.",
+            },
+            {
+              instruction: "En tant qu'Enseignant, valider la réussite des apprenants ayant satisfait aux exigences, puis délivrer les certificats.",
+              warning: "Le rôle Tuteur permet de critiquer et de conseiller, mais ne donne pas le droit de valider la réussite ni de délivrer les certificats.",
+            },
+          ],
+          bestPractices: [
+            "Formuler des appréciations précises et constructives, centrées sur ce qui est réussi et sur le prochain pas à franchir.",
+            "Valider la réussite uniquement après avoir parcouru l'ensemble des productions de l'apprenant, et non sur la seule auto-évaluation.",
+          ],
+          caveat: "Vos rôles de formation sont indépendants de votre rôle d'enseignant dans l'établissement : ils s'attribuent formation par formation, à l'inscription, et n'élargissent pas vos droits sur les autres modules d'EduWeb Planner.",
+        },
+        {
+          title: "Demander ou gérer une inscription",
+          body: "L'accès à une formation passe par une inscription. Pour les apprenants, elle est posée par un administrateur ou un gestionnaire — de façon nominative, par cohorte, ou par import CSV d'adresses e-mail. Si vous êtes vous-même habilité, la gestion des inscriptions et des rôles de formation s'effectue dans Système → Inscriptions aux formations : on peut y inscrire des stagiaires comme étudiants et des collaborateurs comme enseignants ou tuteurs, la recherche d'un utilisateur fonctionnant par nom, e-mail ou rôle.",
+          steps: [
+            {
+              instruction: "Si vous attendez un accès, signaler à un administrateur ou à un gestionnaire la formation visée afin qu'il vous inscrive.",
+            },
+            {
+              instruction: "Si vous êtes habilité, ouvrir Système puis Inscriptions aux formations.",
+              navigation: "Système → Inscriptions aux formations",
+            },
+            {
+              instruction: "Rechercher l'utilisateur par nom, e-mail ou rôle, puis l'inscrire à la formation avec le rôle adéquat (étudiant, enseignant, tuteur).",
+              tip: "Pour une promotion entière, privilégier l'inscription par cohorte ou l'import CSV d'adresses e-mail.",
+            },
+          ],
+          bestPractices: [
+            "Vérifier le rôle attribué avant de valider l'inscription : un apprenant inscrit par erreur comme enseignant pourrait valider des réussites.",
+          ],
+          caveat: "Système → Inscriptions aux formations est réservé aux profils habilités (administrateur, gestionnaire). En tant qu'enseignant non habilité, vous y accédez en consultation ou pas du tout, selon la configuration de l'établissement.",
+        },
+      ],
+    },
   ],
   faq: [
     {
@@ -453,6 +558,14 @@ export const guideEnseignant: Omit<GuideContent, "icon"> = {
     {
       question: "Puis-je accéder à EduWeb Planner depuis mon téléphone ?",
       answer: "Oui, la plateforme est responsive et s'adapte aux écrans mobiles. Pour la saisie de notes ou de bulletins, un poste fixe reste recommandé pour le confort.",
+    },
+    {
+      question: "Comment m'inscrire à un séminaire interactif du Centre de formation ?",
+      answer: "Vous ne vous inscrivez pas vous-même : l'inscription à un séminaire est faite par un administrateur ou un gestionnaire, de façon nominative, par cohorte ou par import CSV. Certaines ressources comme le manuel académique ou les guides vous sont toutefois ouvertes automatiquement selon votre rôle. Si un séminaire reste verrouillé dans Accueil → Aide, demandez votre inscription à un profil habilité.",
+    },
+    {
+      question: "Je suis enseignant dans l'établissement : suis-je automatiquement enseignant des formations ?",
+      answer: "Non. Les rôles de formation sont indépendants de votre rôle dans l'établissement et s'attribuent formation par formation, à l'inscription. Vous pouvez être étudiant sur un séminaire et enseignant sur un autre. Seul le rôle Enseignant d'une formation permet de valider la réussite et de délivrer les certificats ; le rôle Tuteur permet de critiquer et de conseiller sans valider.",
     },
   ],
   glossary: [
@@ -503,6 +616,14 @@ export const guideEnseignant: Omit<GuideContent, "icon"> = {
     {
       term: "Taux d'assiduité",
       definition: "Indicateur statistique mesurant la régularité de présence des élèves sur une période donnée, exprimé en pourcentage.",
+    },
+    {
+      term: "Séminaire interactif",
+      definition: "Formation du Centre de formation présentée comme un livre numérique paginé (navigation au clavier ← → F, sommaire). Il combine diapositives (visionneuse ePub, support PowerPoint, lecture audio), ateliers auto-corrigés, livret académique imprimable, export Word et délivrance d'un certificat de fin.",
+    },
+    {
+      term: "Rôle de formation",
+      definition: "Rôle propre aux espaces de formation, attribué par inscription et indépendant du rôle dans l'établissement. Par ordre décroissant : Admin, Gestionnaire, Enseignant (anime et valide la réussite), Tuteur (accompagne sans valider) et Étudiant (apprenant qui réalise les activités).",
     },
   ],
 };

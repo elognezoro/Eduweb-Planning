@@ -489,6 +489,107 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
         },
       ],
     },
+    {
+      id: "centre-formation",
+      title: "9. Centre de formation",
+      intro: "Le Centre de formation est la bibliothèque de formation d'EduWeb Planner : séminaires interactifs, manuel académique et guides utilisateurs par rôle. En tant qu'administrateur, vous en assurez l'accès : vous inscrivez les participants, attribuez les rôles de formation, fixez les conditions d'accès aux modules et les critères de réussite, et garantissez une identité visuelle conforme pour les certificats délivrés.",
+      sections: [
+        {
+          title: "9.1 Découvrir le Centre de formation",
+          body: "Le Centre de formation se consulte depuis le menu Accueil, rubrique Aide. Il rassemble trois familles de ressources : les séminaires interactifs présentés sous forme de livre numérique paginé, le manuel académique, et les guides utilisateurs par rôle.\n\nTrois séminaires interactifs sont disponibles : « Magnifica Humanitas », « Le numérique au service de la communication éducative et pastorale » (SENEC) et « L'intelligence artificielle au service de la communication éducative et pastorale » (SENEC, 2 h 30). Chaque séminaire propose des diapositives (visionneuse ePub, support PowerPoint téléchargeable, lecture audio des pages et des consignes), des ateliers interactifs auto-corrigés (diagnostic de maturité, QCM, matrice ou check-list, scénario, correction d'un message généré par IA, auto-évaluation finale avec bilan), un livret académique imprimable, un export Word, et la délivrance d'un certificat de fin.",
+          steps: [
+            {
+              instruction: "Ouvrez le Centre de formation depuis le menu d'accueil.",
+              navigation: "Accueil → Aide",
+            },
+            {
+              instruction: "Repérez les trois familles de ressources : séminaires interactifs, manuel académique et guides utilisateurs.",
+            },
+            {
+              instruction: "Ouvrez un séminaire pour le parcourir en mode livre numérique : naviguez au clavier avec les flèches gauche et droite, la touche F pour le plein écran, et le sommaire pour accéder directement à une partie.",
+              tip: "La lecture audio des pages et des consignes facilite l'accessibilité et le suivi à distance.",
+            },
+            {
+              instruction: "Depuis un séminaire, imprimez le livret académique en PDF avec Ctrl+P ou téléchargez l'export Word (.docx) pour un usage hors ligne.",
+            },
+          ],
+          bestPractices: [
+            "Parcourez vous-même chaque séminaire avant d'y inscrire des participants, afin de pouvoir les accompagner.",
+            "Signalez aux apprenants la navigation au clavier (flèches, F, sommaire) pour fluidifier leur progression.",
+          ],
+        },
+        {
+          title: "9.2 Comprendre les rôles de formation",
+          body: "Les rôles de formation sont propres aux espaces de formation : ils sont distincts des rôles métier de la plateforme et s'attribuent PAR INSCRIPTION. Un même utilisateur peut donc être étudiant sur une formation et enseignant sur une autre.\n\nLa hiérarchie, du plus large au plus restreint, est la suivante : l'Admin dispose du contrôle total (contenu, participants, rôles, validation, certificats) ; le Gestionnaire gère les participants et les cohortes, attribue les rôles jusqu'au niveau enseignant ou tuteur et valide la réussite ; l'Enseignant anime la formation, consulte et critique les productions des apprenants, publie ses appréciations, valide la réussite et délivre les certificats ; le Tuteur accompagne, consulte et critique les productions et publie ses retours, mais ne valide pas la réussite ; l'Étudiant (apprenant) accède à la formation, réalise les activités et soumet ses productions.",
+          caveat: "Ne confondez pas un rôle de formation avec un rôle métier : un enseignant de la plateforme peut être simple étudiant sur un séminaire, et un agent administratif peut être enseignant de formation. Les habilitations se raisonnent toujours au niveau de l'inscription.",
+        },
+        {
+          title: "9.3 Inscrire des participants à une formation",
+          body: "L'accès à une formation requiert une inscription. Vous la réalisez depuis Système → Inscriptions aux formations, page réservée aux profils habilités. Vous pouvez inscrire un participant nominativement, inscrire une cohorte entière, ou importer une liste d'adresses e-mail au format CSV. Certaines ressources, comme le manuel académique et les guides, sont accessibles automatiquement selon le rôle, sans inscription manuelle.\n\nLa liste affiche les vrais comptes inscrits, et la recherche d'un utilisateur fonctionne par nom, par e-mail ou par rôle, ce qui permet de retrouver rapidement un participant ou un collaborateur.",
+          steps: [
+            {
+              instruction: "Ouvrez la gestion des inscriptions.",
+              navigation: "Système → Inscriptions aux formations",
+            },
+            {
+              instruction: "Sélectionnez la formation concernée, puis ajoutez un participant par inscription rapide nominative.",
+              tip: "Recherchez le compte par nom, e-mail ou rôle pour éviter les doublons.",
+            },
+            {
+              instruction: "Pour un groupe, inscrivez une cohorte entière, ou importez un fichier CSV d'adresses e-mail.",
+            },
+            {
+              instruction: "Vérifiez que la liste des inscrits affiche bien les comptes réels attendus.",
+            },
+          ],
+          bestPractices: [
+            "Inscrivez les stagiaires comme étudiants et les collaborateurs encadrants comme enseignants ou tuteurs, selon leur mission.",
+            "Préparez le fichier CSV d'e-mails en UTF-8 et vérifiez les adresses avant l'import pour éviter les inscriptions orphelines.",
+          ],
+        },
+        {
+          title: "9.4 Attribuer les rôles de formation et fixer les conditions d'accès",
+          body: "Depuis la même page Inscriptions aux formations, vous attribuez à chaque participant son rôle de formation (étudiant, tuteur, enseignant, gestionnaire, admin). Vous définissez également les conditions d'accès par module — l'ordre dans lequel diapositives et ateliers se débloquent — ainsi que les critères de réussite du cours qui conditionnent la validation et la délivrance du certificat.",
+          steps: [
+            {
+              instruction: "Ouvrez la fiche d'un participant inscrit.",
+              navigation: "Système → Inscriptions aux formations",
+            },
+            {
+              instruction: "Attribuez le rôle de formation adapté : étudiant, tuteur, enseignant, gestionnaire ou admin.",
+            },
+            {
+              instruction: "Définissez les conditions d'accès par module (ordre de déblocage des diapositives et des ateliers).",
+            },
+            {
+              instruction: "Fixez les critères de réussite du cours qui déclenchent la validation et le certificat de fin.",
+              warning: "Un gestionnaire ne peut attribuer que jusqu'au niveau enseignant ou tuteur ; l'attribution du rôle admin reste de votre ressort.",
+            },
+          ],
+          caveat: "Seuls l'enseignant, le gestionnaire et l'admin valident la réussite ; le tuteur publie des retours mais ne valide jamais. Vérifiez ce point avant de confier l'animation d'une cohorte.",
+        },
+        {
+          title: "9.5 Garantir l'identité visuelle des certificats",
+          body: "Les certificats de fin délivrés à l'issue d'un séminaire portent l'identité visuelle de l'institution. Comme pour les bulletins et le livret scolaire, le cachet et la signature doivent être correctement configurés pour produire un document officiel crédible.",
+          steps: [
+            {
+              instruction: "Vérifiez que le logo, le cachet et la signature de la structure sont bien renseignés.",
+              navigation: "Pilotage → Établissements",
+            },
+            {
+              instruction: "Contrôlez le rendu en générant un certificat de test depuis un séminaire achevé.",
+            },
+            {
+              instruction: "Corrigez le format ou la résolution des fichiers si le cachet ou la signature s'affichent mal.",
+            },
+          ],
+          bestPractices: [
+            "Préparez le cachet et la signature au bon format avant la première session pour éviter de régénérer des certificats.",
+          ],
+          caveat: "Un certificat sans cachet ni signature conformes perd sa valeur de reconnaissance. Validez le rendu avant la fin de la première cohorte.",
+        },
+      ],
+    },
   ],
   faq: [
     {
@@ -526,6 +627,14 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
     {
       question: "Puis-je déléguer la création de comptes à un autre rôle ?",
       answer: "Certains rôles, comme le chef d'établissement, peuvent gérer les comptes de leur périmètre via leurs habilitations propres. Vérifiez la matrice avant de retirer cette responsabilité de votre charge quotidienne.",
+    },
+    {
+      question: "Comment inscrire un groupe entier de stagiaires à un séminaire de formation ?",
+      answer: "Depuis Système → Inscriptions aux formations, sélectionnez la formation, puis inscrivez une cohorte entière ou importez un fichier CSV d'adresses e-mail. La liste affiche ensuite les vrais comptes inscrits ; vous pouvez retrouver un participant par nom, e-mail ou rôle.",
+    },
+    {
+      question: "Un même utilisateur peut-il être étudiant sur une formation et enseignant sur une autre ?",
+      answer: "Oui. Les rôles de formation sont attribués par inscription et sont indépendants du rôle métier de la plateforme. Un même compte peut donc être apprenant sur un séminaire et enseignant ou tuteur sur un autre.",
     },
   ],
   glossary: [
@@ -576,6 +685,18 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
     {
       term: "Désactivation de compte",
       definition: "Action réversible suspendant les accès d'un utilisateur tout en conservant l'historique de ses contributions sur la plateforme.",
+    },
+    {
+      term: "Séminaire interactif",
+      definition: "Ressource du Centre de formation présentée en mode livre numérique paginé, combinant diapositives (ePub, PowerPoint, audio), ateliers auto-corrigés, livret imprimable, export Word et certificat de fin.",
+    },
+    {
+      term: "Rôle de formation",
+      definition: "Habilitation propre aux espaces de formation (admin, gestionnaire, enseignant, tuteur, étudiant), attribuée par inscription et indépendante du rôle métier de la plateforme.",
+    },
+    {
+      term: "Inscriptions aux formations",
+      definition: "Page du menu Système, réservée aux profils habilités, où l'on inscrit les participants (nominativement, par cohorte ou par import CSV) et où l'on attribue les rôles de formation.",
     },
   ],
 };

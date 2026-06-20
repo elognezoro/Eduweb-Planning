@@ -438,6 +438,101 @@ export const guideConseillerPedagogique: Omit<GuideContent, "icon"> = {
         },
       ],
     },
+    {
+      id: "centre-formation",
+      title: "8. Centre de formation",
+      intro: "Le Centre de formation est la bibliothèque de formation d'EduWeb Planner : séminaires interactifs, manuel académique et guides utilisateurs par rôle. Pour le conseiller pédagogique, c'est un double levier : vous y montez vous-même en compétences comme apprenant, et vous pouvez accompagner les enseignants dans leur propre parcours, voire animer une formation comme enseignant ou tuteur.",
+      sections: [
+        {
+          title: "8.1 Accéder au Centre de formation",
+          body: "Le Centre de formation se rejoint depuis l'accueil, via la rubrique Aide. Vous y trouvez les séminaires interactifs, le manuel académique et les guides utilisateurs par rôle. L'accès à une formation donnée suppose une inscription : certaines ressources (manuel, guides) vous sont ouvertes automatiquement selon votre rôle, tandis que les séminaires requièrent une inscription nominative réalisée par un administrateur ou un gestionnaire.",
+          steps: [
+            {
+              instruction: "Ouvrez le Centre de formation depuis le menu Accueil.",
+              navigation: "Menu Accueil → Aide",
+            },
+            {
+              instruction: "Repérez les trois familles de ressources : séminaires interactifs, manuel académique et guides utilisateurs.",
+            },
+            {
+              instruction: "Vérifiez les formations auxquelles vous êtes inscrit ; si un séminaire visé n'apparaît pas, sollicitez une inscription auprès de votre administrateur ou gestionnaire.",
+              tip: "Le manuel académique et les guides par rôle sont en général accessibles sans démarche : commencez par eux pour situer votre périmètre avant d'aborder les séminaires.",
+            },
+          ],
+          bestPractices: [
+            "Planifiez vos sessions de formation comme un rendez-vous : réservez un créneau dédié plutôt que de fractionner un séminaire entre deux tâches.",
+            "Repérez les formations utiles à vos enseignants accompagnés pour pouvoir les orienter vers la bonne ressource.",
+          ],
+        },
+        {
+          title: "8.2 Suivre un séminaire interactif comme apprenant",
+          body: "Trois séminaires interactifs sont disponibles : « Magnifica Humanitas », « Le numérique au service de la communication éducative et pastorale » (SENEC) et « L'intelligence artificielle au service de la communication éducative et pastorale » (SENEC, 2 h 30). Chaque séminaire se présente en mode « livre numérique » paginé, avec un sommaire et une navigation au clavier (flèches ← et → pour tourner les pages, touche F pour le plein écran). Il combine des diapositives, des ateliers auto-corrigés, un livret imprimable et un export Word, et débouche sur un certificat de fin.",
+          steps: [
+            {
+              instruction: "Depuis le Centre de formation, ouvrez le séminaire qui vous a été attribué.",
+              navigation: "Menu Accueil → Aide → Séminaires interactifs",
+            },
+            {
+              instruction: "Parcourez les diapositives dans la visionneuse ePub ; au besoin, téléchargez le support PowerPoint ou activez la lecture audio des pages et des consignes.",
+              tip: "Naviguez au clavier : ← et → pour changer de page, F pour passer en plein écran, et utilisez le sommaire pour revenir directement à une partie.",
+            },
+            {
+              instruction: "Réalisez les ateliers interactifs auto-corrigés au fil des pages : diagnostic de maturité, QCM, matrice ou check-list, scénario, correction d'un message généré par IA, puis auto-évaluation finale avec bilan.",
+            },
+            {
+              instruction: "Téléchargez le livret académique imprimable (PDF via Ctrl+P) et, si besoin, l'export Word (.docx) pour conserver une trace hors-ligne.",
+            },
+            {
+              instruction: "Terminez le parcours pour obtenir votre certificat de fin de formation.",
+              warning: "Le certificat n'est délivré qu'au terme complet du séminaire : ne quittez pas avant l'auto-évaluation finale et son bilan.",
+            },
+          ],
+          bestPractices: [
+            "Conservez le livret PDF et le certificat dans votre espace professionnel : ils documentent votre formation continue.",
+            "Réutilisez les ateliers (diagnostic, check-list) comme supports concrets lors de vos entretiens d'accompagnement avec les enseignants.",
+          ],
+        },
+        {
+          title: "8.3 Accompagner et animer : les rôles de formation",
+          body: "Les espaces de formation possèdent leurs propres rôles, attribués PAR INSCRIPTION et indépendants de votre rôle dans l'application : un même utilisateur peut être étudiant sur une formation et enseignant sur une autre. Par ordre décroissant : l'Admin a le contrôle total (contenu, participants, rôles, validation, certificats) ; le Gestionnaire gère participants et cohortes, attribue les rôles jusqu'à enseignant/tuteur et valide la réussite ; l'Enseignant anime, consulte et critique les productions des apprenants, publie ses appréciations, valide la réussite et délivre les certificats ; le Tuteur accompagne, consulte et critique les productions et publie ses retours mais ne valide pas la réussite ; l'Étudiant (apprenant) accède à la formation, réalise les activités et soumet ses productions. En tant que conseiller pédagogique, vous êtes le plus souvent apprenant, mais vous pouvez être inscrit comme enseignant ou tuteur pour animer une formation auprès des enseignants que vous accompagnez.",
+          steps: [
+            {
+              instruction: "Identifiez votre rôle sur chaque formation : il dépend de votre inscription, pas de votre profil applicatif.",
+            },
+            {
+              instruction: "Comme tuteur, consultez et critiquez les productions des apprenants, puis publiez vos retours pour nourrir leur progression.",
+              tip: "La posture de tuteur prolonge naturellement votre rôle d'accompagnement : retours réguliers et critique constructive, sans enjeu de validation.",
+            },
+            {
+              instruction: "Comme enseignant, en plus de critiquer les productions et de publier vos appréciations, validez la réussite des apprenants et délivrez les certificats.",
+              warning: "Seuls l'enseignant, le gestionnaire et l'admin valident la réussite : un tuteur accompagne et commente mais ne clôt pas le parcours.",
+            },
+          ],
+          bestPractices: [
+            "Articulez votre rôle de formation avec votre suivi de terrain : un atelier animé en séminaire peut prolonger une recommandation d'inspection.",
+            "Lorsque vous animez, restituez aux apprenants des retours appuyés sur leurs productions réelles plutôt que sur des principes généraux.",
+          ],
+        },
+        {
+          title: "8.4 Gérer les inscriptions aux formations",
+          body: "L'accès à une formation passe par une inscription. Elle est réalisée par un administrateur ou un gestionnaire, de façon nominative, par cohorte ou par import CSV d'adresses e-mail ; certaines ressources (manuel, guides) sont ouvertes automatiquement selon le rôle. Si vous disposez d'un profil habilité, la gestion des inscriptions et des rôles se fait dans Système → Inscriptions aux formations.",
+          steps: [
+            {
+              instruction: "Ouvrez la page de gestion des inscriptions (profils habilités uniquement).",
+              navigation: "Menu Système → Inscriptions aux formations",
+            },
+            {
+              instruction: "Recherchez un utilisateur par nom, e-mail ou rôle.",
+            },
+            {
+              instruction: "Inscrivez les stagiaires comme étudiants et, le cas échéant, les collaborateurs comme enseignants ou tuteurs ; pour un groupe, utilisez l'inscription par cohorte ou l'import CSV d'adresses e-mail.",
+              tip: "L'import CSV accélère l'ouverture d'un séminaire à toute une promotion : préparez un fichier d'adresses e-mail propre avant de lancer l'opération.",
+            },
+          ],
+          caveat: "Si vous n'avez pas de profil habilité, vous ne gérez pas les inscriptions : adressez vos demandes (inscrire un enseignant, ouvrir un séminaire) à votre administrateur ou gestionnaire de formation.",
+        },
+      ],
+    },
   ],
   faq: [
     {
@@ -479,6 +574,14 @@ export const guideConseillerPedagogique: Omit<GuideContent, "icon"> = {
     {
       question: "Comment préparer efficacement un entretien de restitution après une inspection ?",
       answer: "Relisez le rapport d'inspection et la grille d'évaluation, isolez 2 forces et 2 axes de progrès, puis consultez le cahier de texte pour ancrer vos propos sur des séances réelles. Programmez le rendez-vous dans le module dédié pour que la trace existe.",
+    },
+    {
+      question: "Je veux suivre un séminaire interactif mais il n'apparaît pas dans le Centre de formation : pourquoi ?",
+      answer: "L'accès à un séminaire requiert une inscription. Le manuel académique et les guides par rôle vous sont ouverts automatiquement, mais les séminaires interactifs (« Magnifica Humanitas », les deux séminaires SENEC sur le numérique et l'IA) doivent vous être attribués nominativement, par cohorte ou par import CSV par un administrateur ou un gestionnaire. Sollicitez votre administrateur ou gestionnaire de formation pour être inscrit. Accès : Menu Accueil → Aide.",
+    },
+    {
+      question: "Mon rôle d'apprenant sur un séminaire m'empêche-t-il d'en animer un autre comme enseignant ?",
+      answer: "Non. Les rôles de formation sont attribués par inscription et propres à chaque formation : vous pouvez être étudiant sur l'un et enseignant ou tuteur sur un autre. Comme tuteur, vous consultez, critiquez les productions et publiez vos retours sans valider la réussite ; comme enseignant, vous validez en plus la réussite et délivrez les certificats. La gestion de ces rôles se fait dans Système → Inscriptions aux formations, pour les profils habilités.",
     },
   ],
   glossary: [
@@ -529,6 +632,14 @@ export const guideConseillerPedagogique: Omit<GuideContent, "icon"> = {
     {
       term: "Conseil de progrès",
       definition: "Recommandation formalisée par le conseiller pédagogique à l'issue d'un entretien, qui peut être tracée comme suivi parallèlement aux recommandations d'inspection.",
+    },
+    {
+      term: "Séminaire interactif",
+      definition: "Formation du Centre de formation présentée en mode « livre numérique » paginé (sommaire, navigation au clavier), combinant diapositives, ateliers auto-corrigés, livret imprimable et export Word, et débouchant sur un certificat de fin.",
+    },
+    {
+      term: "Rôle de formation",
+      definition: "Rôle propre aux espaces de formation (Admin, Gestionnaire, Enseignant, Tuteur, Étudiant), attribué par inscription et indépendant du rôle applicatif : un même utilisateur peut être étudiant sur une formation et enseignant ou tuteur sur une autre.",
     },
   ],
 };
