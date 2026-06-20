@@ -26,6 +26,10 @@ import type {
   ModuleCompletion,
 } from "@/lib/formations/types";
 import type { FormationRole } from "@/lib/formations/formation-roles";
+import type {
+  SupportAccessRule,
+  SupportKind,
+} from "@/lib/formations/support-access";
 import { getCourseCompletionRule } from "@/lib/formations/course-completion";
 import { getCourseModuleList } from "@/lib/formations/module-access";
 
@@ -287,6 +291,8 @@ interface StoreState {
   courseCohorts: CourseCohort[];
   /** Règles d'accès configurées par module (prérequis, mode de complétion). */
   moduleAccessRules: ModuleAccessRule[];
+  /** Conditions d'accès aux supports téléchargeables (par cours et support). */
+  supportAccessRules: SupportAccessRule[];
   /** Traces de complétion par utilisateur, cours et module. */
   moduleCompletions: ModuleCompletion[];
   /** Règle de réussite globale du cours (paramétrée par l'admin). */
@@ -495,6 +501,10 @@ interface DataStore extends StoreState {
   setModuleAccessRule: (rule: Omit<ModuleAccessRule, "id">) => void;
   /** Supprime la règle d'accès d'un module (retour au comportement par défaut). */
   clearModuleAccessRule: (courseId: string, moduleId: string) => void;
+  /** Définit ou met à jour la condition d'accès d'un support téléchargeable (upsert). */
+  setSupportAccessRule: (rule: Omit<SupportAccessRule, "id">) => void;
+  /** Supprime la condition d'accès d'un support (retour à « toujours accessible »). */
+  clearSupportAccessRule: (courseId: string, support: SupportKind) => void;
   /** Marque un module comme terminé pour un utilisateur. */
   markModuleCompleted: (input: Omit<ModuleCompletion, "id" | "completedAt">) => void;
   /** Retire toutes les complétions d'un module pour un utilisateur. */
@@ -562,6 +572,7 @@ const DEFAULTS: StoreState = {
   courseEnrollments: [],
   courseCohorts: [],
   moduleAccessRules: [],
+  supportAccessRules: [],
   moduleCompletions: [],
   courseCompletionRules: [],
   courseCompletions: [],
@@ -861,6 +872,34 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         ...s,
         moduleAccessRules: s.moduleAccessRules.filter(
           (r) => !(r.courseId === courseId && r.moduleId === moduleId),
+        ),
+      })),
+    setSupportAccessRule: (rule) =>
+      setState((s) => {
+        const existing = s.supportAccessRules.find(
+          (r) => r.courseId === rule.courseId && r.support === rule.support,
+        );
+        if (existing) {
+          return {
+            ...s,
+            supportAccessRules: s.supportAccessRules.map((r) =>
+              r.id === existing.id ? { ...rule, id: existing.id } : r,
+            ),
+          };
+        }
+        return {
+          ...s,
+          supportAccessRules: [
+            { ...rule, id: genId("sar") },
+            ...s.supportAccessRules,
+          ],
+        };
+      }),
+    clearSupportAccessRule: (courseId, support) =>
+      setState((s) => ({
+        ...s,
+        supportAccessRules: s.supportAccessRules.filter(
+          (r) => !(r.courseId === courseId && r.support === support),
         ),
       })),
     markModuleCompleted: (input) =>

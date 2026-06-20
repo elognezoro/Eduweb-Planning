@@ -3,12 +3,10 @@
 import * as React from "react";
 import {
   AlertTriangle,
-  Award,
   CheckCircle2,
   Download,
   FileSpreadsheet,
   GraduationCap,
-  Image as ImageIcon,
   Lock,
   PenLine,
   Plus,
@@ -66,6 +64,16 @@ import {
   DEFAULT_FORMATION_ROLE,
   type FormationRole,
 } from "@/lib/formations/formation-roles";
+import {
+  SUPPORT_KINDS,
+  SUPPORT_KIND_LABEL,
+  SUPPORT_MODE_LABEL,
+  getSupportCondition,
+  describeCondition,
+  type SupportKind,
+  type SupportAccessCondition,
+  type SupportAccessMode,
+} from "@/lib/formations/support-access";
 import { ETAB_CONFIG_KEY, loadEtabConfig } from "@/lib/etab-config";
 import { cn } from "@/lib/utils";
 
@@ -106,7 +114,7 @@ function FormationsContent() {
   const { users: dirUsers, loading: usersLoading, realMode } = useDirectoryUsers();
   const courses = React.useMemo(() => sortedCourses(), []);
 
-  type Tab = "enrolled" | "cohorts" | "quick" | "access" | "completion" | "identity";
+  type Tab = "enrolled" | "cohorts" | "quick" | "access" | "completion" | "supports" | "identity";
   const [tab, setTab] = React.useState<Tab>("quick");
   const [selectedCourseId, setSelectedCourseId] = React.useState<string>(courses[0]?.id ?? "");
 
@@ -203,6 +211,9 @@ function FormationsContent() {
           <TabButton active={tab === "completion"} onClick={() => setTab("completion")} icon={<Trophy className="h-4 w-4" />}>
             Réussite du cours
           </TabButton>
+          <TabButton active={tab === "supports"} onClick={() => setTab("supports")} icon={<Download className="h-4 w-4" />}>
+            Supports téléchargeables
+          </TabButton>
           <TabButton active={tab === "identity"} onClick={() => setTab("identity")} icon={<Stamp className="h-4 w-4" />}>
             Identité visuelle
           </TabButton>
@@ -218,6 +229,8 @@ function FormationsContent() {
           <AccessRulesPanel courseId={selectedCourseId} />
         ) : tab === "completion" ? (
           <CompletionRulePanel courseId={selectedCourseId} />
+        ) : tab === "supports" ? (
+          <SupportAccessPanel courseId={selectedCourseId} />
         ) : (
           <IdentityPanel />
         )}
@@ -1581,6 +1594,163 @@ function CompletionRulePanel({ courseId }: { courseId: string }) {
           </div>
         </div>
       </article>
+    </div>
+  );
+}
+
+/* ============================================================================
+   ONGLET — SUPPORTS TÉLÉCHARGEABLES (accès conditionné par support)
+   ========================================================================== */
+function SupportAccessPanel({ courseId }: { courseId: string }) {
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg border border-ew-green-200 bg-ew-green-50/40 p-3 text-xs">
+        <p className="flex items-center gap-1.5 font-bold uppercase tracking-wide text-ew-green-700">
+          <Download aria-hidden className="h-3.5 w-3.5" /> Accès aux supports téléchargeables
+        </p>
+        <p className="mt-1 text-foreground/90">
+          Définissez, pour chaque support de ce cours, la condition d&apos;accès. Tant qu&apos;elle
+          n&apos;est pas remplie, le bouton de téléchargement est <strong>désactivé</strong> côté
+          apprenant (avec l&apos;explication). L&apos;administrateur garde toujours l&apos;accès.
+        </p>
+      </div>
+
+      <div className="grid gap-3 lg:grid-cols-3">
+        {SUPPORT_KINDS.map((support) => (
+          <SupportRuleEditor key={support} courseId={courseId} support={support} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SupportRuleEditor({ courseId, support }: { courseId: string; support: SupportKind }) {
+  const store = useStore();
+  const current = getSupportCondition(courseId, support, store.supportAccessRules);
+
+  const [mode, setMode] = React.useState<SupportAccessMode>(current.mode);
+  const [roles, setRoles] = React.useState<FormationRole[]>(
+    current.mode === "roles" ? current.roles : ["enseignant", "tuteur"],
+  );
+  const [date, setDate] = React.useState<string>(
+    current.mode === "after-date" ? current.date : "",
+  );
+  const [savedAt, setSavedAt] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    setMode(current.mode);
+    if (current.mode === "roles") setRoles(current.roles);
+    if (current.mode === "after-date") setDate(current.date);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseId, support]);
+
+  function buildCondition(): SupportAccessCondition | null {
+    switch (mode) {
+      case "open":
+        return { mode: "open" };
+      case "on-completion":
+        return { mode: "on-completion" };
+      case "roles":
+        return roles.length > 0 ? { mode: "roles", roles } : null;
+      case "after-date":
+        return date ? { mode: "after-date", date } : null;
+    }
+  }
+
+  function save() {
+    const condition = buildCondition();
+    if (!condition) return;
+    store.setSupportAccessRule({ courseId, support, condition });
+    setSavedAt(Date.now());
+    window.setTimeout(() => setSavedAt(null), 2500);
+  }
+
+  function reset() {
+    store.clearSupportAccessRule(courseId, support);
+    setMode("open");
+  }
+
+  const invalid =
+    (mode === "roles" && roles.length === 0) || (mode === "after-date" && !date);
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <p className="font-display text-sm font-bold text-ew-green-800">
+        {SUPPORT_KIND_LABEL[support]}
+      </p>
+      <p className="mt-0.5 text-[11px] italic text-muted-foreground">
+        Actuel : {describeCondition(current)}
+      </p>
+
+      <label className="mt-3 block text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+        Condition d&apos;accès
+      </label>
+      <select
+        value={mode}
+        onChange={(e) => setMode(e.target.value as SupportAccessMode)}
+        className="mt-1 h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+      >
+        {(Object.keys(SUPPORT_MODE_LABEL) as SupportAccessMode[]).map((m) => (
+          <option key={m} value={m}>
+            {SUPPORT_MODE_LABEL[m]}
+          </option>
+        ))}
+      </select>
+
+      {mode === "roles" ? (
+        <div className="mt-2 space-y-1">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            Rôles autorisés
+          </p>
+          {FORMATION_ROLES.map((r) => (
+            <label key={r} className="flex items-center gap-2 text-xs">
+              <input
+                type="checkbox"
+                checked={roles.includes(r)}
+                onChange={() =>
+                  setRoles((prev) =>
+                    prev.includes(r) ? prev.filter((x) => x !== r) : [...prev, r],
+                  )
+                }
+                className="h-3.5 w-3.5 accent-ew-green-700"
+              />
+              {FORMATION_ROLE_META[r].label}
+            </label>
+          ))}
+        </div>
+      ) : null}
+
+      {mode === "after-date" ? (
+        <div className="mt-2">
+          <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            Disponible à partir du
+          </label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="mt-1 h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+          />
+        </div>
+      ) : null}
+
+      {mode === "on-completion" ? (
+        <p className="mt-2 rounded-md border border-ew-gold-200 bg-ew-gold-50 px-2 py-1 text-[11px] text-ew-gold-700">
+          La réussite est déterminée par l&apos;onglet « Réussite du cours ».
+        </p>
+      ) : null}
+
+      <div className="mt-3 flex items-center gap-2">
+        <Button size="sm" onClick={save} disabled={invalid}>
+          Enregistrer
+        </Button>
+        <Button size="sm" variant="outline" onClick={reset}>
+          Réinitialiser
+        </Button>
+        {savedAt ? (
+          <span className="text-[11px] font-bold text-ew-green-700">✓ Enregistré</span>
+        ) : null}
+      </div>
     </div>
   );
 }

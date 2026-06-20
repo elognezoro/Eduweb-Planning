@@ -26,6 +26,8 @@ import {
   EnrollmentStatusChip,
   MyEnrollmentsPanel,
 } from "@/components/formations/enrollment-status";
+import { useSupportAccess } from "@/components/formations/use-support-access";
+import { GatedSupportLink } from "@/components/formations/gated-support-button";
 
 /* Mapping rôle → famille (pour le filtre et le tri) — repris de roles.ts. */
 const ROLE_FAMILY: Record<string, "administration" | "supervision" | "etablissement" | "communaute"> = {
@@ -419,6 +421,7 @@ function SeminaireMagnificaBanner() {
 /*  Bandeau « Séminaire SENEC — Communication pastorale »                  */
 /* ---------------------------------------------------------------------- */
 function SeminaireCommunicationBanner() {
+  const access = useSupportAccess("communication-pastorale");
   return (
     <div className="relative overflow-hidden rounded-2xl border border-ew-green-200 shadow-sm">
       <div
@@ -460,31 +463,36 @@ function SeminaireCommunicationBanner() {
         >
           <BookOpen className="h-4 w-4" /> Ouvrir le séminaire
         </Link>
-        <Link
+        <GatedSupportLink
+          access={access("livret")}
+          internal
           href="/aide/seminaire/communication-pastorale/livret"
           className="inline-flex items-center gap-2 rounded-lg border border-ew-green-700 bg-card px-4 py-2 text-sm font-semibold text-ew-green-700 transition-colors hover:bg-ew-green-50"
-        >
-          <FileText className="h-4 w-4" /> Livret imprimable (PDF)
-        </Link>
-        <a
+          icon={<FileText className="h-4 w-4" />}
+          label="Livret imprimable (PDF)"
+        />
+        <GatedSupportLink
+          access={access("livret")}
           href="/api/docx/seminaire/communication-pastorale"
           className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/40"
-        >
-          <FileDown className="h-4 w-4" /> Livret Word (.docx)
-        </a>
-        <a
+          icon={<FileDown className="h-4 w-4" />}
+          label="Livret Word (.docx)"
+        />
+        <GatedSupportLink
+          access={access("powerpoint")}
           href="/seminaires/communication-pastorale/support.pptx"
           download
           className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/40"
-        >
-          <Download className="h-4 w-4" /> Support PowerPoint
-        </a>
+          icon={<Download className="h-4 w-4" />}
+          label="Support PowerPoint"
+        />
       </div>
     </div>
   );
 }
 
 function SeminaireIaCommunicationBanner() {
+  const access = useSupportAccess("ia-communication");
   return (
     <div className="relative overflow-hidden rounded-2xl border border-ew-purple-200 shadow-sm">
       <div
@@ -526,25 +534,29 @@ function SeminaireIaCommunicationBanner() {
         >
           <BookOpen className="h-4 w-4" /> Ouvrir la formation
         </Link>
-        <Link
+        <GatedSupportLink
+          access={access("livret")}
+          internal
           href="/aide/seminaire/ia-communication/livret"
           className="inline-flex items-center gap-2 rounded-lg border border-ew-purple-600 bg-card px-4 py-2 text-sm font-semibold text-ew-purple-700 transition-colors hover:bg-ew-purple-50"
-        >
-          <FileText className="h-4 w-4" /> Livret imprimable (PDF)
-        </Link>
-        <a
+          icon={<FileText className="h-4 w-4" />}
+          label="Livret imprimable (PDF)"
+        />
+        <GatedSupportLink
+          access={access("livret")}
           href="/api/docx/seminaire/ia-communication"
           className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/40"
-        >
-          <FileDown className="h-4 w-4" /> Livret Word (.docx)
-        </a>
-        <a
+          icon={<FileDown className="h-4 w-4" />}
+          label="Livret Word (.docx)"
+        />
+        <GatedSupportLink
+          access={access("powerpoint")}
           href="/seminaires/ia-communication/support.pptx"
           download
           className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/40"
-        >
-          <Download className="h-4 w-4" /> Support PowerPoint
-        </a>
+          icon={<Download className="h-4 w-4" />}
+          label="Support PowerPoint"
+        />
       </div>
     </div>
   );

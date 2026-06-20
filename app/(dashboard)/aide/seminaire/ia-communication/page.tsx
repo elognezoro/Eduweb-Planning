@@ -25,6 +25,8 @@ import {
 import { IA_COMMUNICATION, IA_CONTENT } from "@/lib/seminaires/ia-communication";
 import type { CommSeminaireActivity } from "@/lib/seminaires/communication-pastorale";
 import { CourseGate } from "@/components/formations/course-gate";
+import { useSupportAccess } from "@/components/formations/use-support-access";
+import { GatedSupportButton } from "@/components/formations/gated-support-button";
 import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-book";
 
 /**
@@ -51,6 +53,7 @@ import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-
  */
 export default function IaCommunicationPage() {
   const s = IA_COMMUNICATION;
+  const supportAccess = useSupportAccess("ia-communication");
 
   /** Récupère une activité interactive par son identifiant. */
   const act = React.useCallback(
@@ -355,26 +358,34 @@ export default function IaCommunicationPage() {
             </Link>
           </Button>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant="outline" asChild>
-              <Link href="/aide/seminaire/ia-communication/livret">
-                <FileText className="h-4 w-4" /> Livret imprimable
-              </Link>
-            </Button>
-            <Button size="sm" variant="outline" asChild>
-              <a href="/api/docx/seminaire/ia-communication">
-                <FileDown className="h-4 w-4" /> Livret Word (.docx)
-              </a>
-            </Button>
-            <Button size="sm" variant="outline" asChild>
-              <a href={s.pptxAsset} download>
-                <Presentation className="h-4 w-4" /> Support PowerPoint
-              </a>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/aide/certificat">
-                <Award className="h-4 w-4" /> Délivrer un certificat
-              </Link>
-            </Button>
+            <GatedSupportButton
+              access={supportAccess("livret")}
+              internal
+              href="/aide/seminaire/ia-communication/livret"
+              icon={<FileText className="h-4 w-4" />}
+              label="Livret imprimable"
+            />
+            <GatedSupportButton
+              access={supportAccess("livret")}
+              href="/api/docx/seminaire/ia-communication"
+              icon={<FileDown className="h-4 w-4" />}
+              label="Livret Word (.docx)"
+            />
+            <GatedSupportButton
+              access={supportAccess("powerpoint")}
+              href={s.pptxAsset}
+              download
+              icon={<Presentation className="h-4 w-4" />}
+              label="Support PowerPoint"
+            />
+            <GatedSupportButton
+              access={supportAccess("certificat")}
+              internal
+              primary
+              href="/aide/certificat"
+              icon={<Award className="h-4 w-4" />}
+              label="Délivrer un certificat"
+            />
           </div>
         </div>
 

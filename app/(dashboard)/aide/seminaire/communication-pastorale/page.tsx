@@ -5,16 +5,9 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Award,
-  CheckCircle2,
-  Clock,
   FileDown,
   FileText,
-  GraduationCap,
-  Lock,
   Presentation,
-  Sparkles,
-  Target,
-  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +24,8 @@ import {
 } from "@/components/seminaires/comm-pastorale-views";
 import { COMMUNICATION_PASTORALE } from "@/lib/seminaires/communication-pastorale";
 import { CourseGate } from "@/components/formations/course-gate";
+import { useSupportAccess } from "@/components/formations/use-support-access";
+import { GatedSupportButton } from "@/components/formations/gated-support-button";
 import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-book";
 
 /**
@@ -58,6 +53,7 @@ import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-
  */
 export default function CommPastoralePage() {
   const s = COMMUNICATION_PASTORALE;
+  const supportAccess = useSupportAccess("communication-pastorale");
 
   // Textes de narration audio par page — concaténés depuis les données
   // du séminaire pour rester synchronisés avec le contenu réel.
@@ -268,26 +264,34 @@ export default function CommPastoralePage() {
             </Link>
           </Button>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant="outline" asChild>
-              <Link href="/aide/seminaire/communication-pastorale/livret">
-                <FileText className="h-4 w-4" /> Livret imprimable
-              </Link>
-            </Button>
-            <Button size="sm" variant="outline" asChild>
-              <a href="/api/docx/seminaire/communication-pastorale">
-                <FileDown className="h-4 w-4" /> Livret Word (.docx)
-              </a>
-            </Button>
-            <Button size="sm" variant="outline" asChild>
-              <a href={s.pptxAsset} download>
-                <Presentation className="h-4 w-4" /> Support PowerPoint
-              </a>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/aide/certificat">
-                <Award className="h-4 w-4" /> Délivrer un certificat
-              </Link>
-            </Button>
+            <GatedSupportButton
+              access={supportAccess("livret")}
+              internal
+              href="/aide/seminaire/communication-pastorale/livret"
+              icon={<FileText className="h-4 w-4" />}
+              label="Livret imprimable"
+            />
+            <GatedSupportButton
+              access={supportAccess("livret")}
+              href="/api/docx/seminaire/communication-pastorale"
+              icon={<FileDown className="h-4 w-4" />}
+              label="Livret Word (.docx)"
+            />
+            <GatedSupportButton
+              access={supportAccess("powerpoint")}
+              href={s.pptxAsset}
+              download
+              icon={<Presentation className="h-4 w-4" />}
+              label="Support PowerPoint"
+            />
+            <GatedSupportButton
+              access={supportAccess("certificat")}
+              internal
+              primary
+              href="/aide/certificat"
+              icon={<Award className="h-4 w-4" />}
+              label="Délivrer un certificat"
+            />
           </div>
         </div>
 
