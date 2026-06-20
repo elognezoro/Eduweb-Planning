@@ -34,12 +34,13 @@ const NAVY = "#13315c";
 
 /** Emplacements (en % du cadre) des données incrustées — faciles à régler. */
 const POS = {
+  // Lignes du modèle (mesurées) : nom 47,3% · formation 58% · formateur/date 83,5%.
   number: { left: "86%", top: "20.4%", maxW: "23%" },
-  name: { left: "50%", top: "46.2%", maxW: "66%" },
-  course: { left: "50%", top: "57.4%", maxW: "74%" },
-  trainer: { left: "18.3%", top: "85%", maxW: "21%" },
-  date: { left: "81.4%", top: "85%", maxW: "21%" },
-  sign: { left: "81.4%", top: "78.5%", maxW: "20%" },
+  name: { left: "50%", top: "45.6%", maxW: "66%" },
+  course: { left: "50%", top: "56.6%", maxW: "74%" },
+  trainer: { left: "18.3%", top: "81.8%", maxW: "21%" },
+  date: { left: "81.4%", top: "81.8%", maxW: "21%" },
+  sign: { left: "81.4%", top: "79.6%", maxW: "20%" },
 } as const;
 
 function Centered({
