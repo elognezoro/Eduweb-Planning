@@ -70,6 +70,11 @@ function GenericTrainingCertificate() {
 
   const [name, setName] = React.useState("");
   const [role, setRole] = React.useState("");
+  // Intitulé imprimé sur le certificat : pré-rempli avec le titre du syllabus,
+  // mais éditable pour y écrire le VRAI titre de la formation suivie.
+  const [formationTitle, setFormationTitle] = React.useState(
+    id.intituleAbrege || id.intitule,
+  );
   const [certificateNumber, setCertificateNumber] = React.useState("");
   const [issueDate, setIssueDate] = React.useState(formattedToday);
   const [saving, setSaving] = React.useState(false);
@@ -244,7 +249,15 @@ function GenericTrainingCertificate() {
           l&apos;année en cours. Il sera incrémenté lors de
           l&apos;enregistrement dans le journal.
         </p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-4">
+          <Field
+            label="Intitulé de la formation (imprimé sur le certificat)"
+            value={formationTitle}
+            onChange={setFormationTitle}
+            placeholder="Titre réel de la formation suivie"
+          />
+        </div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field
             label="Nom et prénoms"
             value={name}
@@ -304,7 +317,7 @@ function GenericTrainingCertificate() {
         <CourseCertificate
           certNumber={certificateNumber}
           beneficiaryName={name}
-          courseTitle={id.intituleAbrege || id.intitule}
+          courseTitle={formationTitle}
           trainerName={role}
           dateLabel={issueDate}
           dgName={meta.headName}

@@ -35,7 +35,7 @@ const NAVY = "#13315c";
 /** Emplacements (en % du cadre) des données incrustées — faciles à régler. */
 const POS = {
   // Lignes du modèle (mesurées) : nom 47,3% · formation 58% · formateur/date 83,5%.
-  number: { left: "85.8%", top: "20.4%", maxW: "16%" },
+  number: { left: "84%", top: "20.4%", maxW: "17%" },
   name: { left: "50%", top: "45.6%", maxW: "60%" },
   course: { left: "50%", top: "56.2%", maxW: "60%" },
   trainer: { left: "18.3%", top: "81.8%", maxW: "21%" },
