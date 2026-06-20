@@ -8,6 +8,7 @@ import { claimEnrollIntents } from "@/lib/formations/enrollment-invite";
 import { getEnrollmentVerdict } from "@/lib/formations/enrollment";
 import { getCourse } from "@/lib/formations/catalog";
 import { FORMATION_ROLES } from "@/lib/formations/formation-roles";
+import { isCoursePaid } from "@/lib/formations/pricing";
 
 /**
  * Matérialise les inscriptions issues d'un lien d'inscription.
@@ -39,6 +40,7 @@ export function EnrollmentIntentClaimer() {
 
     const now = Date.now();
     const enrolledTitles: string[] = [];
+    const toPayTitles: string[] = [];
     // Dé-duplication au sein de la réclamation : un cours déjà traité dans
     // cette passe n'est pas réinscrit (les vérifications de verdict reposent
     // sur le snapshot du store et ne « voient » pas les enrollUser de la passe).
@@ -67,6 +69,13 @@ export function EnrollmentIntentClaimer() {
           store.courseCohorts,
         );
         if (verdict.enrolled) return; // déjà inscrit : on n'ajoute pas de doublon
+        // Lien PAYANT + cours PAYANT : pas d'inscription gratuite — l'utilisateur
+        // règlera à la porte du cours (CoursePaymentGate). Un lien offert, ou un
+        // cours gratuit, donne l'inscription immédiate.
+        if (intent.paid && isCoursePaid(courseId, store.coursePrices)) {
+          toPayTitles.push(course.shortTitle);
+          return;
+        }
         store.enrollUser({
           userId,
           courseId,
@@ -81,6 +90,11 @@ export function EnrollmentIntentClaimer() {
     if (enrolledTitles.length > 0) {
       toast.success("Inscription confirmée", {
         description: `Vous avez désormais accès à : ${enrolledTitles.join(", ")}.`,
+      });
+    }
+    if (toPayTitles.length > 0) {
+      toast.info("Paiement requis", {
+        description: `Ouvrez ${toPayTitles.join(", ")} pour régler et finaliser votre inscription.`,
       });
     }
   }, [app.user.email, app.user.id, app.effectiveRole, store]);

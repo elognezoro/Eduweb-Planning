@@ -88,6 +88,7 @@ export default function RegisterPage() {
   );
   const inviteRoleLabel =
     FORMATION_ROLE_META[invite?.r ?? DEFAULT_FORMATION_ROLE].label;
+  const invitePaid = invite?.p === 1;
 
   const {
     register,
@@ -118,6 +119,7 @@ export default function RegisterPage() {
       courseIds: invite.c,
       formationRole: invite.r,
       expiresAt: invite.e ?? null,
+      paid: invite.p === 1,
       source: "Lien d'inscription",
       createdAt: new Date().toISOString(),
     });
@@ -219,6 +221,11 @@ export default function RegisterPage() {
                 (rôle : {inviteRoleLabel})
               </span>
               .
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {invitePaid
+                ? "Lien payant : le règlement des cours payants se fera à l'accès au cours."
+                : "Inscription offerte : aucun paiement ne vous sera demandé."}
             </p>
           </div>
         ) : (

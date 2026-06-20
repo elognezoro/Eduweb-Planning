@@ -32,12 +32,18 @@ import type {
   CourseCompletion,
   CourseCompletionRule,
   CourseEnrollment,
+  CoursePrice,
   CourseScheduleRule,
   ModuleAccessRule,
   ModuleCompletion,
 } from "@/lib/formations/types";
 import type { FormationRole } from "@/lib/formations/formation-roles";
 import type { EnrollmentInviteLink } from "@/lib/formations/enrollment-invite";
+import {
+  DEFAULT_PAYMENT_SETTINGS,
+  type CoursePayment,
+  type PaymentSettings,
+} from "@/lib/formations/payment";
 import type {
   SupportAccessRule,
   SupportKind,
@@ -312,6 +318,12 @@ interface StoreState {
   courseScheduleRules: CourseScheduleRule[];
   /** Liens d'inscription par création de compte (générés par l'admin). */
   enrollmentInviteLinks: EnrollmentInviteLink[];
+  /** Tarifs des cours en FCFA (absence / 0 = gratuit). */
+  coursePrices: CoursePrice[];
+  /** Réglages globaux du paiement Mobile Money. */
+  paymentSettings: PaymentSettings;
+  /** Paiements de cours déposés par les utilisateurs. */
+  coursePayments: CoursePayment[];
   /** Traces de complétion par utilisateur, cours et module. */
   moduleCompletions: ModuleCompletion[];
   /** Règle de réussite globale du cours (paramétrée par l'admin). */
@@ -544,6 +556,27 @@ interface DataStore extends StoreState {
   ) => void;
   /** Supprime un lien d'inscription de la liste (n'invalide pas un lien déjà diffusé : seule l'expiration le fait). */
   removeEnrollmentInvite: (id: string) => void;
+  /** Définit ou met à jour le tarif d'un cours (upsert par courseId). */
+  setCoursePrice: (rule: Omit<CoursePrice, "id">) => void;
+  /** Supprime le tarif d'un cours (retour à « gratuit »). */
+  clearCoursePrice: (courseId: string) => void;
+  /** Met à jour les réglages du paiement Mobile Money. */
+  setPaymentSettings: (patch: Partial<PaymentSettings>) => void;
+  /**
+   * Dépose un paiement de cours. Selon `paymentSettings.autoValidate`, le
+   * paiement est confirmé immédiatement (et l'utilisateur inscrit) ou mis en
+   * attente d'une validation administrateur.
+   */
+  submitCoursePayment: (
+    input: Omit<
+      CoursePayment,
+      "id" | "submittedAt" | "status" | "decidedBy" | "decidedAt"
+    >,
+  ) => void;
+  /** Confirme un paiement en attente et inscrit l'utilisateur au cours. */
+  confirmCoursePayment: (id: string, actor: string) => void;
+  /** Refuse un paiement en attente (avec motif). */
+  rejectCoursePayment: (id: string, actor: string, reason: string) => void;
   /** Marque un module comme terminé pour un utilisateur. */
   markModuleCompleted: (
     input: Omit<ModuleCompletion, "id" | "completedAt">,
@@ -624,6 +657,9 @@ const DEFAULTS: StoreState = {
   supportAccessRules: [],
   courseScheduleRules: [],
   enrollmentInviteLinks: [],
+  coursePrices: [],
+  paymentSettings: DEFAULT_PAYMENT_SETTINGS,
+  coursePayments: [],
   moduleCompletions: [],
   courseCompletionRules: [],
   courseCompletions: [],
@@ -1116,6 +1152,123 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
           (l) => l.id !== id,
         ),
       })),
+    setCoursePrice: (rule) =>
+      setState((s) => {
+        const existing = s.coursePrices.find(
+          (r) => r.courseId === rule.courseId,
+        );
+        if (existing) {
+          return {
+            ...s,
+            coursePrices: s.coursePrices.map((r) =>
+              r.id === existing.id ? { ...rule, id: existing.id } : r,
+            ),
+          };
+        }
+        return {
+          ...s,
+          coursePrices: [{ ...rule, id: genId("price") }, ...s.coursePrices],
+        };
+      }),
+    clearCoursePrice: (courseId) =>
+      setState((s) => ({
+        ...s,
+        coursePrices: s.coursePrices.filter((r) => r.courseId !== courseId),
+      })),
+    setPaymentSettings: (patch) =>
+      setState((s) => ({
+        ...s,
+        paymentSettings: { ...s.paymentSettings, ...patch },
+      })),
+    submitCoursePayment: (input) =>
+      setState((s) => {
+        const now = new Date().toISOString();
+        const auto = s.paymentSettings.autoValidate;
+        const payment: CoursePayment = {
+          ...input,
+          id: genId("pay"),
+          submittedAt: now,
+          status: auto ? "confirmed" : "pending",
+          decidedBy: auto ? "Validation automatique" : undefined,
+          decidedAt: auto ? now : undefined,
+        };
+        let enrollments = s.courseEnrollments;
+        if (auto) {
+          const already = enrollments.some(
+            (e) => e.userId === input.userId && e.courseId === input.courseId,
+          );
+          if (!already) {
+            enrollments = [
+              {
+                id: genId("enr"),
+                userId: input.userId,
+                courseId: input.courseId,
+                enrolledAt: now,
+                enrolledBy: "Paiement Mobile Money",
+                source: "individual",
+              },
+              ...enrollments,
+            ];
+          }
+        }
+        return {
+          ...s,
+          coursePayments: [payment, ...s.coursePayments],
+          courseEnrollments: enrollments,
+        };
+      }),
+    confirmCoursePayment: (id, actor) =>
+      setState((s) => {
+        const pay = s.coursePayments.find((p) => p.id === id);
+        if (!pay || pay.status === "confirmed") return s;
+        const now = new Date().toISOString();
+        const coursePayments = s.coursePayments.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                status: "confirmed" as const,
+                decidedBy: actor,
+                decidedAt: now,
+              }
+            : p,
+        );
+        let enrollments = s.courseEnrollments;
+        const already = enrollments.some(
+          (e) => e.userId === pay.userId && e.courseId === pay.courseId,
+        );
+        if (!already) {
+          enrollments = [
+            {
+              id: genId("enr"),
+              userId: pay.userId,
+              courseId: pay.courseId,
+              enrolledAt: now,
+              enrolledBy: "Paiement Mobile Money",
+              source: "individual",
+            },
+            ...enrollments,
+          ];
+        }
+        return { ...s, coursePayments, courseEnrollments: enrollments };
+      }),
+    rejectCoursePayment: (id, actor, reason) =>
+      setState((s) => {
+        const now = new Date().toISOString();
+        return {
+          ...s,
+          coursePayments: s.coursePayments.map((p) =>
+            p.id === id
+              ? {
+                  ...p,
+                  status: "rejected" as const,
+                  decidedBy: actor,
+                  decidedAt: now,
+                  note: reason,
+                }
+              : p,
+          ),
+        };
+      }),
     markModuleCompleted: (input) =>
       setState((s) => {
         const already = s.moduleCompletions.find(

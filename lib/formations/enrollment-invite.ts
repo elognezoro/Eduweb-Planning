@@ -47,6 +47,12 @@ export interface EnrollmentInviteLink {
   label?: string;
   /** ISO datetime d'expiration du lien (null = sans limite). */
   expiresAt?: string | null;
+  /**
+   * Lien « payant » : l'invité devra régler les cours payants avant d'y
+   * accéder. Si absent / faux, le lien est « offert » (sponsorisé) :
+   * l'inscription est gratuite, même pour un cours tarifé.
+   */
+  paid?: boolean;
   /** ISO timestamp de création. */
   createdAt: string;
   /** Nom de l'administrateur créateur. */
@@ -63,6 +69,8 @@ export interface InvitePayload {
   r?: FormationRole;
   /** expiresAt (ISO) ou null. */
   e?: string | null;
+  /** paid : 1 si lien payant (offert sinon). */
+  p?: 1;
   /** nonce d'unicité. */
   n: string;
 }
@@ -183,6 +191,11 @@ export interface EnrollIntent {
    * claim : une intention dont l'expiration est dépassée n'inscrit personne.
    */
   expiresAt?: string | null;
+  /**
+   * Lien payant : à la matérialisation, les cours payants ne sont pas inscrits
+   * gratuitement (l'utilisateur règle à la porte du cours). Offert sinon.
+   */
+  paid?: boolean;
   /** Libellé reporté dans `enrolledBy`. */
   source: string;
   /** ISO timestamp. */

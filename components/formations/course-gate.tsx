@@ -5,12 +5,19 @@ import Link from "next/link";
 import {
   ArrowLeft,
   CalendarClock,
+  CheckCircle2,
+  CreditCard,
   GraduationCap,
+  Hourglass,
   Lock,
   MessageSquare,
+  Smartphone,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { getCourse } from "@/lib/formations/catalog";
 import {
   getEnrollmentVerdict,
@@ -22,7 +29,21 @@ import {
   getCourseSchedule,
   type CourseScheduleVerdict,
 } from "@/lib/formations/course-schedule";
+import {
+  coursePriceFcfa,
+  formatEurEquivalent,
+  formatFcfa,
+  isCoursePaid,
+} from "@/lib/formations/pricing";
+import {
+  enabledOperators,
+  isMobileMoneyOperational,
+  MM_OPERATOR_META,
+  pendingPaymentFor,
+  type MobileMoneyOperator,
+} from "@/lib/formations/payment";
 import type { Course } from "@/lib/formations/types";
+import { cn } from "@/lib/utils";
 
 /**
  * Garde d'accès à un cours spécifique.
@@ -60,13 +81,12 @@ export function CourseGate({
     );
   }
 
-  // Fenêtre d'ouverture / fermeture : s'applique à tous (hors admin, déjà
-  // sorti plus haut), inscrit ou non. Hors fenêtre, l'accès est refusé avec
-  // un écran dédié indiquant la date d'ouverture ou de clôture.
   const schedule = evaluateCourseSchedule(
     getCourseSchedule(courseId, store.courseScheduleRules),
   );
-  if (!schedule.accessible) {
+
+  // Cours CLÔTURÉ : accès bloqué pour tous — inscription et paiement inutiles.
+  if (schedule.state === "after") {
     return <CourseScheduleClosed course={course} verdict={schedule} />;
   }
 
@@ -79,6 +99,13 @@ export function CourseGate({
   );
 
   if (verdict.enrolled) {
+    // Déjà inscrit, mais le cours n'est pas encore ouvert : écran d'attente
+    // (le contenu reste verrouillé jusqu'à la date d'ouverture).
+    if (schedule.state === "before") {
+      return (
+        <CourseScheduleClosed course={course} verdict={schedule} enrolled />
+      );
+    }
     return (
       <div className="space-y-3">
         <EnrollmentBadge
@@ -91,7 +118,17 @@ export function CourseGate({
     );
   }
 
-  return <CourseAccessDenied courseId={courseId} />;
+  // Non inscrit. Un cours PAYANT (avec Mobile Money opérationnel) ouvre
+  // l'auto-inscription par paiement — possible dès maintenant, même AVANT
+  // l'ouverture du cours (pré-inscription). Un cours gratuit reste géré par
+  // l'administrateur (écran « inscription requise »).
+  const paid =
+    isCoursePaid(courseId, store.coursePrices) &&
+    isMobileMoneyOperational(store.paymentSettings);
+  if (paid) {
+    return <CoursePaymentGate course={course} schedule={schedule} />;
+  }
+  return <CourseAccessDenied courseId={courseId} schedule={schedule} />;
 }
 
 function EnrollmentBadge({
@@ -140,9 +177,12 @@ function EnrollmentBadge({
 function CourseScheduleClosed({
   course,
   verdict,
+  enrolled = false,
 }: {
   course: Course;
   verdict: CourseScheduleVerdict;
+  /** L'utilisateur est déjà inscrit et attend l'ouverture. */
+  enrolled?: boolean;
 }) {
   const isBefore = verdict.state === "before";
   return (
@@ -162,6 +202,12 @@ function CourseScheduleClosed({
           {isBefore ? "Cours pas encore ouvert" : "Cours clôturé"}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">{verdict.reason}</p>
+        {enrolled && isBefore ? (
+          <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-ew-green-50 px-3 py-1 text-xs font-bold text-ew-green-700">
+            <CheckCircle2 aria-hidden className="h-4 w-4" /> Votre inscription
+            est confirmée — l&apos;accès s&apos;ouvrira à cette date.
+          </p>
+        ) : null}
       </div>
 
       <div className="w-full rounded-2xl border border-border bg-card p-5 text-left">
@@ -195,10 +241,248 @@ function CourseScheduleClosed({
   );
 }
 
-function CourseAccessDenied({ courseId }: { courseId: string }) {
+/**
+ * Écran de paiement Mobile Money pour un cours payant (utilisateur non
+ * inscrit). L'utilisateur paie vers le numéro marchand de l'opérateur choisi,
+ * puis saisit la référence de transaction. Selon le réglage admin :
+ *  - validation automatique → inscription immédiate ;
+ *  - sinon → paiement « en attente » jusqu'à validation par l'administrateur.
+ *
+ * Accessible même AVANT l'ouverture du cours (pré-paiement) ; l'accès au
+ * contenu reste repoussé à la date d'ouverture.
+ */
+function CoursePaymentGate({
+  course,
+  schedule,
+}: {
+  course: Course;
+  schedule: CourseScheduleVerdict;
+}) {
+  const app = useApp();
+  const store = useStore();
+  const amount = coursePriceFcfa(course.id, store.coursePrices);
+  const operators = enabledOperators(store.paymentSettings);
+  const pending = pendingPaymentFor(
+    app.user.id,
+    course.id,
+    store.coursePayments,
+  );
+
+  const [operator, setOperator] = React.useState<MobileMoneyOperator>(
+    operators[0]?.key ?? "orange",
+  );
+  const [reference, setReference] = React.useState("");
+  const [payerNumber, setPayerNumber] = React.useState("");
+
+  const selected = operators.find((o) => o.key === operator) ?? operators[0];
+  const opensLater = schedule.state === "before";
+
+  function submit() {
+    const ref = reference.trim();
+    if (!ref || !selected) return;
+    store.submitCoursePayment({
+      userId: app.user.id,
+      userName: app.user.displayName,
+      courseId: course.id,
+      amountFcfa: amount,
+      operator: selected.key,
+      reference: ref,
+      payerNumber: payerNumber.trim() || undefined,
+    });
+    if (store.paymentSettings.autoValidate) {
+      toast.success("Paiement enregistré", {
+        description: "Votre inscription est confirmée.",
+      });
+    } else {
+      toast.success("Paiement transmis", {
+        description: "En attente de validation par l'administrateur.",
+      });
+    }
+  }
+
+  // Un paiement est déjà en attente : on n'affiche pas le formulaire.
+  if (pending) {
+    return (
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-5 py-12 text-center">
+        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-ew-gold-100 text-ew-gold-700">
+          <Hourglass aria-hidden className="h-7 w-7" />
+        </span>
+        <div>
+          <h1 className="font-display text-2xl font-extrabold text-foreground sm:text-3xl">
+            Paiement en attente de validation
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Votre paiement pour <strong>« {course.shortTitle} »</strong> a bien
+            été transmis. L&apos;accès sera ouvert dès sa validation par
+            l&apos;administrateur.
+          </p>
+        </div>
+        <div className="w-full rounded-2xl border border-border bg-card p-5 text-left text-sm">
+          <Fact label="Montant" value={formatFcfa(pending.amountFcfa)} />
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <Fact
+              label="Opérateur"
+              value={MM_OPERATOR_META[pending.operator].label}
+            />
+            <Fact label="Référence" value={pending.reference} />
+          </div>
+        </div>
+        <Link
+          href="/aide"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted/40"
+        >
+          <ArrowLeft className="h-4 w-4" /> Retour à la bibliothèque
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto flex max-w-2xl flex-col gap-5 py-10">
+      <div className="text-center">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-ew-green-100 text-ew-green-700">
+          <CreditCard aria-hidden className="h-7 w-7" />
+        </span>
+        <h1 className="mt-3 font-display text-2xl font-extrabold text-foreground sm:text-3xl">
+          Inscription au cours
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">{course.title}</p>
+      </div>
+
+      {opensLater ? (
+        <p className="flex items-center justify-center gap-1.5 rounded-xl border border-ew-green-200 bg-ew-green-50/50 px-3 py-2 text-center text-xs font-semibold text-ew-green-800">
+          <CalendarClock aria-hidden className="h-4 w-4" /> Ce cours ouvrira le{" "}
+          {formatScheduleMoment(schedule.opensAt)}. Vous pouvez régler dès
+          maintenant ; l&apos;accès s&apos;ouvrira à cette date.
+        </p>
+      ) : null}
+
+      {/* Montant */}
+      <div className="rounded-2xl border border-ew-green-200 bg-ew-green-50/40 p-4 text-center">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-ew-green-700">
+          Montant à payer
+        </p>
+        <p className="mt-1 font-display text-3xl font-extrabold text-foreground">
+          {formatFcfa(amount)}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {formatEurEquivalent(amount)}
+        </p>
+      </div>
+
+      {/* Choix de l'opérateur */}
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+          1. Choisissez votre opérateur Mobile Money
+        </p>
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {operators.map((o) => (
+            <button
+              key={o.key}
+              type="button"
+              onClick={() => setOperator(o.key)}
+              className={cn(
+                "flex flex-col items-center gap-1 rounded-xl border p-3 text-xs font-semibold transition-colors",
+                operator === o.key
+                  ? "border-ew-green-400 bg-ew-green-50 text-ew-green-800"
+                  : "border-border bg-background hover:bg-muted/40",
+              )}
+            >
+              <Smartphone aria-hidden className="h-4 w-4" />
+              {MM_OPERATOR_META[o.key].label}
+            </button>
+          ))}
+        </div>
+
+        {selected ? (
+          <div className="mt-4 rounded-xl border border-dashed border-ew-green-300 bg-ew-green-50/40 p-3 text-sm">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              2. Payez {formatFcfa(amount)} vers ce numéro marchand
+            </p>
+            <p className="mt-1 font-display text-xl font-extrabold tracking-wide text-foreground">
+              {selected.merchantNumber}
+            </p>
+            {selected.merchantName ? (
+              <p className="text-xs text-muted-foreground">
+                Bénéficiaire : <strong>{selected.merchantName}</strong>
+              </p>
+            ) : null}
+            <p className="mt-1 text-xs text-muted-foreground">
+              {MM_OPERATOR_META[selected.key].hint}
+            </p>
+            {store.paymentSettings.instructions ? (
+              <p className="mt-2 text-xs italic text-muted-foreground">
+                {store.paymentSettings.instructions}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+
+      {/* Confirmation de paiement */}
+      <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+          3. Confirmez votre paiement
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="text-[11px] font-semibold text-muted-foreground">
+              Référence de la transaction *
+            </label>
+            <Input
+              value={reference}
+              onChange={(e) => setReference(e.target.value)}
+              placeholder="Ex. MP260620.1234.A56789"
+              className="mt-1 h-9"
+            />
+          </div>
+          <div>
+            <label className="text-[11px] font-semibold text-muted-foreground">
+              Votre numéro payeur (facultatif)
+            </label>
+            <Input
+              value={payerNumber}
+              onChange={(e) => setPayerNumber(e.target.value)}
+              placeholder="07 XX XX XX XX"
+              className="mt-1 h-9"
+            />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            {store.paymentSettings.autoValidate
+              ? "Votre inscription sera confirmée immédiatement."
+              : "Votre paiement sera vérifié par l'administrateur avant l'accès."}
+          </p>
+          <Button onClick={submit} disabled={!reference.trim() || !selected}>
+            <CheckCircle2 className="h-4 w-4" /> Valider mon paiement
+          </Button>
+        </div>
+      </div>
+
+      <div className="text-center">
+        <Link
+          href="/aide"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" /> Retour à la bibliothèque
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function CourseAccessDenied({
+  courseId,
+  schedule,
+}: {
+  courseId: string;
+  schedule?: CourseScheduleVerdict;
+}) {
   const app = useApp();
   const course = getCourse(courseId);
   if (!course) return null;
+  const opensLater = schedule?.state === "before";
   // Le lien vers /systeme/formations n'est rendu cliquable que pour les
   // utilisateurs habilités à gérer les inscriptions ; sinon il est affiché
   // comme une simple mention textuelle (le module n'est pas accessible).
@@ -222,6 +506,13 @@ function CourseAccessDenied({ courseId }: { courseId: string }) {
         <p className="mt-2 text-sm text-muted-foreground">
           Cette formation est ouverte uniquement aux participants inscrits.
         </p>
+        {opensLater ? (
+          <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-ew-green-50 px-3 py-1 text-xs font-bold text-ew-green-700">
+            <CalendarClock aria-hidden className="h-4 w-4" /> Ouverture prévue
+            le {formatScheduleMoment(schedule?.opensAt)} — vous pouvez préparer
+            votre inscription dès maintenant.
+          </p>
+        ) : null}
       </div>
 
       <div className="w-full rounded-2xl border border-border bg-card p-5 text-left">

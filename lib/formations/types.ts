@@ -186,6 +186,21 @@ export interface CourseScheduleRule {
   closesAt?: string | null;
 }
 
+/**
+ * Tarif d'un cours, fixé par l'administrateur.
+ *
+ * Le montant est exprimé en FCFA (XOF). L'équivalent en euros est calculé à
+ * la parité légale fixe (655,957 FCFA = 1 €) — voir lib/formations/pricing.ts.
+ * Un cours sans tarif (ou de montant 0) est gratuit : l'inscription reste
+ * gérée par l'administrateur (cohorte / nominative), sans paiement.
+ */
+export interface CoursePrice {
+  id: string;
+  courseId: string;
+  /** Montant en FCFA (entier, sans décimales). 0 = gratuit. */
+  amountFcfa: number;
+}
+
 /** Cohorte = groupe nommé d'utilisateurs inscrits à un cours. */
 export interface CourseCohort {
   id: string;

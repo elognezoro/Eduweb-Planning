@@ -27,6 +27,10 @@ import {
   Copy,
   Check,
   Ticket,
+  Coins,
+  Smartphone,
+  Wallet,
+  X,
 } from "lucide-react";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Button } from "@/components/ui/button";
@@ -93,6 +97,21 @@ import {
   payloadStatus,
   type EnrollmentInviteLink,
 } from "@/lib/formations/enrollment-invite";
+import {
+  coursePriceFcfa,
+  formatEurEquivalent,
+  formatFcfa,
+  getCoursePrice,
+  isCoursePaid,
+} from "@/lib/formations/pricing";
+import {
+  isMobileMoneyOperational,
+  MM_OPERATOR_META,
+  MOBILE_MONEY_OPERATORS,
+  PAYMENT_STATUS_LABEL,
+  type CoursePayment,
+  type MobileMoneyOperator,
+} from "@/lib/formations/payment";
 import { ETAB_CONFIG_KEY, loadEtabConfig } from "@/lib/etab-config";
 import { cn } from "@/lib/utils";
 
@@ -144,6 +163,8 @@ function FormationsContent() {
     | "access"
     | "completion"
     | "schedule"
+    | "pricing"
+    | "payment"
     | "supports"
     | "links"
     | "identity";
@@ -290,6 +311,20 @@ function FormationsContent() {
             Ouverture / Fermeture
           </TabButton>
           <TabButton
+            active={tab === "pricing"}
+            onClick={() => setTab("pricing")}
+            icon={<Coins className="h-4 w-4" />}
+          >
+            Tarification
+          </TabButton>
+          <TabButton
+            active={tab === "payment"}
+            onClick={() => setTab("payment")}
+            icon={<Wallet className="h-4 w-4" />}
+          >
+            Paiement
+          </TabButton>
+          <TabButton
             active={tab === "supports"}
             onClick={() => setTab("supports")}
             icon={<Download className="h-4 w-4" />}
@@ -330,6 +365,13 @@ function FormationsContent() {
           <CompletionRulePanel courseId={selectedCourseId} />
         ) : tab === "schedule" ? (
           <CourseSchedulePanel courseId={selectedCourseId} />
+        ) : tab === "pricing" ? (
+          <CoursePricePanel courseId={selectedCourseId} />
+        ) : tab === "payment" ? (
+          <PaymentPanel
+            courseId={selectedCourseId}
+            actor={app.user.displayName}
+          />
         ) : tab === "supports" ? (
           <SupportAccessPanel courseId={selectedCourseId} />
         ) : tab === "links" ? (
@@ -2384,11 +2426,20 @@ function EnrollmentLinksPanel({ actor }: { actor: string }) {
   const [role, setRole] = React.useState<FormationRole>(DEFAULT_FORMATION_ROLE);
   const [label, setLabel] = React.useState("");
   const [expiresAt, setExpiresAt] = React.useState("");
+  // Lien « payant » : l'invité règle les cours payants à l'accès. Sinon
+  // « offert » : inscription gratuite même pour un cours tarifé.
+  const [paid, setPaid] = React.useState(false);
 
   const [origin, setOrigin] = React.useState("");
   React.useEffect(() => {
     if (typeof window !== "undefined") setOrigin(window.location.origin);
   }, []);
+
+  // Au moins un cours sélectionné est-il tarifé ? (le mode payant n'a de sens
+  // que dans ce cas).
+  const anyPaidPicked = courses.some(
+    (c) => picked.has(c.id) && isCoursePaid(c.id, store.coursePrices),
+  );
 
   function toggle(courseId: string) {
     setPicked((prev) => {
@@ -2402,11 +2453,13 @@ function EnrollmentLinksPanel({ actor }: { actor: string }) {
   function create() {
     const courseIds = courses.map((c) => c.id).filter((id) => picked.has(id));
     if (courseIds.length === 0) return;
+    const makePaid = paid && anyPaidPicked;
     const token = encodeInviteToken({
       v: 1,
       c: courseIds,
       r: role !== DEFAULT_FORMATION_ROLE ? role : undefined,
       e: expiresAt ? new Date(expiresAt).toISOString() : null,
+      p: makePaid ? 1 : undefined,
       n: makeInviteNonce(),
     });
     store.createEnrollmentInvite({
@@ -2415,12 +2468,14 @@ function EnrollmentLinksPanel({ actor }: { actor: string }) {
       formationRole: role,
       label: label.trim() || undefined,
       expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+      paid: makePaid,
       createdBy: actor,
     });
     setPicked(new Set());
     setLabel("");
     setExpiresAt("");
     setRole(DEFAULT_FORMATION_ROLE);
+    setPaid(false);
   }
 
   const links = store.enrollmentInviteLinks;
@@ -2472,11 +2527,57 @@ function EnrollmentLinksPanel({ actor }: { actor: string }) {
                 <span className="font-medium text-foreground">
                   {c.shortTitle}
                 </span>
-                <span className="ml-auto text-[10px] uppercase text-muted-foreground">
-                  {c.type}
-                </span>
+                {isCoursePaid(c.id, store.coursePrices) ? (
+                  <span className="ml-auto rounded-full bg-ew-gold-100 px-2 py-0.5 text-[10px] font-bold text-ew-gold-700">
+                    {formatFcfa(coursePriceFcfa(c.id, store.coursePrices))}
+                  </span>
+                ) : (
+                  <span className="ml-auto text-[10px] uppercase text-muted-foreground">
+                    gratuit
+                  </span>
+                )}
               </label>
             ))}
+          </div>
+        </div>
+
+        {/* Mode offert / payant (utile seulement si un cours tarifé est choisi) */}
+        <div
+          className={cn(
+            "rounded-xl border p-3",
+            anyPaidPicked
+              ? "border-ew-gold-200 bg-ew-gold-50/40"
+              : "border-border bg-muted/20",
+          )}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                Mode d&apos;inscription
+              </p>
+              <p className="text-xs text-foreground/90">
+                {anyPaidPicked
+                  ? paid
+                    ? "Payant : l'invité réglera les cours tarifés à l'accès."
+                    : "Offert : inscription gratuite, même pour les cours tarifés (prise en charge)."
+                  : "Aucun cours tarifé sélectionné : l'inscription est offerte."}
+              </p>
+            </div>
+            <label
+              className={cn(
+                "inline-flex cursor-pointer items-center gap-2 text-sm font-semibold",
+                !anyPaidPicked && "cursor-not-allowed opacity-50",
+              )}
+            >
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-ew-gold-600"
+                checked={paid && anyPaidPicked}
+                disabled={!anyPaidPicked}
+                onChange={(e) => setPaid(e.target.checked)}
+              />
+              Lien payant
+            </label>
           </div>
         </div>
 
@@ -2612,6 +2713,9 @@ function InviteLinkRow({
                 ? `Expire le ${formatScheduleMoment(link.expiresAt)}`
                 : "Sans expiration"}
             </span>
+            <Badge tone={link.paid ? "gold" : "green"}>
+              {link.paid ? "Payant" : "Offert"}
+            </Badge>
             {status === "expired" ? <Badge tone="gold">Expiré</Badge> : null}
           </div>
         </div>
@@ -2638,6 +2742,433 @@ function InviteLinkRow({
       <p className="mt-2 truncate rounded-md border border-dashed border-border bg-background/60 px-2 py-1 font-mono text-[11px] text-muted-foreground">
         {url || "…"}
       </p>
+    </li>
+  );
+}
+
+/* ============================================================================
+   ONGLET 9 — TARIFICATION (prix du cours en FCFA + équivalent EUR)
+   ========================================================================== */
+function CoursePricePanel({ courseId }: { courseId: string }) {
+  const store = useStore();
+  const course = getCourse(courseId);
+  const current = getCoursePrice(courseId, store.coursePrices);
+
+  const [amount, setAmount] = React.useState<string>("");
+  const [savedAt, setSavedAt] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    setAmount(
+      current && current.amountFcfa > 0 ? String(current.amountFcfa) : "",
+    );
+    setSavedAt(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseId]);
+
+  const amountNum = Math.max(0, Math.round(Number(amount) || 0));
+  const dirty = (current?.amountFcfa ?? 0) !== amountNum;
+  const mmReady = isMobileMoneyOperational(store.paymentSettings);
+
+  function save() {
+    if (amountNum <= 0) store.clearCoursePrice(courseId);
+    else store.setCoursePrice({ courseId, amountFcfa: amountNum });
+    setSavedAt(Date.now());
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg border border-ew-green-200 bg-ew-green-50/40 p-3 text-xs">
+        <p className="flex items-center gap-1.5 font-bold uppercase tracking-wide text-ew-green-700">
+          <Coins aria-hidden className="h-3.5 w-3.5" /> Tarif du cours
+        </p>
+        <p className="mt-1 text-foreground/90">
+          Fixez le prix d&apos;accès au cours{" "}
+          <strong>« {course?.shortTitle ?? courseId} »</strong> en FCFA.
+          L&apos;équivalent en euros est calculé à la parité légale fixe
+          (1&nbsp;€ = 655,957&nbsp;FCFA). Laissez vide ou 0 pour un cours{" "}
+          <strong>gratuit</strong> (inscription gérée par
+          l&apos;administrateur).
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+          Prix du cours (FCFA)
+        </label>
+        <div className="mt-1 flex flex-wrap items-center gap-3">
+          <input
+            type="number"
+            min={0}
+            step={500}
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0"
+            className="h-10 w-44 rounded-md border border-input bg-background px-3 text-lg font-bold focus:border-ew-green-500 focus:outline-none focus:ring-1 focus:ring-ew-green-500"
+          />
+          <div className="text-sm">
+            {amountNum > 0 ? (
+              <>
+                <span className="font-display text-xl font-extrabold text-foreground">
+                  {formatFcfa(amountNum)}
+                </span>{" "}
+                <span className="text-muted-foreground">
+                  {formatEurEquivalent(amountNum)}
+                </span>
+              </>
+            ) : (
+              <span className="font-bold text-ew-green-700">Gratuit</span>
+            )}
+          </div>
+        </div>
+
+        {amountNum > 0 && !mmReady ? (
+          <p className="mt-3 flex items-center gap-1.5 rounded-lg border border-ew-gold-200 bg-ew-gold-50/60 px-3 py-2 text-xs text-ew-gold-700">
+            <AlertTriangle aria-hidden className="h-4 w-4" /> Le paiement Mobile
+            Money n&apos;est pas encore opérationnel : configurez-le dans
+            l&apos;onglet <strong>Paiement</strong> pour permettre
+            l&apos;auto-inscription payante.
+          </p>
+        ) : null}
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            {savedAt && !dirty ? (
+              <span className="text-ew-green-700">
+                ✓ Tarif enregistré à{" "}
+                {new Date(savedAt).toLocaleTimeString("fr-FR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            ) : dirty ? (
+              <span className="italic">Modifications non enregistrées.</span>
+            ) : (
+              <span className="italic">
+                Cours gratuit tant qu&apos;aucun prix n&apos;est fixé.
+              </span>
+            )}
+          </p>
+          <Button size="sm" onClick={save} disabled={!dirty}>
+            <Save className="h-4 w-4" /> Enregistrer
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+   ONGLET 10 — PAIEMENT MOBILE MONEY (config opérateurs + validation)
+   ========================================================================== */
+function PaymentPanel({
+  courseId,
+  actor,
+}: {
+  courseId: string;
+  actor: string;
+}) {
+  const store = useStore();
+  const settings = store.paymentSettings;
+
+  // Brouillon local de la configuration (sauvegarde explicite).
+  const [enabled, setEnabled] = React.useState(settings.mobileMoneyEnabled);
+  const [autoValidate, setAutoValidate] = React.useState(settings.autoValidate);
+  const [instructions, setInstructions] = React.useState(settings.instructions);
+  const [operators, setOperators] = React.useState(() =>
+    MOBILE_MONEY_OPERATORS.map((key) => {
+      const o = settings.operators.find((x) => x.key === key);
+      return {
+        key,
+        enabled: o?.enabled ?? false,
+        merchantNumber: o?.merchantNumber ?? "",
+        merchantName: o?.merchantName ?? "",
+      };
+    }),
+  );
+  const [savedAt, setSavedAt] = React.useState<number | null>(null);
+
+  function patchOperator(
+    key: MobileMoneyOperator,
+    patch: Partial<{
+      enabled: boolean;
+      merchantNumber: string;
+      merchantName: string;
+    }>,
+  ) {
+    setOperators((prev) =>
+      prev.map((o) => (o.key === key ? { ...o, ...patch } : o)),
+    );
+    setSavedAt(null);
+  }
+
+  function save() {
+    store.setPaymentSettings({
+      mobileMoneyEnabled: enabled,
+      autoValidate,
+      instructions,
+      operators,
+    });
+    setSavedAt(Date.now());
+  }
+
+  // Paiements en attente (tous cours) + historique du cours sélectionné.
+  const pending = store.coursePayments.filter((p) => p.status === "pending");
+  const courseHistory = store.coursePayments.filter(
+    (p) => p.courseId === courseId && p.status !== "pending",
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-lg border border-ew-green-200 bg-ew-green-50/40 p-3 text-xs">
+        <p className="flex items-center gap-1.5 font-bold uppercase tracking-wide text-ew-green-700">
+          <Wallet aria-hidden className="h-3.5 w-3.5" /> Paiement Mobile Money
+        </p>
+        <p className="mt-1 text-foreground/90">
+          Publiez, par opérateur, le <strong>numéro marchand</strong> où les
+          utilisateurs paient. Ils saisissent ensuite la référence de leur
+          transaction. Le paiement est confirmé automatiquement, ou mis en
+          attente de votre validation.
+        </p>
+      </div>
+
+      {/* Réglages globaux */}
+      <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold">
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-ew-green-700"
+              checked={enabled}
+              onChange={(e) => {
+                setEnabled(e.target.checked);
+                setSavedAt(null);
+              }}
+            />
+            Activer le paiement Mobile Money
+          </label>
+          <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold">
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-ew-green-700"
+              checked={autoValidate}
+              onChange={(e) => {
+                setAutoValidate(e.target.checked);
+                setSavedAt(null);
+              }}
+            />
+            Validation automatique (sans contrôle manuel)
+          </label>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          {operators.map((o) => (
+            <div
+              key={o.key}
+              className={cn(
+                "rounded-xl border p-3",
+                o.enabled
+                  ? "border-ew-green-300 bg-ew-green-50/40"
+                  : "border-border bg-background",
+              )}
+            >
+              <label className="flex items-center gap-2 text-sm font-bold text-foreground">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-ew-green-700"
+                  checked={o.enabled}
+                  onChange={(e) =>
+                    patchOperator(o.key, { enabled: e.target.checked })
+                  }
+                />
+                <Smartphone aria-hidden className="h-4 w-4 text-ew-green-700" />
+                {MM_OPERATOR_META[o.key].label}
+              </label>
+              <div className="mt-2 grid gap-2">
+                <Input
+                  value={o.merchantNumber}
+                  onChange={(e) =>
+                    patchOperator(o.key, { merchantNumber: e.target.value })
+                  }
+                  placeholder="Numéro marchand (ex. 0700000000)"
+                  className="h-9"
+                  disabled={!o.enabled}
+                />
+                <Input
+                  value={o.merchantName}
+                  onChange={(e) =>
+                    patchOperator(o.key, { merchantName: e.target.value })
+                  }
+                  placeholder="Nom du bénéficiaire (facultatif)"
+                  className="h-9"
+                  disabled={!o.enabled}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            Instructions affichées à l&apos;utilisateur
+          </label>
+          <textarea
+            value={instructions}
+            onChange={(e) => {
+              setInstructions(e.target.value);
+              setSavedAt(null);
+            }}
+            rows={2}
+            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-ew-green-500 focus:outline-none focus:ring-1 focus:ring-ew-green-500"
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            {savedAt ? (
+              <span className="text-ew-green-700">✓ Réglages enregistrés.</span>
+            ) : (
+              <span className="italic">Modifications non enregistrées.</span>
+            )}
+          </p>
+          <Button size="sm" onClick={save}>
+            <Save className="h-4 w-4" /> Enregistrer la configuration
+          </Button>
+        </div>
+      </div>
+
+      {/* Paiements en attente (tous cours) */}
+      <div>
+        <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-ew-gold-700">
+          Paiements en attente de validation ({pending.length})
+        </p>
+        {pending.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-border bg-background/60 p-3 text-center text-sm text-muted-foreground">
+            Aucun paiement en attente.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {pending.map((p) => (
+              <PaymentRow
+                key={p.id}
+                payment={p}
+                onConfirm={() => store.confirmCoursePayment(p.id, actor)}
+                onReject={(reason) =>
+                  store.rejectCoursePayment(p.id, actor, reason)
+                }
+              />
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Historique du cours sélectionné */}
+      {courseHistory.length > 0 ? (
+        <div>
+          <p className="mb-2 font-display text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            Historique — {getCourse(courseId)?.shortTitle ?? courseId} (
+            {courseHistory.length})
+          </p>
+          <ul className="space-y-2">
+            {courseHistory.map((p) => (
+              <PaymentRow key={p.id} payment={p} />
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function PaymentRow({
+  payment,
+  onConfirm,
+  onReject,
+}: {
+  payment: CoursePayment;
+  onConfirm?: () => void;
+  onReject?: (reason: string) => void;
+}) {
+  const [rejecting, setRejecting] = React.useState(false);
+  const [reason, setReason] = React.useState("");
+  const course = getCourse(payment.courseId);
+  const actionable = payment.status === "pending" && onConfirm && onReject;
+
+  const tone =
+    payment.status === "confirmed"
+      ? "green"
+      : payment.status === "rejected"
+        ? "red"
+        : "gold";
+
+  return (
+    <li className="rounded-xl border border-border bg-card p-3 text-sm">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="font-display font-bold text-foreground">
+            {payment.userName}{" "}
+            <span className="font-normal text-muted-foreground">
+              — {course?.shortTitle ?? payment.courseId}
+            </span>
+          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+            <span className="font-bold text-foreground">
+              {formatFcfa(payment.amountFcfa)}
+            </span>
+            <span>{MM_OPERATOR_META[payment.operator].label}</span>
+            <span>
+              Réf.{" "}
+              <strong className="text-foreground">{payment.reference}</strong>
+            </span>
+            {payment.payerNumber ? <span>{payment.payerNumber}</span> : null}
+            <Badge tone={tone}>{PAYMENT_STATUS_LABEL[payment.status]}</Badge>
+          </div>
+          {payment.note ? (
+            <p className="mt-1 text-[11px] italic text-muted-foreground">
+              {payment.note}
+            </p>
+          ) : null}
+        </div>
+        {actionable && !rejecting ? (
+          <div className="flex shrink-0 items-center gap-2">
+            <Button size="sm" onClick={onConfirm}>
+              <Check className="h-4 w-4" /> Confirmer
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setRejecting(true)}
+              className="text-red-600 hover:text-red-700"
+            >
+              <X className="h-4 w-4" /> Refuser
+            </Button>
+          </div>
+        ) : null}
+      </div>
+      {actionable && rejecting ? (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Input
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Motif du refus"
+            className="h-8 flex-1"
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-red-600 hover:text-red-700"
+            onClick={() => {
+              onReject?.(reason.trim() || "Paiement non vérifié.");
+              setRejecting(false);
+              setReason("");
+            }}
+          >
+            Confirmer le refus
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setRejecting(false)}>
+            Annuler
+          </Button>
+        </div>
+      ) : null}
     </li>
   );
 }
