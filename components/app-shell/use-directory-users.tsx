@@ -27,8 +27,10 @@ interface DirectoryUsersValue {
   setUserStatus: (id: string, status: DirectoryUser["status"]) => void;
   removeUser: (id: string) => void;
   removeUsers: (ids: string[]) => void;
-  /** Suppression DÉFINITIVE (irréversible). Renvoie true si supprimé. */
-  deleteUserPermanently: (id: string) => Promise<boolean>;
+  /** Suppression DÉFINITIVE (irréversible). Renvoie ok + message d'erreur. */
+  deleteUserPermanently: (
+    id: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
   /** Suppression DÉFINITIVE en lot. Renvoie un récapitulatif. */
   deleteUsersPermanently: (
     ids: string[],
@@ -154,16 +156,15 @@ export function DirectoryUsersProvider({ children }: { children: React.ReactNode
               error?: string;
             };
             if (!res.ok) {
-              toast.error("Suppression définitive refusée", {
-                description: data.error ?? `Erreur ${res.status}`,
-              });
-              return false;
+              return { ok: false, error: data.error ?? `Erreur ${res.status}` };
             }
             setRealUsers((us) => us.filter((u) => u.id !== id));
-            return true;
+            return { ok: true };
           } catch {
-            toast.error("Suppression définitive impossible");
-            return false;
+            return {
+              ok: false,
+              error: "Route de suppression injoignable (réseau).",
+            };
           }
         },
         deleteUsersPermanently: async (ids) => {
@@ -204,7 +205,7 @@ export function DirectoryUsersProvider({ children }: { children: React.ReactNode
         deleteUserPermanently: async (id) => {
           // Mode démo : suppression locale réelle (le store retire la ligne).
           store.removeUser(id);
-          return true;
+          return { ok: true };
         },
         deleteUsersPermanently: async (ids) => {
           store.removeUsers(ids);

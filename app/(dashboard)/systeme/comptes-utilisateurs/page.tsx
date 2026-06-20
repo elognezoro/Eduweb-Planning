@@ -464,13 +464,13 @@ function RowActions({ user }: { user: DirectoryUser }) {
         onOpenChange={setPermaOpen}
         user={user}
         onConfirm={async () => {
-          const ok = await deleteUserPermanently(user.id);
-          if (ok) {
+          const res = await deleteUserPermanently(user.id);
+          if (res.ok) {
             toast.success("Compte supprimé définitivement", {
               description: `${user.name} et ses données associées ont été supprimés.`,
             });
-            setPermaOpen(false);
           }
+          return res;
         }}
       />
     </>
@@ -490,15 +490,17 @@ function ConfirmPermaDeleteDialog({
   open: boolean;
   onOpenChange: (o: boolean) => void;
   user: DirectoryUser;
-  onConfirm: () => void | Promise<void>;
+  onConfirm: () => Promise<{ ok: boolean; error?: string }>;
 }) {
   const t = useTranslations();
   const [text, setText] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   React.useEffect(() => {
     if (!open) {
       setText("");
       setBusy(false);
+      setError(null);
     }
   }, [open]);
   const armed = text.trim().toUpperCase() === "SUPPRIMER";
@@ -525,6 +527,11 @@ function ConfirmPermaDeleteDialog({
             placeholder="SUPPRIMER"
             autoComplete="off"
           />
+          {error ? (
+            <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+              {error}
+            </p>
+          ) : null}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
@@ -535,11 +542,18 @@ function ConfirmPermaDeleteDialog({
             disabled={!armed || busy}
             onClick={async () => {
               setBusy(true);
-              await onConfirm();
-              setBusy(false);
+              setError(null);
+              const res = await onConfirm();
+              if (res.ok) {
+                onOpenChange(false);
+              } else {
+                setError(res.error ?? "La suppression a échoué.");
+                setBusy(false);
+              }
             }}
           >
-            <Trash2 className="h-4 w-4" /> Supprimer définitivement
+            <Trash2 className="h-4 w-4" />{" "}
+            {busy ? "Suppression…" : "Supprimer définitivement"}
           </Button>
         </DialogFooter>
       </DialogContent>
