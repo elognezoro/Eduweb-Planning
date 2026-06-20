@@ -14,7 +14,6 @@ import {
   ListOrdered,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ManuelCertificate } from "@/components/guides/training-manual";
 import { TRAINING_SYLLABUS } from "@/lib/guides/training-manual-data";
 import { useStore } from "@/components/app-shell/data-store";
 import { useApp } from "@/components/app-shell/app-context";
@@ -299,24 +298,17 @@ function GenericTrainingCertificate() {
         </div>
       </div>
 
-      {/* Aperçu + impression */}
-      <div
-        id="manuel-print"
-        className="space-y-10 bg-muted/40 py-8 print:bg-white print:py-0"
-      >
-        <ManuelCertificate
-          identification={id}
+      {/* Aperçu + impression — nouveau modèle visuel unique */}
+      <style>{`@media print { @page { size: A4 landscape; margin: 0; } }`}</style>
+      <div className="bg-muted/40 py-6 print:bg-white print:py-0">
+        <CourseCertificate
+          certNumber={certificateNumber}
           beneficiaryName={name}
-          beneficiaryRole={role}
-          duration={TRAINING_SYLLABUS.volumeHoraire.dureeTotal}
-          issueDate={issueDate}
-          certificateNumber={certificateNumber}
-          institution={meta.institution}
-          headName={meta.headName}
-          headFunction={meta.headFunction}
-          officialCountry={meta.official || meta.countryName}
-          officialSlogan={meta.slogan}
-          ministry={meta.ministry}
+          courseTitle={id.intituleAbrege || id.intitule}
+          trainerName={role}
+          dateLabel={issueDate}
+          dgName={meta.headName}
+          dgFunction={meta.headFunction || "Directeur Général"}
           signatureUrl={meta.signature}
           stampUrl={meta.stamp}
         />
