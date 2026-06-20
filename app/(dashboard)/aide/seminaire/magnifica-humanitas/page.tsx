@@ -19,10 +19,16 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SeminaireQuizCard, ModuleBody } from "@/components/seminaires/seminaire-views";
+import {
+  SeminaireQuizCard,
+  ModuleBody,
+} from "@/components/seminaires/seminaire-views";
 import { MAGNIFICA_HUMANITAS } from "@/lib/seminaires/magnifica-humanitas";
 import { CourseGate } from "@/components/formations/course-gate";
-import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-book";
+import {
+  MagnificaBook,
+  type BookPage,
+} from "@/components/seminaires/magnifica-book";
 import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
 import {
@@ -165,7 +171,8 @@ export default function SeminaireMagnificaPage() {
       <div className="space-y-5">
         <div className="rounded-2xl border border-ew-green-200 bg-ew-green-50/30 p-5">
           <p className="flex items-center gap-2 font-display text-xs font-bold uppercase tracking-[0.18em] text-ew-green-700">
-            <ScrollText aria-hidden className="h-4 w-4" /> Séminaire des écoles catholiques
+            <ScrollText aria-hidden className="h-4 w-4" /> Séminaire des écoles
+            catholiques
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
             <strong>Référence :</strong> {s.meta.reference}
@@ -176,10 +183,26 @@ export default function SeminaireMagnificaPage() {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <KpiTile icon={<Clock className="h-4 w-4" />} label="Durée totale" value={s.meta.duration} />
-          <KpiTile icon={<Users className="h-4 w-4" />} label="Public" value={shorten(s.meta.audience, 80)} />
-          <KpiTile icon={<GraduationCap className="h-4 w-4" />} label="Niveau" value={s.meta.level} />
-          <KpiTile icon={<CheckCircle2 className="h-4 w-4" />} label="Complétion" value={shorten(s.meta.completion, 80)} />
+          <KpiTile
+            icon={<Clock className="h-4 w-4" />}
+            label="Durée totale"
+            value={s.meta.duration}
+          />
+          <KpiTile
+            icon={<Users className="h-4 w-4" />}
+            label="Public"
+            value={shorten(s.meta.audience, 80)}
+          />
+          <KpiTile
+            icon={<GraduationCap className="h-4 w-4" />}
+            label="Niveau"
+            value={s.meta.level}
+          />
+          <KpiTile
+            icon={<CheckCircle2 className="h-4 w-4" />}
+            label="Complétion"
+            value={shorten(s.meta.completion, 80)}
+          />
         </div>
 
         <div className="space-y-3 text-base leading-relaxed text-foreground/90">
@@ -219,7 +242,9 @@ export default function SeminaireMagnificaPage() {
           <div className="mt-3 space-y-3 text-base">
             {s.competences.map((c) => (
               <div key={c.category}>
-                <p className="text-sm font-bold text-foreground">{c.category}</p>
+                <p className="text-sm font-bold text-foreground">
+                  {c.category}
+                </p>
                 <ul className="mt-1 space-y-1 text-muted-foreground">
                   {c.items.map((it, j) => (
                     <li key={j} className="flex gap-1.5">
@@ -254,10 +279,18 @@ export default function SeminaireMagnificaPage() {
           <tbody>
             {s.architecture.map((row, i) => (
               <tr key={i} className="border-t border-border align-top">
-                <td className="px-3 py-2 font-bold text-ew-green-800">{row.section}</td>
-                <td className="px-3 py-2 text-muted-foreground">{row.contentType}</td>
-                <td className="px-3 py-2 text-muted-foreground">{row.activity}</td>
-                <td className="px-3 py-2 text-muted-foreground">{row.evaluation}</td>
+                <td className="px-3 py-2 font-bold text-ew-green-800">
+                  {row.section}
+                </td>
+                <td className="px-3 py-2 text-muted-foreground">
+                  {row.contentType}
+                </td>
+                <td className="px-3 py-2 text-muted-foreground">
+                  {row.activity}
+                </td>
+                <td className="px-3 py-2 text-muted-foreground">
+                  {row.evaluation}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -277,10 +310,15 @@ export default function SeminaireMagnificaPage() {
   function ChartePage() {
     return (
       <div className="rounded-2xl border border-border bg-card p-5 text-base">
-        <p className="text-justify leading-relaxed text-foreground/90">{s.charte.preambule}</p>
+        <p className="text-justify leading-relaxed text-foreground/90">
+          {s.charte.preambule}
+        </p>
         <ol className="mt-5 space-y-3">
           {s.charte.engagements.map((e) => (
-            <li key={e.num} className="rounded-xl border border-ew-green-200 bg-ew-green-50/40 p-3">
+            <li
+              key={e.num}
+              className="rounded-xl border border-ew-green-200 bg-ew-green-50/40 p-3"
+            >
               <p className="font-display text-base font-bold text-ew-green-800">
                 {e.num}. {e.title}
               </p>
@@ -294,7 +332,10 @@ export default function SeminaireMagnificaPage() {
         <ul className="mt-1 space-y-1 text-sm">
           {s.charte.implementation.map((it, i) => (
             <li key={i} className="flex gap-1.5">
-              <span aria-hidden className="mt-2 inline-block h-1 w-1 shrink-0 rounded-full bg-ew-green-700" />
+              <span
+                aria-hidden
+                className="mt-2 inline-block h-1 w-1 shrink-0 rounded-full bg-ew-green-700"
+              />
               <span>{it}</span>
             </li>
           ))}
@@ -321,7 +362,9 @@ export default function SeminaireMagnificaPage() {
               {s.evaluation.criteria.map((c, i) => (
                 <tr key={i} className="border-t border-border">
                   <td className="px-2 py-1.5">{c.criterion}</td>
-                  <td className="px-2 py-1.5 text-right font-bold text-ew-green-800">{c.points}</td>
+                  <td className="px-2 py-1.5 text-right font-bold text-ew-green-800">
+                    {c.points}
+                  </td>
                 </tr>
               ))}
               <tr className="border-t border-border bg-ew-green-50/60 font-bold">
@@ -332,7 +375,9 @@ export default function SeminaireMagnificaPage() {
               </tr>
             </tbody>
           </table>
-          <p className="mt-3 text-xs font-bold uppercase tracking-wide text-ew-green-700">Niveaux</p>
+          <p className="mt-3 text-xs font-bold uppercase tracking-wide text-ew-green-700">
+            Niveaux
+          </p>
           <ul className="mt-1 space-y-1 text-sm">
             {s.evaluation.levels.map((lv, i) => (
               <li key={i} className="flex gap-2">
@@ -351,7 +396,10 @@ export default function SeminaireMagnificaPage() {
             </p>
             <ul className="mt-3 space-y-2 text-base">
               {s.badges.map((b) => (
-                <li key={b.num} className="rounded-lg border border-ew-gold-200 bg-ew-gold-50/40 p-3">
+                <li
+                  key={b.num}
+                  className="rounded-lg border border-ew-gold-200 bg-ew-gold-50/40 p-3"
+                >
                   <p className="font-display font-bold text-ew-gold-700">
                     {b.num}. {b.title}
                   </p>
@@ -371,7 +419,9 @@ export default function SeminaireMagnificaPage() {
                   className="flex items-center justify-between rounded-md border border-border px-3 py-2"
                 >
                   <span>{w.element}</span>
-                  <span className="font-bold text-ew-green-800">{w.weight}</span>
+                  <span className="font-bold text-ew-green-800">
+                    {w.weight}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -392,14 +442,17 @@ export default function SeminaireMagnificaPage() {
             {s.glossary.map((g) => (
               <div key={g.term} className="border-l-2 border-ew-green-300 pl-3">
                 <dt className="font-bold text-ew-green-800">{g.term}</dt>
-                <dd className="text-sm text-muted-foreground">{g.definition}</dd>
+                <dd className="text-sm text-muted-foreground">
+                  {g.definition}
+                </dd>
               </div>
             ))}
           </dl>
         </div>
         <div className="rounded-2xl border border-border bg-card p-5">
           <p className="flex items-center gap-2 font-display text-sm font-bold uppercase tracking-wide text-ew-green-700">
-            <Sparkles aria-hidden className="h-4 w-4" /> Les 10 repères d&apos;un usage responsable
+            <Sparkles aria-hidden className="h-4 w-4" /> Les 10 repères
+            d&apos;un usage responsable
           </p>
           <ol className="mt-3 space-y-2 text-base">
             {s.references10.map((r) => (
@@ -474,7 +527,8 @@ function MagnificaPageShell({ pages }: { pages: BookPage[] }) {
   const canDeliverCertificate = isAdmin || verdict.completed;
   const canDownloadWord = isAdmin;
 
-  const lockedTip = verdict.reason ?? `Achevez la formation pour débloquer ce livrable.`;
+  const lockedTip =
+    verdict.reason ?? `Achevez la formation pour débloquer ce livrable.`;
 
   return (
     <div className="space-y-5">
@@ -518,7 +572,7 @@ function MagnificaPageShell({ pages }: { pages: BookPage[] }) {
           ) : null}
           {canDeliverCertificate ? (
             <Button size="sm" asChild>
-              <Link href="/aide/certificat">
+              <Link href="/aide/certificat?course=magnifica-humanitas">
                 <Award className="h-4 w-4" /> Délivrer un certificat
               </Link>
             </Button>
@@ -557,7 +611,15 @@ function MagnificaPageShell({ pages }: { pages: BookPage[] }) {
 }
 
 /* -------- Helpers locaux -------- */
-function KpiTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function KpiTile({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="rounded-xl border border-border bg-background/60 p-3">
       <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
@@ -581,7 +643,11 @@ function shorten(s: string, max: number): string {
    - Si accessible : ModuleBody + barre de complétion en bas, dépendante du
      mode (manuel / auto / quiz).
    ========================================================================== */
-function GatedModulePage({ module: m }: { module: (typeof MAGNIFICA_HUMANITAS.modules)[number] }) {
+function GatedModulePage({
+  module: m,
+}: {
+  module: (typeof MAGNIFICA_HUMANITAS.modules)[number];
+}) {
   const app = useApp();
   const store = useStore();
   const courseId = MAGNIFICA_HUMANITAS.meta.slug;
@@ -596,8 +662,18 @@ function GatedModulePage({ module: m }: { module: (typeof MAGNIFICA_HUMANITAS.mo
     store.moduleCompletions,
   );
   const rule = getAccessRule(courseId, m.id, store.moduleAccessRules);
-  const completed = isModuleCompleted(app.user.id, courseId, m.id, store.moduleCompletions);
-  const completion = getModuleCompletion(app.user.id, courseId, m.id, store.moduleCompletions);
+  const completed = isModuleCompleted(
+    app.user.id,
+    courseId,
+    m.id,
+    store.moduleCompletions,
+  );
+  const completion = getModuleCompletion(
+    app.user.id,
+    courseId,
+    m.id,
+    store.moduleCompletions,
+  );
 
   // Mode `auto` : marquer comme complété au premier rendu accessible.
   React.useEffect(() => {
@@ -610,10 +686,21 @@ function GatedModulePage({ module: m }: { module: (typeof MAGNIFICA_HUMANITAS.mo
       moduleId: m.id,
       source: "auto",
     });
-  }, [verdict.accessible, isAdmin, rule.completionMode, completed, app.user.id, courseId, m.id, store]);
+  }, [
+    verdict.accessible,
+    isAdmin,
+    rule.completionMode,
+    completed,
+    app.user.id,
+    courseId,
+    m.id,
+    store,
+  ]);
 
   if (!verdict.accessible) {
-    return <LockedModuleView module={m} missingIds={verdict.missingPrerequisites} />;
+    return (
+      <LockedModuleView module={m} missingIds={verdict.missingPrerequisites} />
+    );
   }
 
   function toggleCompletion() {
@@ -692,21 +779,24 @@ function CompletionBar({
           <p className="text-xs text-muted-foreground">
             {completed ? (
               <>
-                Marqué comme terminé{date ? ` le ${date}` : ""}. Les modules suivants
-                qui dépendaient de celui-ci sont désormais accessibles.
+                Marqué comme terminé{date ? ` le ${date}` : ""}. Les modules
+                suivants qui dépendaient de celui-ci sont désormais accessibles.
               </>
             ) : mode === "manual" ? (
               <>
-                Lorsque vous estimez avoir terminé ce module, cliquez sur «&nbsp;Marquer
-                comme terminé&nbsp;» pour débloquer les modules qui en dépendent.
+                Lorsque vous estimez avoir terminé ce module, cliquez sur
+                «&nbsp;Marquer comme terminé&nbsp;» pour débloquer les modules
+                qui en dépendent.
               </>
             ) : mode === "auto" ? (
-              <>Ce module est marqué comme terminé automatiquement à la lecture.</>
+              <>
+                Ce module est marqué comme terminé automatiquement à la lecture.
+              </>
             ) : (
               <>
                 Pour valider ce module, atteignez un score d&apos;au moins{" "}
-                <strong>{minQuizScore}%</strong> à son quiz. Vous pouvez aussi le
-                marquer comme terminé manuellement après vérification.
+                <strong>{minQuizScore}%</strong> à son quiz. Vous pouvez aussi
+                le marquer comme terminé manuellement après vérification.
               </>
             )}
           </p>
@@ -748,10 +838,12 @@ function LockedModuleView({
         <Lock aria-hidden className="h-7 w-7" />
       </span>
       <div>
-        <h2 className="font-display text-2xl font-extrabold text-foreground">Module verrouillé</h2>
+        <h2 className="font-display text-2xl font-extrabold text-foreground">
+          Module verrouillé
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          L&apos;accès au <strong>Module {m.num}</strong> nécessite que vous ayez
-          d&apos;abord terminé le(s) module(s) suivant(s) :
+          L&apos;accès au <strong>Module {m.num}</strong> nécessite que vous
+          ayez d&apos;abord terminé le(s) module(s) suivant(s) :
         </p>
       </div>
       <ul className="w-full space-y-2 text-left">
@@ -767,15 +859,19 @@ function LockedModuleView({
               <Lock className="h-4 w-4" />
             </span>
             <div>
-              <p className="font-display font-bold text-foreground">{mm.title}</p>
-              <p className="text-xs italic text-muted-foreground">{mm.displayTitle}</p>
+              <p className="font-display font-bold text-foreground">
+                {mm.title}
+              </p>
+              <p className="text-xs italic text-muted-foreground">
+                {mm.displayTitle}
+              </p>
             </div>
           </li>
         ))}
       </ul>
       <p className="text-xs italic text-muted-foreground">
-        Revenez aux pages des prérequis avec ← ou via le sommaire au pied du livre,
-        terminez-les, puis ce module sera automatiquement déverrouillé.
+        Revenez aux pages des prérequis avec ← ou via le sommaire au pied du
+        livre, terminez-les, puis ce module sera automatiquement déverrouillé.
       </p>
     </div>
   );
@@ -791,7 +887,17 @@ function cn(...classes: (string | false | null | undefined)[]): string {
 function SummativeQuizPage({
   quiz,
 }: {
-  quiz: { id: string; num: number; title: string; questions: { question: string; options: string[]; correctIdx: number; rationale?: string }[] };
+  quiz: {
+    id: string;
+    num: number;
+    title: string;
+    questions: {
+      question: string;
+      options: string[];
+      correctIdx: number;
+      rationale?: string;
+    }[];
+  };
 }) {
   const app = useApp();
   const store = useStore();
@@ -819,22 +925,38 @@ function SummativeQuizPage({
     <div className="space-y-3">
       <div className="rounded-2xl border border-ew-green-200 bg-ew-green-50/30 p-4 text-base text-foreground/90">
         <p>
-          Ce <strong>quiz sommatif</strong> regroupe les questions des 3 banques de quiz du
-          séminaire : compréhension générale, Doctrine sociale &amp; IA, risques &amp; solutions.
-          Validez chacune et vérifiez votre score global.
+          Ce <strong>quiz sommatif</strong> regroupe les questions des 3 banques
+          de quiz du séminaire : compréhension générale, Doctrine sociale &amp;
+          IA, risques &amp; solutions. Validez chacune et vérifiez votre score
+          global.
         </p>
         {usesQuiz ? (
           <p className="mt-2 text-sm">
-            <strong className="text-ew-green-800">Score minimum requis pour valider la formation : {minScore}%.</strong>
+            <strong className="text-ew-green-800">
+              Score minimum requis pour valider la formation : {minScore}%.
+            </strong>
             {lastScore !== null ? (
-              <span className={cn("ml-2", lastScore >= minScore ? "text-ew-green-700 font-bold" : "text-ew-gold-700")}>
-                Votre dernier score : {lastScore}% {lastScore >= minScore ? "— formation validée !" : "— continuez !"}
+              <span
+                className={cn(
+                  "ml-2",
+                  lastScore >= minScore
+                    ? "text-ew-green-700 font-bold"
+                    : "text-ew-gold-700",
+                )}
+              >
+                Votre dernier score : {lastScore}%{" "}
+                {lastScore >= minScore
+                  ? "— formation validée !"
+                  : "— continuez !"}
               </span>
             ) : null}
           </p>
         ) : null}
       </div>
-      <SeminaireQuizCard quiz={quiz as Parameters<typeof SeminaireQuizCard>[0]["quiz"]} onScored={handleScored} />
+      <SeminaireQuizCard
+        quiz={quiz as Parameters<typeof SeminaireQuizCard>[0]["quiz"]}
+        onScored={handleScored}
+      />
     </div>
   );
 }

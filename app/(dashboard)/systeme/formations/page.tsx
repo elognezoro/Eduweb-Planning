@@ -3,6 +3,7 @@
 import * as React from "react";
 import {
   AlertTriangle,
+  Award,
   CheckCircle2,
   Download,
   FileSpreadsheet,
@@ -104,6 +105,11 @@ import {
   getCoursePrice,
   isCoursePaid,
 } from "@/lib/formations/pricing";
+import {
+  CERT_DATE_MODE_LABEL,
+  getCertificateConfig,
+  type CertificateDateMode,
+} from "@/lib/formations/certificate";
 import {
   isMobileMoneyOperational,
   MM_OPERATOR_META,
@@ -1953,7 +1959,160 @@ function CompletionRulePanel({ courseId }: { courseId: string }) {
           </div>
         </div>
       </article>
+
+      <CertificateConfigCard courseId={courseId} />
     </div>
+  );
+}
+
+/* ---- Configuration du CERTIFICAT (formateur, date, signataire) ---- */
+function CertificateConfigCard({ courseId }: { courseId: string }) {
+  const store = useStore();
+  const current = getCertificateConfig(courseId, store.certificateConfigs);
+
+  const [trainerName, setTrainerName] = React.useState(
+    current.trainerName ?? "",
+  );
+  const [dateMode, setDateMode] = React.useState<CertificateDateMode>(
+    current.dateMode ?? "download",
+  );
+  const [endDate, setEndDate] = React.useState(current.endDate ?? "");
+  const [customDate, setCustomDate] = React.useState(current.customDate ?? "");
+  const [dgName, setDgName] = React.useState(current.dgName ?? "");
+  const [dgFunction, setDgFunction] = React.useState(
+    current.dgFunction ?? "Directeur Général",
+  );
+  const [savedAt, setSavedAt] = React.useState<number | null>(null);
+
+  // Resync sur le contenu enregistré (clé stable), pas sur l'objet par défaut.
+  const savedKey = `${current.trainerName ?? ""}|${current.dateMode ?? ""}|${current.endDate ?? ""}|${current.customDate ?? ""}|${current.dgName ?? ""}|${current.dgFunction ?? ""}`;
+  React.useEffect(() => {
+    setTrainerName(current.trainerName ?? "");
+    setDateMode(current.dateMode ?? "download");
+    setEndDate(current.endDate ?? "");
+    setCustomDate(current.customDate ?? "");
+    setDgName(current.dgName ?? "");
+    setDgFunction(current.dgFunction ?? "Directeur Général");
+    setSavedAt(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseId, savedKey]);
+
+  function save() {
+    store.setCertificateConfig({
+      courseId,
+      trainerName: trainerName.trim() || undefined,
+      dateMode,
+      endDate: dateMode === "end" ? endDate.trim() || undefined : undefined,
+      customDate:
+        dateMode === "custom" ? customDate.trim() || undefined : undefined,
+      dgName: dgName.trim() || undefined,
+      dgFunction: dgFunction.trim() || undefined,
+    });
+    setSavedAt(Date.now());
+  }
+
+  return (
+    <article className="rounded-2xl border border-border bg-card p-4">
+      <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-ew-green-700">
+        <Award aria-hidden className="h-3.5 w-3.5" /> Certificat
+        d&apos;achèvement
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Formateur et date imprimés sur le certificat de ce cours. La signature
+        et le cachet proviennent de l&apos;onglet « Identité visuelle ». Le
+        numéro est généré automatiquement, unique par participant.
+      </p>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            Formateur (Prénoms NOM)
+          </label>
+          <Input
+            value={trainerName}
+            onChange={(e) => setTrainerName(e.target.value)}
+            placeholder="Ex. Jean KOUASSI"
+            className="mt-1 h-9"
+          />
+        </div>
+        <div>
+          <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            Date imprimée
+          </label>
+          <select
+            value={dateMode}
+            onChange={(e) => setDateMode(e.target.value as CertificateDateMode)}
+            className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:border-ew-green-500 focus:outline-none focus:ring-1 focus:ring-ew-green-500"
+          >
+            {(["download", "end", "custom"] as CertificateDateMode[]).map(
+              (m) => (
+                <option key={m} value={m}>
+                  {CERT_DATE_MODE_LABEL[m]}
+                </option>
+              ),
+            )}
+          </select>
+        </div>
+        {dateMode === "end" ? (
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Date de fin (JJ/MM/AAAA)
+            </label>
+            <Input
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              placeholder="30/06/2026"
+              className="mt-1 h-9"
+            />
+          </div>
+        ) : dateMode === "custom" ? (
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Date personnalisée
+            </label>
+            <Input
+              value={customDate}
+              onChange={(e) => setCustomDate(e.target.value)}
+              placeholder="20 juin 2026"
+              className="mt-1 h-9"
+            />
+          </div>
+        ) : (
+          <div />
+        )}
+        <div>
+          <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            Signataire central
+          </label>
+          <Input
+            value={dgName}
+            onChange={(e) => setDgName(e.target.value)}
+            placeholder="Ex. Elogne ZORO"
+            className="mt-1 h-9"
+          />
+        </div>
+        <div>
+          <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            Fonction du signataire
+          </label>
+          <Input
+            value={dgFunction}
+            onChange={(e) => setDgFunction(e.target.value)}
+            placeholder="Directeur Général"
+            className="mt-1 h-9"
+          />
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-end gap-2">
+        {savedAt ? (
+          <span className="text-xs text-ew-green-700">✓ Enregistré.</span>
+        ) : null}
+        <Button size="sm" onClick={save}>
+          <Save className="h-4 w-4" /> Enregistrer le certificat
+        </Button>
+      </div>
+    </article>
   );
 }
 

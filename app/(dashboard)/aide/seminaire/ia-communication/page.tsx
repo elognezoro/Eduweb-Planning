@@ -404,7 +404,7 @@ export default function IaCommunicationPage() {
               access={supportAccess("certificat")}
               internal
               primary
-              href="/aide/certificat"
+              href="/aide/certificat?course=ia-communication"
               icon={<Award className="h-4 w-4" />}
               label="Délivrer un certificat"
             />

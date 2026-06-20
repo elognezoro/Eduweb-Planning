@@ -289,7 +289,7 @@ export default function CommPastoralePage() {
               access={supportAccess("certificat")}
               internal
               primary
-              href="/aide/certificat"
+              href="/aide/certificat?course=communication-pastorale"
               icon={<Award className="h-4 w-4" />}
               label="Délivrer un certificat"
             />

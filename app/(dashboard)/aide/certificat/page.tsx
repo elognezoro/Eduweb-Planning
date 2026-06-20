@@ -2,13 +2,35 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Printer, FileDown, Award, BookOpenCheck, Stamp, Save, CheckCircle2, ListOrdered } from "lucide-react";
+import {
+  ArrowLeft,
+  Printer,
+  FileDown,
+  Award,
+  BookOpenCheck,
+  Stamp,
+  Save,
+  CheckCircle2,
+  ListOrdered,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ManuelCertificate } from "@/components/guides/training-manual";
 import { TRAINING_SYLLABUS } from "@/lib/guides/training-manual-data";
 import { useStore } from "@/components/app-shell/data-store";
+import { useApp } from "@/components/app-shell/app-context";
 import { etabExportMeta } from "@/lib/etab-config";
-import { consumeNextCertificateNumber, peekNextCertificateNumber } from "@/lib/cert-sequence";
+import {
+  consumeNextCertificateNumber,
+  peekNextCertificateNumber,
+} from "@/lib/cert-sequence";
+import { getCourse } from "@/lib/formations/catalog";
+import { CourseCertificate } from "@/components/formations/course-certificate";
+import {
+  beneficiaryDisplayName,
+  certificateNumber,
+  getCertificateConfig,
+  resolveCertificateDate,
+} from "@/lib/formations/certificate";
 
 /**
  * Page autonome du Certificat de fin de formation EduWeb Planner.
@@ -27,6 +49,18 @@ import { consumeNextCertificateNumber, peekNextCertificateNumber } from "@/lib/c
  *     persiste l'entrée dans le data-store et propose un lien vers le journal.
  */
 export default function CertificatPage() {
+  // Certificat PAR COURS (nouveau modèle visuel) si ?course=<id> est présent.
+  const [courseId] = React.useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return new URLSearchParams(window.location.search).get("course");
+  });
+  if (courseId) {
+    return <CourseCertificateView courseId={courseId} />;
+  }
+  return <GenericTrainingCertificate />;
+}
+
+function GenericTrainingCertificate() {
   const store = useStore();
   const meta = React.useMemo(() => etabExportMeta(), []);
   const id = TRAINING_SYLLABUS.identification;
@@ -74,7 +108,11 @@ export default function CertificatPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      const safeName = (name || "Certificat").normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
+      const safeName = (name || "Certificat")
+        .normalize("NFKD")
+        .replace(/[̀-ͯ]/g, "")
+        .replace(/[^A-Za-z0-9-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
       a.download = `Certificat-${safeName || "EduWeb"}-${certificateNumber || "vierge"}.docx`;
       document.body.appendChild(a);
       a.click();
@@ -89,13 +127,18 @@ export default function CertificatPage() {
 
   function saveToJournal() {
     if (!name.trim()) {
-      window.alert("Renseignez au minimum le nom du bénéficiaire avant d'enregistrer.");
+      window.alert(
+        "Renseignez au minimum le nom du bénéficiaire avant d'enregistrer.",
+      );
       return;
     }
     setSaving(true);
     try {
       // Consomme un numéro frais (différent de la simple suggestion à l'affichage).
-      const sequencedNumber = consumeNextCertificateNumber(meta.code, currentYear);
+      const sequencedNumber = consumeNextCertificateNumber(
+        meta.code,
+        currentYear,
+      );
       store.addCertificate({
         number: sequencedNumber,
         beneficiaryName: name.trim(),
@@ -145,11 +188,23 @@ export default function CertificatPage() {
               <ListOrdered className="h-4 w-4" /> Journal des délivrés
             </Link>
           </Button>
-          <Button size="sm" variant="outline" onClick={saveToJournal} disabled={saving}>
-            <Save className="h-4 w-4" /> {saving ? "Enregistrement…" : "Enregistrer dans le journal"}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={saveToJournal}
+            disabled={saving}
+          >
+            <Save className="h-4 w-4" />{" "}
+            {saving ? "Enregistrement…" : "Enregistrer dans le journal"}
           </Button>
-          <Button size="sm" variant="outline" onClick={downloadWord} disabled={downloading}>
-            <FileDown className="h-4 w-4" /> {downloading ? "Génération…" : "Télécharger Word (.docx)"}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={downloadWord}
+            disabled={downloading}
+          >
+            <FileDown className="h-4 w-4" />{" "}
+            {downloading ? "Génération…" : "Télécharger Word (.docx)"}
           </Button>
           <Button size="sm" onClick={() => window.print()}>
             <Printer className="h-4 w-4" /> Imprimer / PDF
@@ -162,9 +217,15 @@ export default function CertificatPage() {
         <div className="no-print flex items-center gap-3 rounded-2xl border border-ew-green-300 bg-ew-green-50 px-4 py-3 text-sm text-ew-green-900">
           <CheckCircle2 className="h-5 w-5 shrink-0" />
           <div>
-            <p className="font-bold">Certificat enregistré dans le journal — n° {savedId}</p>
+            <p className="font-bold">
+              Certificat enregistré dans le journal — n° {savedId}
+            </p>
             <p className="text-xs text-ew-green-800">
-              Consultez la liste sur la page <Link href="/aide/certificat/journal" className="underline">Journal des certificats délivrés</Link>.
+              Consultez la liste sur la page{" "}
+              <Link href="/aide/certificat/journal" className="underline">
+                Journal des certificats délivrés
+              </Link>
+              .
             </p>
           </div>
         </div>
@@ -179,28 +240,70 @@ export default function CertificatPage() {
           </p>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          Le numéro du certificat est <strong>généré automatiquement</strong> à partir du code de votre
-          établissement ({meta.code || "—"}) et de l&apos;année en cours. Il sera incrémenté lors de
+          Le numéro du certificat est <strong>généré automatiquement</strong> à
+          partir du code de votre établissement ({meta.code || "—"}) et de
+          l&apos;année en cours. Il sera incrémenté lors de
           l&apos;enregistrement dans le journal.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Field label="Nom et prénoms" value={name} onChange={setName} placeholder="ZORO Elogne Guessan" />
-          <Field label="Rôle / fonction" value={role} onChange={setRole} placeholder="Chef d'établissement" />
-          <Field label="N° certificat (auto)" value={certificateNumber} onChange={setCertificateNumber} mono />
-          <Field label="Délivré le" value={issueDate} onChange={setIssueDate} placeholder="JJ/MM/AAAA" />
+          <Field
+            label="Nom et prénoms"
+            value={name}
+            onChange={setName}
+            placeholder="ZORO Elogne Guessan"
+          />
+          <Field
+            label="Rôle / fonction"
+            value={role}
+            onChange={setRole}
+            placeholder="Chef d'établissement"
+          />
+          <Field
+            label="N° certificat (auto)"
+            value={certificateNumber}
+            onChange={setCertificateNumber}
+            mono
+          />
+          <Field
+            label="Délivré le"
+            value={issueDate}
+            onChange={setIssueDate}
+            placeholder="JJ/MM/AAAA"
+          />
         </div>
 
         {/* Synthèse de la configuration utilisée */}
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <ConfigCell icon={<BookOpenCheck className="h-3.5 w-3.5" />} label="Établissement" value={meta.institution || "—"} />
-          <ConfigCell icon={<BookOpenCheck className="h-3.5 w-3.5" />} label="Autorité signataire" value={meta.headName || "—"} />
-          <ConfigCell icon={<Stamp className="h-3.5 w-3.5" />} label="Cachet configuré" value={meta.stamp ? "Oui" : "Non — à téléverser dans Configuration"} />
-          <ConfigCell icon={<Stamp className="h-3.5 w-3.5" />} label="Signature scannée" value={meta.signature ? "Oui" : "Non — à téléverser dans Configuration"} />
+          <ConfigCell
+            icon={<BookOpenCheck className="h-3.5 w-3.5" />}
+            label="Établissement"
+            value={meta.institution || "—"}
+          />
+          <ConfigCell
+            icon={<BookOpenCheck className="h-3.5 w-3.5" />}
+            label="Autorité signataire"
+            value={meta.headName || "—"}
+          />
+          <ConfigCell
+            icon={<Stamp className="h-3.5 w-3.5" />}
+            label="Cachet configuré"
+            value={meta.stamp ? "Oui" : "Non — à téléverser dans Configuration"}
+          />
+          <ConfigCell
+            icon={<Stamp className="h-3.5 w-3.5" />}
+            label="Signature scannée"
+            value={
+              meta.signature ? "Oui" : "Non — à téléverser dans Configuration"
+            }
+          />
         </div>
       </div>
 
       {/* Aperçu + impression */}
-      <div id="manuel-print" className="space-y-10 bg-muted/40 py-8 print:bg-white print:py-0">
+      <div
+        id="manuel-print"
+        className="space-y-10 bg-muted/40 py-8 print:bg-white print:py-0"
+      >
         <ManuelCertificate
           identification={id}
           beneficiaryName={name}
@@ -237,7 +340,9 @@ function Field({
 }) {
   return (
     <div className="space-y-1">
-      <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{label}</label>
+      <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </label>
       <input
         type="text"
         value={value}
@@ -251,7 +356,15 @@ function Field({
   );
 }
 
-function ConfigCell({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function ConfigCell({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="rounded-lg border border-dashed border-border bg-background/60 p-2.5">
       <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
@@ -268,4 +381,170 @@ function formatDate(d: Date): string {
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const yyyy = d.getFullYear();
   return `${dd}/${mm}/${yyyy}`;
+}
+
+/* ============================================================================
+   Certificat PAR COURS — nouveau modèle visuel, auto-rempli.
+   ========================================================================== */
+function CourseCertificateView({ courseId }: { courseId: string }) {
+  const app = useApp();
+  const store = useStore();
+  const meta = React.useMemo(() => etabExportMeta(), []);
+  const course = getCourse(courseId);
+  const config = getCertificateConfig(courseId, store.certificateConfigs);
+
+  const certNumber = certificateNumber(app.user.id, courseId);
+  const dateLabel = React.useMemo(
+    () => resolveCertificateDate(config),
+    [config],
+  );
+  const dgName = (config.dgName || meta.headName || "").trim();
+  const dgFunction = (
+    config.dgFunction ||
+    meta.headFunction ||
+    "Directeur Général"
+  ).trim();
+
+  // Nom du bénéficiaire : pré-rempli depuis le profil, modifiable.
+  const autoName = beneficiaryDisplayName(app.user);
+  const [name, setName] = React.useState(autoName);
+  React.useEffect(() => {
+    if (!name && autoName) setName(autoName);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoName]);
+
+  const [savedId, setSavedId] = React.useState<string | null>(null);
+
+  function saveToJournal() {
+    if (!name.trim()) {
+      window.alert("Le nom du bénéficiaire est requis.");
+      return;
+    }
+    store.addCertificate({
+      number: certNumber,
+      beneficiaryName: name.trim(),
+      beneficiaryRole: "",
+      issueDate: dateLabel,
+      formationCode: courseId,
+      formationVersion: "",
+      validUntil: "",
+      establishment: meta.institution,
+      establishmentCode: meta.code || "",
+      deliveredBy: (config.trainerName || dgName || "—").trim(),
+    });
+    setSavedId(certNumber);
+    window.setTimeout(() => setSavedId(null), 6000);
+  }
+
+  if (!course) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-6 text-sm">
+        Cours introuvable. Revenez à la{" "}
+        <Link href="/aide" className="underline">
+          bibliothèque
+        </Link>
+        .
+      </div>
+    );
+  }
+
+  const missingTrainer = !config.trainerName?.trim();
+
+  return (
+    <div className="space-y-5">
+      <style>{`@media print { @page { size: A4 landscape; margin: 0; } }`}</style>
+
+      {/* Barre d'actions (masquée à l'impression) */}
+      <div className="no-print sticky top-16 z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card/85 px-4 py-3 backdrop-blur sm:-mx-6">
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/aide">
+              <ArrowLeft className="h-4 w-4" /> Bibliothèque
+            </Link>
+          </Button>
+          <div>
+            <p className="font-display text-base font-bold leading-none text-foreground">
+              Certificat d&apos;achèvement
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {course.shortTitle} · N° {certNumber}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" asChild>
+            <Link href="/aide/certificat/journal">
+              <ListOrdered className="h-4 w-4" /> Journal
+            </Link>
+          </Button>
+          <Button size="sm" variant="outline" onClick={saveToJournal}>
+            <Save className="h-4 w-4" /> Enregistrer dans le journal
+          </Button>
+          <Button size="sm" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" /> Imprimer / PDF
+          </Button>
+        </div>
+      </div>
+
+      {savedId ? (
+        <div className="no-print flex items-center gap-3 rounded-2xl border border-ew-green-300 bg-ew-green-50 px-4 py-3 text-sm text-ew-green-900">
+          <CheckCircle2 className="h-5 w-5 shrink-0" />
+          <p className="font-bold">
+            Certificat enregistré dans le journal — n° {savedId}
+          </p>
+        </div>
+      ) : null}
+
+      {/* Réglages auto + champ nom */}
+      <div className="no-print rounded-2xl border border-border bg-card p-5">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Field
+            label="Bénéficiaire (NOM Prénoms)"
+            value={name}
+            onChange={setName}
+            placeholder="ZORO Elogne"
+          />
+          <ConfigCell
+            icon={<BookOpenCheck className="h-3.5 w-3.5" />}
+            label="Formation"
+            value={course.title}
+          />
+          <ConfigCell
+            icon={<Award className="h-3.5 w-3.5" />}
+            label="Formateur (config admin)"
+            value={config.trainerName?.trim() || "— à configurer"}
+          />
+          <ConfigCell
+            icon={<Stamp className="h-3.5 w-3.5" />}
+            label="Date imprimée"
+            value={dateLabel}
+          />
+        </div>
+        {missingTrainer || !meta.signature || !meta.stamp ? (
+          <p className="mt-3 text-xs italic text-muted-foreground">
+            Astuce : le <strong>formateur</strong> et la <strong>date</strong>{" "}
+            se règlent dans Système → Inscriptions aux formations → onglet «
+            Réussite du cours ». La <strong>signature</strong> et le{" "}
+            <strong>cachet</strong> proviennent de l&apos;onglet « Identité
+            visuelle ».
+          </p>
+        ) : null}
+      </div>
+
+      {/* Aperçu imprimable */}
+      <div className="bg-muted/40 py-6 print:bg-white print:py-0">
+        <CourseCertificate
+          certNumber={certNumber}
+          beneficiaryName={name}
+          courseTitle={course.title}
+          trainerName={config.trainerName}
+          dateLabel={dateLabel}
+          dgName={dgName}
+          dgFunction={dgFunction}
+          signatureUrl={meta.signature}
+          stampUrl={meta.stamp}
+        />
+      </div>
+    </div>
+  );
 }

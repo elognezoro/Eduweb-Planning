@@ -48,6 +48,7 @@ import type {
   SupportAccessRule,
   SupportKind,
 } from "@/lib/formations/support-access";
+import type { CertificateConfig } from "@/lib/formations/certificate";
 import { getCourseCompletionRule } from "@/lib/formations/course-completion";
 import { getCourseModuleList } from "@/lib/formations/module-access";
 
@@ -320,6 +321,8 @@ interface StoreState {
   enrollmentInviteLinks: EnrollmentInviteLink[];
   /** Tarifs des cours en FCFA (absence / 0 = gratuit). */
   coursePrices: CoursePrice[];
+  /** Configuration du certificat par cours (formateur, date, signataire). */
+  certificateConfigs: CertificateConfig[];
   /** Réglages globaux du paiement Mobile Money. */
   paymentSettings: PaymentSettings;
   /** Paiements de cours déposés par les utilisateurs. */
@@ -560,6 +563,10 @@ interface DataStore extends StoreState {
   setCoursePrice: (rule: Omit<CoursePrice, "id">) => void;
   /** Supprime le tarif d'un cours (retour à « gratuit »). */
   clearCoursePrice: (courseId: string) => void;
+  /** Définit ou met à jour la config du certificat d'un cours (upsert). */
+  setCertificateConfig: (config: Omit<CertificateConfig, "id">) => void;
+  /** Supprime la config du certificat d'un cours (retour aux défauts). */
+  clearCertificateConfig: (courseId: string) => void;
   /** Met à jour les réglages du paiement Mobile Money. */
   setPaymentSettings: (patch: Partial<PaymentSettings>) => void;
   /**
@@ -660,6 +667,7 @@ const DEFAULTS: StoreState = {
   courseScheduleRules: [],
   enrollmentInviteLinks: [],
   coursePrices: [],
+  certificateConfigs: [],
   paymentSettings: DEFAULT_PAYMENT_SETTINGS,
   coursePayments: [],
   moduleCompletions: [],
@@ -1176,6 +1184,34 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       setState((s) => ({
         ...s,
         coursePrices: s.coursePrices.filter((r) => r.courseId !== courseId),
+      })),
+    setCertificateConfig: (config) =>
+      setState((s) => {
+        const existing = s.certificateConfigs.find(
+          (r) => r.courseId === config.courseId,
+        );
+        if (existing) {
+          return {
+            ...s,
+            certificateConfigs: s.certificateConfigs.map((r) =>
+              r.id === existing.id ? { ...config, id: existing.id } : r,
+            ),
+          };
+        }
+        return {
+          ...s,
+          certificateConfigs: [
+            { ...config, id: genId("certcfg") },
+            ...s.certificateConfigs,
+          ],
+        };
+      }),
+    clearCertificateConfig: (courseId) =>
+      setState((s) => ({
+        ...s,
+        certificateConfigs: s.certificateConfigs.filter(
+          (r) => r.courseId !== courseId,
+        ),
       })),
     setPaymentSettings: (patch) =>
       setState((s) => ({
