@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   Printer,
@@ -48,11 +49,26 @@ import {
  *     persiste l'entrée dans le data-store et propose un lien vers le journal.
  */
 export default function CertificatPage() {
-  // Certificat PAR COURS (nouveau modèle visuel) si ?course=<id> est présent.
-  const [courseId] = React.useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return new URLSearchParams(window.location.search).get("course");
-  });
+  // useSearchParams() exige une frontière Suspense dans l'App Router.
+  return (
+    <React.Suspense fallback={null}>
+      <CertificatRouter />
+    </React.Suspense>
+  );
+}
+
+/**
+ * Aiguillage : certificat PAR COURS (nouveau modèle visuel) si `?course=<id>`
+ * est présent, sinon certificat générique.
+ *
+ * IMPORTANT : on lit le paramètre via `useSearchParams()` (réactif, fiable
+ * côté client et lors des navigations « soft »). L'ancienne lecture dans un
+ * initialiseur `useState(() => window.location.search)` s'exécutait au rendu
+ * serveur/statique (où `window` est indéfini) et renvoyait toujours `null`,
+ * d'où l'affichage systématique du certificat générique.
+ */
+function CertificatRouter() {
+  const courseId = useSearchParams().get("course");
   if (courseId) {
     return <CourseCertificateView courseId={courseId} />;
   }

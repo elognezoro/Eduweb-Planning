@@ -71,12 +71,14 @@ export default function RegisterPage() {
   const [show, setShow] = React.useState(false);
 
   // Lien d'inscription : jeton auto-porteur lu dans l'URL (?invite=...).
-  // Lu côté client uniquement pour éviter la contrainte Suspense de
-  // useSearchParams ; le jeton encode les cours, le rôle et l'expiration.
-  const [inviteToken] = React.useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return new URLSearchParams(window.location.search).get("invite");
-  });
+  // Lecture APRÈS montage (useEffect) : un initialiseur useState lisant
+  // window.location s'exécute au rendu serveur/statique (window indéfini) et
+  // renverrait toujours null, neutralisant le lien d'invitation. L'effet ne
+  // s'exécute que côté client, où le jeton est réellement disponible.
+  const [inviteToken, setInviteToken] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    setInviteToken(new URLSearchParams(window.location.search).get("invite"));
+  }, []);
   const invite = React.useMemo(
     () => (inviteToken ? decodeInviteToken(inviteToken) : null),
     [inviteToken],

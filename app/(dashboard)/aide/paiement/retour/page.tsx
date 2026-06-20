@@ -11,14 +11,18 @@ import { getCourse } from "@/lib/formations/catalog";
  * (via /api/payments/status) jusqu'à confirmation, échec, ou délai.
  */
 export default function PaiementRetourPage() {
-  const [paymentId] = React.useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return new URLSearchParams(window.location.search).get("p");
-  });
-  const [declaredFail] = React.useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return new URLSearchParams(window.location.search).get("echec") === "1";
-  });
+  // Lecture APRÈS montage : un initialiseur useState lisant window.location
+  // s'exécute au rendu serveur/statique (window indéfini) et renverrait des
+  // valeurs erronées. L'effet ne tourne que côté client.
+  const [paymentId, setPaymentId] = React.useState<string | null>(null);
+  const [declaredFail, setDeclaredFail] = React.useState(false);
+  const [paramsRead, setParamsRead] = React.useState(false);
+  React.useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    setPaymentId(sp.get("p"));
+    setDeclaredFail(sp.get("echec") === "1");
+    setParamsRead(true);
+  }, []);
 
   const [status, setStatus] = React.useState<
     "pending" | "confirmed" | "failed" | "timeout" | "unknown"
@@ -26,6 +30,7 @@ export default function PaiementRetourPage() {
   const [courseId, setCourseId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
+    if (!paramsRead) return;
     if (!paymentId) {
       setStatus("unknown");
       return;
@@ -68,7 +73,7 @@ export default function PaiementRetourPage() {
     return () => {
       cancelled = true;
     };
-  }, [paymentId, declaredFail]);
+  }, [paymentId, declaredFail, paramsRead]);
 
   const course = courseId ? getCourse(courseId) : undefined;
 
