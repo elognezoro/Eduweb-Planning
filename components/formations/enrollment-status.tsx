@@ -2,7 +2,15 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, CheckCircle2, GraduationCap, Lock, ScrollText } from "lucide-react";
+import {
+  ArrowRight,
+  Award,
+  BookOpen,
+  CheckCircle2,
+  GraduationCap,
+  Lock,
+  ScrollText,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
@@ -13,6 +21,10 @@ import {
   enrollmentSourceLabel,
   getEnrollmentVerdict,
 } from "@/lib/formations/enrollment";
+import {
+  evaluateCourseCompletion,
+  getCourseCompletionRule,
+} from "@/lib/formations/course-completion";
 
 /**
  * Pastille d'état d'inscription, utilisée dans les bandeaux de la
@@ -128,39 +140,76 @@ export function MyEnrollmentsPanel() {
         </p>
       ) : (
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
-          {mine.map(({ course, verdict }) => (
-            <Link
-              key={course.id}
-              href={course.route}
-              className="group flex items-start gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:border-ew-green-400 hover:bg-ew-green-50/40"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ew-green-100 text-ew-green-800">
-                {course.type === "seminaire" ? (
-                  <ScrollText aria-hidden className="h-4 w-4" />
-                ) : (
-                  <BookOpen aria-hidden className="h-4 w-4" />
-                )}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {courseTypeLabel(course.type)} ·{" "}
-                  {isAdmin
-                    ? "Accès administrateur"
-                    : enrollmentSourceLabel(verdict.source)}
-                </p>
-                <p className="truncate font-display text-sm font-bold text-foreground group-hover:text-ew-green-800">
-                  {course.shortTitle}
-                </p>
-                <p className="line-clamp-2 text-xs text-muted-foreground">
-                  {course.description}
-                </p>
+          {mine.map(({ course, verdict }) => {
+            // Certificat débloqué si admin OU formation achevée (même règle
+            // que sur les pages de détail). Chaque certificat est porté par
+            // SON cours (titre, numéro déterministe, formateur configuré).
+            const completion = evaluateCourseCompletion(
+              app.user.id,
+              isAdmin,
+              course.id,
+              getCourseCompletionRule(course.id, store.courseCompletionRules),
+              store.moduleCompletions,
+              store.courseCompletions,
+            );
+            const canDeliverCertificate = isAdmin || completion.completed;
+            return (
+              <div
+                key={course.id}
+                className="flex flex-col rounded-xl border border-border bg-card p-3 transition-colors hover:border-ew-green-400 hover:bg-ew-green-50/40"
+              >
+                <Link href={course.route} className="group flex items-start gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ew-green-100 text-ew-green-800">
+                    {course.type === "seminaire" ? (
+                      <ScrollText aria-hidden className="h-4 w-4" />
+                    ) : (
+                      <BookOpen aria-hidden className="h-4 w-4" />
+                    )}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                      {courseTypeLabel(course.type)} ·{" "}
+                      {isAdmin
+                        ? "Accès administrateur"
+                        : enrollmentSourceLabel(verdict.source)}
+                    </p>
+                    <p className="truncate font-display text-sm font-bold text-foreground group-hover:text-ew-green-800">
+                      {course.shortTitle}
+                    </p>
+                    <p className="line-clamp-2 text-xs text-muted-foreground">
+                      {course.description}
+                    </p>
+                  </div>
+                  <ArrowRight
+                    aria-hidden
+                    className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-ew-green-700"
+                  />
+                </Link>
+                <div className="mt-3 flex items-center justify-end border-t border-border/60 pt-2">
+                  {canDeliverCertificate ? (
+                    <Link
+                      href={`/aide/certificat?course=${course.id}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-ew-green-700 px-3 py-1.5 text-xs font-semibold text-white transition-transform hover:scale-[1.03]"
+                    >
+                      <Award aria-hidden className="h-3.5 w-3.5" /> Délivrer le
+                      certificat
+                    </Link>
+                  ) : (
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground"
+                      title={
+                        completion.reason ??
+                        "Achevez la formation pour débloquer le certificat."
+                      }
+                    >
+                      <Lock aria-hidden className="h-3.5 w-3.5" /> Certificat
+                      verrouillé
+                    </span>
+                  )}
+                </div>
               </div>
-              <ArrowRight
-                aria-hidden
-                className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-ew-green-700"
-              />
-            </Link>
-          ))}
+            );
+          })}
         </div>
       )}
     </section>
