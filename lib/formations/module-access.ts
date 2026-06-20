@@ -1,4 +1,5 @@
 import { MAGNIFICA_HUMANITAS } from "@/lib/seminaires/magnifica-humanitas";
+import { senecModules } from "@/lib/formations/senec-modules";
 import type { ModuleAccessRule, ModuleCompletion } from "./types";
 
 /**
@@ -30,6 +31,17 @@ export function getCourseModuleList(courseId: string): CourseModuleRef[] {
       displayTitle: m.displayTitle,
     }));
   }
+  // Séminaires SENEC (Communication pastorale, IA & communication) organisés
+  // en modules — voir lib/formations/senec-modules.ts.
+  const senec = senecModules(courseId);
+  if (senec.length > 0) {
+    return senec.map((m) => ({
+      id: m.id,
+      num: m.num,
+      title: m.title,
+      displayTitle: m.displayTitle,
+    }));
+  }
   return [];
 }
 
@@ -43,7 +55,9 @@ export function getAccessRule(
   moduleId: string,
   rules: ModuleAccessRule[],
 ): ModuleAccessRule {
-  const found = rules.find((r) => r.courseId === courseId && r.moduleId === moduleId);
+  const found = rules.find(
+    (r) => r.courseId === courseId && r.moduleId === moduleId,
+  );
   if (found) return found;
   return {
     id: `default-${courseId}-${moduleId}`,
@@ -62,7 +76,8 @@ export function isModuleCompleted(
   completions: ModuleCompletion[],
 ): boolean {
   return completions.some(
-    (c) => c.userId === userId && c.courseId === courseId && c.moduleId === moduleId,
+    (c) =>
+      c.userId === userId && c.courseId === courseId && c.moduleId === moduleId,
   );
 }
 
@@ -75,7 +90,10 @@ export function getModuleCompletion(
 ): ModuleCompletion | undefined {
   return completions
     .filter(
-      (c) => c.userId === userId && c.courseId === courseId && c.moduleId === moduleId,
+      (c) =>
+        c.userId === userId &&
+        c.courseId === courseId &&
+        c.moduleId === moduleId,
     )
     .sort((a, b) => (a.completedAt > b.completedAt ? -1 : 1))[0];
 }
@@ -112,7 +130,9 @@ export function checkModuleAccess(
 }
 
 /** Libellé FR pour un mode de complétion. */
-export function completionModeLabel(mode: ModuleAccessRule["completionMode"]): string {
+export function completionModeLabel(
+  mode: ModuleAccessRule["completionMode"],
+): string {
   switch (mode) {
     case "manual":
       return "Validation manuelle";

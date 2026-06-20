@@ -1,9 +1,29 @@
 "use client";
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight, ListTree, Maximize2, Minimize2 } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Circle,
+  ListTree,
+  Lock,
+  Maximize2,
+  Minimize2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NarrationButton } from "@/components/seminaires/narration-button";
+import { useApp } from "@/components/app-shell/app-context";
+import { useStore } from "@/components/app-shell/data-store";
+import {
+  checkModuleAccess,
+  getCourseModuleList,
+  isModuleCompleted,
+} from "@/lib/formations/module-access";
+import {
+  isLastPageOfModule,
+  moduleIdForPage,
+} from "@/lib/formations/senec-modules";
 
 /* ============================================================================
    MagnificaBook — visionneuse de séminaire en mode livre.
@@ -51,7 +71,21 @@ export interface BookPage {
   narration?: string;
 }
 
-export function MagnificaBook({ pages }: { pages: BookPage[] }) {
+export function MagnificaBook({
+  pages,
+  courseId,
+}: {
+  pages: BookPage[];
+  /**
+   * Si fourni, active l'organisation en MODULES : bandeau de module, garde
+   * d'accès par prérequis et bouton « marquer le module comme terminé ».
+   * Le module de chaque page est résolu via lib/formations/senec-modules.
+   * Omis = livre simple (comportement historique, ex. Magnifica).
+   */
+  courseId?: string;
+}) {
+  const app = useApp();
+  const store = useStore();
   const [idx, setIdx] = React.useState(0);
   const [fullscreen, setFullscreen] = React.useState(false);
   // Le pied (bandeau prev/next + sommaire) est rétractable. En plein écran,
@@ -93,7 +127,10 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
     // Si on n'est pas en plein écran, le livre est inséré dans la page
     // dashboard : on amène son bandeau du haut juste sous le topbar de l'app.
     if (!fullscreen) {
-      containerRef.current?.scrollIntoView?.({ block: "start", behavior: "smooth" });
+      containerRef.current?.scrollIntoView?.({
+        block: "start",
+        behavior: "smooth",
+      });
     }
     pageRef.current?.focus({ preventScroll: true });
   }, [idx, fullscreen]);
@@ -110,7 +147,11 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
       if (e.key === "ArrowLeft" || e.key === "PageUp") {
         e.preventDefault();
         goPrev();
-      } else if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") {
+      } else if (
+        e.key === "ArrowRight" ||
+        e.key === "PageDown" ||
+        e.key === " "
+      ) {
         e.preventDefault();
         goNext();
       } else if (e.key === "Home") {
@@ -147,6 +188,61 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
 
   const progress = ((idx + 1) / total) * 100;
 
+  /* ---- Organisation en modules (si courseId fourni) ---- */
+  const isAdminUser = app.effectiveRole === "admin";
+  const moduleId =
+    courseId && page ? moduleIdForPage(courseId, page.id) : undefined;
+  const moduleRef =
+    courseId && moduleId
+      ? getCourseModuleList(courseId).find((m) => m.id === moduleId)
+      : undefined;
+  const moduleAccess =
+    courseId && moduleId
+      ? checkModuleAccess(
+          app.user.id,
+          isAdminUser,
+          courseId,
+          moduleId,
+          store.moduleAccessRules,
+          store.moduleCompletions,
+        )
+      : null;
+  const moduleLocked = moduleAccess ? !moduleAccess.accessible : false;
+  const moduleCompleted =
+    courseId && moduleId
+      ? isModuleCompleted(
+          app.user.id,
+          courseId,
+          moduleId,
+          store.moduleCompletions,
+        )
+      : false;
+  const canCompleteHere =
+    courseId && moduleId && page
+      ? isLastPageOfModule(courseId, moduleId, page.id)
+      : false;
+
+  function prereqTitles(ids: string[]): string {
+    const all = courseId ? getCourseModuleList(courseId) : [];
+    return ids
+      .map((id) => all.find((m) => m.id === id)?.displayTitle ?? id)
+      .join(", ");
+  }
+
+  function toggleModuleComplete() {
+    if (!courseId || !moduleId) return;
+    if (moduleCompleted) {
+      store.unmarkModuleCompleted(app.user.id, courseId, moduleId);
+    } else {
+      store.markModuleCompleted({
+        userId: app.user.id,
+        courseId,
+        moduleId,
+        source: "manual",
+      });
+    }
+  }
+
   return (
     <section
       ref={containerRef}
@@ -163,9 +259,12 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
         <div className="flex items-center gap-2 text-xs">
           <ListTree aria-hidden className="h-4 w-4 text-ew-green-700" />
           <span className="font-mono font-bold text-ew-green-700">
-            Page {String(idx + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+            Page {String(idx + 1).padStart(2, "0")} /{" "}
+            {String(total).padStart(2, "0")}
           </span>
-          <span className="hidden text-muted-foreground sm:inline">— {page?.shortTitle}</span>
+          <span className="hidden text-muted-foreground sm:inline">
+            — {page?.shortTitle}
+          </span>
         </div>
         <div className="flex items-center gap-1.5">
           <button
@@ -193,7 +292,9 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
           </button>
           <button
             type="button"
-            aria-label={showFooter ? "Replier le sommaire" : "Afficher le sommaire"}
+            aria-label={
+              showFooter ? "Replier le sommaire" : "Afficher le sommaire"
+            }
             aria-pressed={showFooter}
             onClick={() => setShowFooter((v) => !v)}
             className={cn(
@@ -209,7 +310,11 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
           </button>
           <button
             type="button"
-            aria-label={fullscreen ? "Quitter le mode plein écran" : "Afficher en plein écran"}
+            aria-label={
+              fullscreen
+                ? "Quitter le mode plein écran"
+                : "Afficher en plein écran"
+            }
             aria-pressed={fullscreen}
             onClick={() => setFullscreen((v) => !v)}
             className="ml-1 flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted/40"
@@ -220,7 +325,9 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
             ) : (
               <Maximize2 aria-hidden className="h-3.5 w-3.5" />
             )}
-            <span className="hidden sm:inline">{fullscreen ? "Réduire" : "Plein écran"}</span>
+            <span className="hidden sm:inline">
+              {fullscreen ? "Réduire" : "Plein écran"}
+            </span>
           </button>
         </div>
       </div>
@@ -248,20 +355,23 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
           key={page?.id}
           className={cn(
             "mx-auto max-w-4xl",
-            direction === "next" ? "book-page-enter-next" : "book-page-enter-prev",
+            direction === "next"
+              ? "book-page-enter-next"
+              : "book-page-enter-prev",
           )}
         >
           {page ? (
             <>
               <header className="mb-5">
                 <p className="font-display text-[12px] font-bold uppercase tracking-[0.18em] text-ew-gold-600">
-                  Page {String(idx + 1).padStart(2, "0")} · {categoryLabel(page.category)}
+                  Page {String(idx + 1).padStart(2, "0")} ·{" "}
+                  {categoryLabel(page.category)}
                 </p>
                 <div className="mt-1 flex flex-wrap items-start justify-between gap-3">
                   <h2 className="font-display text-2xl font-extrabold leading-tight text-ew-green-900 sm:text-3xl">
                     {page.title}
                   </h2>
-                  {page.narration ? (
+                  {page.narration && !moduleLocked ? (
                     <NarrationButton
                       key={page.id}
                       text={page.narration}
@@ -270,10 +380,30 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
                   ) : null}
                 </div>
                 {page.subtitle ? (
-                  <p className="mt-1 text-sm italic text-muted-foreground">{page.subtitle}</p>
+                  <p className="mt-1 text-sm italic text-muted-foreground">
+                    {page.subtitle}
+                  </p>
                 ) : null}
               </header>
-              {page.content}
+              {moduleRef ? (
+                <ModuleBar
+                  num={moduleRef.num}
+                  title={moduleRef.displayTitle ?? moduleRef.title}
+                  completed={moduleCompleted}
+                  locked={moduleLocked}
+                  canComplete={canCompleteHere && !moduleLocked}
+                  onToggle={toggleModuleComplete}
+                />
+              ) : null}
+              {moduleLocked ? (
+                <LockedModule
+                  missing={prereqTitles(
+                    moduleAccess?.missingPrerequisites ?? [],
+                  )}
+                />
+              ) : (
+                page.content
+              )}
             </>
           ) : null}
         </article>
@@ -283,7 +413,12 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
           Repliable via le bouton « Sommaire » de la barre du haut, et
           automatiquement replié en mode plein écran pour libérer toute la
           place au contenu de la page (utile pour les diapositives SENEC). */}
-      <div className={cn("border-t border-border bg-muted/20", !showFooter && "hidden")}>
+      <div
+        className={cn(
+          "border-t border-border bg-muted/20",
+          !showFooter && "hidden",
+        )}
+      >
         <div className="flex items-center justify-between gap-3 px-3 py-2">
           <button
             type="button"
@@ -328,7 +463,9 @@ export function MagnificaBook({ pages }: { pages: BookPage[] }) {
                     : "border-border bg-card text-muted-foreground hover:bg-muted/40",
                 )}
               >
-                <p className="font-mono font-bold">#{String(i + 1).padStart(2, "0")}</p>
+                <p className="font-mono font-bold">
+                  #{String(i + 1).padStart(2, "0")}
+                </p>
                 <p className="line-clamp-2">{p.shortTitle}</p>
               </button>
             ))}
@@ -374,4 +511,88 @@ function categoryLabel(c: BookPage["category"]): string {
     case "landmarks":
       return "Repères et synthèse";
   }
+}
+
+/* ---- Bandeau de module : numéro, titre, état + bouton « terminé » ---- */
+function ModuleBar({
+  num,
+  title,
+  completed,
+  locked,
+  canComplete,
+  onToggle,
+}: {
+  num: number;
+  title: string;
+  completed: boolean;
+  locked: boolean;
+  canComplete: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3 py-2",
+        locked
+          ? "border-ew-gold-200 bg-ew-gold-50/60"
+          : completed
+            ? "border-ew-green-300 bg-ew-green-50/60"
+            : "border-border bg-muted/20",
+      )}
+    >
+      <p className="flex items-center gap-2 text-sm">
+        {locked ? (
+          <Lock aria-hidden className="h-4 w-4 text-ew-gold-700" />
+        ) : completed ? (
+          <CheckCircle2 aria-hidden className="h-4 w-4 text-ew-green-700" />
+        ) : (
+          <Circle aria-hidden className="h-4 w-4 text-muted-foreground" />
+        )}
+        <span className="font-bold uppercase tracking-wide text-ew-green-700">
+          Module {num}
+        </span>
+        <span className="text-foreground/80">· {title}</span>
+      </p>
+      {completed ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          className="inline-flex items-center gap-1 rounded-md border border-ew-green-300 bg-ew-green-50 px-2.5 py-1 text-xs font-bold text-ew-green-800 hover:bg-ew-green-100"
+        >
+          <CheckCircle2 aria-hidden className="h-3.5 w-3.5" /> Module terminé
+        </button>
+      ) : canComplete ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          className="inline-flex items-center gap-1 rounded-md bg-ew-green-700 px-2.5 py-1 text-xs font-bold text-white hover:bg-ew-green-800"
+        >
+          <Circle aria-hidden className="h-3.5 w-3.5" /> Marquer comme terminé
+        </button>
+      ) : !locked ? (
+        <span className="text-[11px] italic text-muted-foreground">
+          Validez ce module sur sa dernière page.
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+/* ---- Contenu masqué tant que les prérequis ne sont pas complétés ---- */
+function LockedModule({ missing }: { missing: string }) {
+  return (
+    <div className="rounded-2xl border border-ew-gold-200 bg-ew-gold-50/40 p-6 text-center">
+      <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-ew-gold-100 text-ew-gold-700">
+        <Lock aria-hidden className="h-6 w-6" />
+      </span>
+      <p className="mt-3 font-display text-lg font-extrabold text-foreground">
+        Module verrouillé
+      </p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {missing
+          ? `Terminez d'abord : ${missing}.`
+          : "Ce module sera débloqué une fois les prérequis complétés."}
+      </p>
+    </div>
+  );
 }

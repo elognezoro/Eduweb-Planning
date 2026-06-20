@@ -2,7 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Award, FileDown, FileText, Presentation } from "lucide-react";
+import {
+  ArrowLeft,
+  Award,
+  FileDown,
+  FileText,
+  Presentation,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   ActivityList,
@@ -22,12 +28,18 @@ import {
   IaProtocol,
   IaUsageMap,
 } from "@/components/seminaires/ia-communication-views";
-import { IA_COMMUNICATION, IA_CONTENT } from "@/lib/seminaires/ia-communication";
+import {
+  IA_COMMUNICATION,
+  IA_CONTENT,
+} from "@/lib/seminaires/ia-communication";
 import type { CommSeminaireActivity } from "@/lib/seminaires/communication-pastorale";
 import { CourseGate } from "@/components/formations/course-gate";
 import { useSupportAccess } from "@/components/formations/use-support-access";
 import { GatedSupportButton } from "@/components/formations/gated-support-button";
-import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-book";
+import {
+  MagnificaBook,
+  type BookPage,
+} from "@/components/seminaires/magnifica-book";
 
 /**
  * Espace de formation « L'intelligence artificielle au service de la
@@ -66,7 +78,9 @@ export default function IaCommunicationPage() {
 
   const narrations = React.useMemo(() => {
     const presentation =
-      s.meta.presentation.join(" ") + " Message clé. " + IA_CONTENT.presentationMessage;
+      s.meta.presentation.join(" ") +
+      " Message clé. " +
+      IA_CONTENT.presentationMessage;
     const objectives =
       `Objectifs pédagogiques. ${s.objectives.join(" ")} ` +
       `Compétences visées. ${s.competences.join(" ")}`;
@@ -85,12 +99,16 @@ export default function IaCommunicationPage() {
       "Module 2 : bien prompter et produire. Méthode P.A.S.T.O.R.A.L. " +
       IA_CONTENT.module2.narrative.join(" ") +
       " " +
-      (s.promptMethod ?? []).map((p) => `${p.letter}, ${p.label}. ${p.detail}`).join(" ");
+      (s.promptMethod ?? [])
+        .map((p) => `${p.letter}, ${p.label}. ${p.detail}`)
+        .join(" ");
     const fiveV =
       "Module 3 : éthique, risques, image et validation. " +
       IA_CONTENT.module3.narrative.join(" ") +
       " La règle des 5 V. " +
-      (s.fiveV ?? []).map((v) => `${v.letter}, ${v.label}. ${v.detail}`).join(" ");
+      (s.fiveV ?? [])
+        .map((v) => `${v.letter}, ${v.label}. ${v.detail}`)
+        .join(" ");
     const atelierPratique =
       "Séquence 6. Atelier pratique : produire, corriger et adapter un message. " +
       IA_CONTENT.atelierPratique.consigne;
@@ -103,7 +121,9 @@ export default function IaCommunicationPage() {
       "Évaluations interactives. Un pré-test de 8 questions à choix multiples, auto-corrigées.";
     const protocol =
       "Protocole d'usage responsable de l'intelligence artificielle. " +
-      (s.protocol ?? []).map((p) => `${p.num}. ${p.title}. ${p.items.join(", ")}.`).join(" ");
+      (s.protocol ?? [])
+        .map((p) => `${p.num}. ${p.title}. ${p.items.join(", ")}.`)
+        .join(" ");
     const schedule =
       `Déroulé proposé pour la session de 2 heures 30 minutes, soit 150 minutes. ` +
       s.schedule.map((row) => `${row.hours}, ${row.activity}.`).join(" ");
@@ -190,7 +210,8 @@ export default function IaCommunicationPage() {
         category: "module",
         shortTitle: "Module 1 — Usages",
         title: "Module 1 — Comprendre l'IA et ses usages",
-        subtitle: "Séquence 3 — les apports concrets de l'IA pour la communication",
+        subtitle:
+          "Séquence 3 — les apports concrets de l'IA pour la communication",
         content: (
           <div className="space-y-6">
             <IaUsageMap seminaire={s} />
@@ -326,9 +347,10 @@ export default function IaCommunicationPage() {
     return (
       <div className="space-y-3">
         <p className="rounded-md border border-ew-green-200 bg-ew-green-50/40 px-3 py-2 text-sm text-foreground/90">
-          Astuce : utilisez ← → à l&apos;intérieur de la visionneuse pour naviguer entre les
-          diapositives, F pour le plein écran, N pour afficher les notes du formateur. Cliquez
-          sur une miniature pour aller directement à une diapositive.
+          Astuce : utilisez ← → à l&apos;intérieur de la visionneuse pour
+          naviguer entre les diapositives, F pour le plein écran, N pour
+          afficher les notes du formateur. Cliquez sur une miniature pour aller
+          directement à une diapositive.
         </p>
         <SlideDeck slides={s.slides} />
       </div>
@@ -389,7 +411,7 @@ export default function IaCommunicationPage() {
           </div>
         </div>
 
-        <MagnificaBook pages={pages} />
+        <MagnificaBook pages={pages} courseId="ia-communication" />
       </div>
     </CourseGate>
   );
@@ -399,7 +421,9 @@ export default function IaCommunicationPage() {
 function FactCell({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-dashed border-border bg-background/60 p-3">
-      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
       <p className="mt-0.5 text-sm font-bold text-foreground">{value}</p>
     </div>
   );

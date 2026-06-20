@@ -26,7 +26,10 @@ import { COMMUNICATION_PASTORALE } from "@/lib/seminaires/communication-pastoral
 import { CourseGate } from "@/components/formations/course-gate";
 import { useSupportAccess } from "@/components/formations/use-support-access";
 import { GatedSupportButton } from "@/components/formations/gated-support-button";
-import { MagnificaBook, type BookPage } from "@/components/seminaires/magnifica-book";
+import {
+  MagnificaBook,
+  type BookPage,
+} from "@/components/seminaires/magnifica-book";
 
 /**
  * Espace de formation SENEC en mode livre paginé.
@@ -69,17 +72,15 @@ export default function CommPastoralePage() {
       "Méthode RAPIDE pour relire une publication. " +
       (s.rapide ?? []).map((r) => `${r.letter}, ${r.label}.`).join(" ") +
       " Règle des 4 V pour un usage responsable de l'intelligence artificielle. " +
-      (s.fourV ?? []).map((v) => `${v.letter}, ${v.label}. ${v.detail}`).join(" ");
+      (s.fourV ?? [])
+        .map((v) => `${v.letter}, ${v.label}. ${v.detail}`)
+        .join(" ");
     const workshopsIntro =
       `Ateliers interactifs. ${s.activities.length} ateliers pour passer à la pratique. ` +
-      s.activities
-        .map((a) => `Atelier ${a.num}, ${a.title}.`)
-        .join(" ");
+      s.activities.map((a) => `Atelier ${a.num}, ${a.title}.`).join(" ");
     const schedule =
       `Déroulé proposé pour la session de 2 heures, soit 120 minutes. ` +
-      s.schedule
-        .map((row) => `${row.hours}, ${row.activity}.`)
-        .join(" ");
+      s.schedule.map((row) => `${row.hours}, ${row.activity}.`).join(" ");
     const landmarks =
       "Repères et synthèse de la formation. " +
       s.references10.map((r) => `Repère ${r.num}. ${r.text}`).join(" ");
@@ -233,8 +234,8 @@ export default function CommPastoralePage() {
         <p className="rounded-md border border-ew-green-200 bg-ew-green-50/40 px-3 py-2 text-sm text-foreground/90">
           Astuce : utilisez ← → à l&apos;intérieur de la visionneuse pour
           naviguer entre les diapositives, F pour le plein écran, N pour
-          afficher les notes du formateur. Cliquez sur une miniature pour
-          aller directement à une diapositive.
+          afficher les notes du formateur. Cliquez sur une miniature pour aller
+          directement à une diapositive.
         </p>
         <SlideDeck slides={s.slides} />
       </div>
@@ -295,7 +296,7 @@ export default function CommPastoralePage() {
           </div>
         </div>
 
-        <MagnificaBook pages={pages} />
+        <MagnificaBook pages={pages} courseId="communication-pastorale" />
       </div>
     </CourseGate>
   );
