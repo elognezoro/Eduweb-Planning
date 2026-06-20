@@ -69,6 +69,9 @@ const STRENGTH = [
 
 export default function RegisterPage() {
   const [show, setShow] = React.useState(false);
+  // Vrai si l'inscription a échoué car le compte existe déjà : on a tout de
+  // même déposé l'intention d'inscription aux cours (réclamée au prochain login).
+  const [accountExists, setAccountExists] = React.useState(false);
 
   // Lien d'inscription : jeton auto-porteur lu dans l'URL (?invite=...).
   // Lecture APRÈS montage (useEffect) : un initialiseur useState lisant
@@ -146,9 +149,22 @@ export default function RegisterPage() {
         },
       });
       if (error) {
+        const m = (error.message || "").toLowerCase();
+        const already =
+          m.includes("already") ||
+          m.includes("registered") ||
+          m.includes("exist");
+        if (already) {
+          // Le compte existe déjà : on dépose quand même l'intention
+          // d'inscription aux cours du lien — matérialisée au prochain login.
+          setAccountExists(true);
+          queueInviteEnrollment(data.email);
+          return; // écran « ce compte existe déjà — connectez-vous »
+        }
         toast.error("Inscription échouée", { description: error.message });
         throw error; // empêche l'écran de succès
       }
+      setAccountExists(false);
       queueInviteEnrollment(data.email);
       return; // succès → écran « Compte créé / en attente de validation »
     }
@@ -165,11 +181,22 @@ export default function RegisterPage() {
             <CheckCircle2 className="h-7 w-7" />
           </div>
           <h2 className="mt-4 text-lg font-extrabold text-foreground">
-            Compte créé
+            {accountExists ? "Ce compte existe déjà" : "Compte créé"}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Votre compte est <strong>en attente de validation</strong> par un
-            administrateur. Vous recevrez une notification dès son activation.
+            {accountExists ? (
+              <>
+                Un compte existe déjà avec cet e-mail.{" "}
+                <strong>Connectez-vous</strong> : vous serez inscrit(e) aux cours
+                du lien dès votre connexion.
+              </>
+            ) : (
+              <>
+                Votre compte est <strong>en attente de validation</strong> par un
+                administrateur. Vous recevrez une notification dès son
+                activation.
+              </>
+            )}
           </p>
           {invite && inviteState === "valid" && inviteCourses.length > 0 ? (
             <div className="mt-4 rounded-xl border border-ew-green-200 bg-ew-green-50/50 p-3 text-left text-sm">
