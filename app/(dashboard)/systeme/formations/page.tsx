@@ -54,6 +54,10 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
 import { deleteCourseEnrollment } from "@/lib/formations/enrollments-server";
 import {
+  createShortInviteLink,
+  shortInviteUrl,
+} from "@/lib/formations/invite-links-server";
+import {
   COHORT_CSV_TEMPLATE,
   COHORT_CSV_TEMPLATE_FILENAME,
   groupRowsByCohort,
@@ -2868,6 +2872,10 @@ function InviteLinkRow({
   onRemove: () => void;
 }) {
   const [copied, setCopied] = React.useState(false);
+  const [shortUrl, setShortUrl] = React.useState<string | null>(null);
+  const [shortBusy, setShortBusy] = React.useState(false);
+  const [shortCopied, setShortCopied] = React.useState(false);
+  const canShorten = isSupabaseConfigured();
   const url = origin ? buildInviteUrl(origin, link.token) : "";
   const status = payloadStatus({
     v: 1,
@@ -2888,6 +2896,38 @@ function InviteLinkRow({
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
       /* clipboard indisponible */
+    }
+  }
+
+  // Crée (au 1er clic) puis copie un lien COURT de premier domaine
+  // (planning.eduweb.ci/i/<code>) — anti-hameçonnage. Réservé au mode réel.
+  async function copyShort() {
+    if (!origin) return;
+    setShortBusy(true);
+    try {
+      let su = shortUrl;
+      if (!su) {
+        const code = await createShortInviteLink(
+          createClient(),
+          link.token,
+          link.label,
+        );
+        if (!code) {
+          window.alert(
+            "Lien court indisponible : appliquez la migration 009 et réessayez (action réservée à l'administrateur).",
+          );
+          return;
+        }
+        su = shortInviteUrl(origin, code);
+        setShortUrl(su);
+      }
+      await navigator.clipboard.writeText(su);
+      setShortCopied(true);
+      window.setTimeout(() => setShortCopied(false), 1800);
+    } catch {
+      /* clipboard indisponible */
+    } finally {
+      setShortBusy(false);
     }
   }
 
@@ -2922,13 +2962,32 @@ function InviteLinkRow({
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          {canShorten ? (
+            <Button
+              size="sm"
+              onClick={copyShort}
+              disabled={shortBusy || !origin}
+              title="Crée et copie un lien court du domaine officiel (anti-hameçonnage)."
+            >
+              {shortCopied ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Link2 className="h-4 w-4" />
+              )}
+              {shortBusy
+                ? "…"
+                : shortCopied
+                  ? "Lien court copié"
+                  : "Lien court"}
+            </Button>
+          ) : null}
           <Button size="sm" variant="outline" onClick={copy} disabled={!url}>
             {copied ? (
               <Check className="h-4 w-4" />
             ) : (
               <Copy className="h-4 w-4" />
             )}
-            {copied ? "Copié" : "Copier"}
+            {copied ? "Copié" : "Lien complet"}
           </Button>
           <Button
             size="sm"
@@ -2941,7 +3000,12 @@ function InviteLinkRow({
           </Button>
         </div>
       </div>
-      <p className="mt-2 truncate rounded-md border border-dashed border-border bg-background/60 px-2 py-1 font-mono text-[11px] text-muted-foreground">
+      {shortUrl ? (
+        <p className="mt-2 truncate rounded-md border border-ew-green-300 bg-ew-green-50/60 px-2 py-1 font-mono text-[11px] font-semibold text-ew-green-800">
+          {shortUrl}
+        </p>
+      ) : null}
+      <p className="mt-1 truncate rounded-md border border-dashed border-border bg-background/60 px-2 py-1 font-mono text-[11px] text-muted-foreground">
         {url || "…"}
       </p>
     </li>
