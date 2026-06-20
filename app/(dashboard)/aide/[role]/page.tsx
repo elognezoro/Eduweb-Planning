@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { GuideArticle } from "@/components/guides/guide-layout";
 import { GUIDES } from "@/lib/guides";
 import { GUIDE_ICONS } from "@/lib/guides/icons";
+import { prepareGuide } from "@/lib/guides/dynamic-facts";
 import { CourseGate } from "@/components/formations/course-gate";
 
 interface Props {
@@ -17,7 +18,9 @@ export default function GuidePage({ params }: Props) {
   if (!data) notFound();
 
   const Icon = GUIDE_ICONS[role];
-  const guide = { ...data, icon: Icon };
+  // Contenu dérivé : injecte les listes système toujours à jour (formations,
+  // rôles, supports) au moment du rendu — voir lib/guides/dynamic-facts.
+  const guide = { ...prepareGuide(data), icon: Icon };
 
   return (
     <CourseGate courseId="guides-utilisateurs">
