@@ -1249,12 +1249,22 @@ function AccessRuleCard({
   );
   const [savedAt, setSavedAt] = React.useState<number | null>(null);
 
+  // Resynchronise les champs locaux avec la règle ENREGISTRÉE uniquement
+  // quand son CONTENU change (ou au changement de module). `getAccessRule`
+  // renvoie un objet par défaut recréé à chaque rendu (nouveau tableau vide) :
+  // dépendre de la référence du tableau relançait l'effet à chaque rendu et
+  // écrasait la saisie en cours (les cases « ne réagissaient pas »). On dépend
+  // donc d'une clé stable (contenu sérialisé).
+  const savedPrereqKey = current.prerequisiteModuleIds.join(",");
   React.useEffect(() => {
     setPrereq(current.prerequisiteModuleIds);
     setMode(current.completionMode);
     setMinScore(current.minQuizScore ?? 70);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    current.prerequisiteModuleIds,
+    courseId,
+    module.id,
+    savedPrereqKey,
     current.completionMode,
     current.minQuizScore,
   ]);
