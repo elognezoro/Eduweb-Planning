@@ -27,6 +27,8 @@ interface DirectoryUsersValue {
   setUserStatus: (id: string, status: DirectoryUser["status"]) => void;
   removeUser: (id: string) => void;
   removeUsers: (ids: string[]) => void;
+  /** Suppression DÉFINITIVE (irréversible). Renvoie true si supprimé. */
+  deleteUserPermanently: (id: string) => Promise<boolean>;
 }
 
 const Ctx = React.createContext<DirectoryUsersValue | null>(null);
@@ -137,6 +139,29 @@ export function DirectoryUsersProvider({ children }: { children: React.ReactNode
             description: "La suppression définitive se fait côté serveur ; les comptes ont été archivés.",
           });
         },
+        deleteUserPermanently: async (id) => {
+          try {
+            const res = await fetch("/api/admin/users/delete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ userId: id }),
+            });
+            const data = (await res.json().catch(() => ({}))) as {
+              error?: string;
+            };
+            if (!res.ok) {
+              toast.error("Suppression définitive refusée", {
+                description: data.error ?? `Erreur ${res.status}`,
+              });
+              return false;
+            }
+            setRealUsers((us) => us.filter((u) => u.id !== id));
+            return true;
+          } catch {
+            toast.error("Suppression définitive impossible");
+            return false;
+          }
+        },
       }
     : {
         users: store.users,
@@ -148,6 +173,11 @@ export function DirectoryUsersProvider({ children }: { children: React.ReactNode
         setUserStatus: store.setUserStatus,
         removeUser: store.removeUser,
         removeUsers: store.removeUsers,
+        deleteUserPermanently: async (id) => {
+          // Mode démo : suppression locale réelle (le store retire la ligne).
+          store.removeUser(id);
+          return true;
+        },
       };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

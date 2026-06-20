@@ -9,6 +9,7 @@ import type { Permission } from "@/lib/permissions";
 import { useStore } from "@/components/app-shell/data-store";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
+import { SUPER_ADMIN_EMAILS } from "@/lib/super-admins";
 import type { UserRole } from "@/lib/roles";
 import type { UserProfile } from "@/lib/types";
 import { COUNTRIES, getCountry, type CountryConfig } from "@/config/countries";
@@ -37,19 +38,8 @@ const LS_KEY = "eduweb.context.v1";
 /** Mode backend figé au build (variables NEXT_PUBLIC_*). */
 const REAL_MODE = isSupabaseConfigured();
 
-/**
- * Comptes super-administrateurs reconnus par l'application : ces emails
- * obtiennent toujours le rôle `admin` à l'authentification, indépendamment
- * de ce qui figure dans la table `profiles` (l'app aligne ensuite la base
- * en best-effort pour éviter toute divergence persistante).
- *
- * Cette liste est volontairement minuscule et hard-codée : elle garantit
- * qu'un super-administrateur ne peut pas être verrouillé hors de
- * l'application par une manipulation accidentelle de la base.
- */
-const SUPER_ADMIN_EMAILS: string[] = [
-  "elognezoro@gmail.com",
-];
+// La liste des super-administrateurs (SUPER_ADMIN_EMAILS) vit désormais dans
+// `@/lib/super-admins` (source unique partagée avec les routes serveur).
 
 /**
  * Profil « invité » utilisé en mode réel AVANT le chargement du profil Supabase.

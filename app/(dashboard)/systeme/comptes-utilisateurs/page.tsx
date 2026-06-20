@@ -59,6 +59,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DirectoryUsersProvider, useDirectoryUsers } from "@/components/app-shell/use-directory-users";
+import { useApp } from "@/components/app-shell/app-context";
+import { isSuperAdminEmail } from "@/lib/super-admins";
 import type { DirectoryUser } from "@/lib/mock-data";
 import { ETABLISSEMENTS } from "@/lib/mock-data";
 import { ROLE_LIST, ROLE_FAMILY_LABELS } from "@/lib/roles";
@@ -337,11 +339,17 @@ function IconBtn({
 
 function RowActions({ user }: { user: DirectoryUser }) {
   const t = useTranslations();
-  const { setUserStatus, updateUser, removeUser } = useDirectoryUsers();
+  const app = useApp();
+  const { setUserStatus, updateUser, removeUser, deleteUserPermanently } = useDirectoryUsers();
   const [editOpen, setEditOpen] = React.useState(false);
   const [previewOpen, setPreviewOpen] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const [permaOpen, setPermaOpen] = React.useState(false);
   const [roleOpen, setRoleOpen] = React.useState(false);
+
+  // Suppression définitive interdite sur soi-même et sur un super-administrateur
+  // (la garde est aussi appliquée côté serveur ; ici c'est l'UX).
+  const canPermaDelete = app.user.id !== user.id && !isSuperAdminEmail(user.email);
 
   return (
     <>
@@ -418,6 +426,14 @@ function RowActions({ user }: { user: DirectoryUser }) {
             >
               <Archive className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.actions.archive")}
             </DropdownMenuItem>
+            {canPermaDelete && (
+              <DropdownMenuItem
+                className="text-red-600 focus:bg-red-50 focus:text-red-700"
+                onClick={() => setPermaOpen(true)}
+              >
+                <Trash2 className="h-4 w-4" /> Supprimer définitivement
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -465,7 +481,91 @@ function RowActions({ user }: { user: DirectoryUser }) {
           setDeleteOpen(false);
         }}
       />
+      <ConfirmPermaDeleteDialog
+        open={permaOpen}
+        onOpenChange={setPermaOpen}
+        user={user}
+        onConfirm={async () => {
+          const ok = await deleteUserPermanently(user.id);
+          if (ok) {
+            toast.success("Compte supprimé définitivement", {
+              description: `${user.name} et ses données associées ont été supprimés.`,
+            });
+            setPermaOpen(false);
+          }
+        }}
+      />
     </>
+  );
+}
+
+/**
+ * Confirmation FORTE de suppression définitive : l'admin doit saisir « SUPPRIMER »
+ * pour armer le bouton. Action irréversible (cascade base).
+ */
+function ConfirmPermaDeleteDialog({
+  open,
+  onOpenChange,
+  user,
+  onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  user: DirectoryUser;
+  onConfirm: () => void | Promise<void>;
+}) {
+  const t = useTranslations();
+  const [text, setText] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  React.useEffect(() => {
+    if (!open) {
+      setText("");
+      setBusy(false);
+    }
+  }, [open]);
+  const armed = text.trim().toUpperCase() === "SUPPRIMER";
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-red-700">Supprimer définitivement le compte</DialogTitle>
+          <DialogDescription>
+            Action <strong>irréversible</strong>. Le compte de{" "}
+            <strong>{user.name}</strong> ({user.email}) et toutes ses données
+            associées (inscriptions, paiements, certificats…) seront supprimés
+            définitivement.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label>
+            Pour confirmer, saisissez{" "}
+            <span className="font-mono font-bold">SUPPRIMER</span>
+          </Label>
+          <Input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="SUPPRIMER"
+            autoComplete="off"
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
+            {t("pages.systemeComptesUtilisateurs.actions.cancel")}
+          </Button>
+          <Button
+            variant="destructive"
+            disabled={!armed || busy}
+            onClick={async () => {
+              setBusy(true);
+              await onConfirm();
+              setBusy(false);
+            }}
+          >
+            <Trash2 className="h-4 w-4" /> Supprimer définitivement
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
