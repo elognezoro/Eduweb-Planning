@@ -141,6 +141,16 @@ export default function RegisterPage() {
             last_name: data.lastName,
             phone: data.phone,
             country: data.country,
+            // Auto-inscription SERVEUR (lien OFFERT) : le trigger handle_new_user
+            // crée les inscriptions à partir de ces métadonnées → fonctionne sur
+            // n'importe quel appareil. Les liens PAYANTS restent gérés par le
+            // claimer (localStorage) qui applique la garde de paiement.
+            ...(invite && inviteState === "valid" && invite.p !== 1
+              ? {
+                  invite_courses: invite.c,
+                  ...(invite.r ? { invite_role: invite.r } : {}),
+                }
+              : {}),
           },
           emailRedirectTo:
             typeof window !== "undefined"

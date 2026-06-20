@@ -523,6 +523,8 @@ interface DataStore extends StoreState {
     userIds: string[],
     input: Omit<CourseEnrollment, "id" | "enrolledAt" | "userId">,
   ) => void;
+  /** Fusionne des inscriptions venues du serveur (dédoublonné par user+cours). */
+  mergeCourseEnrollments: (rows: CourseEnrollment[]) => void;
   /** Supprime une inscription nominative. */
   removeEnrollment: (id: string) => void;
   /** Change le rôle de formation d'une inscription (admin/enseignant/…). */
@@ -1020,6 +1022,20 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
           enrolledAt: now,
         }));
         return { ...s, courseEnrollments: [...rows, ...s.courseEnrollments] };
+      }),
+    mergeCourseEnrollments: (rows) =>
+      setState((s) => {
+        const seen = new Set(
+          s.courseEnrollments.map((e) => `${e.userId}|${e.courseId}`),
+        );
+        const additions = rows.filter(
+          (r) => !seen.has(`${r.userId}|${r.courseId}`),
+        );
+        if (additions.length === 0) return s;
+        return {
+          ...s,
+          courseEnrollments: [...additions, ...s.courseEnrollments],
+        };
       }),
     removeEnrollment: (id) =>
       setState((s) => ({

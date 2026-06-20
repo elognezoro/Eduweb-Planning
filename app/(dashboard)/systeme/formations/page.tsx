@@ -50,6 +50,9 @@ import {
   getEnrollmentVerdict,
 } from "@/lib/formations/enrollment";
 import type { CourseCohort, CourseEnrollment } from "@/lib/formations/types";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
+import { deleteCourseEnrollment } from "@/lib/formations/enrollments-server";
 import {
   COHORT_CSV_TEMPLATE,
   COHORT_CSV_TEMPLATE_FILENAME,
@@ -780,6 +783,14 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
     }
     if (!window.confirm("Désinscrire cet utilisateur du cours ?")) return;
     store.removeEnrollment(enrollment.id);
+    // Mode réel : supprime aussi côté serveur, sinon la synchronisation
+    // descendante (CourseEnrollmentsSync) la ré-ajouterait au rechargement.
+    if (isSupabaseConfigured()) {
+      void deleteCourseEnrollment(createClient(), {
+        userId: enrollment.userId,
+        courseId: enrollment.courseId,
+      });
+    }
   }
 
   return (

@@ -32,30 +32,19 @@ create table if not exists public.course_payments (
 );
 create index if not exists course_payments_user_idx on public.course_payments (user_id);
 
--- Inscriptions durables (une seule par utilisateur + cours)
-create table if not exists public.course_enrollments (
-  id          uuid primary key default gen_random_uuid(),
-  user_id     uuid not null references auth.users (id) on delete cascade,
-  course_id   text not null,
-  source      text not null default 'payment',
-  enrolled_by text,
-  formation_role text,
-  expires_at  timestamptz,
-  created_at  timestamptz not null default now(),
-  unique (user_id, course_id)
-);
+-- NB : la table `course_enrollments` (inscriptions durables) est la SOURCE DE
+-- VÉRITÉ de la migration `008_course_enrollments.sql` — ne pas la redéclarer
+-- ici. Le webhook Wave (service-role, contourne la RLS) y insère l'inscription
+-- après paiement confirmé ; ses politiques RLS sont définies dans 008.
 
 -- RLS : chacun lit ses propres lignes ; les écritures passent par le
 -- service-role (webhook / route serveur), qui contourne le RLS.
-alter table public.course_payments    enable row level security;
-alter table public.course_enrollments enable row level security;
-alter table public.course_prices      enable row level security;
+alter table public.course_payments enable row level security;
+alter table public.course_prices   enable row level security;
 
-create policy "read own payments"    on public.course_payments
+create policy "read own payments" on public.course_payments
   for select using (auth.uid() = user_id);
-create policy "read own enrollments" on public.course_enrollments
-  for select using (auth.uid() = user_id);
-create policy "read prices"          on public.course_prices
+create policy "read prices"       on public.course_prices
   for select using (true);
 ```
 
