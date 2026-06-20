@@ -165,7 +165,7 @@ export default function ComptesUtilisateursPage() {
 
 function ComptesUtilisateursContent() {
   const t = useTranslations();
-  const { users, addUser, removeUsers, loading, realMode, refresh } = useDirectoryUsers();
+  const { users, addUser, loading, realMode, refresh } = useDirectoryUsers();
   const [role, setRole] = React.useState("all");
   const [status, setStatus] = React.useState("all");
   const [country, setCountry] = React.useState("all");
@@ -289,14 +289,7 @@ function ComptesUtilisateursContent() {
         enableSelection
         getRowId={(u) => u.id}
         bulkActions={(rows, clear) => (
-          <BulkDeleteButton
-            rows={rows as DirectoryUser[]}
-            onConfirm={(ids) => {
-              removeUsers(ids);
-              toast.success(t("pages.systemeComptesUtilisateurs.toasts.bulkDeleted", { count: ids.length }));
-              clear();
-            }}
-          />
+          <BulkDeleteButton rows={rows as DirectoryUser[]} clear={clear} />
         )}
       />
     </ModulePage>
@@ -340,10 +333,9 @@ function IconBtn({
 function RowActions({ user }: { user: DirectoryUser }) {
   const t = useTranslations();
   const app = useApp();
-  const { setUserStatus, updateUser, removeUser, deleteUserPermanently } = useDirectoryUsers();
+  const { setUserStatus, updateUser, deleteUserPermanently } = useDirectoryUsers();
   const [editOpen, setEditOpen] = React.useState(false);
   const [previewOpen, setPreviewOpen] = React.useState(false);
-  const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [permaOpen, setPermaOpen] = React.useState(false);
   const [roleOpen, setRoleOpen] = React.useState(false);
 
@@ -378,7 +370,16 @@ function RowActions({ user }: { user: DirectoryUser }) {
           <Pencil className="h-4 w-4" />
         </IconBtn>
 
-        <IconBtn title={t("pages.systemeComptesUtilisateurs.actions.delete")} tone="red" onClick={() => setDeleteOpen(true)}>
+        <IconBtn
+          title={
+            canPermaDelete
+              ? "Supprimer définitivement"
+              : "Compte protégé — suppression impossible"
+          }
+          tone="red"
+          disabled={!canPermaDelete}
+          onClick={() => setPermaOpen(true)}
+        >
           <Trash2 className="h-4 w-4" />
         </IconBtn>
 
@@ -426,14 +427,6 @@ function RowActions({ user }: { user: DirectoryUser }) {
             >
               <Archive className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.actions.archive")}
             </DropdownMenuItem>
-            {canPermaDelete && (
-              <DropdownMenuItem
-                className="text-red-600 focus:bg-red-50 focus:text-red-700"
-                onClick={() => setPermaOpen(true)}
-              >
-                <Trash2 className="h-4 w-4" /> Supprimer définitivement
-              </DropdownMenuItem>
-            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -464,21 +457,6 @@ function RowActions({ user }: { user: DirectoryUser }) {
         onSave={(patch) => {
           updateUser(user.id, patch);
           toast.success(t("pages.systemeComptesUtilisateurs.toasts.userEdited"));
-        }}
-      />
-      <ConfirmDeleteDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        title={t("pages.systemeComptesUtilisateurs.delete.single")}
-        description={
-          <>
-            {t("pages.systemeComptesUtilisateurs.delete.singleDesc1")}<strong>{user.name}</strong>{t("pages.systemeComptesUtilisateurs.delete.singleDesc2")}
-          </>
-        }
-        onConfirm={() => {
-          removeUser(user.id);
-          toast.success(t("pages.systemeComptesUtilisateurs.toasts.userDeleted"), { description: t("pages.systemeComptesUtilisateurs.toasts.userDeletedDesc", { name: user.name }) });
-          setDeleteOpen(false);
         }}
       />
       <ConfirmPermaDeleteDialog
@@ -632,45 +610,27 @@ function UserPreviewDialog({
   );
 }
 
-function ConfirmDeleteDialog({
-  open,
-  onOpenChange,
-  title,
-  description,
-  confirmLabel,
-  onConfirm,
-}: {
-  open: boolean;
-  onOpenChange: (o: boolean) => void;
-  title: string;
-  description: React.ReactNode;
-  confirmLabel?: string;
-  onConfirm: () => void;
-}) {
+function BulkDeleteButton({ rows, clear }: { rows: DirectoryUser[]; clear: () => void }) {
   const t = useTranslations();
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t("pages.systemeComptesUtilisateurs.actions.cancel")}
-          </Button>
-          <Button variant="destructive" onClick={onConfirm}>
-            <Trash2 className="h-4 w-4" /> {confirmLabel ?? t("pages.systemeComptesUtilisateurs.actions.delete")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function BulkDeleteButton({ rows, onConfirm }: { rows: DirectoryUser[]; onConfirm: (ids: string[]) => void }) {
-  const t = useTranslations();
+  const app = useApp();
+  const { deleteUsersPermanently } = useDirectoryUsers();
   const [open, setOpen] = React.useState(false);
+  const [text, setText] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  React.useEffect(() => {
+    if (!open) {
+      setText("");
+      setBusy(false);
+    }
+  }, [open]);
+
+  // Comptes protégés (soi-même, super-admin) exclus de la suppression.
+  const deletable = rows.filter(
+    (r) => r.id !== app.user.id && !isSuperAdminEmail(r.email),
+  );
+  const protectedCount = rows.length - deletable.length;
+  const armed = text.trim().toUpperCase() === "SUPPRIMER" && deletable.length > 0;
+
   return (
     <>
       <Button
@@ -679,19 +639,67 @@ function BulkDeleteButton({ rows, onConfirm }: { rows: DirectoryUser[]; onConfir
         className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
         onClick={() => setOpen(true)}
       >
-        <Trash2 className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.delete.bulkButton", { count: rows.length })}
+        <Trash2 className="h-4 w-4" />{" "}
+        {t("pages.systemeComptesUtilisateurs.delete.bulkButton", { count: rows.length })}
       </Button>
-      <ConfirmDeleteDialog
-        open={open}
-        onOpenChange={setOpen}
-        title={t("pages.systemeComptesUtilisateurs.delete.bulk", { count: rows.length, plural: rows.length > 1 ? "s" : "" })}
-        description={t("pages.systemeComptesUtilisateurs.delete.bulkDesc")}
-        confirmLabel={t("pages.systemeComptesUtilisateurs.delete.bulkButton", { count: rows.length })}
-        onConfirm={() => {
-          onConfirm(rows.map((r) => r.id));
-          setOpen(false);
-        }}
-      />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-700">
+              Supprimer définitivement {deletable.length} compte
+              {deletable.length > 1 ? "s" : ""}
+            </DialogTitle>
+            <DialogDescription>
+              Action <strong>irréversible</strong>. {deletable.length} compte(s)
+              et leurs données associées seront supprimés définitivement.
+              {protectedCount > 0
+                ? ` ${protectedCount} compte(s) protégé(s) (vous-même / super-administrateur) seront ignorés.`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>
+              Pour confirmer, saisissez{" "}
+              <span className="font-mono font-bold">SUPPRIMER</span>
+            </Label>
+            <Input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="SUPPRIMER"
+              autoComplete="off"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={busy}>
+              {t("pages.systemeComptesUtilisateurs.actions.cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={!armed || busy}
+              onClick={async () => {
+                setBusy(true);
+                const res = await deleteUsersPermanently(deletable.map((r) => r.id));
+                setBusy(false);
+                if (res.deleted > 0) {
+                  toast.success(
+                    `${res.deleted} compte${res.deleted > 1 ? "s" : ""} supprimé${res.deleted > 1 ? "s" : ""} définitivement`,
+                  );
+                }
+                if (res.failed > 0) {
+                  toast.error(
+                    `${res.failed} suppression${res.failed > 1 ? "s" : ""} en échec`,
+                    { description: res.firstError },
+                  );
+                }
+                setOpen(false);
+                clear();
+              }}
+            >
+              <Trash2 className="h-4 w-4" /> Supprimer définitivement
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

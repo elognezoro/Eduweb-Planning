@@ -29,6 +29,10 @@ interface DirectoryUsersValue {
   removeUsers: (ids: string[]) => void;
   /** Suppression DÉFINITIVE (irréversible). Renvoie true si supprimé. */
   deleteUserPermanently: (id: string) => Promise<boolean>;
+  /** Suppression DÉFINITIVE en lot. Renvoie un récapitulatif. */
+  deleteUsersPermanently: (
+    ids: string[],
+  ) => Promise<{ deleted: number; failed: number; firstError?: string }>;
 }
 
 const Ctx = React.createContext<DirectoryUsersValue | null>(null);
@@ -162,6 +166,30 @@ export function DirectoryUsersProvider({ children }: { children: React.ReactNode
             return false;
           }
         },
+        deleteUsersPermanently: async (ids) => {
+          const deleted: string[] = [];
+          let firstError: string | undefined;
+          for (const id of ids) {
+            try {
+              const res = await fetch("/api/admin/users/delete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: id }),
+              });
+              const data = (await res.json().catch(() => ({}))) as {
+                error?: string;
+              };
+              if (res.ok) deleted.push(id);
+              else if (!firstError) firstError = data.error ?? `Erreur ${res.status}`;
+            } catch {
+              if (!firstError) firstError = "Erreur réseau";
+            }
+          }
+          if (deleted.length) {
+            setRealUsers((us) => us.filter((u) => !deleted.includes(u.id)));
+          }
+          return { deleted: deleted.length, failed: ids.length - deleted.length, firstError };
+        },
       }
     : {
         users: store.users,
@@ -177,6 +205,10 @@ export function DirectoryUsersProvider({ children }: { children: React.ReactNode
           // Mode démo : suppression locale réelle (le store retire la ligne).
           store.removeUser(id);
           return true;
+        },
+        deleteUsersPermanently: async (ids) => {
+          store.removeUsers(ids);
+          return { deleted: ids.length, failed: 0 };
         },
       };
 
