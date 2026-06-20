@@ -42,6 +42,9 @@ import {
   pendingPaymentFor,
   type MobileMoneyOperator,
 } from "@/lib/formations/payment";
+import { isWavePaymentEnabled } from "@/lib/payments/config";
+import { startWaveCheckout } from "@/lib/payments/client";
+import { useServerEnrollment } from "@/components/formations/use-server-enrollment";
 import type { Course } from "@/lib/formations/types";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +67,9 @@ export function CourseGate({
 }) {
   const app = useApp();
   const store = useStore();
+  // Inscription durable côté serveur (paiement Wave confirmé). No-op hors mode
+  // réel + Wave activé. Hook appelé inconditionnellement (avant tout retour).
+  const serverEnroll = useServerEnrollment(courseId);
   const course = getCourse(courseId);
 
   // L'administrateur garde un accès complet, par cohérence avec la matrice
@@ -97,8 +103,10 @@ export function CourseGate({
     store.courseEnrollments,
     store.courseCohorts,
   );
+  // Inscrit localement OU via une inscription serveur (paiement Wave confirmé).
+  const enrolled = verdict.enrolled || serverEnroll.enrolled;
 
-  if (verdict.enrolled) {
+  if (enrolled) {
     // Déjà inscrit, mais le cours n'est pas encore ouvert : écran d'attente
     // (le contenu reste verrouillé jusqu'à la date d'ouverture).
     if (schedule.state === "before") {
@@ -109,7 +117,11 @@ export function CourseGate({
     return (
       <div className="space-y-3">
         <EnrollmentBadge
-          sourceLabel={enrollmentSourceLabel(verdict.source)}
+          sourceLabel={
+            verdict.enrolled
+              ? enrollmentSourceLabel(verdict.source)
+              : "Paiement confirmé"
+          }
           expiresAt={verdict.expiresAt}
           closesAt={schedule.closesAt}
         />
@@ -118,13 +130,23 @@ export function CourseGate({
     );
   }
 
-  // Non inscrit. Un cours PAYANT (avec Mobile Money opérationnel) ouvre
-  // l'auto-inscription par paiement — possible dès maintenant, même AVANT
-  // l'ouverture du cours (pré-inscription). Un cours gratuit reste géré par
-  // l'administrateur (écran « inscription requise »).
+  // En mode réel, on attend la réponse du serveur avant d'afficher l'écran de
+  // paiement (évite un flash « payer » alors que l'inscription serveur existe).
+  if (serverEnroll.loading) {
+    return (
+      <div className="py-16 text-center text-sm text-muted-foreground">
+        Vérification de votre inscription…
+      </div>
+    );
+  }
+
+  // Non inscrit. Un cours PAYANT (Mobile Money manuel opérationnel OU paiement
+  // Wave activé) ouvre l'auto-inscription par paiement — possible dès maintenant,
+  // même AVANT l'ouverture du cours (pré-inscription). Un cours gratuit reste
+  // géré par l'administrateur (écran « inscription requise »).
   const paid =
     isCoursePaid(courseId, store.coursePrices) &&
-    isMobileMoneyOperational(store.paymentSettings);
+    (isMobileMoneyOperational(store.paymentSettings) || isWavePaymentEnabled());
   if (paid) {
     return <CoursePaymentGate course={course} schedule={schedule} />;
   }
@@ -350,6 +372,14 @@ function CoursePaymentGate({
     );
   }
 
+  // Paiement serveur Wave activé : redirection vers la page de paiement Wave
+  // (le flux manuel de saisie de référence est remplacé).
+  if (isWavePaymentEnabled()) {
+    return (
+      <WaveCheckoutCard course={course} amount={amount} schedule={schedule} />
+    );
+  }
+
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-5 py-10">
       <div className="text-center">
@@ -489,6 +519,86 @@ function CoursePaymentGate({
           <ArrowLeft className="h-4 w-4" /> Retour à la bibliothèque
         </Link>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Carte de paiement Wave : affiche le montant et redirige vers la page de
+ * paiement hébergée Wave. Accessible même avant l'ouverture du cours
+ * (pré-paiement) ; l'accès au contenu s'ouvre à la date prévue.
+ */
+function WaveCheckoutCard({
+  course,
+  amount,
+  schedule,
+}: {
+  course: Course;
+  amount: number;
+  schedule: CourseScheduleVerdict;
+}) {
+  const [loading, setLoading] = React.useState(false);
+  const opensLater = schedule.state === "before";
+
+  async function pay() {
+    setLoading(true);
+    const res = await startWaveCheckout(course.id);
+    if (!res.ok) {
+      setLoading(false);
+      toast.error("Paiement indisponible", {
+        description: res.error ?? "Réessayez dans un instant.",
+      });
+    }
+    // En cas de succès, la page est redirigée vers Wave (pas de reset).
+  }
+
+  return (
+    <div className="mx-auto flex max-w-xl flex-col gap-5 py-12 text-center">
+      <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-ew-green-100 text-ew-green-700">
+        <CreditCard aria-hidden className="h-7 w-7" />
+      </span>
+      <div>
+        <h1 className="font-display text-2xl font-extrabold text-foreground sm:text-3xl">
+          Inscription au cours
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">{course.title}</p>
+      </div>
+
+      {opensLater ? (
+        <p className="flex items-center justify-center gap-1.5 rounded-xl border border-ew-green-200 bg-ew-green-50/50 px-3 py-2 text-xs font-semibold text-ew-green-800">
+          <CalendarClock aria-hidden className="h-4 w-4" /> Ce cours ouvrira le{" "}
+          {formatScheduleMoment(schedule.opensAt)}. Vous pouvez régler dès
+          maintenant ; l&apos;accès s&apos;ouvrira à cette date.
+        </p>
+      ) : null}
+
+      <div className="rounded-2xl border border-ew-green-200 bg-ew-green-50/40 p-5">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-ew-green-700">
+          Montant à payer
+        </p>
+        <p className="mt-1 font-display text-3xl font-extrabold text-foreground">
+          {formatFcfa(amount)}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {formatEurEquivalent(amount)}
+        </p>
+      </div>
+
+      <Button size="lg" onClick={pay} disabled={loading} className="h-12">
+        <CreditCard className="h-5 w-5" />
+        {loading ? "Redirection vers Wave…" : "Payer avec Wave"}
+      </Button>
+      <p className="text-xs text-muted-foreground">
+        Vous serez redirigé vers la page de paiement sécurisée Wave. À la fin du
+        paiement, votre inscription est confirmée automatiquement.
+      </p>
+
+      <Link
+        href="/aide"
+        className="inline-flex items-center justify-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" /> Retour à la bibliothèque
+      </Link>
     </div>
   );
 }
