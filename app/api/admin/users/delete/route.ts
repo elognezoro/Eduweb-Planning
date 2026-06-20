@@ -78,7 +78,7 @@ export async function POST(request: Request) {
   }
 
   // 5) Suppression définitive. Les données liées sont traitées par les FK
-  //    (cascade / set null) — cf. migration 002_user_deletion_referential_actions.
+  //    (cascade / set null) — cf. migration 006_user_deletion_referential_actions.
   //    Tant que cette migration n'est pas appliquée, certaines dépendances en
   //    NO ACTION peuvent bloquer la suppression : on renvoie alors un message
   //    métier clair (et non l'erreur SQL brute).
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error: isFk
-          ? "Ce compte possède des données liées qui empêchent sa suppression. Appliquez la migration de base 002 (politiques de suppression), ou archivez le compte."
+          ? "Ce compte possède des données liées qui empêchent sa suppression. Appliquez la migration de base 006 (politiques de suppression), ou archivez le compte."
           : `Suppression refusée : ${msg}`,
       },
       { status: isFk ? 409 : 502 },

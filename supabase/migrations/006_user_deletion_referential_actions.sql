@@ -1,5 +1,5 @@
 -- ============================================================================
--- 002 — Politiques référentielles pour la SUPPRESSION DÉFINITIVE d'un compte.
+-- 006 — Politiques référentielles pour la SUPPRESSION DÉFINITIVE d'un compte.
 --
 -- Contexte : `profiles.id references auth.users(id) on delete cascade`. Supprimer
 -- un utilisateur (auth.users) tente donc de supprimer sa ligne `profiles`. Or 25
