@@ -277,9 +277,22 @@ function CoursePaymentGate({
   const selected = operators.find((o) => o.key === operator) ?? operators[0];
   const opensLater = schedule.state === "before";
 
+  // Dernier paiement REFUSÉ pour ce cours (le tableau est préfixé : le premier
+  // trouvé est le plus récent) — affiché pour expliquer le motif à l'utilisateur.
+  const lastRejected = store.coursePayments.find(
+    (p) =>
+      p.userId === app.user.id &&
+      p.courseId === course.id &&
+      p.status === "rejected",
+  );
+
+  // Garde anti double-soumission (double-clic avant le re-rendu en « attente »).
+  const submittedRef = React.useRef(false);
+
   function submit() {
     const ref = reference.trim();
-    if (!ref || !selected) return;
+    if (!ref || !selected || submittedRef.current) return;
+    submittedRef.current = true;
     store.submitCoursePayment({
       userId: app.user.id,
       userName: app.user.displayName,
@@ -348,6 +361,14 @@ function CoursePaymentGate({
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">{course.title}</p>
       </div>
+
+      {lastRejected ? (
+        <p className="rounded-xl border border-red-200 bg-red-50/60 px-3 py-2 text-center text-xs font-semibold text-red-700">
+          Votre précédent paiement a été refusé
+          {lastRejected.note ? ` : ${lastRejected.note}` : "."} Vous pouvez
+          soumettre un nouveau règlement ci-dessous.
+        </p>
+      ) : null}
 
       {opensLater ? (
         <p className="flex items-center justify-center gap-1.5 rounded-xl border border-ew-green-200 bg-ew-green-50/50 px-3 py-2 text-center text-xs font-semibold text-ew-green-800">

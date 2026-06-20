@@ -234,6 +234,19 @@ function FormationsContent() {
                 <p className="font-display text-sm font-bold text-foreground">
                   {course.shortTitle}
                 </p>
+                <p className="mt-0.5 text-[10px] font-bold">
+                  {isCoursePaid(course.id, store.coursePrices) ? (
+                    <span className="text-ew-gold-700">
+                      {formatFcfa(
+                        coursePriceFcfa(course.id, store.coursePrices),
+                      )}
+                    </span>
+                  ) : (
+                    <span className="uppercase text-muted-foreground">
+                      Gratuit
+                    </span>
+                  )}
+                </p>
               </div>
               <div className="text-right">
                 <p className="font-mono text-lg font-extrabold text-ew-green-700">
@@ -2230,13 +2243,19 @@ function CourseSchedulePanel({ courseId }: { courseId: string }) {
   const [closesAt, setClosesAt] = React.useState<string>("");
   const [savedAt, setSavedAt] = React.useState<number | null>(null);
 
-  // Synchronise les champs locaux avec la règle enregistrée du cours choisi.
+  // Réinitialise le retour visuel « enregistré » au changement de cours.
   React.useEffect(() => {
-    setOpensAt(current?.opensAt ?? "");
-    setClosesAt(current?.closesAt ?? "");
     setSavedAt(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
+  // Resynchronise les champs avec la règle enregistrée (changement de cours ou
+  // mise à jour ailleurs), sans écraser une saisie locale en cours puisque la
+  // dépendance porte sur les valeurs primitives du store.
+  const savedOpensAt = current?.opensAt ?? "";
+  const savedClosesAt = current?.closesAt ?? "";
+  React.useEffect(() => {
+    setOpensAt(savedOpensAt);
+    setClosesAt(savedClosesAt);
+  }, [courseId, savedOpensAt, savedClosesAt]);
 
   const dirty =
     (current?.opensAt ?? "") !== opensAt ||
@@ -2571,7 +2590,10 @@ function EnrollmentLinksPanel({ actor }: { actor: string }) {
             >
               <input
                 type="checkbox"
-                className="h-4 w-4 accent-ew-gold-600"
+                className={cn(
+                  "h-4 w-4",
+                  anyPaidPicked ? "accent-ew-gold-600" : "opacity-50 grayscale",
+                )}
                 checked={paid && anyPaidPicked}
                 disabled={!anyPaidPicked}
                 onChange={(e) => setPaid(e.target.checked)}
@@ -2757,13 +2779,17 @@ function CoursePricePanel({ courseId }: { courseId: string }) {
   const [amount, setAmount] = React.useState<string>("");
   const [savedAt, setSavedAt] = React.useState<number | null>(null);
 
+  // Réinitialise le retour visuel « enregistré » au changement de cours.
   React.useEffect(() => {
-    setAmount(
-      current && current.amountFcfa > 0 ? String(current.amountFcfa) : "",
-    );
     setSavedAt(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
+  // Resynchronise le champ avec la valeur enregistrée (changement de cours ou
+  // mise à jour du tarif ailleurs). Dépend de la valeur primitive du store,
+  // pas du saisi local : la frappe en cours n'est donc pas écrasée.
+  const savedAmount = current?.amountFcfa ?? 0;
+  React.useEffect(() => {
+    setAmount(savedAmount > 0 ? String(savedAmount) : "");
+  }, [courseId, savedAmount]);
 
   const amountNum = Math.max(0, Math.round(Number(amount) || 0));
   const dirty = (current?.amountFcfa ?? 0) !== amountNum;
@@ -2960,6 +2986,19 @@ function PaymentPanel({
           </label>
         </div>
 
+        {autoValidate ? (
+          <p className="flex items-start gap-1.5 rounded-lg border border-ew-gold-200 bg-ew-gold-50/60 px-3 py-2 text-xs text-ew-gold-700">
+            <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              <strong>Attention :</strong> en validation automatique, toute
+              référence saisie inscrit immédiatement l&apos;utilisateur, sans
+              vérifier la transaction. N&apos;activez ce mode que si vous
+              acceptez ce risque. Sinon, laissez décoché : chaque paiement
+              restera « en attente » jusqu&apos;à votre confirmation manuelle.
+            </span>
+          </p>
+        ) : null}
+
         <div className="grid gap-3 sm:grid-cols-2">
           {operators.map((o) => (
             <div
@@ -3070,7 +3109,11 @@ function PaymentPanel({
           </p>
           <ul className="space-y-2">
             {courseHistory.map((p) => (
-              <PaymentRow key={p.id} payment={p} />
+              <PaymentRow
+                key={p.id}
+                payment={p}
+                onRevert={() => store.revertCoursePayment(p.id, actor)}
+              />
             ))}
           </ul>
         </div>
@@ -3083,15 +3126,18 @@ function PaymentRow({
   payment,
   onConfirm,
   onReject,
+  onRevert,
 }: {
   payment: CoursePayment;
   onConfirm?: () => void;
   onReject?: (reason: string) => void;
+  onRevert?: () => void;
 }) {
   const [rejecting, setRejecting] = React.useState(false);
   const [reason, setReason] = React.useState("");
   const course = getCourse(payment.courseId);
   const actionable = payment.status === "pending" && onConfirm && onReject;
+  const revertable = payment.status === "confirmed" && onRevert;
 
   const tone =
     payment.status === "confirmed"
@@ -3142,6 +3188,16 @@ function PaymentRow({
               <X className="h-4 w-4" /> Refuser
             </Button>
           </div>
+        ) : revertable ? (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onRevert}
+            title="Annule l'inscription créée par ce paiement."
+            className="shrink-0 text-red-600 hover:text-red-700"
+          >
+            <X className="h-4 w-4" /> Annuler l&apos;inscription
+          </Button>
         ) : null}
       </div>
       {actionable && rejecting ? (

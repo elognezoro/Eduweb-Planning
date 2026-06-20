@@ -577,6 +577,8 @@ interface DataStore extends StoreState {
   confirmCoursePayment: (id: string, actor: string) => void;
   /** Refuse un paiement en attente (avec motif). */
   rejectCoursePayment: (id: string, actor: string, reason: string) => void;
+  /** Annule un paiement déjà confirmé : retire l'inscription correspondante. */
+  revertCoursePayment: (id: string, actor: string) => void;
   /** Marque un module comme terminé pour un utilisateur. */
   markModuleCompleted: (
     input: Omit<ModuleCompletion, "id" | "completedAt">,
@@ -1194,22 +1196,22 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         };
         let enrollments = s.courseEnrollments;
         if (auto) {
-          const already = enrollments.some(
-            (e) => e.userId === input.userId && e.courseId === input.courseId,
-          );
-          if (!already) {
-            enrollments = [
-              {
-                id: genId("enr"),
-                userId: input.userId,
-                courseId: input.courseId,
-                enrolledAt: now,
-                enrolledBy: "Paiement Mobile Money",
-                source: "individual",
-              },
-              ...enrollments,
-            ];
-          }
+          // Idempotent : retire toute inscription existante (userId, courseId)
+          // avant d'en ajouter une — évite les doublons (double-clic, etc.).
+          enrollments = [
+            {
+              id: genId("enr"),
+              userId: input.userId,
+              courseId: input.courseId,
+              enrolledAt: now,
+              enrolledBy: "Paiement Mobile Money",
+              source: "individual",
+            },
+            ...enrollments.filter(
+              (e) =>
+                !(e.userId === input.userId && e.courseId === input.courseId),
+            ),
+          ];
         }
         return {
           ...s,
@@ -1232,23 +1234,20 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
               }
             : p,
         );
-        let enrollments = s.courseEnrollments;
-        const already = enrollments.some(
-          (e) => e.userId === pay.userId && e.courseId === pay.courseId,
-        );
-        if (!already) {
-          enrollments = [
-            {
-              id: genId("enr"),
-              userId: pay.userId,
-              courseId: pay.courseId,
-              enrolledAt: now,
-              enrolledBy: "Paiement Mobile Money",
-              source: "individual",
-            },
-            ...enrollments,
-          ];
-        }
+        // Idempotent : une seule inscription (userId, courseId).
+        const enrollments = [
+          {
+            id: genId("enr"),
+            userId: pay.userId,
+            courseId: pay.courseId,
+            enrolledAt: now,
+            enrolledBy: "Paiement Mobile Money",
+            source: "individual" as const,
+          },
+          ...s.courseEnrollments.filter(
+            (e) => !(e.userId === pay.userId && e.courseId === pay.courseId),
+          ),
+        ];
         return { ...s, coursePayments, courseEnrollments: enrollments };
       }),
     rejectCoursePayment: (id, actor, reason) =>
@@ -1266,6 +1265,38 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
                   note: reason,
                 }
               : p,
+          ),
+        };
+      }),
+    revertCoursePayment: (id, actor) =>
+      setState((s) => {
+        const pay = s.coursePayments.find((p) => p.id === id);
+        if (!pay) return s;
+        const now = new Date().toISOString();
+        return {
+          ...s,
+          coursePayments: s.coursePayments.map((p) =>
+            p.id === id
+              ? {
+                  ...p,
+                  status: "rejected" as const,
+                  decidedBy: actor,
+                  decidedAt: now,
+                  note: [p.note, "Inscription annulée après confirmation."]
+                    .filter(Boolean)
+                    .join(" "),
+                }
+              : p,
+          ),
+          // Retire l'inscription issue de ce paiement (pas les inscriptions
+          // nominatives/cohortes pour le même cours).
+          courseEnrollments: s.courseEnrollments.filter(
+            (e) =>
+              !(
+                e.userId === pay.userId &&
+                e.courseId === pay.courseId &&
+                e.enrolledBy === "Paiement Mobile Money"
+              ),
           ),
         };
       }),

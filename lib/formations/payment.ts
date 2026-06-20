@@ -12,6 +12,18 @@
 
    Un point d'intégration agrégateur (CinetPay / PayDunya / Wave) pourra
    remplacer ce flux manuel à la Phase 2 sans changer le modèle de données.
+
+   MODÈLE DE CONFIANCE (assumé, faute de couche serveur partagée) :
+   - La référence de transaction est DÉCLARATIVE : aucune vérification auprès
+     de l'opérateur n'a lieu côté client. En mode « validation automatique »,
+     toute référence inscrit immédiatement (à n'activer qu'en connaissance de
+     cause) ; en mode manuel (défaut), l'admin confirme après vérification
+     externe (SMS / relevé marchand).
+   - Les paiements et inscriptions sont stockés en localStorage : un
+     utilisateur averti pourrait les forger localement. L'inscription ne
+     donne accès qu'à une FORMATION (pas à des données sensibles) ; le RBAC
+     global et l'accès aux données ne sont jamais affectés. La vraie sécurité
+     (preuve de paiement, idempotence serveur) viendra avec la Phase 2.
    ========================================================================== */
 
 /** Opérateurs Mobile Money pris en charge (Côte d'Ivoire et zone UEMOA). */
