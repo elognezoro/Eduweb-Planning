@@ -83,7 +83,11 @@ export function certificateNumber(userId: string, courseId: string): string {
 }
 
 /* ---- Nom du bénéficiaire ------------------------------------------------- */
-/** « NOM Prénoms » à partir d'un profil, sinon le nom affiché. */
+/**
+ * « NOM Prénoms » à partir d'un profil. N'affiche JAMAIS une adresse e-mail :
+ * si seul un e-mail est disponible (profil sans état civil), renvoie une chaîne
+ * vide afin que le champ reste à saisir manuellement (nom de l'apprenant).
+ */
 export function beneficiaryDisplayName(user: {
   firstName?: string;
   lastName?: string;
@@ -92,7 +96,9 @@ export function beneficiaryDisplayName(user: {
   const last = (user.lastName ?? "").trim();
   const first = (user.firstName ?? "").trim();
   if (last || first) return `${last.toUpperCase()} ${first}`.trim();
-  return (user.displayName ?? "").trim();
+  const dn = (user.displayName ?? "").trim();
+  if (dn && !dn.includes("@")) return dn;
+  return "";
 }
 
 /* ---- Date imprimée ------------------------------------------------------- */

@@ -35,9 +35,9 @@ const NAVY = "#13315c";
 /** Emplacements (en % du cadre) des données incrustées — faciles à régler. */
 const POS = {
   // Lignes du modèle (mesurées) : nom 47,3% · formation 58% · formateur/date 83,5%.
-  number: { left: "86%", top: "20.4%", maxW: "23%" },
-  name: { left: "50%", top: "45.6%", maxW: "66%" },
-  course: { left: "50%", top: "56.6%", maxW: "74%" },
+  number: { left: "85.8%", top: "20.4%", maxW: "16%" },
+  name: { left: "50%", top: "45.6%", maxW: "60%" },
+  course: { left: "50%", top: "56.2%", maxW: "60%" },
   trainer: { left: "18.3%", top: "81.8%", maxW: "21%" },
   date: { left: "81.4%", top: "81.8%", maxW: "21%" },
   sign: { left: "81.4%", top: "79.6%", maxW: "20%" },
@@ -89,11 +89,12 @@ export function CourseCertificate({
 
         {/* Données incrustées */}
         <div className="absolute inset-0" style={{ color: GREEN }}>
-          {/* N° de certificat */}
+          {/* N° de certificat — auto-ajusté pour tenir entre les lauriers */}
           <Centered {...POS.number}>
             <span
-              className="font-bold tracking-wide"
-              style={{ fontSize: "clamp(0.6rem, 1.4vw, 1.05rem)" }}
+              className="block truncate whitespace-nowrap font-bold tracking-wide"
+              style={{ fontSize: "clamp(0.45rem, 0.95vw, 0.78rem)" }}
+              title={certNumber}
             >
               {certNumber}
             </span>
@@ -110,11 +111,16 @@ export function CourseCertificate({
             </span>
           </Centered>
 
-          {/* Intitulé de la formation */}
+          {/* Intitulé de la formation — auto-ajusté : retour à la ligne (2-3
+             lignes) et marge pour ne pas toucher les extrémités de la ligne. */}
           <Centered {...POS.course}>
             <span
-              className="block line-clamp-2 font-bold"
-              style={{ fontSize: "clamp(0.72rem, 1.7vw, 1.3rem)", color: NAVY }}
+              className="block line-clamp-3 font-bold text-balance"
+              style={{
+                fontSize: "clamp(0.65rem, 1.5vw, 1.15rem)",
+                lineHeight: 1.15,
+                color: NAVY,
+              }}
               title={courseTitle}
             >
               {courseTitle || " "}
