@@ -13,12 +13,28 @@ import {
   MapPin,
   BadgeCheck,
   CheckCircle2,
+  GraduationCap,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { AuthShell, AuthField, authInputCls } from "@/components/app-shell/auth-shell";
+import {
+  AuthShell,
+  AuthField,
+  authInputCls,
+} from "@/components/app-shell/auth-shell";
 import { CountryFlag } from "@/components/app-shell/switchers";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
+import { getCourse } from "@/lib/formations/catalog";
+import {
+  DEFAULT_FORMATION_ROLE,
+  FORMATION_ROLE_META,
+} from "@/lib/formations/formation-roles";
+import {
+  decodeInviteToken,
+  payloadStatus,
+  queueEnrollIntent,
+} from "@/lib/formations/enrollment-invite";
 import { PhoneInput } from "@/components/forms/phone-input";
 import { toNomCase, toPrenomCase } from "@/lib/format-name";
 import { Button } from "@/components/ui/button";
@@ -53,6 +69,26 @@ const STRENGTH = [
 
 export default function RegisterPage() {
   const [show, setShow] = React.useState(false);
+
+  // Lien d'inscription : jeton auto-porteur lu dans l'URL (?invite=...).
+  // Lu côté client uniquement pour éviter la contrainte Suspense de
+  // useSearchParams ; le jeton encode les cours, le rôle et l'expiration.
+  const [inviteToken] = React.useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return new URLSearchParams(window.location.search).get("invite");
+  });
+  const invite = React.useMemo(
+    () => (inviteToken ? decodeInviteToken(inviteToken) : null),
+    [inviteToken],
+  );
+  const inviteState = React.useMemo(() => payloadStatus(invite), [invite]);
+  const inviteCourses = React.useMemo(
+    () => (invite ? invite.c.map((id) => getCourse(id)).filter(Boolean) : []),
+    [invite],
+  );
+  const inviteRoleLabel =
+    FORMATION_ROLE_META[invite?.r ?? DEFAULT_FORMATION_ROLE].label;
+
   const {
     register,
     handleSubmit,
@@ -73,24 +109,48 @@ export default function RegisterPage() {
   const lastNameReg = register("lastName");
   const firstNameReg = register("firstName");
 
+  // Dépose l'intention d'inscription aux cours du lien (consommée par le
+  // tableau de bord à la première connexion). N'agit que si le lien est valide.
+  const queueInviteEnrollment = (email: string) => {
+    if (!invite || inviteState !== "valid") return;
+    queueEnrollIntent({
+      email,
+      courseIds: invite.c,
+      formationRole: invite.r,
+      expiresAt: invite.e ?? null,
+      source: "Lien d'inscription",
+      createdAt: new Date().toISOString(),
+    });
+  };
+
   const onSubmit = async (data: RegisterInput) => {
     if (isSupabaseConfigured()) {
       const { error } = await createClient().auth.signUp({
         email: data.email,
         password: data.password,
         options: {
-          data: { first_name: data.firstName, last_name: data.lastName, phone: data.phone, country: data.country },
-          emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}/login` : undefined,
+          data: {
+            first_name: data.firstName,
+            last_name: data.lastName,
+            phone: data.phone,
+            country: data.country,
+          },
+          emailRedirectTo:
+            typeof window !== "undefined"
+              ? `${window.location.origin}/login`
+              : undefined,
         },
       });
       if (error) {
         toast.error("Inscription échouée", { description: error.message });
         throw error; // empêche l'écran de succès
       }
+      queueInviteEnrollment(data.email);
       return; // succès → écran « Compte créé / en attente de validation »
     }
     // Mode démo
     await new Promise((r) => setTimeout(r, 700));
+    queueInviteEnrollment(data.email);
   };
 
   if (isSubmitSuccessful) {
@@ -100,11 +160,40 @@ export default function RegisterPage() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-ew-green-100 text-ew-green-700">
             <CheckCircle2 className="h-7 w-7" />
           </div>
-          <h2 className="mt-4 text-lg font-extrabold text-foreground">Compte créé</h2>
+          <h2 className="mt-4 text-lg font-extrabold text-foreground">
+            Compte créé
+          </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Votre compte est <strong>en attente de validation</strong> par un administrateur. Vous recevrez une
-            notification dès son activation.
+            Votre compte est <strong>en attente de validation</strong> par un
+            administrateur. Vous recevrez une notification dès son activation.
           </p>
+          {invite && inviteState === "valid" && inviteCourses.length > 0 ? (
+            <div className="mt-4 rounded-xl border border-ew-green-200 bg-ew-green-50/50 p-3 text-left text-sm">
+              <p className="flex items-center gap-1.5 font-bold text-ew-green-800">
+                <GraduationCap className="h-4 w-4" /> Inscription préparée
+              </p>
+              <p className="mt-1 text-foreground/90">
+                Dès votre première connexion, vous serez inscrit(e) à :{" "}
+                <strong>
+                  {inviteCourses.map((c) => c!.shortTitle).join(", ")}
+                </strong>
+                .
+              </p>
+            </div>
+          ) : invite && inviteState !== "valid" ? (
+            <div className="mt-4 rounded-xl border border-ew-gold-200 bg-ew-gold-50/60 p-3 text-left text-sm">
+              <p className="flex items-center gap-1.5 font-bold text-ew-gold-700">
+                <AlertTriangle className="h-4 w-4" /> Inscription non appliquée
+              </p>
+              <p className="mt-1 text-foreground/90">
+                Votre lien d&apos;invitation était{" "}
+                {inviteState === "expired" ? "expiré" : "invalide"} : votre
+                compte est créé, mais sans inscription automatique à la
+                formation. Contactez l&apos;administrateur pour obtenir un
+                nouveau lien.
+              </p>
+            </div>
+          ) : null}
           <Button asChild className="mt-5 h-12 w-full">
             <Link href="/login">Retour à la connexion</Link>
           </Button>
@@ -115,6 +204,37 @@ export default function RegisterPage() {
 
   return (
     <AuthShell>
+      {inviteToken ? (
+        inviteState === "valid" && inviteCourses.length > 0 ? (
+          <div className="mb-4 rounded-xl border border-ew-green-200 bg-ew-green-50/50 p-3 text-sm">
+            <p className="flex items-center gap-1.5 font-bold text-ew-green-800">
+              <GraduationCap className="h-4 w-4" /> Invitation à une formation
+            </p>
+            <p className="mt-1 text-foreground/90">
+              En créant votre compte, vous serez inscrit(e) à :{" "}
+              <strong>
+                {inviteCourses.map((c) => c!.shortTitle).join(", ")}
+              </strong>{" "}
+              <span className="text-muted-foreground">
+                (rôle : {inviteRoleLabel})
+              </span>
+              .
+            </p>
+          </div>
+        ) : (
+          <div className="mb-4 rounded-xl border border-ew-gold-200 bg-ew-gold-50/60 p-3 text-sm">
+            <p className="flex items-center gap-1.5 font-bold text-ew-gold-700">
+              <AlertTriangle className="h-4 w-4" /> Lien d&apos;invitation{" "}
+              {inviteState === "expired" ? "expiré" : "invalide"}
+            </p>
+            <p className="mt-1 text-foreground/90">
+              Vous pouvez tout de même créer votre compte ; l&apos;inscription
+              automatique à la formation ne sera pas appliquée. Contactez
+              l&apos;administrateur pour un nouveau lien.
+            </p>
+          </div>
+        )
+      ) : null}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <AuthField
           label="Pays"
@@ -163,7 +283,11 @@ export default function RegisterPage() {
               }}
             />
           </AuthField>
-          <AuthField label="Prénom(s)" required error={errors.firstName?.message}>
+          <AuthField
+            label="Prénom(s)"
+            required
+            error={errors.firstName?.message}
+          >
             <Input
               className={authInputCls}
               placeholder="Elogne Guessan"
@@ -177,7 +301,12 @@ export default function RegisterPage() {
           </AuthField>
         </div>
 
-        <AuthField label="Téléphone" required icon={Phone} error={errors.phone?.message}>
+        <AuthField
+          label="Téléphone"
+          required
+          icon={Phone}
+          error={errors.phone?.message}
+        >
           <Controller
             control={control}
             name="phone"
@@ -193,19 +322,36 @@ export default function RegisterPage() {
         </AuthField>
 
         <AuthField label="Email" required error={errors.email?.message}>
-          <Input className={authInputCls} type="email" placeholder="vous@exemple.com" {...register("email")} />
+          <Input
+            className={authInputCls}
+            type="email"
+            placeholder="vous@exemple.com"
+            {...register("email")}
+          />
         </AuthField>
 
-        <AuthField label="Mot de passe" required error={errors.password?.message}>
+        <AuthField
+          label="Mot de passe"
+          required
+          error={errors.password?.message}
+        >
           <div className="relative">
-            <Input type={show ? "text" : "password"} className={cn(authInputCls, "pr-11")} {...register("password")} />
+            <Input
+              type={show ? "text" : "password"}
+              className={cn(authInputCls, "pr-11")}
+              {...register("password")}
+            />
             <button
               type="button"
               onClick={() => setShow((s) => !s)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
               aria-label={show ? "Masquer" : "Afficher"}
             >
-              {show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              {show ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
             </button>
           </div>
 
@@ -215,11 +361,16 @@ export default function RegisterPage() {
               <div className="mt-2 flex items-center gap-3">
                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                   <div
-                    className={cn("h-full rounded-full transition-all", strength.color)}
+                    className={cn(
+                      "h-full rounded-full transition-all",
+                      strength.color,
+                    )}
                     style={{ width: `${(score / 5) * 100}%` }}
                   />
                 </div>
-                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{strength.label}</span>
+                <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  {strength.label}
+                </span>
               </div>
 
               <div className="mt-3 rounded-xl border border-border bg-muted/30 p-3.5">
@@ -234,11 +385,18 @@ export default function RegisterPage() {
                         key={r.label}
                         className={cn(
                           "flex items-center gap-2 text-xs transition-colors",
-                          ok ? "font-medium text-ew-green-700" : "text-muted-foreground/70",
+                          ok
+                            ? "font-medium text-ew-green-700"
+                            : "text-muted-foreground/70",
                         )}
                       >
                         <CheckCircle2
-                          className={cn("h-4 w-4 shrink-0", ok ? "text-ew-green-600" : "text-muted-foreground/30")}
+                          className={cn(
+                            "h-4 w-4 shrink-0",
+                            ok
+                              ? "text-ew-green-600"
+                              : "text-muted-foreground/30",
+                          )}
                         />
                         {r.label}
                       </li>
@@ -250,13 +408,25 @@ export default function RegisterPage() {
           )}
         </AuthField>
 
-        <AuthField label="Confirmer le mot de passe" required error={errors.confirmPassword?.message}>
-          <Input type="password" className={authInputCls} {...register("confirmPassword")} />
+        <AuthField
+          label="Confirmer le mot de passe"
+          required
+          error={errors.confirmPassword?.message}
+        >
+          <Input
+            type="password"
+            className={authInputCls}
+            {...register("confirmPassword")}
+          />
         </AuthField>
 
         <div>
           <label className="flex items-start gap-2.5 text-sm text-foreground">
-            <input type="checkbox" className="mt-0.5 h-4 w-4 accent-ew-green-700" {...register("acceptTerms")} />
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 accent-ew-green-700"
+              {...register("acceptTerms")}
+            />
             <span>
               J&apos;accepte les{" "}
               <a className="font-semibold text-ew-green-700 underline" href="#">
@@ -269,18 +439,34 @@ export default function RegisterPage() {
               d&apos;EduWeb Planner.
             </span>
           </label>
-          {errors.acceptTerms && <p className="mt-1 text-xs text-red-600">{errors.acceptTerms.message}</p>}
+          {errors.acceptTerms && (
+            <p className="mt-1 text-xs text-red-600">
+              {errors.acceptTerms.message}
+            </p>
+          )}
         </div>
 
-        <Button type="submit" size="lg" className="h-12 w-full text-base" disabled={isSubmitting}>
-          {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <UserPlus className="h-5 w-5" />}
+        <Button
+          type="submit"
+          size="lg"
+          className="h-12 w-full text-base"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <UserPlus className="h-5 w-5" />
+          )}
           Créer mon compte
         </Button>
       </form>
 
       <p className="mt-5 text-center text-sm text-muted-foreground">
         Déjà inscrit ?{" "}
-        <Link href="/login" className="font-bold text-ew-green-700 hover:underline">
+        <Link
+          href="/login"
+          className="font-bold text-ew-green-700 hover:underline"
+        >
           Se connecter
         </Link>
       </p>

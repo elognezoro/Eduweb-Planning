@@ -20,8 +20,13 @@ import {
   UsersRound,
   BookOpen,
   Calendar,
+  CalendarClock,
   GitBranch,
   Unlock,
+  Link2,
+  Copy,
+  Check,
+  Ticket,
 } from "lucide-react";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Button } from "@/components/ui/button";
@@ -33,7 +38,7 @@ import {
   DirectoryUsersProvider,
   useDirectoryUsers,
 } from "@/components/app-shell/use-directory-users";
-import { sortedCourses } from "@/lib/formations/catalog";
+import { getCourse, sortedCourses } from "@/lib/formations/catalog";
 import {
   countEnrolledUsers,
   enrollmentSourceLabel,
@@ -74,6 +79,20 @@ import {
   type SupportAccessCondition,
   type SupportAccessMode,
 } from "@/lib/formations/support-access";
+import {
+  describeSchedule,
+  evaluateCourseSchedule,
+  formatScheduleMoment,
+  getCourseSchedule,
+  isScheduleInverted,
+} from "@/lib/formations/course-schedule";
+import {
+  buildInviteUrl,
+  encodeInviteToken,
+  makeInviteNonce,
+  payloadStatus,
+  type EnrollmentInviteLink,
+} from "@/lib/formations/enrollment-invite";
 import { ETAB_CONFIG_KEY, loadEtabConfig } from "@/lib/etab-config";
 import { cn } from "@/lib/utils";
 
@@ -111,18 +130,38 @@ function FormationsContent() {
   // Annuaire des utilisateurs : vrais comptes Supabase en production, comptes
   // de démonstration sinon. Source unique pour tous les panneaux (inscription,
   // inscrits, cohortes, import CSV).
-  const { users: dirUsers, loading: usersLoading, realMode } = useDirectoryUsers();
+  const {
+    users: dirUsers,
+    loading: usersLoading,
+    realMode,
+  } = useDirectoryUsers();
   const courses = React.useMemo(() => sortedCourses(), []);
 
-  type Tab = "enrolled" | "cohorts" | "quick" | "access" | "completion" | "supports" | "identity";
+  type Tab =
+    | "enrolled"
+    | "cohorts"
+    | "quick"
+    | "access"
+    | "completion"
+    | "schedule"
+    | "supports"
+    | "links"
+    | "identity";
   const [tab, setTab] = React.useState<Tab>("quick");
-  const [selectedCourseId, setSelectedCourseId] = React.useState<string>(courses[0]?.id ?? "");
+  const [selectedCourseId, setSelectedCourseId] = React.useState<string>(
+    courses[0]?.id ?? "",
+  );
 
   const totalEnrolled = React.useMemo(() => {
     const users = dirUsers.map((u) => ({ id: u.id, role: u.role }));
     return courses.map((c) => ({
       course: c,
-      enrolled: countEnrolledUsers(c.id, users, store.courseEnrollments, store.courseCohorts),
+      enrolled: countEnrolledUsers(
+        c.id,
+        users,
+        store.courseEnrollments,
+        store.courseCohorts,
+      ),
     }));
   }, [courses, dirUsers, store.courseEnrollments, store.courseCohorts]);
 
@@ -130,13 +169,21 @@ function FormationsContent() {
     <div className="space-y-5">
       {/* KPIs synthétiques */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi label="Cours du catalogue" value={courses.length} icon={<BookOpen className="h-4 w-4" />} />
+        <Kpi
+          label="Cours du catalogue"
+          value={courses.length}
+          icon={<BookOpen className="h-4 w-4" />}
+        />
         <Kpi
           label="Inscriptions actives"
           value={store.courseEnrollments.length}
           icon={<CheckCircle2 className="h-4 w-4" />}
         />
-        <Kpi label="Cohortes" value={store.courseCohorts.length} icon={<UsersRound className="h-4 w-4" />} />
+        <Kpi
+          label="Cohortes"
+          value={store.courseCohorts.length}
+          icon={<UsersRound className="h-4 w-4" />}
+        />
         <Kpi
           label={realMode ? "Comptes inscrits" : "Utilisateurs"}
           value={usersLoading ? "…" : dirUsers.length}
@@ -163,10 +210,14 @@ function FormationsContent() {
                       ? "Manuel"
                       : "Guides"}
                 </p>
-                <p className="font-display text-sm font-bold text-foreground">{course.shortTitle}</p>
+                <p className="font-display text-sm font-bold text-foreground">
+                  {course.shortTitle}
+                </p>
               </div>
               <div className="text-right">
-                <p className="font-mono text-lg font-extrabold text-ew-green-700">{enrolled}</p>
+                <p className="font-mono text-lg font-extrabold text-ew-green-700">
+                  {enrolled}
+                </p>
                 <p className="text-[10px] text-muted-foreground">inscrits</p>
               </div>
             </li>
@@ -196,41 +247,93 @@ function FormationsContent() {
         </div>
 
         <div className="flex flex-wrap gap-1 border-b border-border pb-2">
-          <TabButton active={tab === "quick"} onClick={() => setTab("quick")} icon={<Plus className="h-4 w-4" />}>
+          <TabButton
+            active={tab === "quick"}
+            onClick={() => setTab("quick")}
+            icon={<Plus className="h-4 w-4" />}
+          >
             Inscription rapide
           </TabButton>
-          <TabButton active={tab === "enrolled"} onClick={() => setTab("enrolled")} icon={<CheckCircle2 className="h-4 w-4" />}>
+          <TabButton
+            active={tab === "enrolled"}
+            onClick={() => setTab("enrolled")}
+            icon={<CheckCircle2 className="h-4 w-4" />}
+          >
             Inscrits au cours
           </TabButton>
-          <TabButton active={tab === "cohorts"} onClick={() => setTab("cohorts")} icon={<UsersRound className="h-4 w-4" />}>
+          <TabButton
+            active={tab === "cohorts"}
+            onClick={() => setTab("cohorts")}
+            icon={<UsersRound className="h-4 w-4" />}
+          >
             Cohortes
           </TabButton>
-          <TabButton active={tab === "access"} onClick={() => setTab("access")} icon={<GitBranch className="h-4 w-4" />}>
+          <TabButton
+            active={tab === "access"}
+            onClick={() => setTab("access")}
+            icon={<GitBranch className="h-4 w-4" />}
+          >
             Conditions d&apos;accès
           </TabButton>
-          <TabButton active={tab === "completion"} onClick={() => setTab("completion")} icon={<Trophy className="h-4 w-4" />}>
+          <TabButton
+            active={tab === "completion"}
+            onClick={() => setTab("completion")}
+            icon={<Trophy className="h-4 w-4" />}
+          >
             Réussite du cours
           </TabButton>
-          <TabButton active={tab === "supports"} onClick={() => setTab("supports")} icon={<Download className="h-4 w-4" />}>
+          <TabButton
+            active={tab === "schedule"}
+            onClick={() => setTab("schedule")}
+            icon={<CalendarClock className="h-4 w-4" />}
+          >
+            Ouverture / Fermeture
+          </TabButton>
+          <TabButton
+            active={tab === "supports"}
+            onClick={() => setTab("supports")}
+            icon={<Download className="h-4 w-4" />}
+          >
             Supports téléchargeables
           </TabButton>
-          <TabButton active={tab === "identity"} onClick={() => setTab("identity")} icon={<Stamp className="h-4 w-4" />}>
+          <TabButton
+            active={tab === "links"}
+            onClick={() => setTab("links")}
+            icon={<Ticket className="h-4 w-4" />}
+          >
+            Liens d&apos;inscription
+          </TabButton>
+          <TabButton
+            active={tab === "identity"}
+            onClick={() => setTab("identity")}
+            icon={<Stamp className="h-4 w-4" />}
+          >
             Identité visuelle
           </TabButton>
         </div>
 
         {tab === "quick" ? (
-          <QuickEnrollPanel courseId={selectedCourseId} actor={app.user.displayName} />
+          <QuickEnrollPanel
+            courseId={selectedCourseId}
+            actor={app.user.displayName}
+          />
         ) : tab === "enrolled" ? (
           <EnrolledPanel courseId={selectedCourseId} />
         ) : tab === "cohorts" ? (
-          <CohortsPanel courseId={selectedCourseId} actor={app.user.displayName} />
+          <CohortsPanel
+            courseId={selectedCourseId}
+            actor={app.user.displayName}
+          />
         ) : tab === "access" ? (
           <AccessRulesPanel courseId={selectedCourseId} />
         ) : tab === "completion" ? (
           <CompletionRulePanel courseId={selectedCourseId} />
+        ) : tab === "schedule" ? (
+          <CourseSchedulePanel courseId={selectedCourseId} />
         ) : tab === "supports" ? (
           <SupportAccessPanel courseId={selectedCourseId} />
+        ) : tab === "links" ? (
+          <EnrollmentLinksPanel actor={app.user.displayName} />
         ) : (
           <IdentityPanel />
         )}
@@ -239,14 +342,24 @@ function FormationsContent() {
   );
 }
 
-function Kpi({ label, value, icon }: { label: string; value: number | string; icon: React.ReactNode }) {
+function Kpi({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: number | string;
+  icon: React.ReactNode;
+}) {
   return (
     <div className="rounded-xl border border-border bg-card p-3">
       <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
         {icon}
         {label}
       </p>
-      <p className="mt-1 font-display text-xl font-extrabold text-foreground">{value}</p>
+      <p className="mt-1 font-display text-xl font-extrabold text-foreground">
+        {value}
+      </p>
     </div>
   );
 }
@@ -282,19 +395,31 @@ function TabButton({
 /* ============================================================================
    ONGLET 1 — INSCRIPTION RAPIDE
    ========================================================================== */
-function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string }) {
+function QuickEnrollPanel({
+  courseId,
+  actor,
+}: {
+  courseId: string;
+  actor: string;
+}) {
   const store = useStore();
   const { users: dirUsers, loading: usersLoading } = useDirectoryUsers();
   const [search, setSearch] = React.useState("");
   const [picked, setPicked] = React.useState<Set<string>>(new Set());
-  const [source, setSource] = React.useState<"individual" | "cohort">("individual");
+  const [source, setSource] = React.useState<"individual" | "cohort">(
+    "individual",
+  );
   const [cohortId, setCohortId] = React.useState<string>("");
   const [expiresAt, setExpiresAt] = React.useState<string>("");
   const [notes, setNotes] = React.useState("");
-  const [formationRole, setFormationRole] = React.useState<FormationRole>(DEFAULT_FORMATION_ROLE);
+  const [formationRole, setFormationRole] = React.useState<FormationRole>(
+    DEFAULT_FORMATION_ROLE,
+  );
   const [toast, setToast] = React.useState<string | null>(null);
 
-  const cohortsForCourse = store.courseCohorts.filter((c) => c.courseId === courseId);
+  const cohortsForCourse = store.courseCohorts.filter(
+    (c) => c.courseId === courseId,
+  );
 
   const filtered = React.useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -336,7 +461,9 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
       enrolledBy: actor,
       source: sourceKind,
       cohortId: source === "cohort" ? cohortId || null : null,
-      expiresAt: expiresAt ? new Date(expiresAt + "T23:59:59").toISOString() : null,
+      expiresAt: expiresAt
+        ? new Date(expiresAt + "T23:59:59").toISOString()
+        : null,
       notes: notes.trim() || undefined,
       formationRole,
     });
@@ -357,7 +484,9 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
           </label>
           <select
             value={source}
-            onChange={(e) => setSource(e.target.value as "individual" | "cohort")}
+            onChange={(e) =>
+              setSource(e.target.value as "individual" | "cohort")
+            }
             className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
           >
             <option value="individual">Nominative</option>
@@ -411,11 +540,21 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
             className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
           />
         </div>
-        <div className={cn("space-y-1", source === "cohort" ? "sm:col-span-4" : "sm:col-span-2")}>
+        <div
+          className={cn(
+            "space-y-1",
+            source === "cohort" ? "sm:col-span-4" : "sm:col-span-2",
+          )}
+        >
           <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
             Notes (facultatif)
           </label>
-          <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Ex. session de juin" className="h-9" />
+          <Input
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Ex. session de juin"
+            className="h-9"
+          />
         </div>
       </div>
 
@@ -467,7 +606,10 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-3 py-4 text-center text-muted-foreground italic">
+                <td
+                  colSpan={4}
+                  className="px-3 py-4 text-center text-muted-foreground italic"
+                >
                   {usersLoading
                     ? "Chargement des comptes…"
                     : "Aucun utilisateur ne correspond à la recherche."}
@@ -491,11 +633,15 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
                       aria-label={`Sélectionner ${u.name}`}
                     />
                   </td>
-                  <td className="px-3 py-1.5 font-medium text-foreground">{u.name}</td>
+                  <td className="px-3 py-1.5 font-medium text-foreground">
+                    {u.name}
+                  </td>
                   <td className="px-3 py-1.5">
                     <Badge tone="green">{u.role}</Badge>
                   </td>
-                  <td className="px-3 py-1.5 text-xs text-muted-foreground">{u.email ?? "—"}</td>
+                  <td className="px-3 py-1.5 text-xs text-muted-foreground">
+                    {u.email ?? "—"}
+                  </td>
                 </tr>
               ))
             )}
@@ -512,7 +658,8 @@ function QuickEnrollPanel({ courseId, actor }: { courseId: string; actor: string
           disabled={picked.size === 0 || (source === "cohort" && !cohortId)}
           size="sm"
         >
-          <Plus className="h-4 w-4" /> Inscrire {picked.size > 0 ? `(${picked.size})` : ""}
+          <Plus className="h-4 w-4" /> Inscrire{" "}
+          {picked.size > 0 ? `(${picked.size})` : ""}
         </Button>
       </div>
     </div>
@@ -528,7 +675,12 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
   const [search, setSearch] = React.useState("");
 
   const rows = React.useMemo(() => {
-    const allUsers = dirUsers.map((u) => ({ id: u.id, name: u.name, role: u.role, email: u.email }));
+    const allUsers = dirUsers.map((u) => ({
+      id: u.id,
+      name: u.name,
+      role: u.role,
+      email: u.email,
+    }));
     return allUsers
       .map((u) => {
         const verdict = getEnrollmentVerdict(
@@ -550,7 +702,13 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
           user.role.toLowerCase().includes(q)
         );
       });
-  }, [dirUsers, store.courseEnrollments, store.courseCohorts, courseId, search]);
+  }, [
+    dirUsers,
+    store.courseEnrollments,
+    store.courseCohorts,
+    courseId,
+    search,
+  ]);
 
   function unenroll(enrollment: CourseEnrollment | undefined) {
     if (!enrollment) {
@@ -591,21 +749,29 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-3 py-6 text-center italic text-muted-foreground">
+                <td
+                  colSpan={7}
+                  className="px-3 py-6 text-center italic text-muted-foreground"
+                >
                   Aucun utilisateur inscrit à ce cours.
                 </td>
               </tr>
             ) : (
               rows.map(({ user, verdict }) => (
                 <tr key={user.id} className="border-t border-border align-top">
-                  <td className="px-3 py-1.5 font-medium text-foreground">{user.name}</td>
+                  <td className="px-3 py-1.5 font-medium text-foreground">
+                    {user.name}
+                  </td>
                   <td className="px-3 py-1.5">
                     <Badge tone="green">{user.role}</Badge>
                   </td>
                   <td className="px-3 py-1.5">
                     {verdict.enrollment ? (
                       <select
-                        value={verdict.enrollment.formationRole ?? DEFAULT_FORMATION_ROLE}
+                        value={
+                          verdict.enrollment.formationRole ??
+                          DEFAULT_FORMATION_ROLE
+                        }
                         onChange={(e) =>
                           store.setEnrollmentFormationRole(
                             verdict.enrollment!.id,
@@ -630,10 +796,14 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-1.5 text-xs">{enrollmentSourceLabel(verdict.source)}</td>
+                  <td className="px-3 py-1.5 text-xs">
+                    {enrollmentSourceLabel(verdict.source)}
+                  </td>
                   <td className="px-3 py-1.5 text-xs text-muted-foreground">
                     {verdict.enrollment
-                      ? new Date(verdict.enrollment.enrolledAt).toLocaleDateString("fr-FR")
+                      ? new Date(
+                          verdict.enrollment.enrolledAt,
+                        ).toLocaleDateString("fr-FR")
                       : "—"}
                   </td>
                   <td className="px-3 py-1.5 text-xs text-muted-foreground">
@@ -650,7 +820,9 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
                         <Trash2 className="h-3.5 w-3.5" /> Retirer
                       </button>
                     ) : (
-                      <span className="text-xs italic text-muted-foreground">Automatique</span>
+                      <span className="text-xs italic text-muted-foreground">
+                        Automatique
+                      </span>
                     )}
                   </td>
                 </tr>
@@ -666,7 +838,13 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
 /* ============================================================================
    ONGLET 3 — COHORTES
    ========================================================================== */
-function CohortsPanel({ courseId, actor }: { courseId: string; actor: string }) {
+function CohortsPanel({
+  courseId,
+  actor,
+}: {
+  courseId: string;
+  actor: string;
+}) {
   const store = useStore();
   const cohorts = store.courseCohorts.filter((c) => c.courseId === courseId);
 
@@ -748,7 +926,9 @@ function CohortCard({
   const store = useStore();
   const { users: dirUsers } = useDirectoryUsers();
   const [name, setName] = React.useState(cohort.name);
-  const [description, setDescription] = React.useState(cohort.description ?? "");
+  const [description, setDescription] = React.useState(
+    cohort.description ?? "",
+  );
   const [search, setSearch] = React.useState("");
 
   const members = dirUsers.filter((u) => cohort.memberUserIds.includes(u.id));
@@ -772,7 +952,12 @@ function CohortCard({
   }
 
   function remove() {
-    if (!window.confirm(`Supprimer la cohorte « ${cohort.name} » ? Les inscriptions individuelles seront conservées.`)) return;
+    if (
+      !window.confirm(
+        `Supprimer la cohorte « ${cohort.name} » ? Les inscriptions individuelles seront conservées.`,
+      )
+    )
+      return;
     store.removeCohort(cohort.id);
   }
 
@@ -792,7 +977,11 @@ function CohortCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         {editing ? (
           <div className="flex-1 space-y-2">
-            <Input value={name} onChange={(e) => setName(e.target.value)} className="h-9 font-bold" />
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="h-9 font-bold"
+            />
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -802,14 +991,23 @@ function CohortCard({
           </div>
         ) : (
           <div>
-            <p className="font-display text-base font-bold text-foreground">{cohort.name}</p>
+            <p className="font-display text-base font-bold text-foreground">
+              {cohort.name}
+            </p>
             {cohort.description ? (
-              <p className="text-xs italic text-muted-foreground">{cohort.description}</p>
+              <p className="text-xs italic text-muted-foreground">
+                {cohort.description}
+              </p>
             ) : null}
             <p className="mt-1 flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
               <Calendar aria-hidden className="h-3 w-3" />
-              Créée le {new Date(cohort.createdAt).toLocaleDateString("fr-FR")} par {cohort.createdBy} ·{" "}
-              <strong className="text-ew-green-800">{cohort.memberUserIds.length} membres</strong>
+              Créée le {new Date(cohort.createdAt).toLocaleDateString(
+                "fr-FR",
+              )}{" "}
+              par {cohort.createdBy} ·{" "}
+              <strong className="text-ew-green-800">
+                {cohort.memberUserIds.length} membres
+              </strong>
             </p>
           </div>
         )}
@@ -848,7 +1046,9 @@ function CohortCard({
             Membres ({members.length})
           </p>
           {members.length === 0 ? (
-            <p className="mt-2 text-xs italic text-muted-foreground">Aucun membre.</p>
+            <p className="mt-2 text-xs italic text-muted-foreground">
+              Aucun membre.
+            </p>
           ) : (
             <ul className="mt-2 max-h-[200px] space-y-1 overflow-y-auto">
               {members.map((u) => (
@@ -875,7 +1075,9 @@ function CohortCard({
 
         {/* Ajouter un membre */}
         <div className="rounded-lg border border-border p-3">
-          <p className="text-xs font-bold uppercase tracking-wide text-ew-green-700">Ajouter un membre</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-ew-green-700">
+            Ajouter un membre
+          </p>
           <div className="relative mt-2">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -886,11 +1088,16 @@ function CohortCard({
             />
           </div>
           {candidates.length === 0 ? (
-            <p className="mt-2 text-xs italic text-muted-foreground">Aucun utilisateur disponible.</p>
+            <p className="mt-2 text-xs italic text-muted-foreground">
+              Aucun utilisateur disponible.
+            </p>
           ) : (
             <ul className="mt-2 max-h-[200px] space-y-1 overflow-y-auto">
               {candidates.map((u) => (
-                <li key={u.id} className="flex items-center justify-between gap-2 text-xs">
+                <li
+                  key={u.id}
+                  className="flex items-center justify-between gap-2 text-xs"
+                >
                   <span>
                     <strong>{u.name}</strong>{" "}
                     <span className="text-muted-foreground">— {u.role}</span>
@@ -915,13 +1122,17 @@ function CohortCard({
    ONGLET 4 — CONDITIONS D'ACCÈS PAR MODULE
    ========================================================================== */
 function AccessRulesPanel({ courseId }: { courseId: string }) {
-  const modules = React.useMemo(() => getCourseModuleList(courseId), [courseId]);
+  const modules = React.useMemo(
+    () => getCourseModuleList(courseId),
+    [courseId],
+  );
 
   if (modules.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-border bg-background/60 p-5 text-center text-sm italic text-muted-foreground">
-        Ce cours n&apos;est pas structuré en modules indépendants. Les conditions
-        d&apos;accès s&apos;appliquent aux cours modulaires (Magnifica Humanitas).
+        Ce cours n&apos;est pas structuré en modules indépendants. Les
+        conditions d&apos;accès s&apos;appliquent aux cours modulaires
+        (Magnifica Humanitas).
       </div>
     );
   }
@@ -933,22 +1144,28 @@ function AccessRulesPanel({ courseId }: { courseId: string }) {
           <Lock aria-hidden className="h-3.5 w-3.5" /> Comment ça marche ?
         </p>
         <p className="mt-1 text-foreground/90">
-          Pour chaque module, vous pouvez exiger qu&apos;un ou plusieurs autres modules
-          soient <strong>terminés</strong> avant que les apprenants ne puissent y accéder.
-          La complétion peut être <strong>validée manuellement</strong> par l&apos;apprenant,
+          Pour chaque module, vous pouvez exiger qu&apos;un ou plusieurs autres
+          modules soient <strong>terminés</strong> avant que les apprenants ne
+          puissent y accéder. La complétion peut être{" "}
+          <strong>validée manuellement</strong> par l&apos;apprenant,
           <strong> automatique</strong> à la lecture, ou exiger un{" "}
           <strong>score minimum à un quiz</strong>.
         </p>
         <p className="mt-1 text-muted-foreground italic">
-          Par défaut, tous les modules sont accessibles librement (aucun prérequis,
-          validation manuelle). L&apos;administrateur passe toujours, quel que soit
-          l&apos;état d&apos;avancement.
+          Par défaut, tous les modules sont accessibles librement (aucun
+          prérequis, validation manuelle). L&apos;administrateur passe toujours,
+          quel que soit l&apos;état d&apos;avancement.
         </p>
       </div>
 
       <div className="space-y-2">
         {modules.map((m) => (
-          <AccessRuleCard key={m.id} courseId={courseId} module={m} modules={modules} />
+          <AccessRuleCard
+            key={m.id}
+            courseId={courseId}
+            module={m}
+            modules={modules}
+          />
         ))}
       </div>
     </div>
@@ -966,19 +1183,31 @@ function AccessRuleCard({
 }) {
   const store = useStore();
   const current = getAccessRule(courseId, module.id, store.moduleAccessRules);
-  const [prereq, setPrereq] = React.useState<string[]>(current.prerequisiteModuleIds);
-  const [mode, setMode] = React.useState<typeof current.completionMode>(current.completionMode);
-  const [minScore, setMinScore] = React.useState<number>(current.minQuizScore ?? 70);
+  const [prereq, setPrereq] = React.useState<string[]>(
+    current.prerequisiteModuleIds,
+  );
+  const [mode, setMode] = React.useState<typeof current.completionMode>(
+    current.completionMode,
+  );
+  const [minScore, setMinScore] = React.useState<number>(
+    current.minQuizScore ?? 70,
+  );
   const [savedAt, setSavedAt] = React.useState<number | null>(null);
 
   React.useEffect(() => {
     setPrereq(current.prerequisiteModuleIds);
     setMode(current.completionMode);
     setMinScore(current.minQuizScore ?? 70);
-  }, [current.prerequisiteModuleIds, current.completionMode, current.minQuizScore]);
+  }, [
+    current.prerequisiteModuleIds,
+    current.completionMode,
+    current.minQuizScore,
+  ]);
 
   function togglePrereq(id: string) {
-    setPrereq((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    setPrereq((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
   }
 
   function save() {
@@ -1011,9 +1240,13 @@ function AccessRuleCard({
           <p className="text-[11px] font-bold uppercase tracking-wide text-ew-green-700">
             Module {module.num}
           </p>
-          <p className="font-display text-base font-bold text-foreground">{module.title}</p>
+          <p className="font-display text-base font-bold text-foreground">
+            {module.title}
+          </p>
           {module.displayTitle ? (
-            <p className="text-xs italic text-muted-foreground">{module.displayTitle}</p>
+            <p className="text-xs italic text-muted-foreground">
+              {module.displayTitle}
+            </p>
           ) : null}
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -1065,7 +1298,8 @@ function AccessRuleCard({
                     />
                     <span>
                       M{other.num} —{" "}
-                      {other.displayTitle ?? other.title.replace(/^Module \d+ — /, "")}
+                      {other.displayTitle ??
+                        other.title.replace(/^Module \d+ — /, "")}
                     </span>
                   </label>
                 );
@@ -1097,7 +1331,9 @@ function AccessRuleCard({
                 type="number"
                 value={minScore}
                 onChange={(e) =>
-                  setMinScore(Math.max(0, Math.min(100, Number(e.target.value))))
+                  setMinScore(
+                    Math.max(0, Math.min(100, Number(e.target.value))),
+                  )
                 }
                 min={0}
                 max={100}
@@ -1143,12 +1379,20 @@ function AccessRuleCard({
 /* ============================================================================
    IMPORT CSV — création groupée de cohortes par glisser/déposer
    ========================================================================== */
-function CsvImportZone({ courseId, actor }: { courseId: string; actor: string }) {
+function CsvImportZone({
+  courseId,
+  actor,
+}: {
+  courseId: string;
+  actor: string;
+}) {
   const store = useStore();
   const { users: dirUsers } = useDirectoryUsers();
   const [drafts, setDrafts] = React.useState<CohortDraft[] | null>(null);
   const [fileName, setFileName] = React.useState<string | null>(null);
-  const [parseErrors, setParseErrors] = React.useState<{ lineNumber: number; message: string }[]>([]);
+  const [parseErrors, setParseErrors] = React.useState<
+    { lineNumber: number; message: string }[]
+  >([]);
   const [isDragging, setIsDragging] = React.useState(false);
   const [toast, setToast] = React.useState<string | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -1162,7 +1406,8 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
       const unknownEmails: string[] = [];
       for (const email of draft.emails) {
         const user = dirUsers.find(
-          (u) => (u.email ?? "").trim().toLowerCase() === email.trim().toLowerCase(),
+          (u) =>
+            (u.email ?? "").trim().toLowerCase() === email.trim().toLowerCase(),
         );
         if (user) matchedIds.push(user.id);
         else unknownEmails.push(email);
@@ -1211,7 +1456,9 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
   }
 
   function downloadTemplate() {
-    const blob = new Blob([COHORT_CSV_TEMPLATE], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([COHORT_CSV_TEMPLATE], {
+      type: "text/csv;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -1230,7 +1477,9 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
     for (const item of drafted) {
       if (item.existing) {
         // Cohorte existante : ajouter les nouveaux membres (déduplication).
-        const next = Array.from(new Set([...item.existing.memberUserIds, ...item.matchedIds]));
+        const next = Array.from(
+          new Set([...item.existing.memberUserIds, ...item.matchedIds]),
+        );
         const delta = next.length - item.existing.memberUserIds.length;
         if (delta > 0) {
           store.updateCohortMembers(item.existing.id, next);
@@ -1300,7 +1549,8 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
               onClick={downloadTemplate}
               className="mt-2 inline-flex items-center gap-1 rounded-md border border-border bg-card px-2.5 py-1 text-xs font-bold hover:bg-muted/40"
             >
-              <Download aria-hidden className="h-3.5 w-3.5" /> Télécharger le modèle CSV
+              <Download aria-hidden className="h-3.5 w-3.5" /> Télécharger le
+              modèle CSV
             </button>
           </div>
         </div>
@@ -1311,44 +1561,58 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
         />
-        {toast ? <p className="mt-2 text-xs text-destructive">{toast}</p> : null}
+        {toast ? (
+          <p className="mt-2 text-xs text-destructive">{toast}</p>
+        ) : null}
       </div>
     );
   }
 
   // Vue aperçu : récapitule ce qui sera créé / fusionné / ignoré.
   const totalCohorts = drafted?.length ?? 0;
-  const totalMatched = drafted?.reduce((acc, d) => acc + d.matchedIds.length, 0) ?? 0;
-  const totalUnknown = drafted?.reduce((acc, d) => acc + d.unknownEmails.length, 0) ?? 0;
+  const totalMatched =
+    drafted?.reduce((acc, d) => acc + d.matchedIds.length, 0) ?? 0;
+  const totalUnknown =
+    drafted?.reduce((acc, d) => acc + d.unknownEmails.length, 0) ?? 0;
 
   return (
     <div className="rounded-lg border border-ew-green-300 bg-ew-green-50/40 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-green-700">
-          <FileSpreadsheet aria-hidden className="h-4 w-4" /> Aperçu de l&apos;import
-          {fileName ? <span className="font-normal text-muted-foreground">— {fileName}</span> : null}
+          <FileSpreadsheet aria-hidden className="h-4 w-4" /> Aperçu de
+          l&apos;import
+          {fileName ? (
+            <span className="font-normal text-muted-foreground">
+              — {fileName}
+            </span>
+          ) : null}
         </p>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={reset}>
             Annuler
           </Button>
           <Button size="sm" onClick={importAll}>
-            <Plus className="h-4 w-4" /> Importer {totalCohorts} cohorte{totalCohorts > 1 ? "s" : ""}
+            <Plus className="h-4 w-4" /> Importer {totalCohorts} cohorte
+            {totalCohorts > 1 ? "s" : ""}
           </Button>
         </div>
       </div>
 
       <div className="mt-2 grid gap-2 text-xs sm:grid-cols-3">
         <span className="rounded-md border border-ew-green-200 bg-card px-2 py-1">
-          <strong className="text-ew-green-800">{totalCohorts}</strong> cohorte(s) trouvée(s)
+          <strong className="text-ew-green-800">{totalCohorts}</strong>{" "}
+          cohorte(s) trouvée(s)
         </span>
         <span className="rounded-md border border-ew-green-200 bg-card px-2 py-1">
-          <strong className="text-ew-green-800">{totalMatched}</strong> membre(s) reconnu(s)
+          <strong className="text-ew-green-800">{totalMatched}</strong>{" "}
+          membre(s) reconnu(s)
         </span>
         <span
           className={cn(
             "rounded-md border bg-card px-2 py-1",
-            totalUnknown > 0 ? "border-ew-gold-500 text-ew-gold-700" : "border-border",
+            totalUnknown > 0
+              ? "border-ew-gold-500 text-ew-gold-700"
+              : "border-border",
           )}
         >
           <strong>{totalUnknown}</strong> email(s) non trouvé(s)
@@ -1357,7 +1621,10 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
 
       <div className="mt-3 max-h-[320px] space-y-2 overflow-y-auto">
         {drafted?.map((item, i) => (
-          <article key={i} className="rounded-md border border-border bg-card p-2.5">
+          <article
+            key={i}
+            className="rounded-md border border-border bg-card p-2.5"
+          >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-bold text-foreground">
                 {item.draft.name}
@@ -1373,17 +1640,21 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
               </p>
               <p className="text-[11px] text-muted-foreground">
                 {item.matchedIds.length} membre(s) reconnu(s)
-                {item.unknownEmails.length > 0 ? `, ${item.unknownEmails.length} email(s) inconnu(s)` : null}
+                {item.unknownEmails.length > 0
+                  ? `, ${item.unknownEmails.length} email(s) inconnu(s)`
+                  : null}
               </p>
             </div>
             {item.draft.description ? (
-              <p className="mt-0.5 text-xs italic text-muted-foreground">{item.draft.description}</p>
+              <p className="mt-0.5 text-xs italic text-muted-foreground">
+                {item.draft.description}
+              </p>
             ) : null}
             {item.unknownEmails.length > 0 ? (
               <div className="mt-1.5 rounded border border-ew-gold-200 bg-ew-gold-50 px-2 py-1 text-[11px]">
                 <p className="flex items-center gap-1 font-bold text-ew-gold-700">
-                  <AlertTriangle aria-hidden className="h-3 w-3" /> Emails non trouvés dans
-                  l&apos;annuaire — ignorés
+                  <AlertTriangle aria-hidden className="h-3 w-3" /> Emails non
+                  trouvés dans l&apos;annuaire — ignorés
                 </p>
                 <p className="mt-0.5 text-muted-foreground">
                   {item.unknownEmails.slice(0, 5).join(", ")}
@@ -1400,7 +1671,8 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
       {parseErrors.length > 0 ? (
         <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/5 p-2">
           <p className="flex items-center gap-1 text-xs font-bold text-destructive">
-            <AlertTriangle aria-hidden className="h-3.5 w-3.5" /> Lignes ignorées ({parseErrors.length})
+            <AlertTriangle aria-hidden className="h-3.5 w-3.5" /> Lignes
+            ignorées ({parseErrors.length})
           </p>
           <ul className="mt-1 space-y-0.5 text-[11px] text-destructive">
             {parseErrors.slice(0, 6).map((e, i) => (
@@ -1409,7 +1681,9 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
               </li>
             ))}
             {parseErrors.length > 6 ? (
-              <li className="italic">… et {parseErrors.length - 6} autre(s) erreur(s).</li>
+              <li className="italic">
+                … et {parseErrors.length - 6} autre(s) erreur(s).
+              </li>
             ) : null}
           </ul>
         </div>
@@ -1423,11 +1697,19 @@ function CsvImportZone({ courseId, actor }: { courseId: string; actor: string })
    ========================================================================== */
 function CompletionRulePanel({ courseId }: { courseId: string }) {
   const store = useStore();
-  const modules = React.useMemo(() => getCourseModuleList(courseId), [courseId]);
-  const current = getCourseCompletionRule(courseId, store.courseCompletionRules);
+  const modules = React.useMemo(
+    () => getCourseModuleList(courseId),
+    [courseId],
+  );
+  const current = getCourseCompletionRule(
+    courseId,
+    store.courseCompletionRules,
+  );
 
   const [mode, setMode] = React.useState<typeof current.mode>(current.mode);
-  const [minScore, setMinScore] = React.useState<number>(current.minQuizScore ?? 70);
+  const [minScore, setMinScore] = React.useState<number>(
+    current.minQuizScore ?? 70,
+  );
   const [quizModuleId, setQuizModuleId] = React.useState<string>(
     current.quizModuleId ?? SUMMATIVE_QUIZ_ID,
   );
@@ -1474,12 +1756,13 @@ function CompletionRulePanel({ courseId }: { courseId: string }) {
     <div className="space-y-3">
       <div className="rounded-lg border border-ew-green-200 bg-ew-green-50/40 p-3 text-xs">
         <p className="flex items-center gap-1.5 font-bold uppercase tracking-wide text-ew-green-700">
-          <Trophy aria-hidden className="h-3.5 w-3.5" /> Réussite de la formation
+          <Trophy aria-hidden className="h-3.5 w-3.5" /> Réussite de la
+          formation
         </p>
         <p className="mt-1 text-foreground/90">
           La règle ci-dessous détermine à quel moment un participant a{" "}
-          <strong>achevé la formation avec succès</strong>. Tant que le critère n&apos;est
-          pas rempli :
+          <strong>achevé la formation avec succès</strong>. Tant que le critère
+          n&apos;est pas rempli :
           <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-card px-1.5 py-0.5 font-bold text-ew-gold-700 border border-ew-gold-200">
             Livret PDF
           </span>{" "}
@@ -1490,8 +1773,9 @@ function CompletionRulePanel({ courseId }: { courseId: string }) {
           restent verrouillés pour le participant.
         </p>
         <p className="mt-1 text-muted-foreground italic">
-          Par défaut : tous les modules complétés. L&apos;administrateur garde toujours
-          un accès complet, quel que soit l&apos;état d&apos;avancement.
+          Par défaut : tous les modules complétés. L&apos;administrateur garde
+          toujours un accès complet, quel que soit l&apos;état
+          d&apos;avancement.
         </p>
       </div>
 
@@ -1521,10 +1805,16 @@ function CompletionRulePanel({ courseId }: { courseId: string }) {
               onChange={(e) => setMode(e.target.value as typeof mode)}
               className="mt-2 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
             >
-              <option value="all-modules">Tous les modules complétés (par défaut)</option>
+              <option value="all-modules">
+                Tous les modules complétés (par défaut)
+              </option>
               <option value="quiz-score">Quiz avec score minimum</option>
-              <option value="all-modules-and-quiz">Tous les modules + quiz</option>
-              <option value="manual-admin">Validation manuelle de l&apos;administrateur</option>
+              <option value="all-modules-and-quiz">
+                Tous les modules + quiz
+              </option>
+              <option value="manual-admin">
+                Validation manuelle de l&apos;administrateur
+              </option>
             </select>
           </div>
           {usesQuiz ? (
@@ -1538,7 +1828,9 @@ function CompletionRulePanel({ courseId }: { courseId: string }) {
                   onChange={(e) => setQuizModuleId(e.target.value)}
                   className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
-                  <option value={SUMMATIVE_QUIZ_ID}>Quiz sommatif global du séminaire</option>
+                  <option value={SUMMATIVE_QUIZ_ID}>
+                    Quiz sommatif global du séminaire
+                  </option>
                   {modules.map((m) => (
                     <option key={m.id} value={m.id}>
                       Quiz du module {m.num} — {m.displayTitle ?? m.title}
@@ -1554,7 +1846,9 @@ function CompletionRulePanel({ courseId }: { courseId: string }) {
                   type="number"
                   value={minScore}
                   onChange={(e) =>
-                    setMinScore(Math.max(0, Math.min(100, Number(e.target.value))))
+                    setMinScore(
+                      Math.max(0, Math.min(100, Number(e.target.value))),
+                    )
                   }
                   min={0}
                   max={100}
@@ -1606,27 +1900,44 @@ function SupportAccessPanel({ courseId }: { courseId: string }) {
     <div className="space-y-3">
       <div className="rounded-lg border border-ew-green-200 bg-ew-green-50/40 p-3 text-xs">
         <p className="flex items-center gap-1.5 font-bold uppercase tracking-wide text-ew-green-700">
-          <Download aria-hidden className="h-3.5 w-3.5" /> Accès aux supports téléchargeables
+          <Download aria-hidden className="h-3.5 w-3.5" /> Accès aux supports
+          téléchargeables
         </p>
         <p className="mt-1 text-foreground/90">
-          Définissez, pour chaque support de ce cours, la condition d&apos;accès. Tant qu&apos;elle
-          n&apos;est pas remplie, le bouton de téléchargement est <strong>désactivé</strong> côté
-          apprenant (avec l&apos;explication). L&apos;administrateur garde toujours l&apos;accès.
+          Définissez, pour chaque support de ce cours, la condition
+          d&apos;accès. Tant qu&apos;elle n&apos;est pas remplie, le bouton de
+          téléchargement est <strong>désactivé</strong> côté apprenant (avec
+          l&apos;explication). L&apos;administrateur garde toujours
+          l&apos;accès.
         </p>
       </div>
 
       <div className="grid gap-3 lg:grid-cols-3">
         {SUPPORT_KINDS.map((support) => (
-          <SupportRuleEditor key={support} courseId={courseId} support={support} />
+          <SupportRuleEditor
+            key={support}
+            courseId={courseId}
+            support={support}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function SupportRuleEditor({ courseId, support }: { courseId: string; support: SupportKind }) {
+function SupportRuleEditor({
+  courseId,
+  support,
+}: {
+  courseId: string;
+  support: SupportKind;
+}) {
   const store = useStore();
-  const current = getSupportCondition(courseId, support, store.supportAccessRules);
+  const current = getSupportCondition(
+    courseId,
+    support,
+    store.supportAccessRules,
+  );
 
   const [mode, setMode] = React.useState<SupportAccessMode>(current.mode);
   const [roles, setRoles] = React.useState<FormationRole[]>(
@@ -1671,7 +1982,8 @@ function SupportRuleEditor({ courseId, support }: { courseId: string; support: S
   }
 
   const invalid =
-    (mode === "roles" && roles.length === 0) || (mode === "after-date" && !date);
+    (mode === "roles" && roles.length === 0) ||
+    (mode === "after-date" && !date);
 
   return (
     <div className="rounded-xl border border-border bg-card p-4">
@@ -1709,7 +2021,9 @@ function SupportRuleEditor({ courseId, support }: { courseId: string; support: S
                 checked={roles.includes(r)}
                 onChange={() =>
                   setRoles((prev) =>
-                    prev.includes(r) ? prev.filter((x) => x !== r) : [...prev, r],
+                    prev.includes(r)
+                      ? prev.filter((x) => x !== r)
+                      : [...prev, r],
                   )
                 }
                 className="h-3.5 w-3.5 accent-ew-green-700"
@@ -1748,7 +2062,9 @@ function SupportRuleEditor({ courseId, support }: { courseId: string; support: S
           Réinitialiser
         </Button>
         {savedAt ? (
-          <span className="text-[11px] font-bold text-ew-green-700">✓ Enregistré</span>
+          <span className="text-[11px] font-bold text-ew-green-700">
+            ✓ Enregistré
+          </span>
         ) : null}
       </div>
     </div>
@@ -1763,7 +2079,9 @@ function IdentityPanel() {
   const [signature, setSignature] = React.useState<string | null>(null);
   const [savedAt, setSavedAt] = React.useState<number | null>(null);
   const [initialStamp, setInitialStamp] = React.useState<string | null>(null);
-  const [initialSignature, setInitialSignature] = React.useState<string | null>(null);
+  const [initialSignature, setInitialSignature] = React.useState<string | null>(
+    null,
+  );
 
   React.useEffect(() => {
     const cfg = loadEtabConfig();
@@ -1796,15 +2114,15 @@ function IdentityPanel() {
           <Stamp aria-hidden className="h-3.5 w-3.5" /> Cachet et signature
         </p>
         <p className="mt-1 text-foreground/90">
-          Téléversez l&apos;empreinte du cachet officiel et la signature numérisée du
-          responsable. Ces éléments sont automatiquement intégrés aux{" "}
-          <strong>certificats de fin de formation</strong> et aux exports Word de
-          l&apos;administrateur.
+          Téléversez l&apos;empreinte du cachet officiel et la signature
+          numérisée du responsable. Ces éléments sont automatiquement intégrés
+          aux <strong>certificats de fin de formation</strong> et aux exports
+          Word de l&apos;administrateur.
         </p>
         <p className="mt-1 text-muted-foreground italic">
           Le logo est déjà géré au niveau de la plateforme. Les autres réglages
-          institutionnels (chef d&apos;établissement, ministère, armoiries) restent
-          dans{" "}
+          institutionnels (chef d&apos;établissement, ministère, armoiries)
+          restent dans{" "}
           <a
             href="/parametrage/configuration#documents"
             className="font-bold text-ew-green-700 underline"
@@ -1855,5 +2173,471 @@ function IdentityPanel() {
         </div>
       </div>
     </div>
+  );
+}
+
+/* ============================================================================
+   ONGLET 7 — OUVERTURE / FERMETURE DU COURS (fenêtre date + heure + minutes)
+   ========================================================================== */
+function CourseSchedulePanel({ courseId }: { courseId: string }) {
+  const store = useStore();
+  const course = getCourse(courseId);
+  const current = getCourseSchedule(courseId, store.courseScheduleRules);
+
+  const [opensAt, setOpensAt] = React.useState<string>("");
+  const [closesAt, setClosesAt] = React.useState<string>("");
+  const [savedAt, setSavedAt] = React.useState<number | null>(null);
+
+  // Synchronise les champs locaux avec la règle enregistrée du cours choisi.
+  React.useEffect(() => {
+    setOpensAt(current?.opensAt ?? "");
+    setClosesAt(current?.closesAt ?? "");
+    setSavedAt(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseId]);
+
+  const dirty =
+    (current?.opensAt ?? "") !== opensAt ||
+    (current?.closesAt ?? "") !== closesAt;
+  const hasAny = opensAt !== "" || closesAt !== "";
+
+  // Aperçu de l'état au moment présent, à partir des valeurs saisies.
+  const previewRule = hasAny
+    ? {
+        id: "preview",
+        courseId,
+        opensAt: opensAt || null,
+        closesAt: closesAt || null,
+      }
+    : null;
+  const verdict = evaluateCourseSchedule(previewRule);
+  const inverted = isScheduleInverted(previewRule);
+
+  function save() {
+    if (!hasAny) {
+      store.clearCourseScheduleRule(courseId);
+    } else {
+      store.setCourseScheduleRule({
+        courseId,
+        opensAt: opensAt || null,
+        closesAt: closesAt || null,
+      });
+    }
+    setSavedAt(Date.now());
+  }
+
+  function clearAll() {
+    setOpensAt("");
+    setClosesAt("");
+    store.clearCourseScheduleRule(courseId);
+    setSavedAt(Date.now());
+  }
+
+  const stateLabel: Record<string, string> = {
+    unscheduled: "Accessible en permanence",
+    before: "Pas encore ouvert",
+    open: "Ouvert actuellement",
+    after: "Clôturé",
+  };
+  const stateTone: Record<string, string> = {
+    unscheduled: "text-muted-foreground",
+    before: "text-ew-green-700",
+    open: "text-ew-green-700",
+    after: "text-ew-gold-700",
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg border border-ew-green-200 bg-ew-green-50/40 p-3 text-xs">
+        <p className="flex items-center gap-1.5 font-bold uppercase tracking-wide text-ew-green-700">
+          <CalendarClock aria-hidden className="h-3.5 w-3.5" /> Fenêtre
+          d&apos;accès au cours
+        </p>
+        <p className="mt-1 text-foreground/90">
+          Définissez la date et l&apos;heure (à la minute près) d&apos;
+          <strong>ouverture</strong> et de <strong>fermeture</strong> du cours{" "}
+          <strong>« {course?.shortTitle ?? courseId} »</strong>. En dehors de la
+          fenêtre, même les participants inscrits voient un écran « cours non
+          encore ouvert » ou « cours clôturé ». Laissez un champ vide pour ne
+          pas fixer cette borne. Les administrateurs gardent toujours
+          l&apos;accès.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Ouverture (date, heure et minutes)
+            </label>
+            <input
+              type="datetime-local"
+              value={opensAt}
+              onChange={(e) => setOpensAt(e.target.value)}
+              className="mt-1 block h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:border-ew-green-500 focus:outline-none focus:ring-1 focus:ring-ew-green-500"
+            />
+            {opensAt ? (
+              <button
+                type="button"
+                onClick={() => setOpensAt("")}
+                className="mt-1 text-[11px] text-muted-foreground underline hover:text-foreground"
+              >
+                Effacer l&apos;ouverture
+              </button>
+            ) : null}
+          </div>
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Fermeture (date, heure et minutes)
+            </label>
+            <input
+              type="datetime-local"
+              value={closesAt}
+              onChange={(e) => setClosesAt(e.target.value)}
+              className="mt-1 block h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:border-ew-green-500 focus:outline-none focus:ring-1 focus:ring-ew-green-500"
+            />
+            {closesAt ? (
+              <button
+                type="button"
+                onClick={() => setClosesAt("")}
+                className="mt-1 text-[11px] text-muted-foreground underline hover:text-foreground"
+              >
+                Effacer la fermeture
+              </button>
+            ) : null}
+          </div>
+        </div>
+
+        {inverted ? (
+          <p className="mt-3 flex items-center gap-1.5 rounded-lg border border-ew-gold-200 bg-ew-gold-50/60 px-3 py-2 text-xs text-ew-gold-700">
+            <AlertTriangle aria-hidden className="h-4 w-4" /> La date de
+            fermeture précède (ou égale) la date d&apos;ouverture : le cours ne
+            sera jamais accessible.
+          </p>
+        ) : (
+          <div className="mt-3 rounded-lg border border-dashed border-border bg-background/60 px-3 py-2 text-xs">
+            <p>
+              <span className="font-bold uppercase tracking-wide text-muted-foreground">
+                État actuel :{" "}
+              </span>
+              <span className={cn("font-bold", stateTone[verdict.state])}>
+                {stateLabel[verdict.state]}
+              </span>
+            </p>
+            <p className="mt-0.5 text-muted-foreground">
+              {describeSchedule(previewRule)}
+            </p>
+          </div>
+        )}
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            {savedAt && !dirty ? (
+              <span className="text-ew-green-700">
+                ✓ Fenêtre enregistrée à{" "}
+                {new Date(savedAt).toLocaleTimeString("fr-FR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            ) : dirty ? (
+              <span className="italic">Modifications non enregistrées.</span>
+            ) : (
+              <span className="italic">
+                Aucune restriction tant qu&apos;aucune borne n&apos;est fixée.
+              </span>
+            )}
+          </p>
+          <div className="flex gap-2">
+            {current ? (
+              <Button size="sm" variant="outline" onClick={clearAll}>
+                <Trash2 className="h-4 w-4" /> Retirer la fenêtre
+              </Button>
+            ) : null}
+            <Button
+              size="sm"
+              onClick={save}
+              disabled={!dirty || inverted}
+              title={
+                inverted
+                  ? "Corrigez la fenêtre : la fermeture doit suivre l'ouverture."
+                  : undefined
+              }
+            >
+              <Save className="h-4 w-4" /> Enregistrer
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================================
+   ONGLET 8 — LIENS D'INSCRIPTION (création de compte → inscription auto)
+   ========================================================================== */
+function EnrollmentLinksPanel({ actor }: { actor: string }) {
+  const store = useStore();
+  const courses = React.useMemo(() => sortedCourses(), []);
+
+  const [picked, setPicked] = React.useState<Set<string>>(new Set());
+  const [role, setRole] = React.useState<FormationRole>(DEFAULT_FORMATION_ROLE);
+  const [label, setLabel] = React.useState("");
+  const [expiresAt, setExpiresAt] = React.useState("");
+
+  const [origin, setOrigin] = React.useState("");
+  React.useEffect(() => {
+    if (typeof window !== "undefined") setOrigin(window.location.origin);
+  }, []);
+
+  function toggle(courseId: string) {
+    setPicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(courseId)) next.delete(courseId);
+      else next.add(courseId);
+      return next;
+    });
+  }
+
+  function create() {
+    const courseIds = courses.map((c) => c.id).filter((id) => picked.has(id));
+    if (courseIds.length === 0) return;
+    const token = encodeInviteToken({
+      v: 1,
+      c: courseIds,
+      r: role !== DEFAULT_FORMATION_ROLE ? role : undefined,
+      e: expiresAt ? new Date(expiresAt).toISOString() : null,
+      n: makeInviteNonce(),
+    });
+    store.createEnrollmentInvite({
+      token,
+      courseIds,
+      formationRole: role,
+      label: label.trim() || undefined,
+      expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+      createdBy: actor,
+    });
+    setPicked(new Set());
+    setLabel("");
+    setExpiresAt("");
+    setRole(DEFAULT_FORMATION_ROLE);
+  }
+
+  const links = store.enrollmentInviteLinks;
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-lg border border-ew-green-200 bg-ew-green-50/40 p-3 text-xs">
+        <p className="flex items-center gap-1.5 font-bold uppercase tracking-wide text-ew-green-700">
+          <Ticket aria-hidden className="h-3.5 w-3.5" /> Lien d&apos;inscription
+          par création de compte
+        </p>
+        <p className="mt-1 text-foreground/90">
+          Générez un lien à diffuser : toute personne qui{" "}
+          <strong>crée son compte</strong> via ce lien est automatiquement
+          inscrite aux cours choisis, avec le rôle indiqué. L&apos;inscription
+          est appliquée dès sa première connexion.
+        </p>
+        <p className="mt-1 text-muted-foreground italic">
+          Le lien est auto-porteur (il fonctionne sur n&apos;importe quel
+          navigateur). Le seul contrôle opposable est la{" "}
+          <strong>date d&apos;expiration</strong> ; « Supprimer » retire le lien
+          de cette liste mais n&apos;invalide pas un lien déjà diffusé.
+        </p>
+      </div>
+
+      {/* Générateur */}
+      <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+            Cours inclus dans le lien
+          </p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            {courses.map((c) => (
+              <label
+                key={c.id}
+                className={cn(
+                  "flex cursor-pointer items-center gap-2 rounded-lg border p-2.5 text-sm transition-colors",
+                  picked.has(c.id)
+                    ? "border-ew-green-300 bg-ew-green-50/50"
+                    : "border-border bg-background hover:bg-muted/40",
+                )}
+              >
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-ew-green-700"
+                  checked={picked.has(c.id)}
+                  onChange={() => toggle(c.id)}
+                />
+                <span className="font-medium text-foreground">
+                  {c.shortTitle}
+                </span>
+                <span className="ml-auto text-[10px] uppercase text-muted-foreground">
+                  {c.type}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Rôle de formation
+            </label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value as FormationRole)}
+              className="mt-1 block h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:border-ew-green-500 focus:outline-none focus:ring-1 focus:ring-ew-green-500"
+            >
+              {FORMATION_ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {FORMATION_ROLE_META[r].label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Expiration (facultative)
+            </label>
+            <input
+              type="datetime-local"
+              value={expiresAt}
+              onChange={(e) => setExpiresAt(e.target.value)}
+              className="mt-1 block h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:border-ew-green-500 focus:outline-none focus:ring-1 focus:ring-ew-green-500"
+            />
+          </div>
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Libellé interne (facultatif)
+            </label>
+            <Input
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="Cohorte CAFOP — sept. 2026"
+              className="mt-1 h-9"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end">
+          <Button size="sm" onClick={create} disabled={picked.size === 0}>
+            <Link2 className="h-4 w-4" /> Générer le lien
+          </Button>
+        </div>
+      </div>
+
+      {/* Liste des liens existants */}
+      <div className="space-y-2">
+        <p className="font-display text-xs font-bold uppercase tracking-wide text-ew-green-700">
+          Liens générés ({links.length})
+        </p>
+        {links.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-border bg-background/60 p-4 text-center text-sm text-muted-foreground">
+            Aucun lien pour le moment. Sélectionnez des cours puis « Générer le
+            lien ».
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {links.map((link) => (
+              <InviteLinkRow
+                key={link.id}
+                link={link}
+                origin={origin}
+                onRemove={() => store.removeEnrollmentInvite(link.id)}
+              />
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function InviteLinkRow({
+  link,
+  origin,
+  onRemove,
+}: {
+  link: EnrollmentInviteLink;
+  origin: string;
+  onRemove: () => void;
+}) {
+  const [copied, setCopied] = React.useState(false);
+  const url = origin ? buildInviteUrl(origin, link.token) : "";
+  const status = payloadStatus({
+    v: 1,
+    c: link.courseIds,
+    r: link.formationRole,
+    e: link.expiresAt ?? null,
+    n: "",
+  });
+  const courseTitles = link.courseIds
+    .map((id) => getCourse(id)?.shortTitle ?? id)
+    .join(", ");
+
+  async function copy() {
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* clipboard indisponible */
+    }
+  }
+
+  return (
+    <li className="rounded-xl border border-border bg-card p-3">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="font-display text-sm font-bold text-foreground">
+            {link.label || courseTitles}
+          </p>
+          <p className="text-xs text-muted-foreground">{courseTitles}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+            <span>
+              Rôle :{" "}
+              <strong className="text-foreground">
+                {
+                  FORMATION_ROLE_META[
+                    link.formationRole ?? DEFAULT_FORMATION_ROLE
+                  ].label
+                }
+              </strong>
+            </span>
+            <span>
+              {link.expiresAt
+                ? `Expire le ${formatScheduleMoment(link.expiresAt)}`
+                : "Sans expiration"}
+            </span>
+            {status === "expired" ? <Badge tone="gold">Expiré</Badge> : null}
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button size="sm" variant="outline" onClick={copy} disabled={!url}>
+            {copied ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+            {copied ? "Copié" : "Copier"}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onRemove}
+            title="Retire ce lien de la liste. Les comptes déjà créés via ce lien conservent leur accès ; seule l'expiration empêche de nouvelles inscriptions."
+            className="text-red-600 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4" /> Retirer
+          </Button>
+        </div>
+      </div>
+      <p className="mt-2 truncate rounded-md border border-dashed border-border bg-background/60 px-2 py-1 font-mono text-[11px] text-muted-foreground">
+        {url || "…"}
+      </p>
+    </li>
   );
 }

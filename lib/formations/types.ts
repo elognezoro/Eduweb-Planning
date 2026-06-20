@@ -164,6 +164,28 @@ export interface ModuleCompletion {
   score?: number;
 }
 
+/**
+ * Fenêtre d'ouverture / fermeture d'un cours.
+ *
+ * Paramétrée par l'administrateur, elle restreint l'accès au cours à une
+ * période donnée (date + heure + minutes). En dehors de la fenêtre, même
+ * un participant inscrit voit un écran « cours non encore ouvert » ou
+ * « cours clôturé ». Les administrateurs (rôle global `admin`) ne sont
+ * jamais bloqués (cohérence avec la matrice des permissions).
+ *
+ * Les bornes sont des chaînes `datetime-local` (ex. `"2026-09-01T08:00"`),
+ * interprétées dans le fuseau local. Une borne absente / `null` signifie
+ * « pas de limite » de ce côté.
+ */
+export interface CourseScheduleRule {
+  id: string;
+  courseId: string;
+  /** Date-heure d'ouverture (datetime-local). null/absent = ouvert d'emblée. */
+  opensAt?: string | null;
+  /** Date-heure de fermeture (datetime-local). null/absent = jamais clôturé. */
+  closesAt?: string | null;
+}
+
 /** Cohorte = groupe nommé d'utilisateurs inscrits à un cours. */
 export interface CourseCohort {
   id: string;

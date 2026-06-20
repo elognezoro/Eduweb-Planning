@@ -6,6 +6,7 @@ import { SidebarContent } from "./sidebar";
 import { Topbar } from "./topbar";
 import { RolePreviewBanner } from "./role-preview";
 import { IdleLogoutWatcher } from "./idle-logout-watcher";
+import { EnrollmentIntentClaimer } from "@/components/formations/enrollment-intent-claimer";
 import { cn } from "@/lib/utils";
 
 const LS_COLLAPSED = "eduweb.sidebar.collapsed";
@@ -73,6 +74,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Surveillance d'inactivité globale : déconnexion automatique selon
           la durée configurée par l'administrateur. */}
       <IdleLogoutWatcher />
+      {/* Matérialise les inscriptions issues d'un lien d'inscription dès que
+          l'utilisateur invité se connecte au tableau de bord. */}
+      <EnrollmentIntentClaimer />
     </div>
   );
 }

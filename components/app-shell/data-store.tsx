@@ -13,8 +13,18 @@ import {
   APFC_ACTIVITIES_SEED,
   type DirectoryUser,
 } from "@/lib/mock-data";
-import type { Apfc, ApfcActivity, Cafop, Etablissement, Inspection } from "@/lib/types";
-import { hasPermission, PERMISSION_LABELS, type Permission } from "@/lib/permissions";
+import type {
+  Apfc,
+  ApfcActivity,
+  Cafop,
+  Etablissement,
+  Inspection,
+} from "@/lib/types";
+import {
+  hasPermission,
+  PERMISSION_LABELS,
+  type Permission,
+} from "@/lib/permissions";
 import { generateUserUid } from "@/lib/uid";
 import type { UserRole } from "@/lib/roles";
 import type {
@@ -22,10 +32,12 @@ import type {
   CourseCompletion,
   CourseCompletionRule,
   CourseEnrollment,
+  CourseScheduleRule,
   ModuleAccessRule,
   ModuleCompletion,
 } from "@/lib/formations/types";
 import type { FormationRole } from "@/lib/formations/formation-roles";
+import type { EnrollmentInviteLink } from "@/lib/formations/enrollment-invite";
 import type {
   SupportAccessRule,
   SupportKind,
@@ -145,7 +157,8 @@ const PROMO_REQUESTS_SEED: PromoRequest[] = [
     etablissement: "LM Cocody",
     type: "IZEN Allocation – Soutien 50%",
     pct: 50,
-    justification: "Famille bénéficiaire des allocations de la Fondation IZEN — deux enfants scolarisés.",
+    justification:
+      "Famille bénéficiaire des allocations de la Fondation IZEN — deux enfants scolarisés.",
     requestedAt: "2026-06-10T09:15:00Z",
     status: "pending",
   },
@@ -167,7 +180,8 @@ const PROMO_REQUESTS_SEED: PromoRequest[] = [
     etablissement: "GS La Lumière",
     type: "Groupe 5+ établissements",
     pct: 15,
-    justification: "Réseau de 6 établissements souhaitant souscrire ensemble à l'Académie Premium.",
+    justification:
+      "Réseau de 6 établissements souhaitant souscrire ensemble à l'Académie Premium.",
     requestedAt: "2026-06-08T11:05:00Z",
     status: "pending",
   },
@@ -178,7 +192,8 @@ const PROMO_REQUESTS_SEED: PromoRequest[] = [
     etablissement: "LM Bouaké",
     type: "Abonné E-School EduWeb",
     pct: 20,
-    justification: "Établissement déjà abonné à E-School EduWeb (contrat 2025-2027).",
+    justification:
+      "Établissement déjà abonné à E-School EduWeb (contrat 2025-2027).",
     requestedAt: "2026-06-05T08:20:00Z",
     status: "approved",
     code: "ESCHOOL-MK3F7",
@@ -293,6 +308,10 @@ interface StoreState {
   moduleAccessRules: ModuleAccessRule[];
   /** Conditions d'accès aux supports téléchargeables (par cours et support). */
   supportAccessRules: SupportAccessRule[];
+  /** Fenêtres d'ouverture / fermeture configurées par cours (date-heure). */
+  courseScheduleRules: CourseScheduleRule[];
+  /** Liens d'inscription par création de compte (générés par l'admin). */
+  enrollmentInviteLinks: EnrollmentInviteLink[];
   /** Traces de complétion par utilisateur, cours et module. */
   moduleCompletions: ModuleCompletion[];
   /** Règle de réussite globale du cours (paramétrée par l'admin). */
@@ -468,14 +487,18 @@ interface DataStore extends StoreState {
   /** Révocation d'une habilitation, journalisée. */
   revokeUserGrant: (id: string, actor: string, justification?: string) => void;
   /** Dépose une demande de code promo (statut « en attente »). */
-  addPromoRequest: (r: Omit<PromoRequest, "id" | "status" | "requestedAt">) => void;
+  addPromoRequest: (
+    r: Omit<PromoRequest, "id" | "status" | "requestedAt">,
+  ) => void;
   /** Approuve une demande de code promo : génère le code et trace la décision. */
   approvePromoRequest: (id: string, actor: string) => void;
   /** Refuse une demande de code promo avec motif. */
   rejectPromoRequest: (id: string, actor: string, reason: string) => void;
   setRegionalStructures: (list: RegionalStructure[] | null) => void;
   /** Enregistre un certificat de fin de formation délivré dans le journal. */
-  addCertificate: (c: Omit<DeliveredCertificate, "id" | "registeredAt">) => void;
+  addCertificate: (
+    c: Omit<DeliveredCertificate, "id" | "registeredAt">,
+  ) => void;
   /** Supprime une entrée du journal des certificats. */
   removeCertificate: (id: string) => void;
   /** Inscrit un utilisateur à un cours (méthode nominative ou cohorte). */
@@ -488,13 +511,19 @@ interface DataStore extends StoreState {
   /** Supprime une inscription nominative. */
   removeEnrollment: (id: string) => void;
   /** Change le rôle de formation d'une inscription (admin/enseignant/…). */
-  setEnrollmentFormationRole: (id: string, formationRole: FormationRole) => void;
+  setEnrollmentFormationRole: (
+    id: string,
+    formationRole: FormationRole,
+  ) => void;
   /** Crée une cohorte nommée pour un cours. */
   createCohort: (c: Omit<CourseCohort, "id" | "createdAt">) => void;
   /** Met à jour la liste des membres d'une cohorte. */
   updateCohortMembers: (cohortId: string, memberUserIds: string[]) => void;
   /** Met à jour le nom / la description d'une cohorte. */
-  updateCohort: (cohortId: string, patch: Partial<Pick<CourseCohort, "name" | "description">>) => void;
+  updateCohort: (
+    cohortId: string,
+    patch: Partial<Pick<CourseCohort, "name" | "description">>,
+  ) => void;
   /** Supprime une cohorte (les inscriptions individuelles restent). */
   removeCohort: (cohortId: string) => void;
   /** Définit ou met à jour la règle d'accès d'un module (upsert). */
@@ -505,16 +534,34 @@ interface DataStore extends StoreState {
   setSupportAccessRule: (rule: Omit<SupportAccessRule, "id">) => void;
   /** Supprime la condition d'accès d'un support (retour à « toujours accessible »). */
   clearSupportAccessRule: (courseId: string, support: SupportKind) => void;
+  /** Définit ou met à jour la fenêtre d'ouverture/fermeture d'un cours (upsert). */
+  setCourseScheduleRule: (rule: Omit<CourseScheduleRule, "id">) => void;
+  /** Supprime la fenêtre d'un cours (retour à « accessible en permanence »). */
+  clearCourseScheduleRule: (courseId: string) => void;
+  /** Crée un lien d'inscription par création de compte. */
+  createEnrollmentInvite: (
+    input: Omit<EnrollmentInviteLink, "id" | "createdAt">,
+  ) => void;
+  /** Supprime un lien d'inscription de la liste (n'invalide pas un lien déjà diffusé : seule l'expiration le fait). */
+  removeEnrollmentInvite: (id: string) => void;
   /** Marque un module comme terminé pour un utilisateur. */
-  markModuleCompleted: (input: Omit<ModuleCompletion, "id" | "completedAt">) => void;
+  markModuleCompleted: (
+    input: Omit<ModuleCompletion, "id" | "completedAt">,
+  ) => void;
   /** Retire toutes les complétions d'un module pour un utilisateur. */
-  unmarkModuleCompleted: (userId: string, courseId: string, moduleId: string) => void;
+  unmarkModuleCompleted: (
+    userId: string,
+    courseId: string,
+    moduleId: string,
+  ) => void;
   /** Définit ou met à jour la règle de réussite d'un cours. */
   setCourseCompletionRule: (rule: Omit<CourseCompletionRule, "id">) => void;
   /** Supprime la règle de réussite d'un cours (retour au défaut). */
   clearCourseCompletionRule: (courseId: string) => void;
   /** Marque un cours comme réussi pour un utilisateur. */
-  markCourseCompleted: (input: Omit<CourseCompletion, "id" | "completedAt">) => void;
+  markCourseCompleted: (
+    input: Omit<CourseCompletion, "id" | "completedAt">,
+  ) => void;
   /** Retire toutes les traces de réussite d'un cours pour un utilisateur. */
   unmarkCourseCompleted: (userId: string, courseId: string) => void;
   /** Met à jour les paramètres de sécurité (auto-déconnexion, etc.). */
@@ -528,7 +575,9 @@ interface DataStore extends StoreState {
   /** Supprime un message du forum (l'auteur ou l'admin). */
   removeForumPost: (id: string) => void;
   /** Ajoute une contribution à une carte mentale collaborative. */
-  postMindMapContribution: (input: Omit<MindMapContribution, "id" | "createdAt">) => void;
+  postMindMapContribution: (
+    input: Omit<MindMapContribution, "id" | "createdAt">,
+  ) => void;
   /** Supprime une contribution (l'auteur ou l'admin). */
   removeMindMapContribution: (id: string) => void;
   /** Crée ou met à jour la soumission de matrice de l'utilisateur. */
@@ -573,6 +622,8 @@ const DEFAULTS: StoreState = {
   courseCohorts: [],
   moduleAccessRules: [],
   supportAccessRules: [],
+  courseScheduleRules: [],
+  enrollmentInviteLinks: [],
   moduleCompletions: [],
   courseCompletionRules: [],
   courseCompletions: [],
@@ -606,7 +657,8 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setState({ ...DEFAULTS, ...(JSON.parse(raw) as Partial<StoreState>) });
+      if (raw)
+        setState({ ...DEFAULTS, ...(JSON.parse(raw) as Partial<StoreState>) });
     } catch {
       /* ignore */
     }
@@ -628,38 +680,99 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       setState((s) => ({
         ...s,
         users: [
-          { ...u, id: generateUserUid({ country: u.country, role: u.role, createdAt: u.createdAt, seq: s.uidSeq }) },
+          {
+            ...u,
+            id: generateUserUid({
+              country: u.country,
+              role: u.role,
+              createdAt: u.createdAt,
+              seq: s.uidSeq,
+            }),
+          },
           ...s.users,
         ],
         uidSeq: s.uidSeq + 1,
       })),
     updateUser: (id, patch) =>
-      setState((s) => ({ ...s, users: s.users.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
+      setState((s) => ({
+        ...s,
+        users: s.users.map((x) => (x.id === id ? { ...x, ...patch } : x)),
+      })),
     setUserStatus: (id, status) =>
-      setState((s) => ({ ...s, users: s.users.map((x) => (x.id === id ? { ...x, status } : x)) })),
-    removeUser: (id) => setState((s) => ({ ...s, users: s.users.filter((x) => x.id !== id) })),
-    removeUsers: (ids) => setState((s) => ({ ...s, users: s.users.filter((x) => !ids.includes(x.id)) })),
+      setState((s) => ({
+        ...s,
+        users: s.users.map((x) => (x.id === id ? { ...x, status } : x)),
+      })),
+    removeUser: (id) =>
+      setState((s) => ({ ...s, users: s.users.filter((x) => x.id !== id) })),
+    removeUsers: (ids) =>
+      setState((s) => ({
+        ...s,
+        users: s.users.filter((x) => !ids.includes(x.id)),
+      })),
     addEtablissement: (e) =>
-      setState((s) => ({ ...s, etablissements: [{ ...e, id: genId("et") }, ...s.etablissements] })),
+      setState((s) => ({
+        ...s,
+        etablissements: [{ ...e, id: genId("et") }, ...s.etablissements],
+      })),
     addEtablissements: (list) =>
-      setState((s) => ({ ...s, etablissements: [...list.map((e) => ({ ...e, id: genId("et") })), ...s.etablissements] })),
+      setState((s) => ({
+        ...s,
+        etablissements: [
+          ...list.map((e) => ({ ...e, id: genId("et") })),
+          ...s.etablissements,
+        ],
+      })),
     updateEtablissement: (id, patch) =>
-      setState((s) => ({ ...s, etablissements: s.etablissements.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
-    removeEtablissement: (id) => setState((s) => ({ ...s, etablissements: s.etablissements.filter((x) => x.id !== id) })),
+      setState((s) => ({
+        ...s,
+        etablissements: s.etablissements.map((x) =>
+          x.id === id ? { ...x, ...patch } : x,
+        ),
+      })),
+    removeEtablissement: (id) =>
+      setState((s) => ({
+        ...s,
+        etablissements: s.etablissements.filter((x) => x.id !== id),
+      })),
     removeEtablissements: (ids) =>
-      setState((s) => ({ ...s, etablissements: s.etablissements.filter((x) => !ids.includes(x.id)) })),
-    addCafop: (c) => setState((s) => ({ ...s, cafops: [{ ...c, id: genId("caf") }, ...s.cafops] })),
+      setState((s) => ({
+        ...s,
+        etablissements: s.etablissements.filter((x) => !ids.includes(x.id)),
+      })),
+    addCafop: (c) =>
+      setState((s) => ({
+        ...s,
+        cafops: [{ ...c, id: genId("caf") }, ...s.cafops],
+      })),
     addCafops: (list) =>
-      setState((s) => ({ ...s, cafops: [...list.map((c) => ({ ...c, id: genId("caf") })), ...s.cafops] })),
-    removeCafop: (id) => setState((s) => ({ ...s, cafops: s.cafops.filter((x) => x.id !== id) })),
+      setState((s) => ({
+        ...s,
+        cafops: [...list.map((c) => ({ ...c, id: genId("caf") })), ...s.cafops],
+      })),
+    removeCafop: (id) =>
+      setState((s) => ({ ...s, cafops: s.cafops.filter((x) => x.id !== id) })),
     setCafopModules: (list) => setState((s) => ({ ...s, cafopModules: list })),
     setCafopFormationYears: (country, years) =>
-      setState((s) => ({ ...s, cafopFormationYears: { ...s.cafopFormationYears, [country]: years } })),
-    addApfc: (a) => setState((s) => ({ ...s, apfcs: [{ ...a, id: genId("apfc") }, ...s.apfcs] })),
+      setState((s) => ({
+        ...s,
+        cafopFormationYears: { ...s.cafopFormationYears, [country]: years },
+      })),
+    addApfc: (a) =>
+      setState((s) => ({
+        ...s,
+        apfcs: [{ ...a, id: genId("apfc") }, ...s.apfcs],
+      })),
     addApfcs: (list) =>
-      setState((s) => ({ ...s, apfcs: [...list.map((a) => ({ ...a, id: genId("apfc") })), ...s.apfcs] })),
+      setState((s) => ({
+        ...s,
+        apfcs: [...list.map((a) => ({ ...a, id: genId("apfc") })), ...s.apfcs],
+      })),
     updateApfc: (id, patch) =>
-      setState((s) => ({ ...s, apfcs: s.apfcs.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
+      setState((s) => ({
+        ...s,
+        apfcs: s.apfcs.map((x) => (x.id === id ? { ...x, ...patch } : x)),
+      })),
     removeApfc: (id) =>
       setState((s) => ({
         ...s,
@@ -673,25 +786,60 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         apfcActivities: s.apfcActivities.filter((a) => !ids.includes(a.apfcId)),
       })),
     addApfcActivity: (a) =>
-      setState((s) => ({ ...s, apfcActivities: [{ ...a, id: genId("apfc-act") }, ...s.apfcActivities] })),
+      setState((s) => ({
+        ...s,
+        apfcActivities: [{ ...a, id: genId("apfc-act") }, ...s.apfcActivities],
+      })),
     removeApfcActivity: (id) =>
-      setState((s) => ({ ...s, apfcActivities: s.apfcActivities.filter((a) => a.id !== id) })),
-    addLessonEntry: (e) => setState((s) => ({ ...s, lessonBook: [{ ...e, id: genId("lb") }, ...s.lessonBook] })),
+      setState((s) => ({
+        ...s,
+        apfcActivities: s.apfcActivities.filter((a) => a.id !== id),
+      })),
+    addLessonEntry: (e) =>
+      setState((s) => ({
+        ...s,
+        lessonBook: [{ ...e, id: genId("lb") }, ...s.lessonBook],
+      })),
     updateLessonEntry: (id, patch) =>
-      setState((s) => ({ ...s, lessonBook: s.lessonBook.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
+      setState((s) => ({
+        ...s,
+        lessonBook: s.lessonBook.map((x) =>
+          x.id === id ? { ...x, ...patch } : x,
+        ),
+      })),
     addAnnouncement: (a) =>
-      setState((s) => ({ ...s, announcements: [{ ...a, id: genId("an") }, ...s.announcements] })),
-    removeAnnouncement: (id) => setState((s) => ({ ...s, announcements: s.announcements.filter((x) => x.id !== id) })),
-    addAppointment: (a) => setState((s) => ({ ...s, appointments: [{ ...a, id: genId("rdv") }, ...s.appointments] })),
-    addInspection: (i) => setState((s) => ({ ...s, inspections: [{ ...i, id: genId("ins") }, ...s.inspections] })),
-    setAttendance: (key, row) => setState((s) => ({ ...s, attendance: { ...s.attendance, [key]: row } })),
-    subscribe: (sub) => setState((s) => ({ ...s, subscription: { ...sub, active: true } })),
+      setState((s) => ({
+        ...s,
+        announcements: [{ ...a, id: genId("an") }, ...s.announcements],
+      })),
+    removeAnnouncement: (id) =>
+      setState((s) => ({
+        ...s,
+        announcements: s.announcements.filter((x) => x.id !== id),
+      })),
+    addAppointment: (a) =>
+      setState((s) => ({
+        ...s,
+        appointments: [{ ...a, id: genId("rdv") }, ...s.appointments],
+      })),
+    addInspection: (i) =>
+      setState((s) => ({
+        ...s,
+        inspections: [{ ...i, id: genId("ins") }, ...s.inspections],
+      })),
+    setAttendance: (key, row) =>
+      setState((s) => ({ ...s, attendance: { ...s.attendance, [key]: row } })),
+    subscribe: (sub) =>
+      setState((s) => ({ ...s, subscription: { ...sub, active: true } })),
     cancelSubscription: () => setState((s) => ({ ...s, subscription: null })),
     setSmsAlerts: (on) => setState((s) => ({ ...s, smsAlerts: on })),
     toggleRolePermission: (role, permission) =>
       setState((s) => {
         const key = `${role}|${permission}`;
-        const current = key in s.roleOverrides ? s.roleOverrides[key] : hasPermission(role, permission);
+        const current =
+          key in s.roleOverrides
+            ? s.roleOverrides[key]
+            : hasPermission(role, permission);
         return { ...s, roleOverrides: { ...s.roleOverrides, [key]: !current } };
       }),
     resetRoleOverrides: () => setState((s) => ({ ...s, roleOverrides: {} })),
@@ -720,7 +868,11 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
           justification: input.justification,
           durationLabel: input.durationLabel,
         };
-        return { ...s, userGrants: [...grants, ...s.userGrants], grantLog: [log, ...s.grantLog] };
+        return {
+          ...s,
+          userGrants: [...grants, ...s.userGrants],
+          grantLog: [log, ...s.grantLog],
+        };
       }),
     revokeUserGrant: (id, actor, justification = "") =>
       setState((s) => {
@@ -736,9 +888,14 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
           activity: g.activity ?? null,
           justification,
         };
-        return { ...s, userGrants: s.userGrants.filter((x) => x.id !== id), grantLog: [log, ...s.grantLog] };
+        return {
+          ...s,
+          userGrants: s.userGrants.filter((x) => x.id !== id),
+          grantLog: [log, ...s.grantLog],
+        };
       }),
-    setRegionalStructures: (list) => setState((s) => ({ ...s, regionalStructures: list })),
+    setRegionalStructures: (list) =>
+      setState((s) => ({ ...s, regionalStructures: list })),
     addCertificate: (c) =>
       setState((s) => ({
         ...s,
@@ -748,12 +905,20 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         ],
       })),
     removeCertificate: (id) =>
-      setState((s) => ({ ...s, certificates: s.certificates.filter((x) => x.id !== id) })),
+      setState((s) => ({
+        ...s,
+        certificates: s.certificates.filter((x) => x.id !== id),
+      })),
     addPromoRequest: (r) =>
       setState((s) => ({
         ...s,
         promoRequests: [
-          { ...r, id: genId("pr"), status: "pending" as const, requestedAt: new Date().toISOString() },
+          {
+            ...r,
+            id: genId("pr"),
+            status: "pending" as const,
+            requestedAt: new Date().toISOString(),
+          },
           ...s.promoRequests,
         ],
       })),
@@ -777,7 +942,13 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         ...s,
         promoRequests: s.promoRequests.map((r) =>
           r.id === id
-            ? { ...r, status: "rejected" as const, decidedBy: actor, decidedAt: new Date().toISOString(), reason }
+            ? {
+                ...r,
+                status: "rejected" as const,
+                decidedBy: actor,
+                decidedAt: new Date().toISOString(),
+                reason,
+              }
             : r,
         ),
       })),
@@ -902,6 +1073,49 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
           (r) => !(r.courseId === courseId && r.support === support),
         ),
       })),
+    setCourseScheduleRule: (rule) =>
+      setState((s) => {
+        const existing = s.courseScheduleRules.find(
+          (r) => r.courseId === rule.courseId,
+        );
+        if (existing) {
+          return {
+            ...s,
+            courseScheduleRules: s.courseScheduleRules.map((r) =>
+              r.id === existing.id ? { ...rule, id: existing.id } : r,
+            ),
+          };
+        }
+        return {
+          ...s,
+          courseScheduleRules: [
+            { ...rule, id: genId("csr") },
+            ...s.courseScheduleRules,
+          ],
+        };
+      }),
+    clearCourseScheduleRule: (courseId) =>
+      setState((s) => ({
+        ...s,
+        courseScheduleRules: s.courseScheduleRules.filter(
+          (r) => r.courseId !== courseId,
+        ),
+      })),
+    createEnrollmentInvite: (input) =>
+      setState((s) => ({
+        ...s,
+        enrollmentInviteLinks: [
+          { ...input, id: genId("eik"), createdAt: new Date().toISOString() },
+          ...s.enrollmentInviteLinks,
+        ],
+      })),
+    removeEnrollmentInvite: (id) =>
+      setState((s) => ({
+        ...s,
+        enrollmentInviteLinks: s.enrollmentInviteLinks.filter(
+          (l) => l.id !== id,
+        ),
+      })),
     markModuleCompleted: (input) =>
       setState((s) => {
         const already = s.moduleCompletions.find(
@@ -925,7 +1139,10 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         // complétés (modes `all-modules` ou `all-modules-and-quiz` — pour ce
         // dernier, le quiz reste à valider, donc on n'enregistre rien tant qu'il
         // n'est pas réussi). Mode `manual-admin` : pas d'auto-détection.
-        const rule = getCourseCompletionRule(input.courseId, s.courseCompletionRules);
+        const rule = getCourseCompletionRule(
+          input.courseId,
+          s.courseCompletionRules,
+        );
         let courseCompletions = s.courseCompletions;
         if (rule.mode === "all-modules") {
           const list = getCourseModuleList(input.courseId);
@@ -986,7 +1203,9 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       }),
     setCourseCompletionRule: (rule) =>
       setState((s) => {
-        const existing = s.courseCompletionRules.find((r) => r.courseId === rule.courseId);
+        const existing = s.courseCompletionRules.find(
+          (r) => r.courseId === rule.courseId,
+        );
         if (existing) {
           return {
             ...s,
@@ -1006,7 +1225,9 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
     clearCourseCompletionRule: (courseId) =>
       setState((s) => ({
         ...s,
-        courseCompletionRules: s.courseCompletionRules.filter((r) => r.courseId !== courseId),
+        courseCompletionRules: s.courseCompletionRules.filter(
+          (r) => r.courseId !== courseId,
+        ),
       })),
     markCourseCompleted: (input) =>
       setState((s) => {
@@ -1017,7 +1238,11 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         return {
           ...s,
           courseCompletions: [
-            { ...input, id: genId("cco"), completedAt: new Date().toISOString() },
+            {
+              ...input,
+              id: genId("cco"),
+              completedAt: new Date().toISOString(),
+            },
             ...s.courseCompletions,
           ],
         };
@@ -1047,7 +1272,11 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         return {
           ...s,
           pollResponses: [
-            { ...input, id: genId("poll"), createdAt: new Date().toISOString() },
+            {
+              ...input,
+              id: genId("poll"),
+              createdAt: new Date().toISOString(),
+            },
             ...s.pollResponses,
           ],
         };
@@ -1071,7 +1300,9 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       setState((s) => ({
         ...s,
         // Suppression du message + de ses réponses imbriquées.
-        forumPosts: s.forumPosts.filter((p) => p.id !== id && p.parentId !== id),
+        forumPosts: s.forumPosts.filter(
+          (p) => p.id !== id && p.parentId !== id,
+        ),
       })),
     postMindMapContribution: (input) =>
       setState((s) => ({
@@ -1096,7 +1327,9 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
           return {
             ...s,
             matrixSubmissions: s.matrixSubmissions.map((m) =>
-              m.id === existing.id ? { ...existing, ...input, updatedAt: now } : m,
+              m.id === existing.id
+                ? { ...existing, ...input, updatedAt: now }
+                : m,
             ),
           };
         }
@@ -1112,13 +1345,17 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       setState((s) => {
         const now = new Date().toISOString();
         const existing = s.matrixReviews.find(
-          (r) => r.submissionId === input.submissionId && r.reviewerId === input.reviewerId,
+          (r) =>
+            r.submissionId === input.submissionId &&
+            r.reviewerId === input.reviewerId,
         );
         if (existing) {
           return {
             ...s,
             matrixReviews: s.matrixReviews.map((r) =>
-              r.id === existing.id ? { ...existing, ...input, updatedAt: now } : r,
+              r.id === existing.id
+                ? { ...existing, ...input, updatedAt: now }
+                : r,
             ),
           };
         }
@@ -1135,7 +1372,11 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         ...s,
         matrixReviews: s.matrixReviews.map((r) =>
           r.id === id
-            ? { ...r, publishedToLearner: published, updatedAt: new Date().toISOString() }
+            ? {
+                ...r,
+                publishedToLearner: published,
+                updatedAt: new Date().toISOString(),
+              }
             : r,
         ),
       })),
@@ -1154,10 +1395,20 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
             ...s.securitySettings,
             ...patch,
             ...(typeof minutes === "number"
-              ? { idleLogoutMinutes: Math.max(1, Math.min(240, Math.round(minutes))) }
+              ? {
+                  idleLogoutMinutes: Math.max(
+                    1,
+                    Math.min(240, Math.round(minutes)),
+                  ),
+                }
               : {}),
             ...(typeof seconds === "number"
-              ? { idleWarningSeconds: Math.max(10, Math.min(120, Math.round(seconds))) }
+              ? {
+                  idleWarningSeconds: Math.max(
+                    10,
+                    Math.min(120, Math.round(seconds)),
+                  ),
+                }
               : {}),
           },
         };
@@ -1170,6 +1421,7 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
 
 export function useStore(): DataStore {
   const ctx = React.useContext(Ctx);
-  if (!ctx) throw new Error("useStore doit être utilisé dans <DataStoreProvider>");
+  if (!ctx)
+    throw new Error("useStore doit être utilisé dans <DataStoreProvider>");
   return ctx;
 }
