@@ -433,6 +433,45 @@ export const TRAINING_ASSESSMENTS: Record<string, ManuelAssessment> = {
         explication:
           "L'attribution de droits passe par une vérification du rôle, un ajustement conforme à la matrice RBAC et une journalisation, sans jamais partager de compte administrateur.",
       },
+      {
+        question:
+          "Dans le module Transport d'élèves, comment l'isolation par établissement est-elle garantie ?",
+        choix: [
+          "Uniquement par un filtrage côté navigateur, facilement contournable.",
+          "Par des politiques RLS côté serveur (lecture et écriture cloisonnées par établissement), un chef ne gérant que le sien.",
+          "En dupliquant la base de données pour chaque établissement.",
+          "Elle n'est pas garantie : tous les établissements partagent les mêmes cars.",
+        ],
+        bonneReponseIndex: 1,
+        explication:
+          "L'isolation repose sur des politiques RLS (Row Level Security) qui cloisonnent cars, créneaux, tarifs, conducteurs et paiements par établissement. Le super-admin supervise tout ; un chef rattaché à son établissement ne gère que celui-ci.",
+      },
+      {
+        question:
+          "Quelle est la portée du réglage « Déconnexion automatique par inactivité » (Système → Sécurité de session) ?",
+        choix: [
+          "Il ne s'applique qu'au compte qui l'a configuré.",
+          "Il est global : il s'applique à tous les comptes et tous les appareils, et est enregistré côté serveur.",
+          "Il déconnecte uniquement les comptes administrateurs.",
+          "Il supprime définitivement les comptes inactifs.",
+        ],
+        bonneReponseIndex: 1,
+        explication:
+          "Le réglage est global (tous les utilisateurs, tous les appareils), persisté côté serveur, et déclenche un avertissement avec compte à rebours avant la déconnexion.",
+      },
+      {
+        question:
+          "Comment activer un chef d'établissement afin qu'il gère le transport de SON établissement ?",
+        choix: [
+          "Lui communiquer le compte super-administrateur.",
+          "Lui attribuer le rôle « Chef d'établissement » ET le rattacher à son établissement (préalablement installé depuis le référentiel CI).",
+          "Installer un logiciel distinct sur son poste.",
+          "Aucune action : tous les enseignants peuvent gérer le transport.",
+        ],
+        bonneReponseIndex: 1,
+        explication:
+          "La délégation s'active en attribuant le rôle « Chef d'établissement » dans Comptes utilisateurs et en rattachant le compte à son établissement. L'établissement doit d'abord être installé depuis le référentiel officiel des 2921 établissements de Côte d'Ivoire (Code DSPS + Code EduWeb).",
+      },
     ],
     exercice: {
       titre: "Mise en situation : pilotage technique d'EduWeb Planner",
@@ -656,6 +695,32 @@ export const TRAINING_ASSESSMENTS: Record<string, ManuelAssessment> = {
         bonneReponseIndex: 1,
         explication:
           "La procédure attendue est de suspendre la publication, faire corriger par l'enseignant responsable, puis re-valider : cela préserve la fiabilité du document et la chaîne de responsabilité.",
+      },
+      {
+        question:
+          "En tant que chef d'établissement, quel est votre périmètre dans le module Transport d'élèves ?",
+        choix: [
+          "Je configure le transport de tous les établissements de la plateforme.",
+          "Je configure uniquement le transport de MON établissement ; les autres me sont invisibles.",
+          "Je ne peux que consulter, jamais configurer.",
+          "Je gère le transport mais pas la validation des paiements.",
+        ],
+        bonneReponseIndex: 1,
+        explication:
+          "Rattaché à votre établissement, vous gérez exclusivement son transport (cars, créneaux, tarifs, conducteurs, validation des paiements). L'isolation RLS garantit qu'aucun autre établissement ne vous est accessible.",
+      },
+      {
+        question:
+          "Qui peut émettre la position GPS d'un car de votre établissement ?",
+        choix: [
+          "N'importe quel parent abonné.",
+          "Uniquement un conducteur que vous avez désigné (par e-mail), pour un car de votre établissement.",
+          "Tout utilisateur connecté à la plateforme.",
+          "Seul le super-administrateur.",
+        ],
+        bonneReponseIndex: 1,
+        explication:
+          "Seuls les conducteurs désignés (protection anti-usurpation) peuvent émettre, et uniquement pour un car de leur établissement, via le « Mode conducteur » sur leur téléphone pendant les créneaux.",
       },
     ],
     exercice: {
@@ -1550,6 +1615,32 @@ export const TRAINING_ASSESSMENTS: Record<string, ManuelAssessment> = {
         bonneReponseIndex: 2,
         explication:
           "Personnaliser son mot de passe dès la première connexion et activer les alertes de connexion permet de sécuriser l'accès aux données scolaires de l'enfant.",
+      },
+      {
+        question:
+          "Pour suivre le car de votre enfant en temps réel, comment accédez-vous au service de transport ?",
+        choix: [
+          "Le suivi est automatique pour tous les parents, sans abonnement.",
+          "Vous vous abonnez (formule mensuelle ou annuelle), réglez par Mobile Money, et l'établissement valide votre paiement.",
+          "Vous devez installer une application séparée.",
+          "Le suivi n'est accessible qu'aux enseignants.",
+        ],
+        bonneReponseIndex: 1,
+        explication:
+          "Le suivi en temps réel nécessite un abonnement : vous choisissez une formule (mensuelle ou annuelle), payez par Mobile Money en indiquant la référence, et l'établissement valide ; l'accès s'ouvre alors jusqu'à l'échéance.",
+      },
+      {
+        question:
+          "Vous êtes abonné au mois et souhaitez passer à l'année. Que se passe-t-il ?",
+        choix: [
+          "C'est impossible : il faut attendre la fin de l'abonnement mensuel.",
+          "Vous réglez le complément vers l'annuel (crédit des jours restants déduit, pénalité d'équité affichée) ; après validation, l'accès passe à un an.",
+          "Vous perdez votre abonnement mensuel et repayez tout.",
+          "Le passage est gratuit et immédiat, sans validation.",
+        ],
+        bonneReponseIndex: 1,
+        explication:
+          "Depuis la carte « Passer à la formule annuelle », le total à régler (reste à payer vers l'annuel, crédit des jours restants déduit, plus une pénalité d'équité) est affiché ; après validation par l'établissement, l'abonnement devient annuel.",
       },
     ],
     exercice: {
