@@ -8,12 +8,52 @@
 
 export type SlotDirection = "aller" | "retour";
 
+/** Formule d'abonnement choisie par le parent. */
+export type SubscriptionPeriod = "month" | "year";
+
 export interface TransportSettings {
-  priceFcfa: number;
+  /** Tarif de la formule mensuelle (FCFA). */
+  priceMonthFcfa: number;
+  /** Tarif de la formule annuelle (FCFA). */
+  priceYearFcfa: number;
   /** Périodicité du bip de rappel, en minutes (défaut 5). */
   beepIntervalMin: number;
   centerLat: number | null;
   centerLng: number | null;
+}
+
+/** État d'abonnement d'un utilisateur (avec échéance). */
+export interface TransportSubscription {
+  subscribed: boolean;
+  period: SubscriptionPeriod | null;
+  /** ISO de fin de validité, ou null (abonnement legacy sans échéance). */
+  expiresAt: string | null;
+}
+
+export const PERIOD_LABEL: Record<SubscriptionPeriod, string> = {
+  month: "Mensuel",
+  year: "Annuel",
+};
+
+/** Tarif correspondant à la formule choisie. */
+export function priceForPeriod(
+  settings: Pick<TransportSettings, "priceMonthFcfa" | "priceYearFcfa"> | null,
+  period: SubscriptionPeriod,
+): number {
+  if (!settings) return 0;
+  return period === "year" ? settings.priceYearFcfa : settings.priceMonthFcfa;
+}
+
+/** Date d'échéance formatée (fr-FR) ou null. */
+export function formatExpiry(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 export interface TransportSlot {
@@ -67,6 +107,8 @@ export interface TransportPayment {
   method: string;
   reference?: string | null;
   status: PaymentStatus;
+  /** Formule payée (mensuel / annuel). */
+  period: SubscriptionPeriod;
   createdAt: string;
 }
 

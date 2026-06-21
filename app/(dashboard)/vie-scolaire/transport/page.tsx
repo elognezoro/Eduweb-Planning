@@ -15,17 +15,22 @@ import { BusMap, type BusMarker } from "@/components/transport/bus-map";
 import { unlockAudio, playTripleBeep } from "@/components/transport/transport-beep";
 import {
   activeSlot,
+  formatExpiry,
+  PERIOD_LABEL,
+  priceForPeriod,
   slotSummary,
   trimTime,
   WEEKDAYS,
   DIRECTION_LABEL,
   type BusPosition,
   type SlotDirection,
+  type SubscriptionPeriod,
   type TransportBus,
   type TransportDriver,
   type TransportPayment,
   type TransportSettings,
   type TransportSlot,
+  type TransportSubscription,
 } from "@/lib/transport/transport";
 import {
   addBus,
@@ -42,8 +47,8 @@ import {
   fetchTransportDrivers,
   fetchTransportSettings,
   fetchTransportSlots,
+  fetchTransportSubscription,
   isTransportDriver,
-  isTransportSubscribed,
   rejectTransportPayment,
   removeTransportDriver,
   saveTransportSettings,
@@ -72,7 +77,11 @@ export default function TransportPage() {
   const [settings, setSettings] = React.useState<TransportSettings | null>(null);
   const [slots, setSlots] = React.useState<TransportSlot[]>([]);
   const [buses, setBuses] = React.useState<TransportBus[]>([]);
-  const [subscribed, setSubscribed] = React.useState(false);
+  const [subscription, setSubscription] = React.useState<TransportSubscription>({
+    subscribed: false,
+    period: null,
+    expiresAt: null,
+  });
   const [positions, setPositions] = React.useState<BusPosition[]>([]);
   const [myPayment, setMyPayment] = React.useState<TransportPayment | null>(null);
   const [isDriver, setIsDriver] = React.useState(false);
@@ -89,14 +98,20 @@ export default function TransportPage() {
         fetchTransportSettings(sb, settingsScopeKey(scopeEtabId)),
         fetchTransportSlots(sb, scopeEtabId),
         fetchBuses(sb, scopeEtabId),
-        userId ? isTransportSubscribed(sb, userId) : Promise.resolve(false),
+        userId
+          ? fetchTransportSubscription(sb, userId)
+          : Promise.resolve<TransportSubscription>({
+              subscribed: false,
+              period: null,
+              expiresAt: null,
+            }),
         userId ? fetchMyLatestTransportPayment(sb, userId) : Promise.resolve(null),
         userId ? isTransportDriver(sb, userId) : Promise.resolve(false),
       ]);
       setSettings(s);
       setSlots(sl);
       setBuses(bs);
-      setSubscribed(sub);
+      setSubscription(sub);
       setMyPayment(pay);
       setIsDriver(drv);
     } finally {
@@ -116,7 +131,7 @@ export default function TransportPage() {
     })();
   }, [isAdmin]);
 
-  const canView = isAdmin || subscribed;
+  const canView = isAdmin || subscription.subscribed;
 
   // Positions : rafraîchies toutes les 5 s tant qu'on peut voir la carte.
   React.useEffect(() => {
@@ -175,14 +190,15 @@ export default function TransportPage() {
         <p className="px-1 py-8 text-center text-sm text-muted-foreground">Chargement…</p>
       ) : !canView ? (
         <PaymentGate
-          priceFcfa={settings?.priceFcfa ?? 0}
+          settings={settings}
           payment={myPayment}
-          onSubmit={async (method, reference) => {
+          onSubmit={async (period, method, reference) => {
             if (!userId) return false;
             const ok = await submitTransportPayment(createClient(), {
               userId,
               payerEmail: app.user.email,
-              amountFcfa: settings?.priceFcfa ?? 0,
+              amountFcfa: priceForPeriod(settings, period),
+              period,
               method,
               reference,
             });
@@ -198,6 +214,7 @@ export default function TransportPage() {
           positions={positions}
           isAdmin={isAdmin}
           isDriver={isDriver}
+          subscription={subscription}
           userId={userId}
           scopeEtabId={scopeEtabId}
           onReload={reload}
@@ -219,16 +236,22 @@ function Notice({ children }: { children: React.ReactNode }) {
 }
 
 function PaymentGate({
-  priceFcfa,
+  settings,
   payment,
   onSubmit,
 }: {
-  priceFcfa: number;
+  settings: TransportSettings | null;
   payment: TransportPayment | null;
-  onSubmit: (method: string, reference: string) => Promise<boolean>;
+  onSubmit: (
+    period: SubscriptionPeriod,
+    method: string,
+    reference: string,
+  ) => Promise<boolean>;
 }) {
+  const [period, setPeriod] = React.useState<SubscriptionPeriod>("month");
   const [reference, setReference] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+  const amount = priceForPeriod(settings, period);
 
   if (payment?.status === "pending") {
     return (
@@ -240,13 +263,20 @@ function PaymentGate({
           Paiement en attente de validation
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Votre paiement ({formatPrice(payment.amountFcfa || priceFcfa)}) a été
-          soumis. Un administrateur le validera — l&apos;accès s&apos;ouvrira
-          automatiquement.
+          Votre paiement{" "}
+          <strong>{PERIOD_LABEL[payment.period].toLowerCase()}</strong> (
+          {formatPrice(payment.amountFcfa)}) a été soumis. Un administrateur le
+          validera — l&apos;accès s&apos;ouvrira automatiquement jusqu&apos;à
+          l&apos;échéance.
         </p>
       </div>
     );
   }
+
+  const formulas: { value: SubscriptionPeriod; price: number; sub: string }[] = [
+    { value: "month", price: settings?.priceMonthFcfa ?? 0, sub: "Accès 1 mois" },
+    { value: "year", price: settings?.priceYearFcfa ?? 0, sub: "Accès 12 mois" },
+  ];
 
   return (
     <div className="mx-auto max-w-lg rounded-2xl border border-border bg-card p-6">
@@ -259,11 +289,41 @@ function PaymentGate({
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Localisez les cars en temps réel, à l&apos;aller comme au retour.
-        </p>
-        <p className="mt-3 text-base font-bold text-ew-green-800">
-          {formatPrice(priceFcfa)}
+          Choisissez votre formule.
         </p>
       </div>
+
+      {/* Choix de la formule (mensuel / annuel) */}
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {formulas.map((f) => {
+          const selected = period === f.value;
+          return (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => setPeriod(f.value)}
+              aria-pressed={selected}
+              className={
+                selected
+                  ? "rounded-xl border-2 border-ew-green-600 bg-ew-green-50 p-3 text-left"
+                  : "rounded-xl border border-border bg-background/60 p-3 text-left hover:border-ew-green-300"
+              }
+            >
+              <span className="flex items-center justify-between">
+                <span className="font-display text-sm font-bold text-foreground">
+                  {PERIOD_LABEL[f.value]}
+                </span>
+                {selected ? <Check className="h-4 w-4 text-ew-green-700" /> : null}
+              </span>
+              <span className="mt-1 block text-base font-bold text-ew-green-800">
+                {formatPrice(f.price)}
+              </span>
+              <span className="text-[11px] text-muted-foreground">{f.sub}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {payment?.status === "rejected" ? (
         <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           Votre précédent paiement a été rejeté. Vérifiez la référence et
@@ -278,8 +338,9 @@ function PaymentGate({
           placeholder="Ex. +225 07… ou ID de transaction"
         />
         <p className="text-[11px] text-muted-foreground">
-          Réglez le montant par Mobile Money, puis saisissez la référence. Un
-          administrateur confirmera votre abonnement.
+          Réglez le montant de la formule <strong>{PERIOD_LABEL[period].toLowerCase()}</strong>{" "}
+          ({formatPrice(amount)}) par Mobile Money, puis saisissez la référence.
+          L&apos;accès reste ouvert jusqu&apos;à l&apos;échéance de la période payée.
         </p>
       </div>
       <Button
@@ -287,7 +348,7 @@ function PaymentGate({
         disabled={busy || !reference.trim()}
         onClick={async () => {
           setBusy(true);
-          const ok = await onSubmit("mobile_money", reference.trim());
+          const ok = await onSubmit(period, "mobile_money", reference.trim());
           setBusy(false);
           if (ok) {
             toast.success("Paiement soumis", {
@@ -295,22 +356,20 @@ function PaymentGate({
             });
           } else {
             toast.error("Échec de la soumission", {
-              description: "Appliquez la migration 012, puis réessayez.",
+              description: "Appliquez la migration 016, puis réessayez.",
             });
           }
         }}
       >
-        {busy ? "Envoi…" : "J'ai payé — soumettre"}
+        {busy ? "Envoi…" : `J'ai payé ${formatPrice(amount)} — soumettre`}
       </Button>
     </div>
   );
 }
 
 function PendingPaymentsPanel({
-  adminId,
   onChanged,
 }: {
-  adminId: string;
   onChanged: () => Promise<void>;
 }) {
   const [items, setItems] = React.useState<TransportPayment[]>([]);
@@ -347,6 +406,9 @@ function PendingPaymentsPanel({
             >
               <span>
                 <strong>{p.payerEmail || p.userId.slice(0, 8)}</strong> ·{" "}
+                <span className="rounded bg-ew-green-100 px-1.5 py-0.5 text-[11px] font-bold text-ew-green-800">
+                  {PERIOD_LABEL[p.period]}
+                </span>{" "}
                 {formatPrice(p.amountFcfa)} · réf. {p.reference || "—"}
               </span>
               <span className="flex gap-2">
@@ -355,11 +417,9 @@ function PendingPaymentsPanel({
                   onClick={async () => {
                     const ok = await confirmTransportPayment(createClient(), {
                       paymentId: p.id,
-                      userId: p.userId,
-                      adminId,
                     });
                     if (ok) {
-                      toast.success("Paiement confirmé — abonnement activé");
+                      toast.success("Paiement confirmé — abonnement prolongé");
                       await load();
                       await onChanged();
                     } else {
@@ -477,6 +537,7 @@ function TransportLive({
   positions,
   isAdmin,
   isDriver,
+  subscription,
   userId,
   scopeEtabId,
   onReload,
@@ -490,6 +551,7 @@ function TransportLive({
   positions: BusPosition[];
   isAdmin: boolean;
   isDriver: boolean;
+  subscription: TransportSubscription;
   userId: string;
   scopeEtabId: string | null;
   onReload: () => Promise<void>;
@@ -577,8 +639,24 @@ function TransportLive({
     return () => navigator.geolocation.clearWatch(watchId);
   }, [driverMode, driverBusId, slots, userId]);
 
+  const expiryLabel = formatExpiry(subscription.expiresAt);
+
   return (
     <div className="space-y-4">
+      {/* Échéance de l'abonnement (côté parent) */}
+      {!isAdmin && subscription.subscribed && expiryLabel ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-ew-green-200 bg-ew-green-50/50 px-4 py-2.5 text-sm">
+          <Check className="h-4 w-4 text-ew-green-700" />
+          <span className="text-foreground/90">
+            Abonnement{" "}
+            {subscription.period ? (
+              <strong>{PERIOD_LABEL[subscription.period].toLowerCase()}</strong>
+            ) : null}{" "}
+            actif <strong>jusqu&apos;au {expiryLabel}</strong>.
+          </span>
+        </div>
+      ) : null}
+
       {/* Statut + actions */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-3">
         <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -676,7 +754,6 @@ function TransportLive({
 
       {isAdmin ? (
         <AdminConfig
-          adminId={userId}
           scopeEtabId={scopeEtabId}
           settings={settings}
           slots={slots}
@@ -693,7 +770,6 @@ function TransportLive({
 
 /* ----------------------------- Config admin ------------------------------- */
 function AdminConfig({
-  adminId,
   scopeEtabId,
   settings,
   slots,
@@ -703,7 +779,6 @@ function AdminConfig({
   onBuses,
   onReload,
 }: {
-  adminId: string;
   scopeEtabId: string | null;
   settings: TransportSettings | null;
   slots: TransportSlot[];
@@ -713,15 +788,18 @@ function AdminConfig({
   onBuses: (b: TransportBus[]) => void;
   onReload: () => Promise<void>;
 }) {
-  const [price, setPrice] = React.useState(String(settings?.priceFcfa ?? 0));
+  const [priceMonth, setPriceMonth] = React.useState(String(settings?.priceMonthFcfa ?? 0));
+  const [priceYear, setPriceYear] = React.useState(String(settings?.priceYearFcfa ?? 0));
   const [interval, setIntervalMin] = React.useState(String(settings?.beepIntervalMin ?? 5));
   const [centerLat, setCenterLat] = React.useState(settings?.centerLat?.toString() ?? "");
   const [centerLng, setCenterLng] = React.useState(settings?.centerLng?.toString() ?? "");
-  const priceNum = Number(price) || 0;
+  const priceMonthNum = Number(priceMonth) || 0;
+  const priceYearNum = Number(priceYear) || 0;
 
   async function save() {
     const next: TransportSettings = {
-      priceFcfa: priceNum,
+      priceMonthFcfa: priceMonthNum,
+      priceYearFcfa: priceYearNum,
       beepIntervalMin: Math.max(1, Number(interval) || 5),
       centerLat: centerLat ? Number(centerLat) : null,
       centerLng: centerLng ? Number(centerLng) : null,
@@ -746,7 +824,7 @@ function AdminConfig({
       </p>
 
       {/* Paiements en attente */}
-      <PendingPaymentsPanel adminId={adminId} onChanged={onReload} />
+      <PendingPaymentsPanel onChanged={onReload} />
 
       {/* Cars */}
       <BusesPanel
@@ -760,11 +838,16 @@ function AdminConfig({
       <DriversPanel />
 
       {/* Réglages */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div className="space-y-1">
-          <Label>Tarif (FCFA)</Label>
-          <Input value={price} onChange={(e) => setPrice(e.target.value.replace(/[^\d]/g, ""))} inputMode="numeric" />
-          <p className="text-[11px] text-muted-foreground">{formatPrice(priceNum)}</p>
+          <Label>Tarif mensuel (FCFA)</Label>
+          <Input value={priceMonth} onChange={(e) => setPriceMonth(e.target.value.replace(/[^\d]/g, ""))} inputMode="numeric" />
+          <p className="text-[11px] text-muted-foreground">{formatPrice(priceMonthNum)} / mois</p>
+        </div>
+        <div className="space-y-1">
+          <Label>Tarif annuel (FCFA)</Label>
+          <Input value={priceYear} onChange={(e) => setPriceYear(e.target.value.replace(/[^\d]/g, ""))} inputMode="numeric" />
+          <p className="text-[11px] text-muted-foreground">{formatPrice(priceYearNum)} / an</p>
         </div>
         <div className="space-y-1">
           <Label>Bip toutes les (min)</Label>

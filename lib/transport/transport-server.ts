@@ -3,11 +3,13 @@ import type {
   BusPosition,
   PaymentStatus,
   SlotDirection,
+  SubscriptionPeriod,
   TransportBus,
   TransportDriver,
   TransportPayment,
   TransportSettings,
   TransportSlot,
+  TransportSubscription,
 } from "./transport";
 import { trimTime } from "./transport";
 
@@ -22,8 +24,12 @@ export function settingsScopeKey(etablissementId: string | null): string {
 
 /* ---- Mappers ------------------------------------------------------------- */
 function mapSettings(r: Record<string, unknown>): TransportSettings {
+  // Reprise : si les colonnes par formule sont absentes (avant migration 016),
+  // on retombe sur l'ancien tarif unique `price_fcfa` pour le mensuel.
+  const legacy = Number(r.price_fcfa ?? 0);
   return {
-    priceFcfa: Number(r.price_fcfa ?? 0),
+    priceMonthFcfa: Number(r.price_month_fcfa ?? legacy),
+    priceYearFcfa: Number(r.price_year_fcfa ?? 0),
     beepIntervalMin: Number(r.beep_interval_min ?? 5),
     centerLat: (r.center_lat as number | null) ?? null,
     centerLng: (r.center_lng as number | null) ?? null,
@@ -101,7 +107,11 @@ export async function saveTransportSettings(
   const { error } = await supabase.from("transport_settings").upsert(
     {
       id: scopeKey,
-      price_fcfa: s.priceFcfa,
+      // `price_fcfa` (legacy, NOT NULL) conservé = tarif mensuel, pour
+      // compatibilité avec une base où la migration 016 n'est pas encore passée.
+      price_fcfa: s.priceMonthFcfa,
+      price_month_fcfa: s.priceMonthFcfa,
+      price_year_fcfa: s.priceYearFcfa,
       beep_interval_min: s.beepIntervalMin,
       center_lat: s.centerLat,
       center_lng: s.centerLng,
@@ -217,29 +227,45 @@ export async function upsertBusPosition(
   return !error;
 }
 
-/* ---- Abonnement par utilisateur ------------------------------------------ */
+/* ---- Abonnement par utilisateur (avec échéance) -------------------------- */
+
+/** Un abonnement est-il valide à l'instant donné ? */
+function isSubscriptionValid(
+  row: { active?: boolean; expires_at?: string | null } | null,
+): boolean {
+  if (!row) return false;
+  const exp = row.expires_at ?? null;
+  if (exp) return new Date(exp).getTime() > Date.now();
+  // Abonnement legacy (avant 016) : sans échéance, on s'appuie sur `active`.
+  return Boolean(row.active);
+}
+
+/** État détaillé de l'abonnement (échéance + formule). */
+export async function fetchTransportSubscription(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<TransportSubscription> {
+  const { data } = await supabase
+    .from("transport_subscriptions")
+    .select("active, period, expires_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const row = data as
+    | { active?: boolean; period?: string | null; expires_at?: string | null }
+    | null;
+  return {
+    subscribed: isSubscriptionValid(row),
+    period: (row?.period as SubscriptionPeriod | null) ?? null,
+    expiresAt: row?.expires_at ?? null,
+  };
+}
+
+/** Abonné valide ? (booléen — pour la carte du tableau de bord.) */
 export async function isTransportSubscribed(
   supabase: SupabaseClient,
   userId: string,
 ): Promise<boolean> {
-  const { data } = await supabase
-    .from("transport_subscriptions")
-    .select("active")
-    .eq("user_id", userId)
-    .maybeSingle();
-  return Boolean((data as { active?: boolean } | null)?.active);
-}
-
-export async function setTransportSubscription(
-  supabase: SupabaseClient,
-  userId: string,
-  active: boolean,
-): Promise<boolean> {
-  const { error } = await supabase.from("transport_subscriptions").upsert(
-    { user_id: userId, active },
-    { onConflict: "user_id" },
-  );
-  return !error;
+  return (await fetchTransportSubscription(supabase, userId)).subscribed;
 }
 
 /* ---- Paiement de l'abonnement (Mobile Money, validation manuelle) -------- */
@@ -252,17 +278,19 @@ function mapPayment(r: Record<string, unknown>): TransportPayment {
     method: (r.method as string) ?? "mobile_money",
     reference: (r.reference as string | null) ?? null,
     status: ((r.status as PaymentStatus) ?? "pending") as PaymentStatus,
+    period: ((r.period as SubscriptionPeriod) ?? "month") as SubscriptionPeriod,
     createdAt: (r.created_at as string) ?? "",
   };
 }
 
-/** Soumet un paiement (en attente de validation admin). */
+/** Soumet un paiement (formule + montant), en attente de validation admin. */
 export async function submitTransportPayment(
   supabase: SupabaseClient,
   p: {
     userId: string;
     payerEmail?: string | null;
     amountFcfa: number;
+    period: SubscriptionPeriod;
     method?: string;
     reference?: string | null;
   },
@@ -271,6 +299,7 @@ export async function submitTransportPayment(
     user_id: p.userId,
     payer_email: p.payerEmail ?? null,
     amount_fcfa: p.amountFcfa,
+    period: p.period,
     method: p.method ?? "mobile_money",
     reference: p.reference ?? null,
     status: "pending",
@@ -305,21 +334,19 @@ export async function fetchPendingTransportPayments(
   return (data ?? []).map((r) => mapPayment(r as Record<string, unknown>));
 }
 
-/** Confirme un paiement ET active l'abonnement du payeur (admin). */
+/**
+ * Confirme un paiement ET prolonge l'abonnement du payeur jusqu'à l'échéance
+ * (1 mois / 1 an selon la formule), via la RPC `confirm_transport_payment`
+ * (SECURITY DEFINER : autorisation admin / super-admin vérifiée en base).
+ */
 export async function confirmTransportPayment(
   supabase: SupabaseClient,
-  p: { paymentId: string; userId: string; adminId: string },
+  p: { paymentId: string },
 ): Promise<boolean> {
-  const { error } = await supabase
-    .from("transport_payments")
-    .update({
-      status: "confirmed",
-      confirmed_at: new Date().toISOString(),
-      confirmed_by: p.adminId,
-    })
-    .eq("id", p.paymentId);
-  if (error) return false;
-  return setTransportSubscription(supabase, p.userId, true);
+  const { error } = await supabase.rpc("confirm_transport_payment", {
+    p_payment_id: p.paymentId,
+  });
+  return !error;
 }
 
 /** Rejette un paiement (admin). */
