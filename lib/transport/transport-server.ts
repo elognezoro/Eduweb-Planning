@@ -15,7 +15,10 @@ import { trimTime } from "./transport";
    Accès Supabase au module Transport (migration 010, périmètre global v1).
    ========================================================================== */
 
-const SCOPE = "global";
+/** Clé de périmètre des réglages : uuid de l'établissement, ou 'global'. */
+export function settingsScopeKey(etablissementId: string | null): string {
+  return etablissementId ?? "global";
+}
 
 /* ---- Mappers ------------------------------------------------------------- */
 function mapSettings(r: Record<string, unknown>): TransportSettings {
@@ -30,6 +33,7 @@ function mapSettings(r: Record<string, unknown>): TransportSettings {
 function mapSlot(r: Record<string, unknown>): TransportSlot {
   return {
     id: r.id as string,
+    etablissementId: (r.etablissement_id as string | null) ?? null,
     label: (r.label as string) ?? undefined,
     direction: ((r.direction as SlotDirection) ?? "aller") as SlotDirection,
     days: Array.isArray(r.days) ? (r.days as number[]) : [],
@@ -55,31 +59,48 @@ function mapPosition(r: Record<string, unknown>): BusPosition {
 function mapBus(r: Record<string, unknown>): TransportBus {
   return {
     id: r.id as string,
+    etablissementId: (r.etablissement_id as string | null) ?? null,
     matricule: (r.matricule as string) ?? "",
     label: (r.label as string) ?? undefined,
     active: Boolean(r.active),
   };
 }
 
+/** Liste des établissements (pour le sélecteur du super-admin). */
+export async function fetchEstablishments(
+  supabase: SupabaseClient,
+): Promise<{ id: string; name: string }[]> {
+  const { data } = await supabase
+    .from("etablissements")
+    .select("id, name")
+    .order("name", { ascending: true });
+  return (data ?? []).map((r) => {
+    const row = r as Record<string, unknown>;
+    return { id: row.id as string, name: (row.name as string) ?? "Établissement" };
+  });
+}
+
 /* ---- Réglages & créneaux ------------------------------------------------- */
 export async function fetchTransportSettings(
   supabase: SupabaseClient,
+  scopeKey: string,
 ): Promise<TransportSettings | null> {
   const { data } = await supabase
     .from("transport_settings")
     .select("*")
-    .eq("id", SCOPE)
+    .eq("id", scopeKey)
     .maybeSingle();
   return data ? mapSettings(data as Record<string, unknown>) : null;
 }
 
 export async function saveTransportSettings(
   supabase: SupabaseClient,
+  scopeKey: string,
   s: TransportSettings,
 ): Promise<boolean> {
   const { error } = await supabase.from("transport_settings").upsert(
     {
-      id: SCOPE,
+      id: scopeKey,
       price_fcfa: s.priceFcfa,
       beep_interval_min: s.beepIntervalMin,
       center_lat: s.centerLat,
@@ -93,11 +114,13 @@ export async function saveTransportSettings(
 
 export async function fetchTransportSlots(
   supabase: SupabaseClient,
+  etablissementId: string | null,
 ): Promise<TransportSlot[]> {
-  const { data } = await supabase
-    .from("transport_slots")
-    .select("*")
-    .order("start_time", { ascending: true });
+  let q = supabase.from("transport_slots").select("*");
+  q = etablissementId
+    ? q.eq("etablissement_id", etablissementId)
+    : q.is("etablissement_id", null);
+  const { data } = await q.order("start_time", { ascending: true });
   return (data ?? []).map((r) => mapSlot(r as Record<string, unknown>));
 }
 
@@ -106,6 +129,7 @@ export async function addTransportSlot(
   slot: Omit<TransportSlot, "id">,
 ): Promise<boolean> {
   const { error } = await supabase.from("transport_slots").insert({
+    etablissement_id: slot.etablissementId ?? null,
     label: slot.label ?? null,
     direction: slot.direction,
     days: slot.days,
@@ -127,21 +151,25 @@ export async function deleteTransportSlot(
 /* ---- Cars (un par matricule) -------------------------------------------- */
 export async function fetchBuses(
   supabase: SupabaseClient,
+  etablissementId: string | null,
 ): Promise<TransportBus[]> {
-  const { data } = await supabase
-    .from("transport_buses")
-    .select("*")
-    .order("matricule", { ascending: true });
+  let q = supabase.from("transport_buses").select("*");
+  q = etablissementId
+    ? q.eq("etablissement_id", etablissementId)
+    : q.is("etablissement_id", null);
+  const { data } = await q.order("matricule", { ascending: true });
   return (data ?? []).map((r) => mapBus(r as Record<string, unknown>));
 }
 
 export async function addBus(
   supabase: SupabaseClient,
-  bus: { matricule: string; label?: string },
+  bus: { matricule: string; label?: string; etablissementId?: string | null },
 ): Promise<boolean> {
-  const { error } = await supabase
-    .from("transport_buses")
-    .insert({ matricule: bus.matricule, label: bus.label ?? null });
+  const { error } = await supabase.from("transport_buses").insert({
+    matricule: bus.matricule,
+    label: bus.label ?? null,
+    etablissement_id: bus.etablissementId ?? null,
+  });
   return !error;
 }
 

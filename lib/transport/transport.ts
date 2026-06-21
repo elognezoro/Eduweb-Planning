@@ -18,6 +18,8 @@ export interface TransportSettings {
 
 export interface TransportSlot {
   id: string;
+  /** Périmètre établissement (null = « Général »). */
+  etablissementId?: string | null;
   label?: string;
   direction: SlotDirection;
   /** Jours d'émission : 1 = lundi … 7 = dimanche. */
@@ -31,6 +33,8 @@ export interface TransportSlot {
 /** Un car de transport (un terminal émetteur) identifié par son matricule. */
 export interface TransportBus {
   id: string;
+  /** Périmètre établissement (null = « Général »). */
+  etablissementId?: string | null;
   matricule: string;
   label?: string;
   active: boolean;

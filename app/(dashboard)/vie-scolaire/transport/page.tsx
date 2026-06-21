@@ -36,6 +36,7 @@ import {
   deleteTransportSlot,
   fetchBuses,
   fetchBusPositions,
+  fetchEstablishments,
   fetchMyLatestTransportPayment,
   fetchPendingTransportPayments,
   fetchTransportDrivers,
@@ -46,6 +47,7 @@ import {
   rejectTransportPayment,
   removeTransportDriver,
   saveTransportSettings,
+  settingsScopeKey,
   submitTransportPayment,
   upsertBusPosition,
 } from "@/lib/transport/transport-server";
@@ -56,6 +58,15 @@ export default function TransportPage() {
   const app = useApp();
   const isAdmin = app.effectiveRole === "admin";
   const userId = app.user.id;
+  const userEtabId = app.user.etablissementId ?? null;
+
+  // Périmètre : établissement de l'utilisateur ; le super-admin choisit lequel
+  // gérer (null = « Général »).
+  const [adminScopeEtabId, setAdminScopeEtabId] = React.useState<string | null>(null);
+  const scopeEtabId = isAdmin ? adminScopeEtabId : userEtabId;
+  const [establishments, setEstablishments] = React.useState<
+    { id: string; name: string }[]
+  >([]);
 
   const [loading, setLoading] = React.useState(REAL);
   const [settings, setSettings] = React.useState<TransportSettings | null>(null);
@@ -75,9 +86,9 @@ export default function TransportPage() {
     try {
       const sb = createClient();
       const [s, sl, bs, sub, pay, drv] = await Promise.all([
-        fetchTransportSettings(sb),
-        fetchTransportSlots(sb),
-        fetchBuses(sb),
+        fetchTransportSettings(sb, settingsScopeKey(scopeEtabId)),
+        fetchTransportSlots(sb, scopeEtabId),
+        fetchBuses(sb, scopeEtabId),
         userId ? isTransportSubscribed(sb, userId) : Promise.resolve(false),
         userId ? fetchMyLatestTransportPayment(sb, userId) : Promise.resolve(null),
         userId ? isTransportDriver(sb, userId) : Promise.resolve(false),
@@ -91,11 +102,19 @@ export default function TransportPage() {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, scopeEtabId]);
 
   React.useEffect(() => {
     void reload();
   }, [reload]);
+
+  // Liste des établissements pour le sélecteur du super-admin.
+  React.useEffect(() => {
+    if (!REAL || !isAdmin) return;
+    void (async () => {
+      setEstablishments(await fetchEstablishments(createClient()));
+    })();
+  }, [isAdmin]);
 
   const canView = isAdmin || subscribed;
 
@@ -130,6 +149,23 @@ export default function TransportPage() {
         ) : undefined
       }
     >
+      {REAL && isAdmin && establishments.length > 0 ? (
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm">
+          <Label className="shrink-0">Établissement géré :</Label>
+          <select
+            value={adminScopeEtabId ?? ""}
+            onChange={(e) => setAdminScopeEtabId(e.target.value || null)}
+            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+          >
+            <option value="">Général (sans établissement)</option>
+            {establishments.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
       {!REAL ? (
         <Notice>
           Ce module nécessite le mode en ligne (Supabase), disponible sur
@@ -163,6 +199,7 @@ export default function TransportPage() {
           isAdmin={isAdmin}
           isDriver={isDriver}
           userId={userId}
+          scopeEtabId={scopeEtabId}
           onReload={reload}
           onSettings={setSettings}
           onSlots={setSlots}
@@ -441,6 +478,7 @@ function TransportLive({
   isAdmin,
   isDriver,
   userId,
+  scopeEtabId,
   onReload,
   onSettings,
   onSlots,
@@ -453,6 +491,7 @@ function TransportLive({
   isAdmin: boolean;
   isDriver: boolean;
   userId: string;
+  scopeEtabId: string | null;
   onReload: () => Promise<void>;
   onSettings: (s: TransportSettings) => void;
   onSlots: (s: TransportSlot[]) => void;
@@ -475,16 +514,20 @@ function TransportLive({
   const current = now.getTime() ? activeSlot(slots, now) : null;
   const emitting = Boolean(current);
 
-  // Marqueurs : une position par car, étiquetée avec son matricule.
-  const markers: BusMarker[] = positions.map((p) => {
-    const bus = buses.find((b) => b.id === p.busId);
-    return {
-      id: p.busId,
-      lat: p.lat,
-      lng: p.lng,
-      label: bus?.matricule ?? "Car",
-    };
-  });
+  // Marqueurs : une position par car DU PÉRIMÈTRE (étiquetée avec le matricule).
+  // On ne montre que les cars de l'établissement courant (positions filtrées
+  // sur les cars chargés).
+  const markers: BusMarker[] = positions
+    .filter((p) => buses.some((b) => b.id === p.busId))
+    .map((p) => {
+      const bus = buses.find((b) => b.id === p.busId);
+      return {
+        id: p.busId,
+        lat: p.lat,
+        lng: p.lng,
+        label: bus?.matricule ?? "Car",
+      };
+    });
 
   // BIP : au démarrage d'un créneau (bip-bip-bip) puis répété selon la périodicité.
   const beepTimer = React.useRef<number | null>(null);
@@ -634,6 +677,7 @@ function TransportLive({
       {isAdmin ? (
         <AdminConfig
           adminId={userId}
+          scopeEtabId={scopeEtabId}
           settings={settings}
           slots={slots}
           buses={buses}
@@ -650,6 +694,7 @@ function TransportLive({
 /* ----------------------------- Config admin ------------------------------- */
 function AdminConfig({
   adminId,
+  scopeEtabId,
   settings,
   slots,
   buses,
@@ -659,6 +704,7 @@ function AdminConfig({
   onReload,
 }: {
   adminId: string;
+  scopeEtabId: string | null;
   settings: TransportSettings | null;
   slots: TransportSlot[];
   buses: TransportBus[];
@@ -680,7 +726,11 @@ function AdminConfig({
       centerLat: centerLat ? Number(centerLat) : null,
       centerLng: centerLng ? Number(centerLng) : null,
     };
-    const ok = await saveTransportSettings(createClient(), next);
+    const ok = await saveTransportSettings(
+      createClient(),
+      settingsScopeKey(scopeEtabId),
+      next,
+    );
     if (ok) {
       onSettings(next);
       toast.success("Réglages enregistrés");
@@ -699,7 +749,12 @@ function AdminConfig({
       <PendingPaymentsPanel adminId={adminId} onChanged={onReload} />
 
       {/* Cars */}
-      <BusesPanel buses={buses} onBuses={onBuses} onReload={onReload} />
+      <BusesPanel
+        buses={buses}
+        scopeEtabId={scopeEtabId}
+        onBuses={onBuses}
+        onReload={onReload}
+      />
 
       {/* Conducteurs désignés */}
       <DriversPanel />
@@ -764,7 +819,10 @@ function AdminConfig({
         )}
         <SlotForm
           onAdd={async (slot) => {
-            const ok = await addTransportSlot(createClient(), slot);
+            const ok = await addTransportSlot(createClient(), {
+              ...slot,
+              etablissementId: scopeEtabId,
+            });
             if (ok) {
               await onReload();
               toast.success("Créneau ajouté");
@@ -780,10 +838,12 @@ function AdminConfig({
 
 function BusesPanel({
   buses,
+  scopeEtabId,
   onBuses,
   onReload,
 }: {
   buses: TransportBus[];
+  scopeEtabId: string | null;
   onBuses: (b: TransportBus[]) => void;
   onReload: () => Promise<void>;
 }) {
@@ -840,6 +900,7 @@ function BusesPanel({
             const ok = await addBus(createClient(), {
               matricule: matricule.trim(),
               label: label.trim() || undefined,
+              etablissementId: scopeEtabId,
             });
             setBusy(false);
             if (ok) {
