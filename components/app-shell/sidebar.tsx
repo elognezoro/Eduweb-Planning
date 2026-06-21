@@ -190,7 +190,7 @@ function NavLink({
 }) {
   const t = useTranslations();
   const Icon = item.icon;
-  const label = t(item.label);
+  const label = item.labelText ?? t(item.label);
   const link = (
     <Link
       href={item.href}

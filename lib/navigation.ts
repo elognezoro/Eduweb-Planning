@@ -42,6 +42,7 @@ import {
   Target,
   ListTodo,
   BookOpen,
+  Bus,
 } from "lucide-react";
 import type { Permission } from "./permissions";
 
@@ -49,6 +50,8 @@ export interface NavItem {
   href: string;
   /** Clé i18n (ex. "nav.items.accueil"). Le composant Sidebar la résout via useTranslations(). */
   label: string;
+  /** Libellé brut prioritaire : s'il est présent, court-circuite la résolution i18n. */
+  labelText?: string;
   icon: LucideIcon;
   permission: Permission;
   description?: string;
@@ -281,6 +284,13 @@ export const NAVIGATION: NavGroup[] = [
         label: "nav.items.academiePremium",
         icon: Crown,
         permission: "premium:view",
+      },
+      {
+        href: "/vie-scolaire/transport",
+        label: "nav.items.transport",
+        labelText: "Transport d'élèves",
+        icon: Bus,
+        permission: "dashboard:view",
       },
       {
         href: "/vie-scolaire/alertes-sms",
