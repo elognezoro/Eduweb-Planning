@@ -713,14 +713,45 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
     setHydrated(true);
   }, []);
 
+  // Persistance DEBOUNCÉE : sérialiser tout le magasin à chaque changement
+  // d'état est coûteux et bloque le thread (UI « lente à réagir »). On écrit au
+  // plus une fois par ~500 ms après le dernier changement, avec un flush
+  // immédiat avant masquage/fermeture de l'onglet (anti-perte de données).
+  const stateRef = React.useRef(state);
+  stateRef.current = state;
+
   React.useEffect(() => {
     if (!hydrated) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      /* ignore */
-    }
+    const id = window.setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateRef.current));
+      } catch {
+        /* ignore */
+      }
+    }, 500);
+    return () => window.clearTimeout(id);
   }, [state, hydrated]);
+
+  React.useEffect(() => {
+    if (!hydrated) return;
+    const flush = () => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateRef.current));
+      } catch {
+        /* ignore */
+      }
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      flush(); // flush au démontage (déconnexion / navigation dure)
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [hydrated]);
 
   const value: DataStore = {
     ...state,

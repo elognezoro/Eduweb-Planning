@@ -516,6 +516,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "appointments:view",
     "appointments:manage",
     "premium:view",
+    // Espace formation ouvert : permet à un parent invité d'accéder aux cours
+    // auxquels il est inscrit (chaque cours reste gardé par l'inscription).
+    "formations:access",
   ],
   eleve: [
     "dashboard:view",
@@ -528,6 +531,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "communication:view",
     "appointments:view",
     "premium:view",
+    // Espace formation ouvert : un élève/invité inscrit (auto-provisionné
+    // « eleve ») doit pouvoir accéder à ses cours (gardés par l'inscription).
+    "formations:access",
   ],
 };
 
