@@ -28,7 +28,16 @@ export interface TransportSlot {
   active: boolean;
 }
 
+/** Un car de transport (un terminal émetteur) identifié par son matricule. */
+export interface TransportBus {
+  id: string;
+  matricule: string;
+  label?: string;
+  active: boolean;
+}
+
 export interface BusPosition {
+  busId: string;
   driverId?: string | null;
   lat: number;
   lng: number;

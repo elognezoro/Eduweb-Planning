@@ -11,7 +11,7 @@ import { useApp } from "@/components/app-shell/app-context";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/formations/pricing";
-import { BusMap } from "@/components/transport/bus-map";
+import { BusMap, type BusMarker } from "@/components/transport/bus-map";
 import { unlockAudio, playTripleBeep } from "@/components/transport/transport-beep";
 import {
   activeSlot,
@@ -21,13 +21,17 @@ import {
   DIRECTION_LABEL,
   type BusPosition,
   type SlotDirection,
+  type TransportBus,
   type TransportSettings,
   type TransportSlot,
 } from "@/lib/transport/transport";
 import {
+  addBus,
   addTransportSlot,
+  deleteBus,
   deleteTransportSlot,
-  fetchBusPosition,
+  fetchBuses,
+  fetchBusPositions,
   fetchTransportSettings,
   fetchTransportSlots,
   isTransportSubscribed,
@@ -46,8 +50,9 @@ export default function TransportPage() {
   const [loading, setLoading] = React.useState(REAL);
   const [settings, setSettings] = React.useState<TransportSettings | null>(null);
   const [slots, setSlots] = React.useState<TransportSlot[]>([]);
+  const [buses, setBuses] = React.useState<TransportBus[]>([]);
   const [subscribed, setSubscribed] = React.useState(false);
-  const [position, setPosition] = React.useState<BusPosition | null>(null);
+  const [positions, setPositions] = React.useState<BusPosition[]>([]);
 
   const reload = React.useCallback(async () => {
     if (!REAL) {
@@ -57,13 +62,15 @@ export default function TransportPage() {
     setLoading(true);
     try {
       const sb = createClient();
-      const [s, sl, sub] = await Promise.all([
+      const [s, sl, bs, sub] = await Promise.all([
         fetchTransportSettings(sb),
         fetchTransportSlots(sb),
+        fetchBuses(sb),
         userId ? isTransportSubscribed(sb, userId) : Promise.resolve(false),
       ]);
       setSettings(s);
       setSlots(sl);
+      setBuses(bs);
       setSubscribed(sub);
     } finally {
       setLoading(false);
@@ -76,14 +83,14 @@ export default function TransportPage() {
 
   const canView = isAdmin || subscribed;
 
-  // Position : on rafraîchit toutes les 5 s tant qu'on peut voir la carte.
+  // Positions : rafraîchies toutes les 5 s tant qu'on peut voir la carte.
   React.useEffect(() => {
     if (!REAL || !canView) return;
     let stop = false;
     const sb = createClient();
     const tick = async () => {
-      const p = await fetchBusPosition(sb);
-      if (!stop) setPosition(p);
+      const p = await fetchBusPositions(sb);
+      if (!stop) setPositions(p);
     };
     void tick();
     const id = window.setInterval(tick, 5000);
@@ -96,7 +103,7 @@ export default function TransportPage() {
   return (
     <ModulePage
       title="Transport d'élèves"
-      description="Géolocalisation en temps réel du car de transport (aller / retour)."
+      description="Géolocalisation en temps réel des cars de transport (aller / retour)."
       icon={Bus}
       permission="dashboard:view"
       actions={
@@ -109,7 +116,7 @@ export default function TransportPage() {
     >
       {!REAL ? (
         <Notice>
-          Ce module nécessite le mode en ligne (Supabase). Disponible sur
+          Ce module nécessite le mode en ligne (Supabase), disponible sur
           https://planning.eduweb.ci.
         </Notice>
       ) : loading ? (
@@ -123,11 +130,11 @@ export default function TransportPage() {
             if (ok) {
               setSubscribed(true);
               toast.success("Abonnement activé", {
-                description: "Vous pouvez maintenant suivre le car en temps réel.",
+                description: "Vous pouvez maintenant suivre les cars en temps réel.",
               });
             } else {
               toast.error("Abonnement impossible", {
-                description: "Appliquez la migration 010, puis réessayez.",
+                description: "Appliquez les migrations 010 + 011, puis réessayez.",
               });
             }
           }}
@@ -136,12 +143,14 @@ export default function TransportPage() {
         <TransportLive
           settings={settings}
           slots={slots}
-          position={position}
+          buses={buses}
+          positions={positions}
           isAdmin={isAdmin}
           userId={userId}
           onReload={reload}
           onSettings={setSettings}
           onSlots={setSlots}
+          onBuses={setBuses}
         />
       )}
     </ModulePage>
@@ -173,7 +182,7 @@ function SubscribeGate({
         Module non activé
       </h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        Abonnez-vous au suivi de transport pour localiser le car en temps réel,
+        Abonnez-vous au suivi de transport pour localiser les cars en temps réel,
         à l&apos;aller comme au retour.
       </p>
       <p className="mt-3 text-base font-bold text-ew-green-800">
@@ -197,28 +206,32 @@ function SubscribeGate({
 function TransportLive({
   settings,
   slots,
-  position,
+  buses,
+  positions,
   isAdmin,
   userId,
   onReload,
   onSettings,
   onSlots,
+  onBuses,
 }: {
   settings: TransportSettings | null;
   slots: TransportSlot[];
-  position: BusPosition | null;
+  buses: TransportBus[];
+  positions: BusPosition[];
   isAdmin: boolean;
   userId: string;
   onReload: () => Promise<void>;
   onSettings: (s: TransportSettings) => void;
   onSlots: (s: TransportSlot[]) => void;
+  onBuses: (b: TransportBus[]) => void;
 }) {
   const beepInterval = Math.max(1, settings?.beepIntervalMin ?? 5);
   const [alertsOn, setAlertsOn] = React.useState(true);
   const [driverMode, setDriverMode] = React.useState(false);
+  const [driverBusId, setDriverBusId] = React.useState("");
   const [now, setNow] = React.useState(() => new Date(0));
 
-  // Horloge légère (toutes les 20 s) pour évaluer le créneau actif.
   React.useEffect(() => {
     const tick = () => setNow(new Date());
     tick();
@@ -229,8 +242,18 @@ function TransportLive({
   const current = now.getTime() ? activeSlot(slots, now) : null;
   const emitting = Boolean(current);
 
-  // BIP : au démarrage d'un créneau (bip-bip-bip immédiat) puis répété selon la
-  // périodicité tant que le créneau est actif. Désactivable.
+  // Marqueurs : une position par car, étiquetée avec son matricule.
+  const markers: BusMarker[] = positions.map((p) => {
+    const bus = buses.find((b) => b.id === p.busId);
+    return {
+      id: p.busId,
+      lat: p.lat,
+      lng: p.lng,
+      label: bus?.matricule ?? "Car",
+    };
+  });
+
+  // BIP : au démarrage d'un créneau (bip-bip-bip) puis répété selon la périodicité.
   const beepTimer = React.useRef<number | null>(null);
   React.useEffect(() => {
     if (beepTimer.current) {
@@ -239,10 +262,7 @@ function TransportLive({
     }
     if (!alertsOn || !emitting) return;
     playTripleBeep();
-    beepTimer.current = window.setInterval(
-      () => playTripleBeep(),
-      beepInterval * 60000,
-    );
+    beepTimer.current = window.setInterval(() => playTripleBeep(), beepInterval * 60000);
     return () => {
       if (beepTimer.current) {
         window.clearInterval(beepTimer.current);
@@ -251,16 +271,17 @@ function TransportLive({
     };
   }, [alertsOn, emitting, beepInterval]);
 
-  // MODE CONDUCTEUR : émet la position GPS pendant les créneaux actifs.
+  // MODE CONDUCTEUR : émet la position GPS du car choisi pendant les créneaux.
   React.useEffect(() => {
-    if (!driverMode || typeof navigator === "undefined" || !navigator.geolocation)
-      return;
+    if (!driverMode || !driverBusId) return;
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
     const sb = createClient();
     const watchId = navigator.geolocation.watchPosition(
       (pos) => {
         const slot = activeSlot(slots, new Date());
-        if (!slot) return; // hors créneau : on n'émet pas
+        if (!slot) return;
         void upsertBusPosition(sb, {
+          busId: driverBusId,
           driverId: userId,
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
@@ -278,17 +299,13 @@ function TransportLive({
       { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 },
     );
     return () => navigator.geolocation.clearWatch(watchId);
-  }, [driverMode, slots, userId]);
-
-  const lastSeen = position?.updatedAt
-    ? new Date(position.updatedAt).toLocaleTimeString("fr-FR")
-    : null;
+  }, [driverMode, driverBusId, slots, userId]);
 
   return (
     <div className="space-y-4">
-      {/* Statut */}
+      {/* Statut + actions */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-3">
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex flex-wrap items-center gap-2 text-sm">
           <span
             className={
               emitting
@@ -298,12 +315,10 @@ function TransportLive({
           >
             <Radio className="h-3 w-3" /> {emitting ? "Émission en cours" : "Hors créneau"}
           </span>
-          {current ? (
-            <span className="text-muted-foreground">{slotSummary(current)}</span>
-          ) : null}
-          {lastSeen ? (
-            <span className="text-xs text-muted-foreground">· dernière position {lastSeen}</span>
-          ) : null}
+          {current ? <span className="text-muted-foreground">{slotSummary(current)}</span> : null}
+          <span className="text-xs text-muted-foreground">
+            · {positions.length} car{positions.length > 1 ? "s" : ""} en ligne
+          </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button
@@ -325,7 +340,7 @@ function TransportLive({
               unlockAudio();
               setDriverMode((v) => !v);
             }}
-            title="Active le partage de votre position GPS (réservé au conducteur)."
+            title="Partage de la position GPS de votre car (réservé au conducteur)."
           >
             <MapPin className="h-4 w-4" /> {driverMode ? "Conducteur : actif" : "Mode conducteur"}
           </Button>
@@ -333,18 +348,41 @@ function TransportLive({
       </div>
 
       {driverMode ? (
-        <Notice>
-          <strong>Mode conducteur actif.</strong> Votre position est émise
-          automatiquement <strong>pendant les créneaux</strong> (
-          {emitting ? "créneau en cours" : "aucun créneau pour l'instant"}).
-          Gardez cette page ouverte et l&apos;écran allumé.
-        </Notice>
+        <div className="space-y-2 rounded-xl border border-ew-green-200 bg-ew-green-50/40 p-3 text-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            <Label className="shrink-0">Votre car :</Label>
+            <select
+              value={driverBusId}
+              onChange={(e) => setDriverBusId(e.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="">— Choisir le car —</option>
+              {buses.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.matricule}
+                  {b.label ? ` (${b.label})` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+          {driverBusId ? (
+            <p className="text-foreground/90">
+              Position émise automatiquement <strong>pendant les créneaux</strong> (
+              {emitting ? "créneau en cours" : "aucun créneau actuellement"}). Gardez
+              cette page ouverte, écran allumé.
+            </p>
+          ) : (
+            <p className="text-ew-gold-700">
+              Sélectionnez le car que vous conduisez pour démarrer l&apos;émission.
+            </p>
+          )}
+        </div>
       ) : null}
 
       {/* Carte */}
-      {position ? (
+      {markers.length > 0 ? (
         <BusMap
-          position={position}
+          markers={markers}
           center={
             settings?.centerLat != null && settings?.centerLng != null
               ? { lat: settings.centerLat, lng: settings.centerLng }
@@ -353,8 +391,8 @@ function TransportLive({
         />
       ) : (
         <div className="flex h-[300px] items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 text-center text-sm text-muted-foreground">
-          Aucune position pour le moment. Le car apparaîtra dès que le conducteur
-          émettra (pendant un créneau).
+          Aucun car en ligne pour le moment. Un car apparaît dès que son conducteur
+          émet (pendant un créneau).
         </div>
       )}
 
@@ -362,8 +400,10 @@ function TransportLive({
         <AdminConfig
           settings={settings}
           slots={slots}
+          buses={buses}
           onSettings={onSettings}
           onSlots={onSlots}
+          onBuses={onBuses}
           onReload={onReload}
         />
       ) : null}
@@ -375,14 +415,18 @@ function TransportLive({
 function AdminConfig({
   settings,
   slots,
+  buses,
   onSettings,
   onSlots,
+  onBuses,
   onReload,
 }: {
   settings: TransportSettings | null;
   slots: TransportSlot[];
+  buses: TransportBus[];
   onSettings: (s: TransportSettings) => void;
   onSlots: (s: TransportSlot[]) => void;
+  onBuses: (b: TransportBus[]) => void;
   onReload: () => Promise<void>;
 }) {
   const [price, setPrice] = React.useState(String(settings?.priceFcfa ?? 0));
@@ -392,19 +436,15 @@ function AdminConfig({
   const priceNum = Number(price) || 0;
 
   async function save() {
-    const ok = await saveTransportSettings(createClient(), {
+    const next: TransportSettings = {
       priceFcfa: priceNum,
       beepIntervalMin: Math.max(1, Number(interval) || 5),
       centerLat: centerLat ? Number(centerLat) : null,
       centerLng: centerLng ? Number(centerLng) : null,
-    });
+    };
+    const ok = await saveTransportSettings(createClient(), next);
     if (ok) {
-      onSettings({
-        priceFcfa: priceNum,
-        beepIntervalMin: Math.max(1, Number(interval) || 5),
-        centerLat: centerLat ? Number(centerLat) : null,
-        centerLng: centerLng ? Number(centerLng) : null,
-      });
+      onSettings(next);
       toast.success("Réglages enregistrés");
     } else {
       toast.error("Enregistrement refusé");
@@ -416,6 +456,9 @@ function AdminConfig({
       <p className="font-display text-sm font-bold uppercase tracking-wide text-ew-green-700">
         Configuration (administrateur)
       </p>
+
+      {/* Cars */}
+      <BusesPanel buses={buses} onBuses={onBuses} onReload={onReload} />
 
       {/* Réglages */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -491,6 +534,87 @@ function AdminConfig({
   );
 }
 
+function BusesPanel({
+  buses,
+  onBuses,
+  onReload,
+}: {
+  buses: TransportBus[];
+  onBuses: (b: TransportBus[]) => void;
+  onReload: () => Promise<void>;
+}) {
+  const [matricule, setMatricule] = React.useState("");
+  const [label, setLabel] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+        Cars / terminaux ({buses.length})
+      </p>
+      {buses.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-border bg-background/60 p-3 text-center text-sm text-muted-foreground">
+          Aucun car enregistré. Ajoutez chaque car par son matricule.
+        </p>
+      ) : (
+        <ul className="space-y-1.5">
+          {buses.map((b) => (
+            <li key={b.id} className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm">
+              <span>
+                <strong>{b.matricule}</strong>
+                {b.label ? <span className="text-muted-foreground"> · {b.label}</span> : null}
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-red-600 hover:text-red-700"
+                onClick={async () => {
+                  const ok = await deleteBus(createClient(), b.id);
+                  if (ok) onBuses(buses.filter((x) => x.id !== b.id));
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-ew-green-300 bg-background/60 p-3">
+        <div className="space-y-1">
+          <Label>Matricule du car</Label>
+          <Input value={matricule} onChange={(e) => setMatricule(e.target.value)} placeholder="1234 AB 01" className="w-44" />
+        </div>
+        <div className="space-y-1">
+          <Label>Libellé (facultatif)</Label>
+          <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Bus n°1 — Cocody" className="w-56" />
+        </div>
+        <Button
+          size="sm"
+          disabled={busy || !matricule.trim()}
+          onClick={async () => {
+            setBusy(true);
+            const ok = await addBus(createClient(), {
+              matricule: matricule.trim(),
+              label: label.trim() || undefined,
+            });
+            setBusy(false);
+            if (ok) {
+              setMatricule("");
+              setLabel("");
+              await onReload();
+              toast.success("Car ajouté");
+            } else {
+              toast.error("Ajout refusé");
+            }
+          }}
+        >
+          <Plus className="h-4 w-4" /> Ajouter le car
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function SlotForm({
   onAdd,
 }: {
@@ -530,7 +654,7 @@ function SlotForm({
         </div>
         <div className="space-y-1">
           <Label>Libellé (facultatif)</Label>
-          <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Bus n°1" />
+          <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Matin" />
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-1.5">

@@ -1,12 +1,11 @@
 "use client";
 
 import * as React from "react";
-import type { BusPosition } from "@/lib/transport/transport";
 
 /* ============================================================================
-   Carte de géolocalisation du car (OpenStreetMap via Leaflet, chargé par CDN
-   — aucune dépendance npm ni clé API). Affiche le marqueur du car et le
-   recentre à chaque mise à jour de position.
+   Carte de géolocalisation des cars (OpenStreetMap via Leaflet, chargé par CDN
+   — aucune dépendance npm ni clé API). Un marqueur par car, étiqueté avec son
+   matricule ; recadrage automatique sur l'ensemble des cars.
    ========================================================================== */
 
 const LEAFLET_CSS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
@@ -15,14 +14,23 @@ const LEAFLET_JS = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 /** Centre par défaut (Abidjan) si aucune position connue. */
 const FALLBACK: [number, number] = [5.3599, -4.0083];
 
-type LMap = {
-  setView: (c: [number, number], z: number) => LMap;
-  remove: () => void;
-};
+export interface BusMarker {
+  id: string;
+  lat: number;
+  lng: number;
+  label: string;
+}
+
 type LMarker = {
   setLatLng: (c: [number, number]) => LMarker;
   addTo: (m: LMap) => LMarker;
-  bindPopup: (html: string) => LMarker;
+  bindTooltip: (html: string, opts?: Record<string, unknown>) => LMarker;
+  remove: () => void;
+};
+type LMap = {
+  setView: (c: [number, number], z: number) => LMap;
+  fitBounds: (b: [number, number][], opts?: Record<string, unknown>) => LMap;
+  remove: () => void;
 };
 type LTileLayer = { addTo: (m: LMap) => LTileLayer };
 type LeafletNS = {
@@ -42,7 +50,7 @@ function loadLeaflet(): Promise<LeafletNS | null> {
   return new Promise((resolve) => {
     if (typeof window === "undefined") return resolve(null);
     if (window.L) return resolve(window.L);
-    if (!document.querySelector(`link[data-leaflet]`)) {
+    if (!document.querySelector("link[data-leaflet]")) {
       const link = document.createElement("link");
       link.rel = "stylesheet";
       link.href = LEAFLET_CSS;
@@ -68,77 +76,106 @@ function loadLeaflet(): Promise<LeafletNS | null> {
   });
 }
 
-function busIcon(L: LeafletNS): unknown {
+function esc(s: string): string {
+  return s.replace(/[&<>"]/g, (c) =>
+    c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : "&quot;",
+  );
+}
+
+function busIcon(L: LeafletNS, label: string): unknown {
   return L.divIcon({
     className: "",
-    html: '<div style="font-size:26px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))">🚌</div>',
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
+    html:
+      '<div style="display:flex;flex-direction:column;align-items:center;transform:translateY(-6px)">' +
+      '<div style="font-size:24px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))">🚌</div>' +
+      `<div style="background:#13402f;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:6px;white-space:nowrap;margin-top:1px;box-shadow:0 1px 2px rgba(0,0,0,.3)">${esc(label)}</div>` +
+      "</div>",
+    iconSize: [40, 44],
+    iconAnchor: [20, 38],
   });
 }
 
 export function BusMap({
-  position,
+  markers,
   center,
-  height = 380,
+  height = 400,
 }: {
-  position: BusPosition | null;
+  markers: BusMarker[];
   center?: { lat: number; lng: number } | null;
   height?: number;
 }) {
   const ref = React.useRef<HTMLDivElement | null>(null);
   const mapRef = React.useRef<LMap | null>(null);
-  const markerRef = React.useRef<LMarker | null>(null);
+  const lRef = React.useRef<LeafletNS | null>(null);
+  const markerMap = React.useRef<Map<string, LMarker>>(new Map());
+  const [ready, setReady] = React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
     void (async () => {
       const L = await loadLeaflet();
       if (!L || cancelled || !ref.current || mapRef.current) return;
-      const c: [number, number] = position
-        ? [position.lat, position.lng]
-        : center
-          ? [center.lat, center.lng]
-          : FALLBACK;
-      const map = L.map(ref.current, { zoomControl: true }).setView(c, 14);
+      const start: [number, number] =
+        center ? [center.lat, center.lng] : FALLBACK;
+      const map = L.map(ref.current, { zoomControl: true }).setView(start, 13);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: "© OpenStreetMap",
       }).addTo(map);
       mapRef.current = map;
-      if (position) {
-        markerRef.current = L.marker(c, { icon: busIcon(L) as object })
-          .addTo(map)
-          .bindPopup("Car de transport");
-      }
+      lRef.current = L;
+      setReady(true);
     })();
     return () => {
       cancelled = true;
+      markerMap.current.clear();
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
-        markerRef.current = null;
       }
+      lRef.current = null;
     };
-    // init unique au montage ; les MAJ de position sont gérées par l'effet suivant.
+    // init unique
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Mise à jour du marqueur / recentrage à chaque nouvelle position.
+  // Synchronise les marqueurs avec la liste des cars.
   React.useEffect(() => {
     const map = mapRef.current;
-    if (!map || !position) return;
-    const c: [number, number] = [position.lat, position.lng];
-    if (markerRef.current) {
-      markerRef.current.setLatLng(c);
-    } else if (window.L) {
-      markerRef.current = window.L
-        .marker(c, { icon: busIcon(window.L) as object })
-        .addTo(map)
-        .bindPopup("Car de transport");
+    const L = lRef.current;
+    if (!ready || !map || !L) return;
+    const seen = new Set<string>();
+    for (const m of markers) {
+      seen.add(m.id);
+      const existing = markerMap.current.get(m.id);
+      if (existing) {
+        existing.setLatLng([m.lat, m.lng]);
+      } else {
+        const mk = L.marker([m.lat, m.lng], {
+          icon: busIcon(L, m.label) as object,
+        })
+          .addTo(map)
+          .bindTooltip(esc(m.label), { direction: "top", offset: [0, -38] });
+        markerMap.current.set(m.id, mk);
+      }
     }
-    map.setView(c, 15);
-  }, [position?.lat, position?.lng]);
+    // Retire les cars disparus.
+    for (const [id, mk] of markerMap.current) {
+      if (!seen.has(id)) {
+        mk.remove();
+        markerMap.current.delete(id);
+      }
+    }
+    // Recadrage.
+    if (markers.length === 1) {
+      map.setView([markers[0].lat, markers[0].lng], 15);
+    } else if (markers.length > 1) {
+      map.fitBounds(
+        markers.map((m) => [m.lat, m.lng] as [number, number]),
+        { padding: [40, 40], maxZoom: 16 },
+      );
+    }
+  }, [ready, markers]);
 
   return (
     <div
