@@ -42,7 +42,6 @@ import {
   deleteTransportSlot,
   fetchBuses,
   fetchBusPositions,
-  fetchEstablishments,
   fetchMyLatestTransportPayment,
   fetchPendingTransportPayments,
   fetchTransportDrivers,
@@ -58,6 +57,11 @@ import {
   submitTransportUpgrade,
   upsertBusPosition,
 } from "@/lib/transport/transport-server";
+import {
+  EtablissementCombobox,
+  type EtablissementSelection,
+} from "@/components/etablissements/etablissement-combobox";
+import { ensureEstablishment } from "@/lib/etablissements/etablissements-server";
 
 const REAL = isSupabaseConfigured();
 
@@ -74,10 +78,10 @@ export default function TransportPage() {
   // Périmètre : établissement de l'utilisateur ; le super-admin choisit lequel
   // gérer (null = « Général »).
   const [adminScopeEtabId, setAdminScopeEtabId] = React.useState<string | null>(null);
+  const [adminScopeSel, setAdminScopeSel] =
+    React.useState<EtablissementSelection | null>(null);
+  const [resolvingEtab, setResolvingEtab] = React.useState(false);
   const scopeEtabId = isAdmin ? adminScopeEtabId : userEtabId;
-  const [establishments, setEstablishments] = React.useState<
-    { id: string; name: string }[]
-  >([]);
 
   const [loading, setLoading] = React.useState(REAL);
   const [settings, setSettings] = React.useState<TransportSettings | null>(null);
@@ -129,16 +133,27 @@ export default function TransportPage() {
     void reload();
   }, [reload]);
 
-  // Liste des établissements pour le sélecteur du super-admin.
-  React.useEffect(() => {
-    if (!REAL || !isAdmin) return;
-    void (async () => {
-      setEstablishments(await fetchEstablishments(createClient()));
-    })();
-  }, [isAdmin]);
-
   // Le gestionnaire (admin / chef) accède à la carte de son périmètre sans abonnement.
   const canView = canConfigure || subscription.subscribed;
+
+  // Le super-admin choisit l'établissement géré via le référentiel CI ; on le
+  // matérialise dans Supabase (UUID) à la sélection pour le scoping transport.
+  async function onPickEtab(sel: EtablissementSelection | null) {
+    setAdminScopeSel(sel);
+    if (!sel) {
+      setAdminScopeEtabId(null);
+      return;
+    }
+    setResolvingEtab(true);
+    const res = await ensureEstablishment(createClient(), sel);
+    setResolvingEtab(false);
+    if (res.id) {
+      setAdminScopeEtabId(res.id);
+    } else {
+      toast.error("Établissement non enregistré", { description: res.error });
+      setAdminScopeSel(null);
+    }
+  }
 
   // Positions : rafraîchies toutes les 5 s tant qu'on peut voir la carte.
   React.useEffect(() => {
@@ -171,21 +186,24 @@ export default function TransportPage() {
         ) : undefined
       }
     >
-      {REAL && isAdmin && establishments.length > 0 ? (
-        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm">
-          <Label className="shrink-0">Établissement géré :</Label>
-          <select
-            value={adminScopeEtabId ?? ""}
-            onChange={(e) => setAdminScopeEtabId(e.target.value || null)}
-            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-          >
-            <option value="">Général (sans établissement)</option>
-            {establishments.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.name}
-              </option>
-            ))}
-          </select>
+      {REAL && isAdmin ? (
+        <div className="mb-3 space-y-1.5 rounded-xl border border-border bg-card p-3 text-sm">
+          <Label className="shrink-0">Établissement géré (Côte d&apos;Ivoire) :</Label>
+          <div className="flex flex-wrap items-center gap-2">
+            <EtablissementCombobox
+              value={adminScopeSel}
+              onChange={(sel) => void onPickEtab(sel)}
+              placeholder="Général (laisser vide) ou rechercher un établissement…"
+              className="w-full max-w-md"
+            />
+            {resolvingEtab ? (
+              <span className="text-xs text-muted-foreground">Enregistrement…</span>
+            ) : (
+              <span className="text-xs text-muted-foreground">
+                {adminScopeSel ? "Périmètre : " + adminScopeSel.name : "Périmètre : Général"}
+              </span>
+            )}
+          </div>
         </div>
       ) : null}
       {!REAL ? (
