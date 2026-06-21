@@ -56,6 +56,7 @@ import {
   INSPECTIONS,
 } from "@/lib/mock-data";
 import { ALL_NAV_ITEMS } from "@/lib/navigation";
+import { TransportDashboardCard } from "@/components/transport/transport-dashboard-card";
 
 const MODULES = [
   { href: "/parametrage/emplois-du-temps", title: "Emplois du temps", description: "Planifier et détecter les conflits", icon: CalendarDays, tone: "green" as const },
@@ -172,6 +173,9 @@ export default function DashboardPage() {
         <KpiCard label="Taux de présence" value="94,2 %" icon={CheckCircle2} tone="teal" delta={1.4} />
         <KpiCard label="Inspections planifiées" value={plannedInspections} icon={SearchCheck} tone="red" hint="à venir" />
       </div>
+
+      {/* Carte Transport d'élèves (statut live pour l'abonné / admin) */}
+      <TransportDashboardCard />
 
       {/* Sommaire des blocs */}
       <SectionNav
