@@ -8,6 +8,7 @@ import {
   Heart,
   SearchCheck,
   Sparkles,
+  School,
 } from "lucide-react";
 
 /** Icône Lucide associée à chaque guide de rôle (utilisée dans l'en-tête + l'index). */
@@ -20,4 +21,5 @@ export const GUIDE_ICONS: Record<string, LucideIcon> = {
   parent: Heart,
   inspecteur: SearchCheck,
   conseiller_pedagogique: Sparkles,
+  cafop_admin: School,
 };

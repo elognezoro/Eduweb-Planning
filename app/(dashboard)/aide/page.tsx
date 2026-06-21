@@ -39,6 +39,7 @@ const ROLE_FAMILY: Record<string, "administration" | "supervision" | "etablissem
   parent: "communaute",
   inspecteur: "supervision",
   conseiller_pedagogique: "supervision",
+  cafop_admin: "administration",
 };
 
 const FAMILY_LABEL: Record<string, string> = {
@@ -58,6 +59,7 @@ const FAMILY_TONE: Record<string, "green" | "blue" | "gold" | "purple"> = {
 /** Ordre stratégique recommandé par la revue d'harmonisation. */
 const ORDER: string[] = [
   "admin",
+  "cafop_admin",
   "chef_etablissement",
   "inspecteur",
   "conseiller_pedagogique",

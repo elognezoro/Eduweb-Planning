@@ -7,6 +7,7 @@ import { guideEleve } from "./eleve";
 import { guideParent } from "./parent";
 import { guideInspecteur } from "./inspecteur";
 import { guideConseillerPedagogique } from "./conseiller_pedagogique";
+import { guideCafopAdmin } from "./cafop_admin";
 
 export const GUIDES: Record<string, Omit<GuideContent, "icon">> = {
   admin: guideAdmin,
@@ -17,6 +18,7 @@ export const GUIDES: Record<string, Omit<GuideContent, "icon">> = {
   parent: guideParent,
   inspecteur: guideInspecteur,
   conseiller_pedagogique: guideConseillerPedagogique,
+  cafop_admin: guideCafopAdmin,
 };
 
 export const GUIDE_KEYS = Object.keys(GUIDES) as Array<keyof typeof GUIDES>;
