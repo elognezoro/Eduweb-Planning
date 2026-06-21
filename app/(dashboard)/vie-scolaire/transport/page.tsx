@@ -64,6 +64,10 @@ const REAL = isSupabaseConfigured();
 export default function TransportPage() {
   const app = useApp();
   const isAdmin = app.effectiveRole === "admin";
+  const isChef = app.effectiveRole === "chef_etablissement";
+  // Qui peut configurer : super-admin (n'importe quel établissement) ou chef
+  // d'établissement (UNIQUEMENT le sien — isolation garantie côté RLS).
+  const canConfigure = isAdmin || isChef;
   const userId = app.user.id;
   const userEtabId = app.user.etablissementId ?? null;
 
@@ -133,7 +137,8 @@ export default function TransportPage() {
     })();
   }, [isAdmin]);
 
-  const canView = isAdmin || subscription.subscribed;
+  // Le gestionnaire (admin / chef) accède à la carte de son périmètre sans abonnement.
+  const canView = canConfigure || subscription.subscribed;
 
   // Positions : rafraîchies toutes les 5 s tant qu'on peut voir la carte.
   React.useEffect(() => {
@@ -215,6 +220,7 @@ export default function TransportPage() {
           buses={buses}
           positions={positions}
           isAdmin={isAdmin}
+          canConfigure={canConfigure}
           isDriver={isDriver}
           subscription={subscription}
           payment={myPayment}
@@ -511,8 +517,10 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 function PendingPaymentsPanel({
+  scopeEtabId,
   onChanged,
 }: {
+  scopeEtabId: string | null;
   onChanged: () => Promise<void>;
 }) {
   const [items, setItems] = React.useState<TransportPayment[]>([]);
@@ -520,10 +528,10 @@ function PendingPaymentsPanel({
 
   const load = React.useCallback(async () => {
     setLoading(true);
-    const p = await fetchPendingTransportPayments(createClient());
+    const p = await fetchPendingTransportPayments(createClient(), scopeEtabId);
     setItems(p);
     setLoading(false);
-  }, []);
+  }, [scopeEtabId]);
 
   React.useEffect(() => {
     void load();
@@ -593,14 +601,14 @@ function PendingPaymentsPanel({
   );
 }
 
-function DriversPanel() {
+function DriversPanel({ scopeEtabId }: { scopeEtabId: string | null }) {
   const [drivers, setDrivers] = React.useState<TransportDriver[]>([]);
   const [email, setEmail] = React.useState("");
   const [busy, setBusy] = React.useState(false);
 
   const load = React.useCallback(async () => {
-    setDrivers(await fetchTransportDrivers(createClient()));
-  }, []);
+    setDrivers(await fetchTransportDrivers(createClient(), scopeEtabId));
+  }, [scopeEtabId]);
   React.useEffect(() => {
     void load();
   }, [load]);
@@ -656,7 +664,11 @@ function DriversPanel() {
           disabled={busy || !email.trim()}
           onClick={async () => {
             setBusy(true);
-            const res = await addTransportDriverByEmail(createClient(), email.trim());
+            const res = await addTransportDriverByEmail(
+              createClient(),
+              email.trim(),
+              scopeEtabId,
+            );
             setBusy(false);
             if (res.ok) {
               setEmail("");
@@ -680,6 +692,7 @@ function TransportLive({
   buses,
   positions,
   isAdmin,
+  canConfigure,
   isDriver,
   subscription,
   payment,
@@ -696,6 +709,7 @@ function TransportLive({
   buses: TransportBus[];
   positions: BusPosition[];
   isAdmin: boolean;
+  canConfigure: boolean;
   isDriver: boolean;
   subscription: TransportSubscription;
   payment: TransportPayment | null;
@@ -797,7 +811,7 @@ function TransportLive({
   return (
     <div className="space-y-4">
       {/* Échéance de l'abonnement (côté parent) */}
-      {!isAdmin && subscription.subscribed && expiryLabel ? (
+      {!canConfigure && subscription.subscribed && expiryLabel ? (
         <div className="flex flex-wrap items-center gap-2 rounded-xl border border-ew-green-200 bg-ew-green-50/50 px-4 py-2.5 text-sm">
           <Check className="h-4 w-4 text-ew-green-700" />
           <span className="text-foreground/90">
@@ -811,7 +825,7 @@ function TransportLive({
       ) : null}
 
       {/* Passage mensuel → annuel (côté parent abonné au mois) */}
-      {!isAdmin && upgradeQuote && upgradeQuote.total > 0 ? (
+      {!canConfigure && upgradeQuote && upgradeQuote.total > 0 ? (
         <UpgradeCard quote={upgradeQuote} payment={payment} onUpgrade={onUpgrade} />
       ) : null}
 
@@ -910,7 +924,7 @@ function TransportLive({
         </div>
       )}
 
-      {isAdmin ? (
+      {canConfigure ? (
         <AdminConfig
           scopeEtabId={scopeEtabId}
           settings={settings}
@@ -985,7 +999,7 @@ function AdminConfig({
       </p>
 
       {/* Paiements en attente */}
-      <PendingPaymentsPanel onChanged={onReload} />
+      <PendingPaymentsPanel scopeEtabId={scopeEtabId} onChanged={onReload} />
 
       {/* Cars */}
       <BusesPanel
@@ -996,7 +1010,7 @@ function AdminConfig({
       />
 
       {/* Conducteurs désignés */}
-      <DriversPanel />
+      <DriversPanel scopeEtabId={scopeEtabId} />
 
       {/* Réglages */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

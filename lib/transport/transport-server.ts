@@ -343,15 +343,16 @@ export async function fetchMyLatestTransportPayment(
   return data ? mapPayment(data as Record<string, unknown>) : null;
 }
 
-/** Paiements en attente (admin). */
+/** Paiements en attente d'un établissement (NULL = « Général »). */
 export async function fetchPendingTransportPayments(
   supabase: SupabaseClient,
+  etablissementId: string | null,
 ): Promise<TransportPayment[]> {
-  const { data } = await supabase
-    .from("transport_payments")
-    .select("*")
-    .eq("status", "pending")
-    .order("created_at", { ascending: true });
+  let q = supabase.from("transport_payments").select("*").eq("status", "pending");
+  q = etablissementId
+    ? q.eq("etablissement_id", etablissementId)
+    : q.is("etablissement_id", null);
+  const { data } = await q.order("created_at", { ascending: true });
   return (data ?? []).map((r) => mapPayment(r as Record<string, unknown>));
 }
 
@@ -395,13 +396,16 @@ export async function isTransportDriver(
   return Boolean(data);
 }
 
+/** Conducteurs désignés d'un établissement (NULL = « Général »). */
 export async function fetchTransportDrivers(
   supabase: SupabaseClient,
+  etablissementId: string | null,
 ): Promise<TransportDriver[]> {
-  const { data } = await supabase
-    .from("transport_drivers")
-    .select("*")
-    .order("created_at", { ascending: true });
+  let q = supabase.from("transport_drivers").select("*");
+  q = etablissementId
+    ? q.eq("etablissement_id", etablissementId)
+    : q.is("etablissement_id", null);
+  const { data } = await q.order("created_at", { ascending: true });
   return (data ?? []).map((r) => {
     const row = r as Record<string, unknown>;
     return {
@@ -411,10 +415,14 @@ export async function fetchTransportDrivers(
   });
 }
 
-/** Désigne un conducteur par e-mail (résolu via la table profiles). */
+/**
+ * Désigne un conducteur par e-mail (résolu via profiles) POUR un établissement.
+ * Un conducteur est rattaché à un établissement (NULL = « Général »).
+ */
 export async function addTransportDriverByEmail(
   supabase: SupabaseClient,
   email: string,
+  etablissementId: string | null,
 ): Promise<{ ok: boolean; error?: string }> {
   const target = email.trim();
   if (!target) return { ok: false, error: "E-mail requis." };
@@ -428,7 +436,11 @@ export async function addTransportDriverByEmail(
   const { error } = await supabase
     .from("transport_drivers")
     .upsert(
-      { user_id: id, email: (prof as { email?: string }).email ?? target },
+      {
+        user_id: id,
+        email: (prof as { email?: string }).email ?? target,
+        etablissement_id: etablissementId,
+      },
       { onConflict: "user_id" },
     );
   return { ok: !error, error: error?.message };
