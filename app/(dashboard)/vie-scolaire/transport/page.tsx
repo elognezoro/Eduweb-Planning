@@ -925,22 +925,22 @@ function TransportLive({
         </div>
       ) : null}
 
-      {/* Carte */}
-      {markers.length > 0 ? (
-        <BusMap
-          markers={markers}
-          center={
-            settings?.centerLat != null && settings?.centerLng != null
-              ? { lat: settings.centerLat, lng: settings.centerLng }
-              : null
-          }
-        />
-      ) : (
-        <div className="flex h-[300px] items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 text-center text-sm text-muted-foreground">
-          Aucun car en ligne pour le moment. Un car apparaît dès que son conducteur
-          émet (pendant un créneau).
+      {/* Carte — TOUJOURS affichée (fond de carte centré). Les marqueurs des
+          cars apparaissent dès qu'un conducteur émet (pendant un créneau). */}
+      {markers.length === 0 ? (
+        <div className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+          <MapPin className="h-3.5 w-3.5 shrink-0" /> Aucun car en ligne pour le
+          moment — un car apparaît dès que son conducteur émet (pendant un créneau).
         </div>
-      )}
+      ) : null}
+      <BusMap
+        markers={markers}
+        center={
+          settings?.centerLat != null && settings?.centerLng != null
+            ? { lat: settings.centerLat, lng: settings.centerLng }
+            : null
+        }
+      />
 
       {canConfigure ? (
         <AdminConfig
