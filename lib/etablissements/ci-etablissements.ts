@@ -41,8 +41,11 @@ let cache: Promise<CiEtablissement[]> | null = null;
 /** Charge (une seule fois) le référentiel CI depuis /public. */
 export function loadCiEtablissements(): Promise<CiEtablissement[]> {
   if (!cache) {
-    cache = fetch("/data/ci-etablissements.json")
-      .then((r) => (r.ok ? (r.json() as Promise<RawRow[]>) : []))
+    cache = fetch("/data/ci-etablissements.json", { cache: "force-cache" })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json() as Promise<RawRow[]>;
+      })
       .then((raw) =>
         raw.map((x) => ({
           eduwebCode: x.e,
@@ -55,7 +58,12 @@ export function loadCiEtablissements(): Promise<CiEtablissement[]> {
           milieu: x.m ?? null,
         })),
       )
-      .catch(() => [] as CiEtablissement[]);
+      .catch(() => {
+        // NE PAS mémoriser l'échec : un chargement raté (fichier pas encore
+        // déployé, coupure réseau…) doit pouvoir être réessayé au prochain appel.
+        cache = null;
+        return [] as CiEtablissement[];
+      });
   }
   return cache;
 }

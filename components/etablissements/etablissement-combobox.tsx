@@ -46,6 +46,7 @@ export function EtablissementCombobox({
   className?: string;
 }) {
   const [list, setList] = React.useState<CiEtablissement[]>([]);
+  const [loaded, setLoaded] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [customMode, setCustomMode] = React.useState(false);
@@ -55,7 +56,10 @@ export function EtablissementCombobox({
   React.useEffect(() => {
     let alive = true;
     void loadCiEtablissements().then((l) => {
-      if (alive) setList(l);
+      if (alive) {
+        setList(l);
+        setLoaded(true);
+      }
     });
     return () => {
       alive = false;
@@ -157,10 +161,15 @@ export function EtablissementCombobox({
                   className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                 />
               </div>
+              <div className="border-b border-border px-3 py-1 text-[11px] text-muted-foreground">
+                {!loaded
+                  ? "Chargement du référentiel…"
+                  : `${list.length.toLocaleString("fr-FR")} établissements · ${results.length} affiché(s) — tapez pour affiner`}
+              </div>
               <ul className="max-h-72 overflow-y-auto py-1" role="listbox">
                 {results.length === 0 ? (
                   <li className="px-3 py-3 text-center text-sm text-muted-foreground">
-                    Aucun résultat.
+                    {!loaded ? "Chargement du référentiel…" : "Aucun résultat."}
                   </li>
                 ) : (
                   results.map((e) => {
