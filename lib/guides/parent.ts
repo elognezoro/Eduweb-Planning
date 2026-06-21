@@ -310,12 +310,14 @@ export const guideParent: Omit<GuideContent, "icon"> = {
       id: "transport-eleves",
       title: "Suivre le car de transport",
       intro:
-        "Si votre établissement propose le suivi de transport, vous pouvez vous abonner pour localiser le car en temps réel sur une carte, à l'aller comme au retour, avec une alerte sonore.",
+        "Le suivi du transport vous permet de savoir où se trouve le car de votre enfant, en temps réel, du domicile à l'école et au retour. C'est avant tout un service de tranquillité d'esprit : vous voyez le car approcher et un signal sonore vous prévient au bon moment. L'accès est réservé aux familles abonnées — le service a un coût d'exploitation — et vous choisissez une formule au mois ou à l'année.",
       sections: [
         {
           title: "S'abonner (mensuel ou annuel)",
           body:
-            "À l'ouverture du module, choisissez une formule — Mensuel ou Annuel — puis réglez le montant par Mobile Money et saisissez la référence du paiement. Un administrateur valide votre paiement, et l'accès s'ouvre automatiquement jusqu'à l'échéance.",
+            "Deux formules existent pour s'adapter à votre besoin : la mensuelle, souple, idéale pour essayer ; l'annuelle, plus économique sur l'année. Vous payez par Mobile Money et saisissez la référence ; l'établissement valide, et votre accès s'ouvre automatiquement jusqu'à l'échéance.",
+          example:
+            "Au « Lycée Moderne de Cocody », la formule mensuelle est à 5 000 FCFA et l'annuelle à 50 000 FCFA (soit deux mois offerts). M. Kouassi choisit le mois pour essayer : il paie 5 000 FCFA, saisit sa référence ; l'établissement valide et son accès est ouvert pour 30 jours.",
           steps: [
             {
               instruction: "Ouvrez le suivi de transport.",
@@ -323,22 +325,54 @@ export const guideParent: Omit<GuideContent, "icon"> = {
             },
             {
               instruction:
-                "Sélectionnez la formule, payez par Mobile Money, saisissez la référence puis soumettez.",
-              tip: "Tant que l'administrateur n'a pas validé, l'écran indique « Paiement en attente ». Vous voyez l'échéance une fois l'accès ouvert.",
+                "Choisissez la formule (Mensuel ou Annuel) : le montant correspondant s'affiche.",
+            },
+            {
+              instruction:
+                "Réglez ce montant par Mobile Money, saisissez la référence du paiement, puis soumettez.",
+              tip: "Tant que l'établissement n'a pas validé, l'écran indique « Paiement en attente ». Une fois l'accès ouvert, vous voyez la date d'échéance.",
             },
           ],
         },
         {
           title: "Passer du mensuel à l'annuel",
           body:
-            "Abonné au mois, vous pouvez basculer en formule annuelle depuis la carte « Passer à la formule annuelle ». Le détail affiche le tarif annuel, le crédit pour vos jours déjà payés, et une pénalité d'équité — le total à régler s'affiche avant paiement.",
+            "Si vous êtes satisfait après quelques semaines, vous pouvez passer à l'année sans repayer toute l'année : vous ne réglez que le complément. Une petite pénalité s'applique — c'est une question d'équité envers les familles qui se sont engagées à l'année dès le départ. Tout est calculé pour vous et affiché avant le paiement.",
+          example:
+            "Après une dizaine de jours, M. Kouassi veut l'année. La carte « Passer à la formule annuelle » lui affiche le détail : tarif annuel, crédit de ses jours restants, pénalité d'équité, et le total à régler (par ex. environ 56 700 FCFA pour une vingtaine de jours restants). Il paie, l'établissement valide, son accès devient annuel.",
+          steps: [
+            {
+              instruction: "Ouvrez la carte « Passer à la formule annuelle ».",
+            },
+            {
+              instruction:
+                "Vérifiez le détail (tarif annuel, crédit des jours restants, pénalité, total).",
+            },
+            {
+              instruction:
+                "Réglez le total par Mobile Money, saisissez la référence, puis soumettez.",
+              tip: "Après validation, votre accès passe à un an à compter d'aujourd'hui.",
+            },
+          ],
         },
         {
           title: "Suivre le car et l'alerte sonore",
           body:
-            "Une fois abonné, la carte affiche le car (marqueur au matricule) dès que le conducteur émet, pendant les créneaux. Un « bip-bip-bip » signale l'arrivée du créneau ; vous pouvez couper les alertes via le bouton dédié.",
+            "Une fois abonné, la carte affiche le car (marqueur portant son matricule) dès que le conducteur émet sa position, pendant les créneaux. Un « bip-bip-bip » signale l'arrivée du créneau pour vous laisser le temps de préparer votre enfant ; vous pouvez couper les alertes via le bouton dédié.",
+          example:
+            "À 6 h 30, votre téléphone émet « bip-bip-bip » : le créneau du matin commence. Le car « 1234 AB 01 » apparaît sur la carte et avance vers votre quartier — vous préparez votre enfant au bon moment, sans attente inutile au portail.",
+          steps: [
+            {
+              instruction:
+                "Ouvrez la carte et vérifiez que le bouton indique « Alertes activées ».",
+            },
+            {
+              instruction:
+                "Suivez le marqueur du car pendant le créneau ; il disparaît à la fin du créneau.",
+            },
+          ],
           caveat:
-            "Le car n'apparaît que lorsque son conducteur émet sa position, pendant un créneau d'émission.",
+            "Le car n'apparaît que lorsque son conducteur émet sa position, pendant un créneau d'émission. En dehors, la carte reste affichée mais sans marqueur.",
         },
       ],
     },

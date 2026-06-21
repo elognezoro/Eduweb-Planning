@@ -580,12 +580,14 @@ export const guideChefEtablissement: Omit<GuideContent, "icon"> = {
       id: "transport-eleves",
       title: "Transport d'élèves de mon établissement",
       intro:
-        "Si votre compte est rattaché à votre établissement, vous gérez son service de transport — et lui seul. Le suivi se fait en temps réel sur une carte (OpenStreetMap) ; les parents abonnés voient les cars se déplacer.",
+        "La gestion déléguée repose sur un principe simple : votre compte étant rattaché à un établissement, vous administrez son service de transport — et lui seul. Ce cloisonnement (l'isolation par établissement) est garanti côté serveur : vous ne pouvez ni voir ni modifier les données d'un autre établissement, même par erreur. Concrètement, vous configurez véhicules, créneaux et tarifs, vous désignez les conducteurs, et vous validez les paiements de vos familles ; le super-administrateur n'intervient qu'en supervision.",
       sections: [
         {
           title: "Accéder au service et comprendre le périmètre",
           body:
-            "Vous n'avez pas de sélecteur d'établissement : vous gérez automatiquement le vôtre. L'isolation garantit que vous ne voyez ni ne modifiez les données d'un autre établissement (cars, créneaux, tarifs, conducteurs, paiements).",
+            "Vous n'avez pas de sélecteur d'établissement : contrairement au super-admin, vous gérez automatiquement le vôtre. C'est la traduction concrète de l'isolation : tout ce que vous voyez (cars, créneaux, tarifs, conducteurs, paiements) appartient à votre établissement.",
+          example:
+            "Mme Diabaté, chef du « Collège Municipal de Treichville », ouvre Transport : aucune liste d'établissements ne lui est proposée — elle arrive directement sur le service de son collège, et seuls les cars, conducteurs et paiements de Treichville s'affichent.",
           steps: [
             {
               instruction: "Ouvrez le module de transport.",
@@ -597,7 +599,27 @@ export const guideChefEtablissement: Omit<GuideContent, "icon"> = {
         {
           title: "Configurer véhicules, créneaux et tarifs",
           body:
-            "Dans « Configuration (administrateur) », réglez la tarification (mensuel, annuel, pénalité d'upgrade), la périodicité du bip et le centre de la carte, puis ajoutez vos cars (par matricule) et vos créneaux (aller / retour, jours, heures).",
+            "La configuration suit une logique simple : d'abord ce qui se facture (tarifs), puis ce qui se localise (centre de carte), puis ce qui circule (cars) et quand (créneaux). Un car n'émet sa position que pendant un créneau ; en dehors, la carte reste affichée mais sans marqueur.",
+          example:
+            "Pour la rentrée, le collège déclare 2 cars — « 4567 CD 02 » (Cocody) et « 8910 EF 03 » (Plateau) — un créneau Aller 06:15–07:15 et un créneau Retour 17:00–18:00, du lundi au vendredi, au tarif de 4 000 FCFA/mois.",
+          steps: [
+            {
+              instruction:
+                "Réglez le tarif mensuel, le tarif annuel et la pénalité d'upgrade, puis la périodicité du bip et le centre de la carte ; enregistrez.",
+              navigation: "Transport → Configuration (administrateur) → Réglages",
+            },
+            {
+              instruction: "Ajoutez chaque car par son matricule (un terminal émetteur par car).",
+              navigation: "Configuration → Cars / terminaux",
+            },
+            {
+              instruction:
+                "Créez vos créneaux d'émission : sens (aller / retour), jours, heures de début et de fin.",
+              navigation: "Configuration → Créneaux d'émission",
+              warning:
+                "Sans créneau actif à l'heure réelle, aucun car n'émet et la carte reste vide.",
+            },
+          ],
           bestPractices: [
             "Préparez cars, créneaux et conducteurs avant la rentrée.",
             "Vérifiez qu'un créneau couvre bien les heures réelles de ramassage.",
@@ -606,7 +628,25 @@ export const guideChefEtablissement: Omit<GuideContent, "icon"> = {
         {
           title: "Conducteurs et validation des paiements",
           body:
-            "Désignez vos conducteurs par e-mail (compte existant) ; eux seuls peuvent émettre la position depuis leur téléphone (« Mode conducteur »). Validez ensuite les paiements Mobile Money de vos parents dans « Paiements en attente » : la confirmation ouvre l'abonnement jusqu'à l'échéance.",
+            "Deux gestes structurent l'exploitation quotidienne. D'une part, la désignation des conducteurs : seul un conducteur que vous avez désigné peut émettre une position, et uniquement pour un car de votre établissement (protection anti-usurpation). D'autre part, la validation des paiements : c'est elle qui ouvre l'accès du parent au suivi, jusqu'à l'échéance de la formule réglée.",
+          example:
+            "Un parent règle 4 000 FCFA par Mobile Money et saisit sa référence. La demande apparaît dans « Paiements en attente · Mensuel » ; vous cliquez Confirmer → son abonnement est actif un mois et il voit aussitôt les cars du collège se déplacer pendant les créneaux.",
+          steps: [
+            {
+              instruction:
+                "Désignez un conducteur par son e-mail (le compte doit exister).",
+              navigation: "Configuration → Conducteurs désignés",
+            },
+            {
+              instruction:
+                "Demandez au conducteur d'activer « Mode conducteur » sur son téléphone et de sélectionner son car.",
+            },
+            {
+              instruction:
+                "Validez les paiements de vos familles (Confirmer / Rejeter).",
+              navigation: "Configuration → Paiements en attente",
+            },
+          ],
           caveat:
             "Vous ne validez que les paiements de votre établissement ; ceux des autres établissements ne vous sont pas présentés.",
         },
