@@ -1,8 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   BusPosition,
+  PaymentStatus,
   SlotDirection,
   TransportBus,
+  TransportPayment,
   TransportSettings,
   TransportSlot,
 } from "./transport";
@@ -208,5 +210,97 @@ export async function setTransportSubscription(
     { user_id: userId, active },
     { onConflict: "user_id" },
   );
+  return !error;
+}
+
+/* ---- Paiement de l'abonnement (Mobile Money, validation manuelle) -------- */
+function mapPayment(r: Record<string, unknown>): TransportPayment {
+  return {
+    id: r.id as string,
+    userId: r.user_id as string,
+    payerEmail: (r.payer_email as string | null) ?? null,
+    amountFcfa: Number(r.amount_fcfa ?? 0),
+    method: (r.method as string) ?? "mobile_money",
+    reference: (r.reference as string | null) ?? null,
+    status: ((r.status as PaymentStatus) ?? "pending") as PaymentStatus,
+    createdAt: (r.created_at as string) ?? "",
+  };
+}
+
+/** Soumet un paiement (en attente de validation admin). */
+export async function submitTransportPayment(
+  supabase: SupabaseClient,
+  p: {
+    userId: string;
+    payerEmail?: string | null;
+    amountFcfa: number;
+    method?: string;
+    reference?: string | null;
+  },
+): Promise<boolean> {
+  const { error } = await supabase.from("transport_payments").insert({
+    user_id: p.userId,
+    payer_email: p.payerEmail ?? null,
+    amount_fcfa: p.amountFcfa,
+    method: p.method ?? "mobile_money",
+    reference: p.reference ?? null,
+    status: "pending",
+  });
+  return !error;
+}
+
+/** Dernier paiement de l'utilisateur (pour afficher l'état). */
+export async function fetchMyLatestTransportPayment(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<TransportPayment | null> {
+  const { data } = await supabase
+    .from("transport_payments")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data ? mapPayment(data as Record<string, unknown>) : null;
+}
+
+/** Paiements en attente (admin). */
+export async function fetchPendingTransportPayments(
+  supabase: SupabaseClient,
+): Promise<TransportPayment[]> {
+  const { data } = await supabase
+    .from("transport_payments")
+    .select("*")
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
+  return (data ?? []).map((r) => mapPayment(r as Record<string, unknown>));
+}
+
+/** Confirme un paiement ET active l'abonnement du payeur (admin). */
+export async function confirmTransportPayment(
+  supabase: SupabaseClient,
+  p: { paymentId: string; userId: string; adminId: string },
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("transport_payments")
+    .update({
+      status: "confirmed",
+      confirmed_at: new Date().toISOString(),
+      confirmed_by: p.adminId,
+    })
+    .eq("id", p.paymentId);
+  if (error) return false;
+  return setTransportSubscription(supabase, p.userId, true);
+}
+
+/** Rejette un paiement (admin). */
+export async function rejectTransportPayment(
+  supabase: SupabaseClient,
+  paymentId: string,
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("transport_payments")
+    .update({ status: "rejected" })
+    .eq("id", paymentId);
   return !error;
 }

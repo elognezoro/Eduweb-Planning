@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bus, MapPin, Radio, BellRing, BellOff, Save, Plus, Trash2, Lock, RefreshCw } from "lucide-react";
+import { Bus, MapPin, Radio, BellRing, BellOff, Save, Plus, Trash2, Lock, RefreshCw, Hourglass, Check } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage } from "@/components/modules/module-page";
 import { Button } from "@/components/ui/button";
@@ -22,21 +22,26 @@ import {
   type BusPosition,
   type SlotDirection,
   type TransportBus,
+  type TransportPayment,
   type TransportSettings,
   type TransportSlot,
 } from "@/lib/transport/transport";
 import {
   addBus,
   addTransportSlot,
+  confirmTransportPayment,
   deleteBus,
   deleteTransportSlot,
   fetchBuses,
   fetchBusPositions,
+  fetchMyLatestTransportPayment,
+  fetchPendingTransportPayments,
   fetchTransportSettings,
   fetchTransportSlots,
   isTransportSubscribed,
+  rejectTransportPayment,
   saveTransportSettings,
-  setTransportSubscription,
+  submitTransportPayment,
   upsertBusPosition,
 } from "@/lib/transport/transport-server";
 
@@ -53,6 +58,7 @@ export default function TransportPage() {
   const [buses, setBuses] = React.useState<TransportBus[]>([]);
   const [subscribed, setSubscribed] = React.useState(false);
   const [positions, setPositions] = React.useState<BusPosition[]>([]);
+  const [myPayment, setMyPayment] = React.useState<TransportPayment | null>(null);
 
   const reload = React.useCallback(async () => {
     if (!REAL) {
@@ -62,16 +68,18 @@ export default function TransportPage() {
     setLoading(true);
     try {
       const sb = createClient();
-      const [s, sl, bs, sub] = await Promise.all([
+      const [s, sl, bs, sub, pay] = await Promise.all([
         fetchTransportSettings(sb),
         fetchTransportSlots(sb),
         fetchBuses(sb),
         userId ? isTransportSubscribed(sb, userId) : Promise.resolve(false),
+        userId ? fetchMyLatestTransportPayment(sb, userId) : Promise.resolve(null),
       ]);
       setSettings(s);
       setSlots(sl);
       setBuses(bs);
       setSubscribed(sub);
+      setMyPayment(pay);
     } finally {
       setLoading(false);
     }
@@ -122,21 +130,20 @@ export default function TransportPage() {
       ) : loading ? (
         <p className="px-1 py-8 text-center text-sm text-muted-foreground">Chargement…</p>
       ) : !canView ? (
-        <SubscribeGate
+        <PaymentGate
           priceFcfa={settings?.priceFcfa ?? 0}
-          onSubscribe={async () => {
-            if (!userId) return;
-            const ok = await setTransportSubscription(createClient(), userId, true);
-            if (ok) {
-              setSubscribed(true);
-              toast.success("Abonnement activé", {
-                description: "Vous pouvez maintenant suivre les cars en temps réel.",
-              });
-            } else {
-              toast.error("Abonnement impossible", {
-                description: "Appliquez les migrations 010 + 011, puis réessayez.",
-              });
-            }
+          payment={myPayment}
+          onSubmit={async (method, reference) => {
+            if (!userId) return false;
+            const ok = await submitTransportPayment(createClient(), {
+              userId,
+              payerEmail: app.user.email,
+              amountFcfa: settings?.priceFcfa ?? 0,
+              method,
+              reference,
+            });
+            if (ok) await reload();
+            return ok;
           }}
         />
       ) : (
@@ -165,40 +172,173 @@ function Notice({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SubscribeGate({
+function PaymentGate({
   priceFcfa,
-  onSubscribe,
+  payment,
+  onSubmit,
 }: {
   priceFcfa: number;
-  onSubscribe: () => void;
+  payment: TransportPayment | null;
+  onSubmit: (method: string, reference: string) => Promise<boolean>;
 }) {
+  const [reference, setReference] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+
+  if (payment?.status === "pending") {
+    return (
+      <div className="mx-auto max-w-lg rounded-2xl border border-ew-gold-200 bg-ew-gold-50/50 p-6 text-center">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-ew-gold-100 text-ew-gold-700">
+          <Hourglass className="h-7 w-7" />
+        </span>
+        <h2 className="mt-4 font-display text-lg font-bold text-foreground">
+          Paiement en attente de validation
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Votre paiement ({formatPrice(payment.amountFcfa || priceFcfa)}) a été
+          soumis. Un administrateur le validera — l&apos;accès s&apos;ouvrira
+          automatiquement.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-lg rounded-2xl border border-border bg-card p-6 text-center">
-      <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-ew-green-100 text-ew-green-700">
-        <Lock className="h-7 w-7" />
-      </span>
-      <h2 className="mt-4 font-display text-lg font-bold text-foreground">
-        Module non activé
-      </h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Abonnez-vous au suivi de transport pour localiser les cars en temps réel,
-        à l&apos;aller comme au retour.
-      </p>
-      <p className="mt-3 text-base font-bold text-ew-green-800">
-        {formatPrice(priceFcfa)}
-      </p>
+    <div className="mx-auto max-w-lg rounded-2xl border border-border bg-card p-6">
+      <div className="text-center">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-ew-green-100 text-ew-green-700">
+          <Lock className="h-7 w-7" />
+        </span>
+        <h2 className="mt-4 font-display text-lg font-bold text-foreground">
+          S&apos;abonner au suivi de transport
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Localisez les cars en temps réel, à l&apos;aller comme au retour.
+        </p>
+        <p className="mt-3 text-base font-bold text-ew-green-800">
+          {formatPrice(priceFcfa)}
+        </p>
+      </div>
+      {payment?.status === "rejected" ? (
+        <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          Votre précédent paiement a été rejeté. Vérifiez la référence et
+          réessayez.
+        </p>
+      ) : null}
+      <div className="mt-4 space-y-2">
+        <Label>Référence Mobile Money (n° payeur ou ID de transaction)</Label>
+        <Input
+          value={reference}
+          onChange={(e) => setReference(e.target.value)}
+          placeholder="Ex. +225 07… ou ID de transaction"
+        />
+        <p className="text-[11px] text-muted-foreground">
+          Réglez le montant par Mobile Money, puis saisissez la référence. Un
+          administrateur confirmera votre abonnement.
+        </p>
+      </div>
       <Button
-        className="mt-4"
-        disabled={busy}
+        className="mt-4 w-full"
+        disabled={busy || !reference.trim()}
         onClick={async () => {
           setBusy(true);
-          await onSubscribe();
+          const ok = await onSubmit("mobile_money", reference.trim());
           setBusy(false);
+          if (ok) {
+            toast.success("Paiement soumis", {
+              description: "En attente de validation par l'administrateur.",
+            });
+          } else {
+            toast.error("Échec de la soumission", {
+              description: "Appliquez la migration 012, puis réessayez.",
+            });
+          }
         }}
       >
-        {busy ? "Activation…" : "S'abonner"}
+        {busy ? "Envoi…" : "J'ai payé — soumettre"}
       </Button>
+    </div>
+  );
+}
+
+function PendingPaymentsPanel({
+  adminId,
+  onChanged,
+}: {
+  adminId: string;
+  onChanged: () => Promise<void>;
+}) {
+  const [items, setItems] = React.useState<TransportPayment[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  const load = React.useCallback(async () => {
+    setLoading(true);
+    const p = await fetchPendingTransportPayments(createClient());
+    setItems(p);
+    setLoading(false);
+  }, []);
+
+  React.useEffect(() => {
+    void load();
+  }, [load]);
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+        Paiements en attente ({items.length})
+      </p>
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Chargement…</p>
+      ) : items.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-border bg-background/60 p-3 text-center text-sm text-muted-foreground">
+          Aucun paiement en attente.
+        </p>
+      ) : (
+        <ul className="space-y-1.5">
+          {items.map((p) => (
+            <li
+              key={p.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm"
+            >
+              <span>
+                <strong>{p.payerEmail || p.userId.slice(0, 8)}</strong> ·{" "}
+                {formatPrice(p.amountFcfa)} · réf. {p.reference || "—"}
+              </span>
+              <span className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    const ok = await confirmTransportPayment(createClient(), {
+                      paymentId: p.id,
+                      userId: p.userId,
+                      adminId,
+                    });
+                    if (ok) {
+                      toast.success("Paiement confirmé — abonnement activé");
+                      await load();
+                      await onChanged();
+                    } else {
+                      toast.error("Confirmation refusée");
+                    }
+                  }}
+                >
+                  <Check className="h-4 w-4" /> Confirmer
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-red-600 hover:text-red-700"
+                  onClick={async () => {
+                    const ok = await rejectTransportPayment(createClient(), p.id);
+                    if (ok) await load();
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" /> Rejeter
+                </Button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -398,6 +538,7 @@ function TransportLive({
 
       {isAdmin ? (
         <AdminConfig
+          adminId={userId}
           settings={settings}
           slots={slots}
           buses={buses}
@@ -413,6 +554,7 @@ function TransportLive({
 
 /* ----------------------------- Config admin ------------------------------- */
 function AdminConfig({
+  adminId,
   settings,
   slots,
   buses,
@@ -421,6 +563,7 @@ function AdminConfig({
   onBuses,
   onReload,
 }: {
+  adminId: string;
   settings: TransportSettings | null;
   slots: TransportSlot[];
   buses: TransportBus[];
@@ -456,6 +599,9 @@ function AdminConfig({
       <p className="font-display text-sm font-bold uppercase tracking-wide text-ew-green-700">
         Configuration (administrateur)
       </p>
+
+      {/* Paiements en attente */}
+      <PendingPaymentsPanel adminId={adminId} onChanged={onReload} />
 
       {/* Cars */}
       <BusesPanel buses={buses} onBuses={onBuses} onReload={onReload} />

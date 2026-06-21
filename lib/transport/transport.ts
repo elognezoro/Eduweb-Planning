@@ -47,6 +47,19 @@ export interface BusPosition {
   updatedAt: string;
 }
 
+export type PaymentStatus = "pending" | "confirmed" | "rejected";
+
+export interface TransportPayment {
+  id: string;
+  userId: string;
+  payerEmail?: string | null;
+  amountFcfa: number;
+  method: string;
+  reference?: string | null;
+  status: PaymentStatus;
+  createdAt: string;
+}
+
 export const WEEKDAYS: { value: number; label: string; short: string }[] = [
   { value: 1, label: "Lundi", short: "Lun" },
   { value: 2, label: "Mardi", short: "Mar" },
