@@ -48,6 +48,8 @@ interface GuideStep {
 export interface GuideSection {
   title: string;
   body: string;
+  /** Cas concret illustré (chiffres, noms, scénario) — rendu en encadré « Exemple concret ». */
+  example?: string;
   steps?: GuideStep[];
   bestPractices?: string[];
   caveat?: string;
@@ -248,6 +250,19 @@ function SectionBlock({ section }: { section: GuideSection }) {
           <p key={i}>{para}</p>
         ))}
       </div>
+
+      {section.example && (
+        <div className="mt-4 rounded-lg border border-ew-green-200 bg-ew-green-50/60 p-4">
+          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-ew-green-700">
+            <GraduationCap className="h-3.5 w-3.5" /> Exemple concret
+          </p>
+          <div className="mt-1.5 space-y-2 text-[13.5px] leading-relaxed text-foreground/90">
+            {section.example.split(/\n\n+/).map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
+        </div>
+      )}
 
       {section.steps && section.steps.length > 0 && (
         <ol className="mt-5 space-y-3 border-l-2 border-ew-green-200 pl-5">

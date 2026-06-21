@@ -594,12 +594,14 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
       id: "transport-eleves",
       title: "Transport d'élèves",
       intro:
-        "Le module Transport assure la géolocalisation en temps réel des cars (aller / retour) et la gestion des abonnements. Chaque établissement dispose d'un espace de configuration totalement indépendant ; le super-admin supervise l'ensemble.",
+        "Le module Transport répond à un double besoin : sécuriser le trajet des élèves en permettant aux familles de localiser le car en temps réel, et donner à chaque établissement la maîtrise de son propre service. Trois principes le structurent. Premièrement, la position est émise par le terminal du conducteur (un simple téléphone), sans boîtier matériel ni abonnement opérateur. Deuxièmement, l'accès des familles au suivi est un service payant, dont la validité est vérifiée côté serveur — l'interface ne fait qu'afficher ce que le serveur autorise. Troisièmement, les données sont cloisonnées par établissement : c'est le principe d'isolation, qui rend la délégation à un chef d'établissement sûre. Le super-admin supervise l'ensemble et configure n'importe quel établissement ; le chef ne gère que le sien.",
       sections: [
         {
           title: "Vue d'ensemble et accès",
           body:
-            "Le suivi s'appuie sur OpenStreetMap (gratuit, sans clé). Le fond de carte est toujours affiché ; les cars apparaissent sous forme de marqueurs (étiquetés par matricule) dès qu'un conducteur émet sa position pendant un créneau. Une alerte sonore « bip-bip-bip » signale l'entrée en créneau.",
+            "Le suivi s'appuie sur OpenStreetMap (gratuit, sans clé). Le fond de carte est toujours affiché ; les cars apparaissent sous forme de marqueurs (étiquetés par matricule) dès qu'un conducteur émet sa position pendant un créneau. Une alerte sonore « bip-bip-bip » signale l'entrée en créneau.\n\nLa notion de créneau est centrale : un car n'émet et n'apparaît que pendant les fenêtres horaires que vous définissez (aller le matin, retour le soir). En dehors, la carte reste affichée mais sans marqueur — ce qui évite toute géolocalisation hors service.",
+          example:
+            "Un parent du « Lycée Moderne de Cocody », abonné et connecté, ouvre Transport à 6 h 35 : le créneau « Aller · Lun-Ven · 06:30–07:30 » est actif, le car « 1234 AB 01 » apparaît et se déplace sur la carte ; un « bip-bip-bip » l'avait prévenu à 6 h 30. À 7 h 31, hors créneau, le marqueur disparaît automatiquement.",
           steps: [
             {
               instruction: "Ouvrez le module de transport.",
@@ -619,16 +621,30 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
         {
           title: "Configurer le service d'un établissement",
           body:
-            "Dans le bloc « Configuration (administrateur) », réglez la tarification, les véhicules et les créneaux du périmètre sélectionné.",
+            "Dans le bloc « Configuration (administrateur) », vous réglez successivement la tarification, le centre de carte, les véhicules puis les créneaux du périmètre sélectionné. L'ordre ci-dessous garantit qu'aucun élément ne manque à la mise en service.",
           steps: [
             {
               instruction:
-                "Fixez le tarif mensuel, le tarif annuel et la pénalité d'upgrade (passage mensuel → annuel), la périodicité du bip et le centre de la carte (latitude / longitude).",
-              tip: "Pour Abidjan, un centre proche de 5.35 / -4.00 cadre bien la carte.",
+                "Renseignez le tarif mensuel et le tarif annuel (en FCFA) ainsi que la pénalité d'upgrade (en %).",
+              navigation: "Transport → Configuration (administrateur) → Tarifs",
+              tip: "Le tarif annuel doit être inférieur à douze mensualités pour rester attractif ; la pénalité d'upgrade (déf. 20 %) protège ceux qui s'engagent à l'année.",
             },
             {
               instruction:
-                "Ajoutez chaque car par son matricule (un terminal émetteur par car), puis créez les créneaux d'émission (sens aller/retour, jours, heures).",
+                "Définissez la périodicité du bip (en minutes) et le centre de la carte (latitude / longitude), puis enregistrez les réglages.",
+              tip: "Pour Abidjan-Cocody, un centre proche de 5.35 / -3.99 cadre bien la carte dès l'ouverture.",
+            },
+            {
+              instruction:
+                "Ajoutez chaque car par son matricule (un terminal émetteur = un car), avec un libellé facultatif.",
+              navigation: "Configuration → Cars / terminaux",
+            },
+            {
+              instruction:
+                "Créez les créneaux d'émission : sens (aller / retour), jours de la semaine, heure de début et de fin.",
+              navigation: "Configuration → Créneaux d'émission",
+              warning:
+                "Sans créneau actif à l'heure réelle, aucun car n'émet et la carte reste vide : créez au moins un créneau couvrant la tournée.",
             },
           ],
           bestPractices: [
@@ -660,7 +676,9 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
         {
           title: "Abonnements et paiements (Mobile Money)",
           body:
-            "Le parent choisit une formule (mensuelle ou annuelle), règle par Mobile Money et saisit une référence ; vous validez le paiement, ce qui ouvre l'accès jusqu'à l'échéance. Le passage mensuel → annuel applique une pénalité d'équité calculée côté serveur.",
+            "Le parent choisit une formule (mensuelle ou annuelle), règle par Mobile Money et saisit une référence ; vous validez le paiement, ce qui ouvre l'accès jusqu'à l'échéance.\n\nLe passage mensuel → annuel obéit à un principe d'équité : un parent qui bascule tardivement ne doit pas payer, au total, moins qu'un parent ayant souscrit l'annuel dès le départ. Le montant est donc le reste à payer vers l'annuel (les jours déjà couverts sont crédités au tarif annuel), majoré d'une pénalité paramétrable. Tout le calcul est fait côté serveur : le client ne fixe jamais le montant.",
+          example:
+            "Tarifs de l'établissement : 5 000 FCFA/mois, 50 000 FCFA/an, pénalité d'upgrade 20 %. Un parent abonné au mois (il lui reste 20 jours) demande l'annuel. Le serveur calcule : crédit ≈ 50 000 × 20/365 ≈ 2 740 FCFA → reste à payer = 47 260 → pénalité 20 % = 9 452 → total ≈ 56 712 FCFA. Le parent voit ce détail avant de payer ; après votre validation, son accès devient annuel (1 an).",
           steps: [
             {
               instruction:

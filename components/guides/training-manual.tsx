@@ -630,6 +630,7 @@ export interface ManuelModuleProps {
     sections: {
       title: string;
       body: string;
+      example?: string;
       steps?: { instruction: string; navigation?: string; tip?: string; warning?: string }[];
       bestPractices?: string[];
       caveat?: string;
@@ -732,6 +733,17 @@ export function ManuelModuleBlock({ moduleCode, roleLabel, icon: Icon, duration,
                   <p key={i}>{para}</p>
                 ))}
               </div>
+
+              {s.example && (
+                <div className="mt-3 rounded border border-ew-green-200 bg-ew-green-50/60 p-2.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-ew-green-700">Exemple concret</p>
+                  <div className="mt-1 space-y-1 text-[11px] leading-[1.6] text-gray-800">
+                    {s.example.split(/\n\n+/).map((para, i) => (
+                      <p key={i}>{para}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {s.steps && s.steps.length > 0 && (
                 <ol className="mt-3 space-y-2 border-l-2 border-ew-green-300 pl-3 text-[11.5px]">
