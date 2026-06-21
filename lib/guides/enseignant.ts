@@ -218,6 +218,8 @@ export const guideEnseignant: Omit<GuideContent, "icon"> = {
         {
           title: "Publier une séance dans le cahier de texte",
           body: "Chaque séance doit comporter au minimum un objectif pédagogique, le contenu abordé et, le cas échéant, les devoirs à effectuer pour la séance suivante. Le cahier de texte est consultable par les élèves, les parents et les inspecteurs.",
+          example:
+            "Après son cours du mardi en 4ᵉ C, Mme Brou publie la séance — Objectif : « Identifier les figures de style » ; Contenu : « La métaphore et la comparaison » ; Travail à faire : « Exercices p. 42, pour vendredi ». Les élèves absents et les parents y accèdent immédiatement.",
           steps: [
             {
               instruction: "Ouvrir Vie scolaire puis Cahier de texte.",
@@ -244,6 +246,8 @@ export const guideEnseignant: Omit<GuideContent, "icon"> = {
         {
           title: "Saisir les notes par classe et période",
           body: "La saisie des notes s'effectue par évaluation, classe et période (trimestre, semestre). Le module calcule automatiquement les moyennes pondérées en fonction des coefficients définis par l'établissement.",
+          example:
+            "En 3ᵉ A, M. Kouassi saisit le devoir de mathématiques (coefficient 2) : Awa 15/20, Koffi 12/20, Mariam 17/20. Le module applique le coefficient et recalcule aussitôt la moyenne trimestrielle de chaque élève — sans aucun calcul manuel.",
           steps: [
             {
               instruction: "Ouvrir Vie scolaire puis Notes et bulletins.",
