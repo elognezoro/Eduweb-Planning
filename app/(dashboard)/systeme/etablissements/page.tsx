@@ -55,6 +55,7 @@ import {
 } from "@/components/ui/select";
 import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
+import { InstalledEstablishmentsPanel } from "@/components/etablissements/installed-establishments-panel";
 import { COUNTRIES } from "@/config/countries";
 import { getUnCountry } from "@/config/un-countries";
 import type { Etablissement } from "@/lib/types";
@@ -176,6 +177,10 @@ export default function EtablissementsPage() {
         { label: "Réussite moyenne", value: "76,9 %", icon: TrendingUp, tone: "purple", delta: 1.8 },
       ]}
     >
+      <div className="mb-4">
+        <InstalledEstablishmentsPanel />
+      </div>
+
       <FilterBar>
         <CountrySearchSelect value={country} onChange={setCountry} allowAll className="w-56" />
         <FilterSelect

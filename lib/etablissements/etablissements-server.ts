@@ -64,10 +64,17 @@ export async function ensureEstablishment(
   return { id: (data as { id?: string } | null)?.id ?? null };
 }
 
+export interface InstalledEstablishment {
+  id: string;
+  name: string;
+  code: string | null;
+  dspsCode: string | null;
+}
+
 /** Établissements déjà matérialisés (UUID + nom + codes) — pour les listes admin. */
 export async function fetchInstalledEstablishments(
   supabase: SupabaseClient,
-): Promise<{ id: string; name: string; code: string | null; dspsCode: string | null }[]> {
+): Promise<InstalledEstablishment[]> {
   const { data } = await supabase
     .from("etablissements")
     .select("id, name, code, dsps_code")
@@ -81,4 +88,13 @@ export async function fetchInstalledEstablishments(
       dspsCode: (row.dsps_code as string | null) ?? null,
     };
   });
+}
+
+/** Retire un établissement installé (admin). Bloqué par la base s'il est référencé. */
+export async function deleteInstalledEstablishment(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase.from("etablissements").delete().eq("id", id);
+  return { ok: !error, error: error?.message };
 }
