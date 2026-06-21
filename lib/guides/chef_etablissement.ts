@@ -576,6 +576,42 @@ export const guideChefEtablissement: Omit<GuideContent, "icon"> = {
         },
       ],
     },
+    {
+      id: "transport-eleves",
+      title: "Transport d'élèves de mon établissement",
+      intro:
+        "Si votre compte est rattaché à votre établissement, vous gérez son service de transport — et lui seul. Le suivi se fait en temps réel sur une carte (OpenStreetMap) ; les parents abonnés voient les cars se déplacer.",
+      sections: [
+        {
+          title: "Accéder au service et comprendre le périmètre",
+          body:
+            "Vous n'avez pas de sélecteur d'établissement : vous gérez automatiquement le vôtre. L'isolation garantit que vous ne voyez ni ne modifiez les données d'un autre établissement (cars, créneaux, tarifs, conducteurs, paiements).",
+          steps: [
+            {
+              instruction: "Ouvrez le module de transport.",
+              navigation: "Vie scolaire → Transport d'élèves",
+              tip: "Si vous ne voyez pas le bloc « Configuration », c'est que votre compte n'est pas encore rattaché à votre établissement — demandez-le à l'administrateur.",
+            },
+          ],
+        },
+        {
+          title: "Configurer véhicules, créneaux et tarifs",
+          body:
+            "Dans « Configuration (administrateur) », réglez la tarification (mensuel, annuel, pénalité d'upgrade), la périodicité du bip et le centre de la carte, puis ajoutez vos cars (par matricule) et vos créneaux (aller / retour, jours, heures).",
+          bestPractices: [
+            "Préparez cars, créneaux et conducteurs avant la rentrée.",
+            "Vérifiez qu'un créneau couvre bien les heures réelles de ramassage.",
+          ],
+        },
+        {
+          title: "Conducteurs et validation des paiements",
+          body:
+            "Désignez vos conducteurs par e-mail (compte existant) ; eux seuls peuvent émettre la position depuis leur téléphone (« Mode conducteur »). Validez ensuite les paiements Mobile Money de vos parents dans « Paiements en attente » : la confirmation ouvre l'abonnement jusqu'à l'échéance.",
+          caveat:
+            "Vous ne validez que les paiements de votre établissement ; ceux des autres établissements ne vous sont pas présentés.",
+        },
+      ],
+    },
   ],
   faq: [
     {

@@ -306,8 +306,52 @@ export const guideParent: Omit<GuideContent, "icon"> = {
         },
       ],
     },
+    {
+      id: "transport-eleves",
+      title: "Suivre le car de transport",
+      intro:
+        "Si votre établissement propose le suivi de transport, vous pouvez vous abonner pour localiser le car en temps réel sur une carte, à l'aller comme au retour, avec une alerte sonore.",
+      sections: [
+        {
+          title: "S'abonner (mensuel ou annuel)",
+          body:
+            "À l'ouverture du module, choisissez une formule — Mensuel ou Annuel — puis réglez le montant par Mobile Money et saisissez la référence du paiement. Un administrateur valide votre paiement, et l'accès s'ouvre automatiquement jusqu'à l'échéance.",
+          steps: [
+            {
+              instruction: "Ouvrez le suivi de transport.",
+              navigation: "Vie scolaire → Transport d'élèves",
+            },
+            {
+              instruction:
+                "Sélectionnez la formule, payez par Mobile Money, saisissez la référence puis soumettez.",
+              tip: "Tant que l'administrateur n'a pas validé, l'écran indique « Paiement en attente ». Vous voyez l'échéance une fois l'accès ouvert.",
+            },
+          ],
+        },
+        {
+          title: "Passer du mensuel à l'annuel",
+          body:
+            "Abonné au mois, vous pouvez basculer en formule annuelle depuis la carte « Passer à la formule annuelle ». Le détail affiche le tarif annuel, le crédit pour vos jours déjà payés, et une pénalité d'équité — le total à régler s'affiche avant paiement.",
+        },
+        {
+          title: "Suivre le car et l'alerte sonore",
+          body:
+            "Une fois abonné, la carte affiche le car (marqueur au matricule) dès que le conducteur émet, pendant les créneaux. Un « bip-bip-bip » signale l'arrivée du créneau ; vous pouvez couper les alertes via le bouton dédié.",
+          caveat:
+            "Le car n'apparaît que lorsque son conducteur émet sa position, pendant un créneau d'émission.",
+        },
+      ],
+    },
   ],
   faq: [
+    {
+      question: "Comment suivre le car de mon enfant en temps réel ?",
+      answer: "Si votre établissement a activé le service, allez dans Vie scolaire → Transport d'élèves, abonnez-vous (formule mensuelle ou annuelle, paiement Mobile Money validé par l'établissement), puis suivez le car sur la carte dès qu'il circule pendant un créneau.",
+    },
+    {
+      question: "J'ai payé au mois, puis-je passer à l'année ?",
+      answer: "Oui. Depuis votre carte de transport, cliquez « Passer à la formule annuelle ». Vous payez le complément (avec un crédit pour vos jours restants et une pénalité d'équité affichée) ; après validation, votre accès passe à un an.",
+    },
     {
       question: "Je ne vois pas mon enfant dans mon espace : que faire ?",
       answer: "Contactez le secrétariat de l'établissement pour vérifier le rattachement parent-enfant dans la base administrative. Sans ce rattachement, les modules restent vides.",

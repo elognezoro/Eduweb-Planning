@@ -590,8 +590,151 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
         },
       ],
     },
+    {
+      id: "transport-eleves",
+      title: "Transport d'élèves",
+      intro:
+        "Le module Transport assure la géolocalisation en temps réel des cars (aller / retour) et la gestion des abonnements. Chaque établissement dispose d'un espace de configuration totalement indépendant ; le super-admin supervise l'ensemble.",
+      sections: [
+        {
+          title: "Vue d'ensemble et accès",
+          body:
+            "Le suivi s'appuie sur OpenStreetMap (gratuit, sans clé). Le fond de carte est toujours affiché ; les cars apparaissent sous forme de marqueurs (étiquetés par matricule) dès qu'un conducteur émet sa position pendant un créneau. Une alerte sonore « bip-bip-bip » signale l'entrée en créneau.",
+          steps: [
+            {
+              instruction: "Ouvrez le module de transport.",
+              navigation: "Vie scolaire → Transport d'élèves",
+            },
+            {
+              instruction:
+                "En tant que super-admin, choisissez l'établissement à gérer dans le sélecteur « Établissement géré » (référentiel CI).",
+              tip: "L'établissement choisi est enregistré dans la base au moment de la sélection ; laissez vide pour le périmètre « Général ».",
+            },
+          ],
+        },
+        {
+          title: "Configurer le service d'un établissement",
+          body:
+            "Dans le bloc « Configuration (administrateur) », réglez la tarification, les véhicules et les créneaux du périmètre sélectionné.",
+          steps: [
+            {
+              instruction:
+                "Fixez le tarif mensuel, le tarif annuel et la pénalité d'upgrade (passage mensuel → annuel), la périodicité du bip et le centre de la carte (latitude / longitude).",
+              tip: "Pour Abidjan, un centre proche de 5.35 / -4.00 cadre bien la carte.",
+            },
+            {
+              instruction:
+                "Ajoutez chaque car par son matricule (un terminal émetteur par car), puis créez les créneaux d'émission (sens aller/retour, jours, heures).",
+            },
+          ],
+          bestPractices: [
+            "Préparez véhicules, créneaux et conducteurs avant la rentrée.",
+            "Un créneau couvrant l'heure réelle est nécessaire pour que l'émission GPS démarre.",
+          ],
+        },
+        {
+          title: "Conducteurs et émission de la position",
+          body:
+            "Seuls les conducteurs désignés (ou l'admin) peuvent émettre une position — protection anti-usurpation. Un conducteur n'émet que pour un car de son établissement.",
+          steps: [
+            {
+              instruction:
+                "Désignez un conducteur par son e-mail dans « Conducteurs désignés » (le compte doit exister).",
+            },
+            {
+              instruction:
+                "Sur le téléphone du conducteur : Transport → « Mode conducteur » → autoriser la géolocalisation → choisir son car. La position s'émet pendant les créneaux.",
+              warning:
+                "La page doit rester ouverte, écran allumé ; un téléphone verrouillé interrompt l'émission.",
+            },
+          ],
+        },
+        {
+          title: "Abonnements et paiements (Mobile Money)",
+          body:
+            "Le parent choisit une formule (mensuelle ou annuelle), règle par Mobile Money et saisit une référence ; vous validez le paiement, ce qui ouvre l'accès jusqu'à l'échéance. Le passage mensuel → annuel applique une pénalité d'équité calculée côté serveur.",
+          steps: [
+            {
+              instruction:
+                "Dans « Paiements en attente », confirmez ou rejetez chaque demande (le badge indique Mensuel / Annuel et les upgrades).",
+              tip: "À la confirmation, l'abonnement est prolongé automatiquement (1 mois / 1 an) ; au-delà de l'échéance, l'accès se referme seul.",
+            },
+          ],
+          caveat:
+            "Le paiement Mobile Money est validé manuellement (confiance assumée) : vérifiez la référence avant de confirmer.",
+        },
+        {
+          title: "Isolation par établissement et délégation",
+          body:
+            "Cars, créneaux, tarifs, conducteurs, paiements et abonnements sont strictement cloisonnés par établissement (en lecture comme en écriture). Le chef d'établissement gère uniquement le sien ; vous, super-admin, configurez n'importe lequel via le sélecteur. Pour activer un chef, rattachez son compte à son établissement (voir le chapitre suivant).",
+        },
+      ],
+    },
+    {
+      id: "securite-etablissements",
+      title: "Sécurité de session & rattachement aux établissements",
+      intro:
+        "Réglages transverses récents : déconnexion automatique globale, référentiel officiel des établissements de Côte d'Ivoire, et rattachement des comptes à leur établissement (qui active la délégation aux chefs d'établissement).",
+      sections: [
+        {
+          title: "Déconnexion automatique par inactivité",
+          body:
+            "Vous définissez une durée d'inactivité au-delà de laquelle tout utilisateur est déconnecté automatiquement. Le réglage est global (tous les comptes, tous les appareils) et précédé d'un avertissement avec compte à rebours.",
+          steps: [
+            {
+              instruction:
+                "Activez la déconnexion auto et choisissez la durée (1 à 240 min) et le délai d'avertissement.",
+              navigation: "Système → Sécurité de session",
+              tip: "15 à 30 minutes conviennent pour des postes partagés en établissement.",
+            },
+          ],
+        },
+        {
+          title: "Référentiel des établissements (Côte d'Ivoire)",
+          body:
+            "Un référentiel officiel de 2921 établissements secondaires est intégré. Installez ceux que vous exploitez : ils deviennent disponibles pour les fonctionnalités par établissement (transport, délégation…). Chaque établissement porte deux identifiants : le Code DSPS (officiel) et le Code EduWeb (CI-#####).",
+          steps: [
+            {
+              instruction:
+                "Dans le panneau « Établissements installés », recherchez un établissement (nom, code DSPS, commune, DRENA) puis cliquez « Installer ». Une saisie manuelle est possible si l'établissement n'est pas listé.",
+              navigation: "Système → Établissements",
+            },
+          ],
+        },
+        {
+          title: "Rattacher un compte à un établissement (délégation chef)",
+          body:
+            "Rattacher un compte à un établissement conditionne la gestion déléguée. Un compte au rôle « Chef d'établissement » rattaché à un établissement pourra configurer le transport de cet établissement — et de lui seul.",
+          steps: [
+            {
+              instruction:
+                "Ouvrez « Changer le rôle » sur le compte, choisissez le rôle « Chef d'établissement », sélectionnez son établissement dans la liste, puis enregistrez.",
+              navigation: "Système → Comptes utilisateurs",
+              tip: "Validez d'abord le compte s'il est « en attente ».",
+            },
+          ],
+        },
+        {
+          title: "Inscription avec choix d'établissement",
+          body:
+            "À la création de compte (page d'inscription), l'utilisateur de Côte d'Ivoire peut sélectionner son établissement dans le référentiel ; il y est rattaché automatiquement dès la création, sans intervention de votre part.",
+        },
+      ],
+    },
   ],
   faq: [
+    {
+      question: "Un parent paie son transport au mois puis veut passer à l'année. Est-ce possible ?",
+      answer: "Oui. Depuis sa carte de transport, il choisit « Passer à la formule annuelle ». Le montant est le reste à payer vers l'annuel, majoré d'une pénalité d'équité (réglable, défaut 20 %) calculée par le serveur ; après votre validation, son accès passe à un an.",
+    },
+    {
+      question: "Comment activer un chef d'établissement pour qu'il gère son propre transport ?",
+      answer: "Dans Comptes utilisateurs, attribuez-lui le rôle « Chef d'établissement » ET rattachez-le à son établissement (préalablement installé depuis le référentiel). L'isolation garantit qu'il ne voit ni ne modifie les autres établissements.",
+    },
+    {
+      question: "La déconnexion automatique s'applique-t-elle à tout le monde ?",
+      answer: "Oui : une fois activée dans Système → Sécurité de session, elle vaut pour tous les comptes et tous les appareils. Le réglage est enregistré côté serveur.",
+    },
     {
       question: "Puis-je créer un compte administrateur supplémentaire ?",
       answer: "Oui, mais avec parcimonie. Un nombre restreint d'administrateurs facilite l'audit. Justifiez chaque création et documentez-la dans le registre de gouvernance interne.",
