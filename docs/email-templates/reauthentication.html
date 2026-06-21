@@ -1,0 +1,48 @@
+<!-- ============================================================================
+     EduWeb Planner — Modèle « Reauthentication » (Code de vérification)
+     Supabase : Authentication → Emails → Templates → "Reauthentication"
+     Objet suggéré : Votre code de vérification EduWeb Planner
+     Variable utilisée : {{ .Token }}  (code à 6 chiffres — PAS de lien ici)
+     ============================================================================ -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Votre code de vérification EduWeb Planner.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0fbf5;margin:0;padding:24px 0;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border:1px solid #bbe1cc;border-radius:16px;overflow:hidden;">
+        <tr>
+          <td style="background-color:#105234;padding:24px 32px;">
+            <span style="display:inline-block;background-color:#eba52a;color:#0b3b25;font-weight:bold;font-size:14px;border-radius:8px;padding:6px 10px;">EduWeb</span>
+            <span style="color:#ffffff;font-size:18px;font-weight:bold;letter-spacing:0.3px;margin-left:8px;">EduWeb Planner</span>
+            <div style="color:#bbe1cc;font-size:12px;margin-top:6px;">Pilotage et vie scolaire</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px;">
+            <h1 style="margin:0 0 12px;color:#0b3b25;font-size:22px;">Code de vérification</h1>
+            <p style="margin:0 0 16px;color:#1f2937;font-size:15px;line-height:1.6;">
+              Saisissez ce code pour confirmer votre action sur
+              <strong>EduWeb Planner</strong> :
+            </p>
+            <div style="margin:24px 0;text-align:center;">
+              <span style="display:inline-block;background-color:#f0fbf5;border:1px solid #bbe1cc;border-radius:12px;color:#0b3b25;font-size:32px;font-weight:bold;letter-spacing:8px;padding:16px 28px;">
+                {{ .Token }}
+              </span>
+            </div>
+            <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.6;">
+              Ce code expire après un court délai. Si vous n'êtes pas à l'origine de
+              cette demande, ignorez cet e-mail et ne communiquez ce code à personne.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="background-color:#f0fbf5;padding:20px 32px;border-top:1px solid #dff4e9;">
+            <p style="margin:0;color:#6b7280;font-size:12px;line-height:1.6;">
+              EduWeb Planner — <a href="https://planning.eduweb.ci" style="color:#176b45;text-decoration:none;">planning.eduweb.ci</a><br>
+              Cet e-mail vous a été envoyé automatiquement, merci de ne pas y répondre.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

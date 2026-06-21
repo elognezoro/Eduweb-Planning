@@ -1,0 +1,65 @@
+<!-- ============================================================================
+     EduWeb Planner — Modèle « Change Email Address » (Changer d'e-mail)
+     Supabase : Authentication → Emails → Templates → "Change Email Address"
+     Objet suggéré : Confirmez votre nouvelle adresse e-mail — EduWeb Planner
+     Variables : {{ .ConfirmationURL }}, {{ .Email }} (ancienne), {{ .NewEmail }} (nouvelle)
+     ============================================================================ -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Confirmez le changement d'adresse e-mail de votre compte EduWeb Planner.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0fbf5;margin:0;padding:24px 0;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border:1px solid #bbe1cc;border-radius:16px;overflow:hidden;">
+        <tr>
+          <td style="background-color:#105234;padding:24px 32px;">
+            <span style="display:inline-block;background-color:#eba52a;color:#0b3b25;font-weight:bold;font-size:14px;border-radius:8px;padding:6px 10px;">EduWeb</span>
+            <span style="color:#ffffff;font-size:18px;font-weight:bold;letter-spacing:0.3px;margin-left:8px;">EduWeb Planner</span>
+            <div style="color:#bbe1cc;font-size:12px;margin-top:6px;">Pilotage et vie scolaire</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px;">
+            <h1 style="margin:0 0 12px;color:#0b3b25;font-size:22px;">Changement d'adresse e-mail</h1>
+            <p style="margin:0 0 16px;color:#1f2937;font-size:15px;line-height:1.6;">
+              Une demande de modification d'adresse e-mail a été faite pour votre compte
+              <strong>EduWeb Planner</strong> :
+            </p>
+            <p style="margin:0 0 16px;color:#1f2937;font-size:14px;line-height:1.7;background-color:#f0fbf5;border:1px solid #dff4e9;border-radius:10px;padding:12px 16px;">
+              Ancienne adresse : <strong>{{ .Email }}</strong><br>
+              Nouvelle adresse : <strong>{{ .NewEmail }}</strong>
+            </p>
+            <p style="margin:0 0 8px;color:#1f2937;font-size:15px;line-height:1.6;">
+              Confirmez ce changement en cliquant sur le bouton ci-dessous.
+            </p>
+            <table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+              <tr>
+                <td align="center" bgcolor="#176b45" style="border-radius:10px;">
+                  <a href="{{ .ConfirmationURL }}" style="display:inline-block;color:#ffffff;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;">
+                    Confirmer le changement
+                  </a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:0 0 8px;color:#6b7280;font-size:13px;line-height:1.6;">
+              Si le bouton ne fonctionne pas, copiez-collez ce lien dans votre navigateur :
+            </p>
+            <p style="margin:0 0 16px;word-break:break-all;">
+              <a href="{{ .ConfirmationURL }}" style="color:#176b45;font-size:13px;">{{ .ConfirmationURL }}</a>
+            </p>
+            <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.6;">
+              Vous n'êtes pas à l'origine de cette demande ? Ignorez cet e-mail : votre
+              adresse actuelle restera inchangée.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="background-color:#f0fbf5;padding:20px 32px;border-top:1px solid #dff4e9;">
+            <p style="margin:0;color:#6b7280;font-size:12px;line-height:1.6;">
+              EduWeb Planner — <a href="https://planning.eduweb.ci" style="color:#176b45;text-decoration:none;">planning.eduweb.ci</a><br>
+              Cet e-mail vous a été envoyé automatiquement, merci de ne pas y répondre.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
