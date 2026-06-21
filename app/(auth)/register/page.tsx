@@ -48,6 +48,10 @@ import {
 } from "@/components/ui/select";
 import { UN_COUNTRIES } from "@/config/un-countries";
 import { registerSchema, type RegisterInput } from "@/lib/schemas/auth";
+import {
+  EtablissementCombobox,
+  type EtablissementSelection,
+} from "@/components/etablissements/etablissement-combobox";
 import { cn } from "@/lib/utils";
 
 const RULES: { label: string; test: (v: string) => boolean }[] = [
@@ -78,6 +82,8 @@ export default function RegisterPage() {
   // window.location s'exécute au rendu serveur/statique (window indéfini) et
   // renverrait toujours null, neutralisant le lien d'invitation. L'effet ne
   // s'exécute que côté client, où le jeton est réellement disponible.
+  // Établissement de rattachement (référentiel CI) — facultatif, hors schéma zod.
+  const [etabSel, setEtabSel] = React.useState<EtablissementSelection | null>(null);
   const [inviteToken, setInviteToken] = React.useState<string | null>(null);
   React.useEffect(() => {
     setInviteToken(new URLSearchParams(window.location.search).get("invite"));
@@ -141,6 +147,15 @@ export default function RegisterPage() {
             last_name: data.lastName,
             phone: data.phone,
             country: data.country,
+            // Établissement choisi → matérialisé par le trigger handle_new_user
+            // (SECURITY DEFINER) qui pose profiles.etablissement_id (migration 020).
+            ...(etabSel
+              ? {
+                  establishment_code: etabSel.eduwebCode ?? null,
+                  establishment_name: etabSel.name,
+                  establishment_dsps: etabSel.dspsCode ?? null,
+                }
+              : {}),
             // Auto-inscription SERVEUR (lien OFFERT) : le trigger handle_new_user
             // crée les inscriptions à partir de ces métadonnées → fonctionne sur
             // n'importe quel appareil. Les liens PAYANTS restent gérés par le
@@ -315,6 +330,16 @@ export default function RegisterPage() {
             )}
           />
         </AuthField>
+
+        {selectedCountry === "CI" ? (
+          <AuthField label="Établissement (facultatif)" icon={GraduationCap}>
+            <EtablissementCombobox
+              value={etabSel}
+              onChange={setEtabSel}
+              placeholder="Rechercher votre établissement…"
+            />
+          </AuthField>
+        ) : null}
 
         <div className="grid grid-cols-2 gap-3">
           <AuthField label="Nom" required error={errors.lastName?.message}>
