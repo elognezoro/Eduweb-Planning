@@ -11,6 +11,9 @@ import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
+import { saveSecuritySettings } from "@/lib/security/security-server";
 
 /**
  * Page « Sécurité de session » — réservée à l'admin (system:manage_permissions).
@@ -44,6 +47,10 @@ function SecurityContent() {
   const [minutes, setMinutes] = React.useState<number>(current.idleLogoutMinutes);
   const [warnSec, setWarnSec] = React.useState<number>(current.idleWarningSeconds);
   const [savedAt, setSavedAt] = React.useState<number | null>(null);
+  const [saving, setSaving] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const realMode = isSupabaseConfigured();
 
   React.useEffect(() => {
     setEnabled(current.idleLogoutEnabled);
@@ -56,17 +63,51 @@ function SecurityContent() {
     minutes !== current.idleLogoutMinutes ||
     warnSec !== current.idleWarningSeconds;
 
+  // Applique localement puis, en mode réel, persiste côté serveur (global, tous
+  // appareils). En cas d'échec serveur, on remonte l'erreur sans bloquer le local.
+  async function persist(next: {
+    idleLogoutEnabled: boolean;
+    idleLogoutMinutes: number;
+    idleWarningSeconds: number;
+  }) {
+    setError(null);
+    store.setSecuritySettings(next);
+    if (!realMode) {
+      setSavedAt(Date.now());
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await saveSecuritySettings(createClient(), next);
+      if (res.ok) {
+        setSavedAt(Date.now());
+      } else {
+        setError(
+          res.error
+            ? `Échec de l'enregistrement serveur : ${res.error}`
+            : "Échec de l'enregistrement serveur. Réessayez.",
+        );
+      }
+    } catch {
+      setError("Échec de l'enregistrement serveur (réseau). Réessayez.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function save() {
-    store.setSecuritySettings({
+    void persist({
       idleLogoutEnabled: enabled,
       idleLogoutMinutes: minutes,
       idleWarningSeconds: warnSec,
     });
-    setSavedAt(Date.now());
   }
 
   function reset() {
-    store.setSecuritySettings({
+    setEnabled(false);
+    setMinutes(20);
+    setWarnSec(30);
+    void persist({
       idleLogoutEnabled: false,
       idleLogoutMinutes: 20,
       idleWarningSeconds: 30,
@@ -89,6 +130,19 @@ function SecurityContent() {
               <strong>tous les utilisateurs de la plateforme</strong>, quel que soit
               leur rôle. Un avertissement précède la déconnexion pour permettre à
               l&apos;utilisateur de prolonger sa session.
+            </p>
+            <p className="mt-1 text-foreground/90">
+              {realMode ? (
+                <>
+                  ✅ Réglage <strong>enregistré côté serveur</strong> : il s&apos;impose
+                  à tous les comptes, sur <strong>tous les appareils</strong>.
+                </>
+              ) : (
+                <>
+                  ⚠️ Mode démonstration : le réglage reste local à ce navigateur
+                  (la persistance serveur s&apos;active une fois la base connectée).
+                </>
+              )}
             </p>
             <p className="mt-1 italic text-muted-foreground">
               Connecté en tant que{" "}
@@ -229,9 +283,15 @@ function SecurityContent() {
 
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground">
-              {savedAt && !hasChanges ? (
+              {saving ? (
+                <span className="italic text-ew-gold-700">
+                  Enregistrement côté serveur…
+                </span>
+              ) : error ? (
+                <span className="text-red-600">⚠️ {error}</span>
+              ) : savedAt && !hasChanges ? (
                 <span className="text-ew-green-700">
-                  ✓ Paramètres enregistrés à{" "}
+                  ✓ Paramètres enregistrés{realMode ? " (serveur)" : ""} à{" "}
                   {new Date(savedAt).toLocaleTimeString("fr-FR", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -244,10 +304,10 @@ function SecurityContent() {
               )}
             </p>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={reset}>
+              <Button variant="outline" size="sm" onClick={reset} disabled={saving}>
                 Réinitialiser
               </Button>
-              <Button size="sm" onClick={save} disabled={!hasChanges}>
+              <Button size="sm" onClick={save} disabled={!hasChanges || saving}>
                 <Save className="h-4 w-4" /> Enregistrer
               </Button>
             </div>

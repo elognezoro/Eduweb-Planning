@@ -6,6 +6,7 @@ import { SidebarContent } from "./sidebar";
 import { Topbar } from "./topbar";
 import { RolePreviewBanner } from "./role-preview";
 import { IdleLogoutWatcher } from "./idle-logout-watcher";
+import { SecuritySettingsSync } from "./security-settings-sync";
 import { EnrollmentIntentClaimer } from "@/components/formations/enrollment-intent-claimer";
 import { CourseEnrollmentsSync } from "@/components/formations/course-enrollments-sync";
 import { cn } from "@/lib/utils";
@@ -72,6 +73,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {t("footer.tagline")} · © {new Date().getFullYear()}
         </footer>
       </div>
+      {/* Charge les réglages de sécurité globaux (durée d'inactivité) définis
+          par le super-admin, en mode réel, dans le store de chaque utilisateur. */}
+      <SecuritySettingsSync />
       {/* Surveillance d'inactivité globale : déconnexion automatique selon
           la durée configurée par l'administrateur. */}
       <IdleLogoutWatcher />
