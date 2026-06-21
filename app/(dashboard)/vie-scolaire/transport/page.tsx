@@ -15,6 +15,7 @@ import { BusMap, type BusMarker } from "@/components/transport/bus-map";
 import { unlockAudio, playTripleBeep } from "@/components/transport/transport-beep";
 import {
   activeSlot,
+  computeUpgradeQuote,
   formatExpiry,
   PERIOD_LABEL,
   priceForPeriod,
@@ -54,6 +55,7 @@ import {
   saveTransportSettings,
   settingsScopeKey,
   submitTransportPayment,
+  submitTransportUpgrade,
   upsertBusPosition,
 } from "@/lib/transport/transport-server";
 
@@ -215,8 +217,15 @@ export default function TransportPage() {
           isAdmin={isAdmin}
           isDriver={isDriver}
           subscription={subscription}
+          payment={myPayment}
           userId={userId}
           scopeEtabId={scopeEtabId}
+          onUpgrade={async (reference) => {
+            // Montant calculé et validé EN BASE (RPC) — le client ne le fournit pas.
+            const res = await submitTransportUpgrade(createClient(), reference);
+            if (res.ok) await reload();
+            return res;
+          }}
           onReload={reload}
           onSettings={setSettings}
           onSlots={setSlots}
@@ -367,6 +376,140 @@ function PaymentGate({
   );
 }
 
+function UpgradeCard({
+  quote,
+  payment,
+  onUpgrade,
+}: {
+  quote: ReturnType<typeof computeUpgradeQuote>;
+  payment: TransportPayment | null;
+  onUpgrade: (
+    reference: string,
+  ) => Promise<{ ok: boolean; amountFcfa?: number; error?: string }>;
+}) {
+  const [open, setOpen] = React.useState(false);
+  // Devis FIGÉ à l'ouverture du panneau : le montant ne doit pas bouger sous les
+  // yeux du parent (le crédit décroît avec le temps). Le serveur reste l'autorité.
+  const [frozen, setFrozen] = React.useState(quote);
+  const [reference, setReference] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  if (!quote) return null;
+
+  // Un upgrade déjà soumis attend la validation de l'admin.
+  if (payment?.status === "pending" && payment.isUpgrade) {
+    return (
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-ew-gold-200 bg-ew-gold-50/50 px-4 py-2.5 text-sm">
+        <Hourglass className="h-4 w-4 text-ew-gold-700" />
+        <span className="text-foreground/90">
+          Passage à l&apos;annuel ({formatPrice(payment.amountFcfa)}) soumis — en
+          attente de validation par l&apos;administrateur.
+        </span>
+      </div>
+    );
+  }
+
+  const q = open ? (frozen ?? quote) : quote;
+
+  return (
+    <div className="rounded-xl border border-ew-gold-200 bg-ew-gold-50/40 p-4">
+      <button
+        type="button"
+        onClick={() => {
+          if (!open) setFrozen(quote); // fige le devis à l'ouverture
+          setOpen((v) => !v);
+        }}
+        className="flex w-full items-center justify-between gap-2 text-left"
+        aria-expanded={open}
+      >
+        <span className="flex items-center gap-2">
+          <RefreshCw className="h-4 w-4 text-ew-gold-700" />
+          <span className="font-display text-sm font-bold text-foreground">
+            Passer à la formule annuelle
+          </span>
+        </span>
+        <span className="text-sm font-bold text-ew-green-800">
+          {formatPrice(q.total)}
+        </span>
+      </button>
+
+      {open ? (
+        <div className="mt-3 space-y-3 border-t border-ew-gold-200 pt-3 text-sm">
+          {/* Détail du calcul d'équité */}
+          <dl className="space-y-1">
+            <Row label="Tarif annuel" value={formatPrice(q.annual)} />
+            <Row
+              label={`Crédit jours restants (${q.remainingDays} j, au tarif annuel)`}
+              value={`− ${formatPrice(q.creditUnused)}`}
+            />
+            <Row label="Reste à payer" value={formatPrice(q.baseRemaining)} />
+            <Row
+              label={`Pénalité d'équité (${q.penaltyPct}%)`}
+              value={`+ ${formatPrice(q.penaltyAmount)}`}
+            />
+            <div className="flex items-center justify-between border-t border-ew-gold-200 pt-1 font-bold">
+              <dt>Total à régler</dt>
+              <dd className="text-ew-green-800">{formatPrice(q.total)}</dd>
+            </div>
+          </dl>
+          <p className="text-[11px] text-muted-foreground">
+            La pénalité garantit l&apos;équité avec les parents ayant choisi
+            l&apos;annuel dès le départ. Après validation, votre accès passe à un an.
+          </p>
+          {payment?.status === "rejected" && payment.isUpgrade ? (
+            <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              Votre précédent passage à l&apos;annuel a été rejeté. Vérifiez la
+              référence et réessayez.
+            </p>
+          ) : null}
+          <div className="space-y-2">
+            <Label>Référence Mobile Money (n° payeur ou ID de transaction)</Label>
+            <Input
+              value={reference}
+              onChange={(e) => setReference(e.target.value)}
+              placeholder="Ex. +225 07… ou ID de transaction"
+            />
+          </div>
+          <Button
+            className="w-full"
+            disabled={busy || !reference.trim() || q.total <= 0}
+            onClick={async () => {
+              setBusy(true);
+              const res = await onUpgrade(reference.trim());
+              setBusy(false);
+              if (res.ok) {
+                toast.success("Demande de passage à l'annuel soumise", {
+                  description: "En attente de validation par l'administrateur.",
+                });
+              } else {
+                toast.error("Échec de la soumission", {
+                  description:
+                    res.error ?? "Vérifiez votre abonnement, puis réessayez.",
+                });
+              }
+            }}
+          >
+            {busy ? "Envoi…" : `J'ai payé ${formatPrice(q.total)} — passer à l'annuel`}
+          </Button>
+        </div>
+      ) : (
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Réglez le complément (avec pénalité d&apos;équité) et profitez d&apos;un
+          an d&apos;accès. Cliquez pour voir le détail.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="font-medium text-foreground">{value}</dd>
+    </div>
+  );
+}
+
 function PendingPaymentsPanel({
   onChanged,
 }: {
@@ -408,6 +551,7 @@ function PendingPaymentsPanel({
                 <strong>{p.payerEmail || p.userId.slice(0, 8)}</strong> ·{" "}
                 <span className="rounded bg-ew-green-100 px-1.5 py-0.5 text-[11px] font-bold text-ew-green-800">
                   {PERIOD_LABEL[p.period]}
+                  {p.isUpgrade ? " · upgrade" : ""}
                 </span>{" "}
                 {formatPrice(p.amountFcfa)} · réf. {p.reference || "—"}
               </span>
@@ -538,8 +682,10 @@ function TransportLive({
   isAdmin,
   isDriver,
   subscription,
+  payment,
   userId,
   scopeEtabId,
+  onUpgrade,
   onReload,
   onSettings,
   onSlots,
@@ -552,8 +698,12 @@ function TransportLive({
   isAdmin: boolean;
   isDriver: boolean;
   subscription: TransportSubscription;
+  payment: TransportPayment | null;
   userId: string;
   scopeEtabId: string | null;
+  onUpgrade: (
+    reference: string,
+  ) => Promise<{ ok: boolean; amountFcfa?: number; error?: string }>;
   onReload: () => Promise<void>;
   onSettings: (s: TransportSettings) => void;
   onSlots: (s: TransportSlot[]) => void;
@@ -640,6 +790,9 @@ function TransportLive({
   }, [driverMode, driverBusId, slots, userId]);
 
   const expiryLabel = formatExpiry(subscription.expiresAt);
+  const upgradeQuote = now.getTime()
+    ? computeUpgradeQuote(settings, subscription, now)
+    : null;
 
   return (
     <div className="space-y-4">
@@ -655,6 +808,11 @@ function TransportLive({
             actif <strong>jusqu&apos;au {expiryLabel}</strong>.
           </span>
         </div>
+      ) : null}
+
+      {/* Passage mensuel → annuel (côté parent abonné au mois) */}
+      {!isAdmin && upgradeQuote && upgradeQuote.total > 0 ? (
+        <UpgradeCard quote={upgradeQuote} payment={payment} onUpgrade={onUpgrade} />
       ) : null}
 
       {/* Statut + actions */}
@@ -790,16 +948,19 @@ function AdminConfig({
 }) {
   const [priceMonth, setPriceMonth] = React.useState(String(settings?.priceMonthFcfa ?? 0));
   const [priceYear, setPriceYear] = React.useState(String(settings?.priceYearFcfa ?? 0));
+  const [penalty, setPenalty] = React.useState(String(settings?.upgradePenaltyPct ?? 20));
   const [interval, setIntervalMin] = React.useState(String(settings?.beepIntervalMin ?? 5));
   const [centerLat, setCenterLat] = React.useState(settings?.centerLat?.toString() ?? "");
   const [centerLng, setCenterLng] = React.useState(settings?.centerLng?.toString() ?? "");
   const priceMonthNum = Number(priceMonth) || 0;
   const priceYearNum = Number(priceYear) || 0;
+  const penaltyNum = Math.max(0, Math.min(100, Number(penalty) || 0));
 
   async function save() {
     const next: TransportSettings = {
       priceMonthFcfa: priceMonthNum,
       priceYearFcfa: priceYearNum,
+      upgradePenaltyPct: penaltyNum,
       beepIntervalMin: Math.max(1, Number(interval) || 5),
       centerLat: centerLat ? Number(centerLat) : null,
       centerLng: centerLng ? Number(centerLng) : null,
@@ -848,6 +1009,13 @@ function AdminConfig({
           <Label>Tarif annuel (FCFA)</Label>
           <Input value={priceYear} onChange={(e) => setPriceYear(e.target.value.replace(/[^\d]/g, ""))} inputMode="numeric" />
           <p className="text-[11px] text-muted-foreground">{formatPrice(priceYearNum)} / an</p>
+        </div>
+        <div className="space-y-1">
+          <Label>Pénalité upgrade (%)</Label>
+          <Input value={penalty} onChange={(e) => setPenalty(e.target.value.replace(/[^\d]/g, ""))} inputMode="numeric" />
+          <p className="text-[11px] text-muted-foreground">
+            Passage mensuel → annuel. {penaltyNum}% sur le reste à payer.
+          </p>
         </div>
         <div className="space-y-1">
           <Label>Bip toutes les (min)</Label>

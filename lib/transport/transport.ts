@@ -16,6 +16,8 @@ export interface TransportSettings {
   priceMonthFcfa: number;
   /** Tarif de la formule annuelle (FCFA). */
   priceYearFcfa: number;
+  /** Pénalité d'équité (%) appliquée au passage mensuel → annuel. */
+  upgradePenaltyPct: number;
   /** Périodicité du bip de rappel, en minutes (défaut 5). */
   beepIntervalMin: number;
   centerLat: number | null;
@@ -54,6 +56,77 @@ export function formatExpiry(iso: string | null): string | null {
     month: "long",
     year: "numeric",
   });
+}
+
+/** Devis de passage mensuel → annuel (avec pénalité d'équité). */
+export interface UpgradeQuote {
+  /** Tarif annuel plein. */
+  annual: number;
+  /** Jours encore couverts par le mois en cours. */
+  remainingDays: number;
+  /** Crédit des jours non consommés du mois en cours (déduit). */
+  creditUnused: number;
+  /** Reste à payer vers l'annuel, avant pénalité (≥ 0). */
+  baseRemaining: number;
+  /** Pénalité (%). */
+  penaltyPct: number;
+  /** Montant de la pénalité. */
+  penaltyAmount: number;
+  /** Montant total à régler pour l'upgrade. */
+  total: number;
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Calcule le devis d'upgrade mensuel → annuel (AFFICHAGE), ou null si
+ * l'utilisateur n'est pas un abonné mensuel actif.
+ *
+ * ⚠️ Le montant AUTORITATIF est recalculé côté serveur (RPC
+ * `submit_transport_upgrade`, migration 017) ; cette fonction doit en être le
+ * miroir EXACT pour que le parent voie le bon montant à régler.
+ *
+ * Équité : le crédit des jours restants est valorisé au TARIF ANNUEL journalier
+ * (price_year/365), pas au tarif mensuel. Ainsi, même à pénalité 0 %,
+ * l'upgradeur ne paie jamais moins, à couverture identique, qu'un abonné annuel
+ * direct (ses jours déjà couverts ont été payés au tarif mensuel, plus cher).
+ */
+export function computeUpgradeQuote(
+  settings: Pick<
+    TransportSettings,
+    "priceMonthFcfa" | "priceYearFcfa" | "upgradePenaltyPct"
+  > | null,
+  subscription: Pick<TransportSubscription, "subscribed" | "period" | "expiresAt">,
+  now: Date,
+): UpgradeQuote | null {
+  if (!settings) return null;
+  if (!subscription.subscribed || subscription.period !== "month") return null;
+  if (!subscription.expiresAt) return null;
+
+  const exp = new Date(subscription.expiresAt).getTime();
+  if (Number.isNaN(exp)) return null;
+
+  const annual = settings.priceYearFcfa;
+  const remainingDays = Math.min(
+    365,
+    Math.max(0, Math.ceil((exp - now.getTime()) / DAY_MS)),
+  );
+  // Crédit au TARIF ANNUEL journalier (équité, cf. RPC serveur).
+  const creditUnused = Math.round((annual * remainingDays) / 365);
+  const baseRemaining = Math.max(0, annual - creditUnused);
+  const penaltyPct = Math.max(0, Math.min(100, settings.upgradePenaltyPct ?? 0));
+  const penaltyAmount = Math.round((baseRemaining * penaltyPct) / 100);
+  const total = baseRemaining + penaltyAmount;
+
+  return {
+    annual,
+    remainingDays,
+    creditUnused,
+    baseRemaining,
+    penaltyPct,
+    penaltyAmount,
+    total,
+  };
 }
 
 export interface TransportSlot {
@@ -109,6 +182,8 @@ export interface TransportPayment {
   status: PaymentStatus;
   /** Formule payée (mensuel / annuel). */
   period: SubscriptionPeriod;
+  /** Ce paiement est un passage mensuel → annuel. */
+  isUpgrade: boolean;
   createdAt: string;
 }
 

@@ -30,6 +30,7 @@ function mapSettings(r: Record<string, unknown>): TransportSettings {
   return {
     priceMonthFcfa: Number(r.price_month_fcfa ?? legacy),
     priceYearFcfa: Number(r.price_year_fcfa ?? 0),
+    upgradePenaltyPct: Number(r.upgrade_penalty_pct ?? 20),
     beepIntervalMin: Number(r.beep_interval_min ?? 5),
     centerLat: (r.center_lat as number | null) ?? null,
     centerLng: (r.center_lng as number | null) ?? null,
@@ -112,6 +113,7 @@ export async function saveTransportSettings(
       price_fcfa: s.priceMonthFcfa,
       price_month_fcfa: s.priceMonthFcfa,
       price_year_fcfa: s.priceYearFcfa,
+      upgrade_penalty_pct: s.upgradePenaltyPct,
       beep_interval_min: s.beepIntervalMin,
       center_lat: s.centerLat,
       center_lng: s.centerLng,
@@ -279,11 +281,12 @@ function mapPayment(r: Record<string, unknown>): TransportPayment {
     reference: (r.reference as string | null) ?? null,
     status: ((r.status as PaymentStatus) ?? "pending") as PaymentStatus,
     period: ((r.period as SubscriptionPeriod) ?? "month") as SubscriptionPeriod,
+    isUpgrade: Boolean(r.is_upgrade),
     createdAt: (r.created_at as string) ?? "",
   };
 }
 
-/** Soumet un paiement (formule + montant), en attente de validation admin. */
+/** Soumet un paiement de SOUSCRIPTION/renouvellement (formule + montant). */
 export async function submitTransportPayment(
   supabase: SupabaseClient,
   p: {
@@ -300,11 +303,29 @@ export async function submitTransportPayment(
     payer_email: p.payerEmail ?? null,
     amount_fcfa: p.amountFcfa,
     period: p.period,
+    is_upgrade: false,
     method: p.method ?? "mobile_money",
     reference: p.reference ?? null,
     status: "pending",
   });
   return !error;
+}
+
+/**
+ * Soumet un passage MENSUEL → ANNUEL. Le montant est calculé et validé EN BASE
+ * (RPC `submit_transport_upgrade`, migration 017) : précondition « abonné
+ * mensuel actif », anti-doublon, et crédit au tarif annuel. Retourne le montant
+ * autoritaire (FCFA) en cas de succès, ou null en cas d'échec.
+ */
+export async function submitTransportUpgrade(
+  supabase: SupabaseClient,
+  reference: string,
+): Promise<{ ok: boolean; amountFcfa?: number; error?: string }> {
+  const { data, error } = await supabase.rpc("submit_transport_upgrade", {
+    p_reference: reference,
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, amountFcfa: typeof data === "number" ? data : undefined };
 }
 
 /** Dernier paiement de l'utilisateur (pour afficher l'état). */
