@@ -63,6 +63,13 @@ import { useApp } from "@/components/app-shell/app-context";
 import { isSuperAdminEmail } from "@/lib/super-admins";
 import type { DirectoryUser } from "@/lib/mock-data";
 import { ETABLISSEMENTS } from "@/lib/mock-data";
+import {
+  EtablissementCombobox,
+  type EtablissementSelection,
+} from "@/components/etablissements/etablissement-combobox";
+import { ensureEstablishment } from "@/lib/etablissements/etablissements-server";
+import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ROLE_LIST, ROLE_FAMILY_LABELS } from "@/lib/roles";
 import type { UserRole, RoleFamily } from "@/lib/roles";
 import { toNomCase, toPrenomCase, toFullNameCase } from "@/lib/format-name";
@@ -835,15 +842,48 @@ function ChangeRoleDialog({
   onSave: (patch: Partial<DirectoryUser>) => void;
 }) {
   const t = useTranslations();
+  const realMode = isSupabaseConfigured();
   const [role, setRole] = React.useState<UserRole>(user.role);
-  const [etab, setEtab] = React.useState(user.etablissement);
+  const initialSel = React.useMemo<EtablissementSelection | null>(
+    () =>
+      user.etablissement
+        ? { eduwebCode: null, dspsCode: null, name: user.etablissement, custom: false }
+        : null,
+    [user.etablissement],
+  );
+  const [sel, setSel] = React.useState<EtablissementSelection | null>(initialSel);
+  const [busy, setBusy] = React.useState(false);
 
   React.useEffect(() => {
     if (open) {
       setRole(user.role);
-      setEtab(user.etablissement);
+      setSel(initialSel);
     }
-  }, [open, user]);
+  }, [open, user, initialSel]);
+
+  async function handleSave() {
+    const patch: Partial<DirectoryUser> = { role };
+    const changed = (sel?.name ?? "") !== (user.etablissement ?? "");
+    if (changed) {
+      if (!sel) {
+        patch.etablissement = "";
+        patch.etablissementId = null;
+      } else if (realMode) {
+        setBusy(true);
+        const res = await ensureEstablishment(createClient(), sel);
+        setBusy(false);
+        if (!res.id) {
+          toast.error("Établissement non enregistré", { description: res.error });
+          return;
+        }
+        patch.etablissement = sel.name;
+        patch.etablissementId = res.id;
+      } else {
+        patch.etablissement = sel.name;
+      }
+    }
+    onSave(patch);
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -883,24 +923,22 @@ function ChangeRoleDialog({
 
           <div className="space-y-1.5">
             <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t("pages.systemeComptesUtilisateurs.changeRole.attachInstitution")}</p>
-            <SearchSelect
-              items={ETABLISSEMENTS.map((e) => ({ value: e.shortName, label: e.name, sublabel: e.locality }))}
-              value={etab}
-              onChange={setEtab}
-              allowAll
-              allValue=""
-              allLabel={t("pages.systemeComptesUtilisateurs.changeRole.noAttachment")}
+            <EtablissementCombobox
+              value={sel}
+              onChange={setSel}
               placeholder={t("pages.systemeComptesUtilisateurs.changeRole.choosePlaceholder")}
-              searchPlaceholder={t("pages.systemeComptesUtilisateurs.filters.institutionPlaceholder")}
-              emptyText={t("pages.systemeComptesUtilisateurs.changeRole.noInstitutionFound")}
             />
+            <p className="text-[11px] text-muted-foreground">
+              Le rattachement à un établissement (Côte d&apos;Ivoire) active la
+              gestion déléguée pour un <strong>chef d&apos;établissement</strong>.
+            </p>
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>{t("pages.systemeComptesUtilisateurs.actions.cancel")}</Button>
-          <Button onClick={() => onSave({ role, etablissement: etab })}>
-            <ShieldCheck className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.changeRole.save")}
+          <Button disabled={busy} onClick={() => void handleSave()}>
+            <ShieldCheck className="h-4 w-4" /> {busy ? "Enregistrement…" : t("pages.systemeComptesUtilisateurs.changeRole.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -558,7 +558,10 @@ export interface DirectoryUser {
   email: string;
   role: UserRole;
   status: AccountStatus;
+  /** Nom de l'établissement de rattachement (affichage). */
   etablissement: string;
+  /** UUID Supabase de l'établissement (`profiles.etablissement_id`) — null si non rattaché. */
+  etablissementId?: string | null;
   region: string;
   /** Numéro international complet (ex. « +225 07 12 34 56 78 »), pour les notifications SMS. */
   phone?: string;

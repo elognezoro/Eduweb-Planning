@@ -42,19 +42,24 @@ const Ctx = React.createContext<DirectoryUsersValue | null>(null);
 const REAL_MODE = isSupabaseConfigured();
 
 /** Profil Supabase → forme `DirectoryUser` utilisée par l'UI. */
-function mapProfile(row: Record<string, unknown>): DirectoryUser {
+function mapProfile(
+  row: Record<string, unknown>,
+  etabNames: Map<string, string>,
+): DirectoryUser {
   const name =
     (row.display_name as string) ||
     [row.last_name, row.first_name].filter(Boolean).join(" ") ||
     (row.email as string) ||
     "—";
+  const etabId = (row.etablissement_id as string | null) ?? null;
   return {
     id: row.id as string,
     name,
     email: (row.email as string) ?? "",
     role: ((row.role as UserRole) ?? "eleve") as UserRole,
     status: (row.status as DirectoryUser["status"]) ?? "pending",
-    etablissement: "",
+    etablissement: etabId ? (etabNames.get(etabId) ?? "") : "",
+    etablissementId: etabId,
     region: "",
     phone: (row.phone as string) ?? undefined,
     country: "CI",
@@ -72,15 +77,29 @@ export function DirectoryUsersProvider({ children }: { children: React.ReactNode
     setLoading(true);
     try {
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) {
-        toast.error("Chargement des comptes impossible", { description: error.message });
+      const [profilesRes, etabRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        supabase.from("etablissements").select("id, name"),
+      ]);
+      if (profilesRes.error) {
+        toast.error("Chargement des comptes impossible", {
+          description: profilesRes.error.message,
+        });
         return;
       }
-      setRealUsers((data ?? []).map((r) => mapProfile(r as Record<string, unknown>)));
+      const etabNames = new Map<string, string>();
+      for (const e of etabRes.data ?? []) {
+        const row = e as Record<string, unknown>;
+        etabNames.set(row.id as string, (row.name as string) ?? "");
+      }
+      setRealUsers(
+        (profilesRes.data ?? []).map((r) =>
+          mapProfile(r as Record<string, unknown>, etabNames),
+        ),
+      );
     } catch {
       toast.error("Chargement des comptes impossible");
     } finally {
@@ -128,6 +147,11 @@ export function DirectoryUsersProvider({ children }: { children: React.ReactNode
           const dbPatch: Record<string, unknown> = {};
           if (patch.role) dbPatch.role = patch.role;
           if (patch.name) dbPatch.display_name = patch.name;
+          // Rattachement à un établissement (UUID) — null = détacher. Active la
+          // délégation chef_etablissement côté RLS transport.
+          if (patch.etablissementId !== undefined) {
+            dbPatch.etablissement_id = patch.etablissementId;
+          }
           if (Object.keys(dbPatch).length === 0) return;
           void patchProfile([id], dbPatch, patch);
         },
