@@ -611,6 +611,10 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
               tip: "L'établissement choisi est enregistré dans la base au moment de la sélection ; laissez vide pour le périmètre « Général ».",
             },
           ],
+          bestPractices: [
+            "Installez d'abord l'établissement depuis le référentiel (Système → Établissements) : il devient sélectionnable ici.",
+            "Renseignez le centre de la carte sur la ville desservie pour un cadrage immédiat, même sans car en ligne.",
+          ],
         },
         {
           title: "Configurer le service d'un établissement",
@@ -648,6 +652,10 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
                 "La page doit rester ouverte, écran allumé ; un téléphone verrouillé interrompt l'émission.",
             },
           ],
+          bestPractices: [
+            "Désignez un compte conducteur dédié par car, distinct des comptes personnels du personnel.",
+            "Prévoyez un support (chargeur, fixation) pour garder le téléphone du conducteur allumé pendant toute la tournée.",
+          ],
         },
         {
           title: "Abonnements et paiements (Mobile Money)",
@@ -666,7 +674,13 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
         {
           title: "Isolation par établissement et délégation",
           body:
-            "Cars, créneaux, tarifs, conducteurs, paiements et abonnements sont strictement cloisonnés par établissement (en lecture comme en écriture). Le chef d'établissement gère uniquement le sien ; vous, super-admin, configurez n'importe lequel via le sélecteur. Pour activer un chef, rattachez son compte à son établissement (voir le chapitre suivant).",
+            "Cars, créneaux, tarifs, conducteurs, paiements et abonnements sont strictement cloisonnés par établissement (en lecture comme en écriture). Le chef d'établissement gère uniquement le sien ; vous, super-admin, configurez n'importe lequel via le sélecteur. Pour activer un chef, rattachez son compte à son établissement (voir le chapitre suivant).\n\nLe cloisonnement est appliqué côté serveur (politiques RLS) : il ne dépend pas de l'interface et résiste donc à toute tentative de contournement par requête directe. Un parent ne voit que les cars de son établissement, et seulement s'il dispose d'un abonnement actif (le suivi en temps réel est un service payant, vérifié au niveau du serveur).",
+          bestPractices: [
+            "Confiez à chaque chef d'établissement la gestion de son périmètre ; n'intervenez en super-admin qu'en supervision ou en cas de besoin.",
+            "Vérifiez le rattachement du chef à son établissement après chaque changement de rôle : c'est la condition de la délégation.",
+          ],
+          caveat:
+            "Un chef d'établissement sans établissement rattaché ne voit pas le bloc de configuration : pensez à compléter le rattachement dans Comptes utilisateurs.",
         },
       ],
     },
@@ -840,6 +854,26 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
     {
       term: "Inscriptions aux formations",
       definition: "Page du menu Système, réservée aux profils habilités, où l'on inscrit les participants (nominativement, par cohorte ou par import CSV) et où l'on attribue les rôles de formation.",
+    },
+    {
+      term: "Isolation par établissement (transport)",
+      definition: "Cloisonnement strict, appliqué côté serveur (RLS), des données de transport — cars, créneaux, tarifs, conducteurs, paiements et abonnements — par établissement : chaque établissement ne voit et ne modifie que les siennes.",
+    },
+    {
+      term: "Délégation chef d'établissement",
+      definition: "Mécanisme par lequel un compte au rôle « Chef d'établissement », rattaché à un établissement, gère le transport de cet établissement et de lui seul. S'active en rattachant le compte à son établissement dans Comptes utilisateurs.",
+    },
+    {
+      term: "Déconnexion automatique par inactivité",
+      definition: "Réglage global (Système → Sécurité de session) déconnectant tout utilisateur après une durée d'inactivité définie, sur tous les comptes et appareils, après un avertissement avec compte à rebours.",
+    },
+    {
+      term: "Référentiel des établissements (Côte d'Ivoire)",
+      definition: "Liste officielle de 2 921 établissements secondaires intégrée à la plateforme. Chaque établissement porte un Code DSPS (officiel) et un Code EduWeb (CI-#####). On installe ceux que l'on exploite pour les rendre disponibles aux fonctionnalités par établissement.",
+    },
+    {
+      term: "Upgrade mensuel → annuel (transport)",
+      definition: "Passage d'un abonnement transport mensuel à annuel, facturé comme le reste à payer vers l'annuel (crédit des jours restants déduit) majoré d'une pénalité d'équité calculée côté serveur.",
     },
   ],
 };
