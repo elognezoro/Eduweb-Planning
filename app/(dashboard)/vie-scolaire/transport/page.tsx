@@ -22,12 +22,14 @@ import {
   type BusPosition,
   type SlotDirection,
   type TransportBus,
+  type TransportDriver,
   type TransportPayment,
   type TransportSettings,
   type TransportSlot,
 } from "@/lib/transport/transport";
 import {
   addBus,
+  addTransportDriverByEmail,
   addTransportSlot,
   confirmTransportPayment,
   deleteBus,
@@ -36,10 +38,13 @@ import {
   fetchBusPositions,
   fetchMyLatestTransportPayment,
   fetchPendingTransportPayments,
+  fetchTransportDrivers,
   fetchTransportSettings,
   fetchTransportSlots,
+  isTransportDriver,
   isTransportSubscribed,
   rejectTransportPayment,
+  removeTransportDriver,
   saveTransportSettings,
   submitTransportPayment,
   upsertBusPosition,
@@ -59,6 +64,7 @@ export default function TransportPage() {
   const [subscribed, setSubscribed] = React.useState(false);
   const [positions, setPositions] = React.useState<BusPosition[]>([]);
   const [myPayment, setMyPayment] = React.useState<TransportPayment | null>(null);
+  const [isDriver, setIsDriver] = React.useState(false);
 
   const reload = React.useCallback(async () => {
     if (!REAL) {
@@ -68,18 +74,20 @@ export default function TransportPage() {
     setLoading(true);
     try {
       const sb = createClient();
-      const [s, sl, bs, sub, pay] = await Promise.all([
+      const [s, sl, bs, sub, pay, drv] = await Promise.all([
         fetchTransportSettings(sb),
         fetchTransportSlots(sb),
         fetchBuses(sb),
         userId ? isTransportSubscribed(sb, userId) : Promise.resolve(false),
         userId ? fetchMyLatestTransportPayment(sb, userId) : Promise.resolve(null),
+        userId ? isTransportDriver(sb, userId) : Promise.resolve(false),
       ]);
       setSettings(s);
       setSlots(sl);
       setBuses(bs);
       setSubscribed(sub);
       setMyPayment(pay);
+      setIsDriver(drv);
     } finally {
       setLoading(false);
     }
@@ -153,6 +161,7 @@ export default function TransportPage() {
           buses={buses}
           positions={positions}
           isAdmin={isAdmin}
+          isDriver={isDriver}
           userId={userId}
           onReload={reload}
           onSettings={setSettings}
@@ -343,12 +352,94 @@ function PendingPaymentsPanel({
   );
 }
 
+function DriversPanel() {
+  const [drivers, setDrivers] = React.useState<TransportDriver[]>([]);
+  const [email, setEmail] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  const load = React.useCallback(async () => {
+    setDrivers(await fetchTransportDrivers(createClient()));
+  }, []);
+  React.useEffect(() => {
+    void load();
+  }, [load]);
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+        Conducteurs désignés ({drivers.length})
+      </p>
+      {drivers.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-border bg-background/60 p-3 text-center text-sm text-muted-foreground">
+          Aucun conducteur. Seuls les conducteurs désignés peuvent émettre une
+          position.
+        </p>
+      ) : (
+        <ul className="space-y-1.5">
+          {drivers.map((d) => (
+            <li
+              key={d.userId}
+              className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm"
+            >
+              <span>
+                <strong>{d.email || d.userId.slice(0, 8)}</strong>
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-red-600 hover:text-red-700"
+                onClick={async () => {
+                  const ok = await removeTransportDriver(createClient(), d.userId);
+                  if (ok) await load();
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-ew-green-300 bg-background/60 p-3">
+        <div className="space-y-1">
+          <Label>E-mail du conducteur</Label>
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="conducteur@exemple.com"
+            className="w-64"
+          />
+        </div>
+        <Button
+          size="sm"
+          disabled={busy || !email.trim()}
+          onClick={async () => {
+            setBusy(true);
+            const res = await addTransportDriverByEmail(createClient(), email.trim());
+            setBusy(false);
+            if (res.ok) {
+              setEmail("");
+              await load();
+              toast.success("Conducteur désigné");
+            } else {
+              toast.error("Impossible", { description: res.error });
+            }
+          }}
+        >
+          <Plus className="h-4 w-4" /> Désigner conducteur
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function TransportLive({
   settings,
   slots,
   buses,
   positions,
   isAdmin,
+  isDriver,
   userId,
   onReload,
   onSettings,
@@ -360,12 +451,14 @@ function TransportLive({
   buses: TransportBus[];
   positions: BusPosition[];
   isAdmin: boolean;
+  isDriver: boolean;
   userId: string;
   onReload: () => Promise<void>;
   onSettings: (s: TransportSettings) => void;
   onSlots: (s: TransportSlot[]) => void;
   onBuses: (b: TransportBus[]) => void;
 }) {
+  const canDrive = isAdmin || isDriver;
   const beepInterval = Math.max(1, settings?.beepIntervalMin ?? 5);
   const [alertsOn, setAlertsOn] = React.useState(true);
   const [driverMode, setDriverMode] = React.useState(false);
@@ -473,17 +566,19 @@ function TransportLive({
             {alertsOn ? <BellRing className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
             {alertsOn ? "Alertes activées" : "Alertes coupées"}
           </Button>
-          <Button
-            size="sm"
-            variant={driverMode ? "default" : "outline"}
-            onClick={() => {
-              unlockAudio();
-              setDriverMode((v) => !v);
-            }}
-            title="Partage de la position GPS de votre car (réservé au conducteur)."
-          >
-            <MapPin className="h-4 w-4" /> {driverMode ? "Conducteur : actif" : "Mode conducteur"}
-          </Button>
+          {canDrive ? (
+            <Button
+              size="sm"
+              variant={driverMode ? "default" : "outline"}
+              onClick={() => {
+                unlockAudio();
+                setDriverMode((v) => !v);
+              }}
+              title="Partage de la position GPS de votre car (réservé aux conducteurs désignés)."
+            >
+              <MapPin className="h-4 w-4" /> {driverMode ? "Conducteur : actif" : "Mode conducteur"}
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -605,6 +700,9 @@ function AdminConfig({
 
       {/* Cars */}
       <BusesPanel buses={buses} onBuses={onBuses} onReload={onReload} />
+
+      {/* Conducteurs désignés */}
+      <DriversPanel />
 
       {/* Réglages */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

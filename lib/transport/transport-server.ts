@@ -4,6 +4,7 @@ import type {
   PaymentStatus,
   SlotDirection,
   TransportBus,
+  TransportDriver,
   TransportPayment,
   TransportSettings,
   TransportSlot,
@@ -302,5 +303,68 @@ export async function rejectTransportPayment(
     .from("transport_payments")
     .update({ status: "rejected" })
     .eq("id", paymentId);
+  return !error;
+}
+
+/* ---- Conducteurs désignés ------------------------------------------------ */
+export async function isTransportDriver(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<boolean> {
+  const { data } = await supabase
+    .from("transport_drivers")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return Boolean(data);
+}
+
+export async function fetchTransportDrivers(
+  supabase: SupabaseClient,
+): Promise<TransportDriver[]> {
+  const { data } = await supabase
+    .from("transport_drivers")
+    .select("*")
+    .order("created_at", { ascending: true });
+  return (data ?? []).map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      userId: row.user_id as string,
+      email: (row.email as string | null) ?? null,
+    };
+  });
+}
+
+/** Désigne un conducteur par e-mail (résolu via la table profiles). */
+export async function addTransportDriverByEmail(
+  supabase: SupabaseClient,
+  email: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const target = email.trim();
+  if (!target) return { ok: false, error: "E-mail requis." };
+  const { data: prof } = await supabase
+    .from("profiles")
+    .select("id, email")
+    .ilike("email", target)
+    .maybeSingle();
+  const id = (prof as { id?: string } | null)?.id;
+  if (!id) return { ok: false, error: "Aucun compte avec cet e-mail." };
+  const { error } = await supabase
+    .from("transport_drivers")
+    .upsert(
+      { user_id: id, email: (prof as { email?: string }).email ?? target },
+      { onConflict: "user_id" },
+    );
+  return { ok: !error, error: error?.message };
+}
+
+export async function removeTransportDriver(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("transport_drivers")
+    .delete()
+    .eq("user_id", userId);
   return !error;
 }

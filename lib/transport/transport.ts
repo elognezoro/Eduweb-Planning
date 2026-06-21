@@ -47,6 +47,12 @@ export interface BusPosition {
   updatedAt: string;
 }
 
+/** Conducteur désigné (autorisé à émettre une position). */
+export interface TransportDriver {
+  userId: string;
+  email?: string | null;
+}
+
 export type PaymentStatus = "pending" | "confirmed" | "rejected";
 
 export interface TransportPayment {
