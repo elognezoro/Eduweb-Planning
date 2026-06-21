@@ -22,20 +22,17 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useStore } from "@/components/app-shell/data-store";
 import { useApp } from "@/components/app-shell/app-context";
 import { getRole } from "@/lib/roles";
-import { MESSAGES, ETABLISSEMENTS } from "@/lib/mock-data";
+import { MESSAGES } from "@/lib/mock-data";
 import { CountrySearchSelect } from "@/components/forms/country-select";
+import {
+  EtablissementCombobox,
+  type EtablissementSelection,
+} from "@/components/etablissements/etablissement-combobox";
 import type { Announcement } from "@/lib/types";
 import { initials, formatDate, cn } from "@/lib/utils";
 
@@ -108,7 +105,9 @@ export default function CommunicationPage() {
 function AnnouncementComposer({ onPublish }: { onPublish: (a: Omit<Announcement, "id">) => void }) {
   const { user, effectiveRole } = useApp();
   const [pays, setPays] = React.useState("tous");
-  const [etab, setEtab] = React.useState("tous");
+  // null = « Tous les établissements » ; sinon un établissement du référentiel CI.
+  const [etabSel, setEtabSel] = React.useState<EtablissementSelection | null>(null);
+  const etabName = etabSel?.name ?? null;
   const [audience, setAudience] = React.useState<"etablissement" | "classe">("etablissement");
   const [classes, setClasses] = React.useState<string[]>([]);
   const [title, setTitle] = React.useState("");
@@ -127,9 +126,9 @@ function AnnouncementComposer({ onPublish }: { onPublish: (a: Omit<Announcement,
   const diffusionNote =
     pays === "tous"
       ? "Diffusée à tous les établissements du réseau."
-      : etab === "tous"
+      : etabName == null
         ? `Diffusée aux établissements de ${pays}.`
-        : `Diffusée à ${etab}.`;
+        : `Diffusée à ${etabName}.`;
 
   const toggleClass = (c: string) => setClasses((p) => (p.includes(c) ? p.filter((x) => x !== c) : [...p, c]));
 
@@ -170,15 +169,12 @@ function AnnouncementComposer({ onPublish }: { onPublish: (a: Omit<Announcement,
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">Établissement</Label>
-              <Select value={etab} onValueChange={setEtab} disabled={pays === "tous"}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="tous">Tous les établissements</SelectItem>
-                  {ETABLISSEMENTS.map((e) => (
-                    <SelectItem key={e.id} value={e.shortName}>{e.shortName}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <EtablissementCombobox
+                value={etabSel}
+                onChange={setEtabSel}
+                disabled={pays === "tous"}
+                placeholder="Tous les établissements (laisser vide) ou rechercher…"
+              />
             </div>
           </div>
           <p className="mt-2 text-xs font-medium text-ew-gold-600">{diffusionNote}</p>
