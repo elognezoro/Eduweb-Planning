@@ -2161,6 +2161,895 @@ export const TRAINING_ASSESSMENTS: Record<string, ManuelAssessment> = {
       },
     ],
   },
+
+  cafop_admin: {
+  "roleKey": "cafop_admin",
+  "roleLabel": "Admin CAFOP",
+  "moduleCode": "M09",
+  "preTest": [
+    {
+      "question": "Selon vous, en quoi la mission d'un CAFOP se distingue-t-elle de la gestion d'un établissement scolaire ordinaire, et quelles conséquences cette distinction a-t-elle sur les données que vous administrez ?"
+    },
+    {
+      "question": "Comment organisez-vous actuellement le suivi de l'avancement de vos promotions d'élèves-maîtres au fil des semestres ? Quels écueils rencontrez-vous ?"
+    },
+    {
+      "question": "À quels indicateurs vous fiez-vous aujourd'hui pour comparer la performance de deux centres d'un même CAFOP, et à quelle fréquence les consultez-vous ?"
+    },
+    {
+      "question": "Quelle place donnez-vous aux rapports d'activité dans votre pilotage : à quelle échéance les produisez-vous et comment les conservez-vous pour le suivi dans le temps ?"
+    },
+    {
+      "question": "Quelles attentes avez-vous vis-à-vis du module CAFOP d'EduWeb Planner pour fiabiliser la chaîne qui va de l'inscription d'une promotion jusqu'à la production des bilans ?"
+    }
+  ],
+  "qcm": [
+    {
+      "question": "Dans EduWeb Planner, par quel chemin de navigation ouvrez-vous le module CAFOP ?",
+      "choix": [
+        "Accueil → Vie scolaire → CAFOP",
+        "Système → CAFOP",
+        "Accueil → Aide → CAFOP",
+        "Établissements → CAFOP"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le module CAFOP s'ouvre depuis Système → CAFOP. C'est le point d'entrée unique d'où l'on retrouve les quatre onglets de travail (Gestion, Enseignements & Évaluation, Statistiques, Rapports)."
+    },
+    {
+      "question": "Le module CAFOP est une structure autonome. Quelle affirmation décrit correctement son périmètre ?",
+      "choix": [
+        "Il partage ses élèves et ses statistiques avec la gestion des établissements scolaires ordinaires.",
+        "Il gère des élèves-maîtres en formation et possède ses propres données, statistiques et rapports, distincts de la vie scolaire ordinaire.",
+        "Il dépend du module Établissements pour produire ses rapports d'activité.",
+        "Il importe automatiquement les bulletins des établissements rattachés."
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le CAFOP est une structure autonome : il administre des élèves-maîtres en formation, et non des élèves d'établissements. Ses données, ses statistiques et ses rapports lui sont propres et ne se mêlent pas à la vie scolaire ordinaire."
+    },
+    {
+      "question": "Quels sont les quatre onglets qui structurent le travail dans le module CAFOP ?",
+      "choix": [
+        "Inscriptions, Bulletins, Finances, Archives",
+        "Gestion, Enseignements & Évaluation, Statistiques, Rapports",
+        "Centres, Élèves, Notes, Diplômes",
+        "Accueil, Modules, Séminaires, Aide"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le module est organisé en quatre volets qui suivent le cycle de vie d'une promotion, de l'inscription au bilan : Gestion, Enseignements & Évaluation, Statistiques et Rapports."
+    },
+    {
+      "question": "À quelle fréquence l'Admin CAFOP doit-il mettre à jour l'avancement des promotions pour garantir des indicateurs cohérents ?",
+      "choix": [
+        "Une seule fois, au moment de la création de la promotion",
+        "À chaque changement de semestre",
+        "Uniquement en fin d'année de formation",
+        "Chaque fois qu'un rapport est archivé"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "L'avancement de chaque promotion doit être actualisé à chaque changement de semestre. C'est cette mise à jour régulière qui garantit la cohérence des effectifs, des analyses par genre et des classements affichés dans le volet Statistiques."
+    },
+    {
+      "question": "Pour comparer valablement le taux de mention « Bien » de deux centres du même CAFOP dans le volet Statistiques, quelle précaution est essentielle ?",
+      "choix": [
+        "Comparer les centres sur des semestres différents pour neutraliser les écarts",
+        "Comparer toujours sur la même période (même semestre) avant de tirer des conclusions",
+        "N'utiliser que les effectifs bruts sans tenir compte des mentions",
+        "Attendre la fin de la formation pour toute comparaison"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Une comparaison n'est valide que si elle porte sur la même période. Comparer les classements et la répartition par CAFOP au même semestre permet de repérer un écart réel (par exemple un taux de mention « Bien » inférieur de 10 points) et d'orienter un appui pédagogique ciblé."
+    },
+    {
+      "question": "Quelle est la bonne pratique recommandée pour la saisie des évaluations des modules d'enseignement ?",
+      "choix": [
+        "Tout saisir en bloc en fin de semestre pour gagner du temps",
+        "Saisir les évaluations au fil de l'eau, module par module, et vérifier la cohérence des moyennes avant de communiquer les résultats",
+        "Communiquer les résultats avant de vérifier les moyennes pour respecter les délais",
+        "Confier la saisie au module Établissements"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "La saisie au fil de l'eau, module par module, évite l'engorgement de fin de semestre et fiabilise les bilans. Vérifier la cohérence des moyennes avant toute communication est indispensable, car ces moyennes alimentent les mentions et les classements."
+    }
+  ],
+  "exercice": {
+    "titre": "Piloter une promotion d'élèves-maîtres, de la rentrée au bilan semestriel",
+    "introduction": "Ces deux scénarios vous placent dans la peau d'un Admin CAFOP en situation réelle. Le premier vérifie votre maîtrise des fondamentaux du module (centres, promotions, navigation). Le second mobilise l'ensemble de la chaîne de pilotage : enseignements, statistiques comparées et production de rapports. Réalisez chaque scénario directement dans le module CAFOP d'EduWeb Planner, en respectant le périmètre autonome de la structure.",
+    "scenarios": [
+      {
+        "niveau": "de base",
+        "contexte": "M. Konan, directeur des études du CAFOP de Bouaké, prépare la rentrée 2026. Son CAFOP regroupe deux centres, « Bouaké I » et « Bouaké II ». Une nouvelle promotion d'élèves-maîtres, la promotion 2026, doit être rattachée et démarrer au semestre 1. La promotion 2025, elle, passe du semestre 2 au semestre 3.",
+        "consignes": [
+          "Ouvrez le module CAFOP depuis Système → CAFOP et repérez les quatre onglets de travail.",
+          "Dans l'onglet Gestion, section Centres CAFOP, vérifiez la présence des deux centres « Bouaké I » et « Bouaké II » et ajoutez tout centre manquant.",
+          "Dans la section Promotions, rattachez la promotion 2026 et positionnez son avancement au semestre 1.",
+          "Actualisez l'avancement de la promotion 2025 du semestre 2 au semestre 3, puis vérifiez que les indicateurs (effectifs, genre) se recalculent pour le nouveau semestre."
+        ],
+        "criteresEvaluation": [
+          "Le module est ouvert par le bon chemin (Système → CAFOP) et les quatre onglets sont correctement identifiés.",
+          "Les deux centres « Bouaké I » et « Bouaké II » sont présents et exacts dans la section Centres CAFOP.",
+          "La promotion 2026 est rattachée à un centre et son avancement est bien positionné au semestre 1.",
+          "L'avancement de la promotion 2025 est passé au semestre 3 et le recalcul des indicateurs est constaté."
+        ]
+      },
+      {
+        "niveau": "approfondi",
+        "contexte": "Fin du semestre 3, CAFOP de Bouaké. Les enseignements du module « Didactique du français » sont achevés pour les groupes-classes des deux centres. M. Konan constate, à la lecture des classements, que le centre « Bouaké II » affiche un taux de mention « Bien » inférieur de 10 points à celui de « Bouaké I ». Il doit clôturer le semestre par un rapport d'activité et décider d'un appui pédagogique.",
+        "consignes": [
+          "Dans l'onglet Enseignements & Évaluation, sélectionnez le module « Didactique du français », le groupe-classe et le semestre 3, saisissez les évaluations manquantes et vérifiez la cohérence des moyennes calculées.",
+          "Dans l'onglet Statistiques, comparez sur le même semestre les classements et la répartition par CAFOP pour « Bouaké I » et « Bouaké II », et confirmez l'écart de mentions « Bien ».",
+          "Formulez, à partir des indicateurs lus, une décision d'appui pédagogique ciblée sur le centre « Bouaké II » pour le semestre suivant.",
+          "Dans l'onglet Rapports, générez le rapport d'activité de la promotion 2026 au semestre 3, appliquez les filtres utiles, datez-le et archivez-le dans les rapports disponibles.",
+          "Vérifiez que le rapport généré apparaît bien dans la liste des rapports disponibles en vue d'une comparaison ultérieure."
+        ],
+        "criteresEvaluation": [
+          "Les évaluations de « Didactique du français » sont saisies pour le bon module, groupe-classe et semestre, et la cohérence des moyennes est contrôlée avant toute communication.",
+          "La comparaison statistique est réalisée sur la même période et l'écart de 10 points de mention « Bien » entre les deux centres est correctement identifié.",
+          "La décision d'appui pédagogique est explicitement justifiée par les indicateurs observés et ciblée sur le centre « Bouaké II ».",
+          "Le rapport d'activité est généré, daté, archivé, et retrouvé dans la liste des rapports disponibles pour servir de point de comparaison."
+        ]
+      }
+    ]
+  },
+  "syntheseFormative": [
+    {
+      "question": "Reformulez avec vos propres mots ce qui fait du CAFOP une structure autonome dans EduWeb Planner et pourquoi ses données ne se mêlent pas à celles des établissements scolaires ordinaires."
+    },
+    {
+      "question": "Décrivez l'enchaînement complet, de l'ouverture du module jusqu'au bilan, en nommant les quatre onglets et la phase de travail à laquelle chacun correspond."
+    },
+    {
+      "question": "Expliquez en quoi l'actualisation de l'avancement des promotions à chaque semestre conditionne la fiabilité des statistiques et des classements."
+    },
+    {
+      "question": "À partir d'un écart de mentions constaté entre deux centres, comment construiriez-vous une décision d'appui pédagogique défendable, et quelles précautions de comparaison appliqueriez-vous ?"
+    },
+    {
+      "question": "Quel dispositif de production et d'archivage des rapports d'activité allez-vous mettre en place pour disposer d'une série comparable d'un semestre à l'autre ?"
+    }
+  ]
+},
+
+  cafop_directeur: {
+  "roleKey": "cafop_directeur",
+  "roleLabel": "Directeur de CAFOP",
+  "moduleCode": "M10",
+  "preTest": [
+    {
+      "question": "Selon vous, quels sont les leviers de pilotage dont dispose un directeur de CAFOP dans EduWeb Planner, et comment les articulez-vous au cours d'une année de formation ?"
+    },
+    {
+      "question": "Comment distinguez-vous actuellement le rôle de Directeur de CAFOP de celui d'Admin CAFOP en matière d'accès et de responsabilités ?"
+    },
+    {
+      "question": "Avant de publier officiellement les résultats d'évaluation d'une promotion, quelles vérifications jugez-vous indispensables, et pourquoi ?"
+    },
+    {
+      "question": "Sur quels critères fondez-vous aujourd'hui une décision d'appui pédagogique entre deux centres ou deux groupes-classes ?"
+    },
+    {
+      "question": "Quelle place accordez-vous au rapport de direction daté et archivé dans votre démarche d'amélioration continue ?"
+    }
+  ],
+  "qcm": [
+    {
+      "question": "Par quel chemin de navigation accède-t-on au module CAFOP dans EduWeb Planner ?",
+      "choix": [
+        "Accueil → Aide → CAFOP",
+        "Système → CAFOP",
+        "Gestion → Promotions → CAFOP",
+        "Statistiques → CAFOP"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le module CAFOP s'ouvre depuis Système → CAFOP. C'est le point d'entrée du tableau de bord de direction, qui donne ensuite accès aux quatre onglets (Gestion, Enseignements & Évaluation, Statistiques, Rapports)."
+    },
+    {
+      "question": "Le module CAFOP est décrit comme une structure autonome. Qu'est-ce que cela implique pour le Directeur de CAFOP ?",
+      "choix": [
+        "Le CAFOP partage ses promotions et statistiques avec les établissements secondaires du même territoire",
+        "Le CAFOP constitue un espace autonome, avec ses propres données et son pilotage, sans dépendre des autres structures",
+        "Le directeur doit demander à l'Admin établissement de valider chaque rapport CAFOP",
+        "Les évaluations du CAFOP sont automatiquement importées depuis la Vie scolaire"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le CAFOP est une structure AUTONOME : il possède ses propres centres, promotions, évaluations, statistiques et rapports, réunis dans un espace dédié. Cette autonomie garantit que le pilotage de la formation initiale des instituteurs ne dépend pas des autres modules (établissements, vie scolaire, APFC)."
+    },
+    {
+      "question": "Quels sont les quatre volets qui structurent le module CAFOP et épousent le cycle de la formation ?",
+      "choix": [
+        "Inscriptions, Emplois du temps, Bulletins, Archives",
+        "Gestion, Enseignements & Évaluation, Statistiques, Rapports",
+        "Centres, Professeurs, Mentions, Diplômes",
+        "Promotions, Finances, Communication, Aide"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le module s'organise en quatre onglets : Gestion (centres, promotions), Enseignements & Évaluation, Statistiques et Rapports. Le directeur, qui dispose de l'accès complet, arbitre et valide à chaque étape de ce cycle."
+    },
+    {
+      "question": "Avant de communiquer officiellement les résultats d'une promotion, quelle est la bonne pratique attendue du directeur ?",
+      "choix": [
+        "Publier immédiatement les moyennes dès qu'au moins un module est saisi",
+        "Contrôler la complétude et la cohérence des saisies par module, puis valider avant diffusion",
+        "Laisser chaque professeur publier les notes de son module sans contrôle centralisé",
+        "Attendre la fin de l'année scolaire pour ne publier qu'un seul jeu de résultats"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le rôle de supervision impose de vérifier que les saisies sont complètes et homogènes par module (par exemple repérer un groupe sans note en « Didactique des mathématiques ») avant toute communication officielle. On ne publie les résultats qu'après contrôle de complétude et de cohérence des moyennes."
+    },
+    {
+      "question": "Sur quelle base le directeur doit-il fonder une décision d'appui pédagogique entre deux centres ?",
+      "choix": [
+        "Sur une impression générale recueillie auprès des professeurs",
+        "Sur un écart constaté dans les statistiques, lues à période égale",
+        "Sur l'ordre alphabétique des centres pour assurer une rotation équitable",
+        "Sur le nombre d'élèves-maîtres inscrits, indépendamment des résultats"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Diriger, c'est arbitrer sur des faits : une décision d'appui se fonde sur un écart objectivé par les statistiques (indicateurs, mentions, classements), comparées à période égale. L'impression ne suffit pas, et la décision doit être documentée dans le rapport pour être évaluée au bilan suivant."
+    },
+    {
+      "question": "Pourquoi le directeur doit-il actualiser l'avancement d'une promotion à chaque changement de semestre ?",
+      "choix": [
+        "Pour réinitialiser les notes déjà saisies par les professeurs",
+        "Pour maintenir la cohérence des indicateurs et permettre les comparaisons inter-centres à période égale",
+        "Pour supprimer les promotions des années antérieures",
+        "Parce que c'est une obligation imposée par l'Admin établissement"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Faire avancer une promotion d'un semestre à l'autre maintient la cohérence des effectifs, de l'analyse par genre et des moyennes pour la nouvelle période. Sans cet avancement à jour, les comparaisons inter-centres et le suivi statistique perdent leur valeur."
+    }
+  ],
+  "exercice": {
+    "titre": "Piloter une promotion du contrôle des évaluations au rapport de direction",
+    "introduction": "Ces deux scénarios vous placent dans la posture de direction d'un CAFOP : vous mobilisez successivement les onglets Gestion, Enseignements & Évaluation, Statistiques et Rapports. Le premier scénario consolide les gestes de base de supervision ; le second approfondit l'arbitrage stratégique fondé sur les données et la traçabilité des décisions. Réalisez chaque étape dans le module CAFOP (Système → CAFOP) en respectant l'angle direction : contrôler, comparer à période égale, décider, puis consigner.",
+    "scenarios": [
+      {
+        "niveau": "de base",
+        "contexte": "Vous êtes M. Koffi, directeur des études du CAFOP de Daloa, qui compte deux centres. À l'approche de la publication des résultats du semestre 2 de la promotion 2025 (118 élèves-maîtres), vous devez contrôler les évaluations avant toute communication officielle. Un doute subsiste sur la complétude des notes du module « Didactique des mathématiques » pour l'un des groupes-classes.",
+        "consignes": [
+          "Ouvrez le module CAFOP via Système → CAFOP et repérez les quatre onglets du tableau de bord de direction.",
+          "Dans l'onglet Gestion, vérifiez que les deux centres et la promotion 2025 sont correctement enregistrés et que leur avancement correspond bien au semestre 2.",
+          "Dans l'onglet Enseignements & Évaluation, contrôlez la complétude des saisies module par module et identifiez le groupe-classe dont la note de « Didactique des mathématiques » est manquante.",
+          "Formulez par écrit le signalement que vous adresseriez au professeur concerné, puis indiquez la condition à remplir avant d'autoriser la publication des résultats."
+        ],
+        "criteresEvaluation": [
+          "Le chemin de navigation Système → CAFOP est correctement utilisé et les quatre onglets sont identifiés.",
+          "La cohérence de l'avancement de la promotion 2025 au semestre 2 est vérifiée dans l'onglet Gestion.",
+          "Le contrôle de complétude par module est effectué et la note manquante en « Didactique des mathématiques » est repérée dans l'onglet Enseignements & Évaluation.",
+          "Le signalement au professeur est clair et la publication n'est conditionnée qu'après contrôle de complétude et de cohérence des moyennes."
+        ]
+      },
+      {
+        "niveau": "approfondi",
+        "contexte": "Toujours au CAFOP de Daloa, les évaluations du semestre 2 sont désormais complètes. En consultant les statistiques, vous constatez que le centre B affiche 12 points de pourcentage de mentions « Bien » de moins que le centre A, à effectifs comparables. Vous devez décider d'un appui pédagogique ciblé pour le semestre suivant, le tracer et préparer le bilan de fin de semestre de la promotion 2026.",
+        "consignes": [
+          "Dans l'onglet Statistiques, comparez les centres A et B à période égale en mobilisant les indicateurs clés, l'analyse par genre, les classements et la répartition des mentions.",
+          "Caractérisez l'écart constaté (ampleur, modules concernés) et formulez une décision d'appui pédagogique ciblée pour le centre B au semestre suivant.",
+          "Dans l'onglet Rapports, générez le rapport de la promotion 2026, appliquez les filtres pertinents, consignez la décision d'appui décidée au centre B, datez puis archivez le rapport.",
+          "Décrivez comment, au bilan du semestre suivant, vous mesurerez l'effet de cette décision d'appui à partir des rapports datés successifs."
+        ],
+        "criteresEvaluation": [
+          "La comparaison entre centres est menée à période égale et s'appuie sur des indicateurs statistiques explicites (mentions, classements, analyse par genre).",
+          "La décision d'appui pédagogique est fondée sur un écart objectivé et non sur une impression, et elle est ciblée sur le centre et les modules concernés.",
+          "Le rapport de la promotion 2026 est généré, filtré, daté et archivé dans l'onglet Rapports, et la décision d'appui y est consignée.",
+          "La démarche d'évaluation de l'effet de la décision au bilan suivant est explicitée, illustrant la logique d'amélioration continue par rapports datés successifs."
+        ]
+      }
+    ]
+  },
+  "syntheseFormative": [
+    {
+      "question": "Comment articulez-vous désormais les quatre onglets du module CAFOP (Gestion, Enseignements & Évaluation, Statistiques, Rapports) au fil d'une année de formation ?"
+    },
+    {
+      "question": "En quoi l'autonomie de la structure CAFOP modifie-t-elle votre façon de piloter les promotions et de produire les rapports par rapport aux autres modules de l'application ?"
+    },
+    {
+      "question": "Quelles vérifications de complétude et de cohérence intégrez-vous systématiquement à votre processus de supervision avant toute publication de résultats ?"
+    },
+    {
+      "question": "Comment vous appuyez-vous sur les statistiques lues à période égale pour décider, justifier et tracer un appui pédagogique ciblé ?"
+    },
+    {
+      "question": "De quelle manière une série de rapports datés et archivés vous permet-elle de mesurer l'effet de vos décisions et d'inscrire votre direction dans une logique d'amélioration continue ?"
+    }
+  ]
+},
+
+  cafop_professeur: {
+  "roleKey": "cafop_professeur",
+  "roleLabel": "Professeur de CAFOP",
+  "moduleCode": "M11",
+  "preTest": [
+    {
+      "question": "Selon vous, quelles tâches relèvent du périmètre du professeur de CAFOP dans l'application EduWeb Planner, et lesquelles ne lui sont pas accessibles ?"
+    },
+    {
+      "question": "Décrivez le chemin que vous emprunteriez pour saisir une note d'évaluation pour l'un de vos groupes-classes. Par quels menus passez-vous ?"
+    },
+    {
+      "question": "Lorsque vous saisissez une évaluation, quels éléments devez-vous sélectionner au préalable avant d'entrer les notes ?"
+    },
+    {
+      "question": "À quoi servent, d'après vous, les statistiques de vos groupes-classes, et comment pourriez-vous les exploiter pour ajuster votre enseignement ?"
+    },
+    {
+      "question": "Si un module ou un groupe-classe que vous devez évaluer n'apparaît pas dans votre espace, quelle démarche jugez-vous appropriée ?"
+    }
+  ],
+  "qcm": [
+    {
+      "question": "Au démarrage du module CAFOP, sur quel onglet le professeur de CAFOP arrive-t-il directement ?",
+      "choix": [
+        "Gestion des centres",
+        "Enseignements & Évaluation",
+        "Rapports officiels",
+        "Promotions et inscriptions"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "À l'ouverture du module CAFOP (Système → CAFOP), le professeur arrive directement sur « Enseignements & Évaluation », son espace de saisie. Cela lui évite d'être encombré par des fonctions de gestion qui ne le concernent pas."
+    },
+    {
+      "question": "Quelles sont les deux seules zones accessibles au professeur de CAFOP dans le module ?",
+      "choix": [
+        "Enseignements & Évaluation et Statistiques",
+        "Gestion des centres et Promotions",
+        "Statistiques et Rapports",
+        "Enseignements & Évaluation et Gestion des centres"
+      ],
+      "bonneReponseIndex": 0,
+      "explication": "Le périmètre du professeur, fondé sur le principe de moindre privilège, se limite à « Enseignements & Évaluation » (saisie) et « Statistiques » (suivi de ses groupes). La gestion des centres/promotions et les rapports relèvent de la direction du CAFOP."
+    },
+    {
+      "question": "Un professeur de CAFOP peut-il créer ou modifier un centre, une promotion ou un groupe-classe dans l'application ?",
+      "choix": [
+        "Oui, à condition de disposer de la permission system:teach_cafop",
+        "Oui, mais uniquement en début de semestre",
+        "Non : il ne peut que saisir des notes et lire ses statistiques ; la gestion des structures relève de la direction",
+        "Oui, pour les groupes-classes qu'il enseigne uniquement"
+      ],
+      "bonneReponseIndex": 2,
+      "explication": "Le professeur ne peut ni créer ni modifier les centres, promotions ou groupes-classes. La permission system:teach_cafop n'autorise que la saisie des évaluations et la lecture des statistiques. Toute correction de structure doit être signalée à la direction du CAFOP."
+    },
+    {
+      "question": "Avant de saisir une évaluation, quels trois éléments le professeur doit-il sélectionner dans « Enseignements & Évaluation » ?",
+      "choix": [
+        "Le centre, l'enseignant et la matière",
+        "Le module, le groupe-classe et le semestre",
+        "La promotion, le coefficient et la date",
+        "L'élève-maître, la mention et le barème"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "La saisie se fait en sélectionnant d'abord le module, le groupe-classe et le semestre, avant d'entrer les notes. Le système calcule ensuite automatiquement les moyennes et fait apparaître les mentions."
+    },
+    {
+      "question": "Après la saisie d'une note de composition, comment la moyenne et la mention du groupe-classe sont-elles obtenues ?",
+      "choix": [
+        "Elles sont saisies manuellement par le professeur",
+        "Elles sont calculées et mises à jour automatiquement par le système",
+        "Elles sont fixées par la direction après validation",
+        "Elles n'apparaissent qu'à la fin du semestre, sur demande"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le système calcule les moyennes et fait apparaître les mentions automatiquement à partir des notes saisies. C'est précisément pourquoi l'exactitude de la saisie du professeur conditionne la justesse des résultats officiels."
+    },
+    {
+      "question": "Un professeur constate que ses statistiques semblent incohérentes pour un groupe-classe. Quelle est la première vérification à effectuer ?",
+      "choix": [
+        "Demander à la direction de recalculer les moyennes",
+        "Vérifier la complétude de ses saisies, car une statistique fausse provient presque toujours d'une note manquante",
+        "Changer de semestre pour réinitialiser l'affichage",
+        "Recréer le groupe-classe concerné"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Une statistique fausse vient presque toujours d'une note manquante ou d'une saisie incomplète. Il faut d'abord vérifier la complétude de ses saisies et s'assurer de comparer la même période, plutôt que de recréer des structures (ce que le professeur ne peut d'ailleurs pas faire)."
+    }
+  ],
+  "exercice": {
+    "titre": "Saisir et exploiter les évaluations de ses groupes-classes au CAFOP",
+    "introduction": "Ces deux scénarios vous placent en situation réelle de professeur de CAFOP devant son espace « Enseignements & Évaluation » et son onglet « Statistiques ». Le premier scénario consolide la saisie correcte des notes par module, groupe-classe et semestre ; le second vous amène à exploiter les statistiques pour ajuster votre enseignement, tout en respectant strictement les limites de votre périmètre (saisie et suivi uniquement, sans gestion des centres ni des promotions). Réalisez chaque scénario dans l'ordre et autoévaluez-vous à l'aide des critères fournis.",
+    "scenarios": [
+      {
+        "niveau": "de base",
+        "contexte": "Au CAFOP de Bouaké, Mme Brou enseigne « Didactique du français » au groupe-classe « 2ⁿᵈᵉ année A », composé de 32 élèves-maîtres. La composition du premier semestre vient d'avoir lieu et elle dispose des 32 copies corrigées, notées sur 20 (parmi lesquelles trois notes limites : 9,75 ; 10 ; 10,25). Elle se connecte à EduWeb Planner pour saisir ces résultats au fil de l'eau, le jour même de la correction.",
+        "consignes": [
+          "Ouvrez le module CAFOP en passant par Système → CAFOP, puis vérifiez que vous arrivez bien sur l'onglet « Enseignements & Évaluation ».",
+          "Sélectionnez successivement le module « Didactique du français », le groupe-classe « 2ⁿᵈᵉ année A » et le premier semestre.",
+          "Saisissez les 32 notes de la composition, puis contrôlez deux fois les trois notes limites (9,75 ; 10 ; 10,25) avant de quitter l'écran.",
+          "Vérifiez la moyenne du groupe-classe et la mention obtenues, recalculées automatiquement par le système après votre saisie.",
+          "Identifiez à quelle personne vous devez vous adresser si le groupe-classe « 2ⁿᵈᵉ année A » n'apparaissait pas dans votre liste."
+        ],
+        "criteresEvaluation": [
+          "Le chemin de navigation Système → CAFOP → Enseignements & Évaluation est correctement emprunté et identifié.",
+          "Les trois éléments préalables (module, groupe-classe, semestre) sont sélectionnés avant toute saisie de note.",
+          "Les notes limites font l'objet d'un double contrôle avant de quitter l'écran, conformément aux bonnes pratiques.",
+          "La candidate constate que la moyenne et la mention sont recalculées automatiquement et n'ont pas à être saisies à la main.",
+          "L'absence éventuelle d'une structure est correctement signalée à la direction du CAFOP, et non corrigée par la professeure elle-même."
+        ]
+      },
+      {
+        "niveau": "approfondi",
+        "contexte": "Au CAFOP d'Abengourou, M. Koffi enseigne « Mathématiques et leur didactique » à deux groupes-classes : « 1ʳᵉ année B » (28 élèves-maîtres) et « 1ʳᵉ année C » (30 élèves-maîtres). À la clôture du second semestre, l'onglet Statistiques affiche pour la « 1ʳᵉ année C » une majorité de mentions « Passable » concentrée sur la compétence « résolution de problèmes », tandis que la « 1ʳᵉ année B » présente un profil plus homogène. M. Koffi souhaite exploiter ces données pour préparer une séance de remédiation et comparer ses deux groupes d'une année sur l'autre.",
+        "consignes": [
+          "Après avoir achevé et vérifié la saisie complète des évaluations des deux groupes-classes, ouvrez l'onglet Statistiques (CAFOP → Statistiques).",
+          "Repérez, pour la « 1ʳᵉ année C », la concentration de mentions « Passable » sur la compétence « résolution de problèmes » et notez les indicateurs correspondants (moyenne, répartition).",
+          "Comparez les profils des deux groupes-classes en vous assurant de confronter le même semestre d'une année à l'autre.",
+          "Décidez d'une action pédagogique concrète (par exemple une séance de remédiation ciblée sur la résolution de problèmes au prochain cours) à partir des points faibles récurrents identifiés.",
+          "Vérifiez, avant toute conclusion, que les écarts observés ne proviennent pas d'une note manquante ou d'une saisie incomplète."
+        ],
+        "criteresEvaluation": [
+          "La lecture des statistiques s'appuie sur une saisie préalablement complétée et vérifiée pour les deux groupes-classes.",
+          "Les points faibles récurrents (mentions « Passable » sur une compétence précise) sont correctement repérés et reliés à des indicateurs concrets.",
+          "La comparaison respecte la règle de période égale (même semestre d'une année à l'autre) pour rester pertinente.",
+          "Une décision pédagogique concrète et justifiée (remédiation ciblée) est tirée de l'analyse des statistiques.",
+          "La complétude des saisies est contrôlée avant d'interpréter les écarts, écartant l'hypothèse d'une note manquante, et aucune action de gestion de structure n'est entreprise hors périmètre."
+        ]
+      }
+    ]
+  },
+  "syntheseFormative": [
+    {
+      "question": "Reformulez avec vos propres mots le périmètre exact du professeur de CAFOP : que pouvez-vous faire, et qu'est-ce qui reste réservé à la direction ?"
+    },
+    {
+      "question": "Décrivez de mémoire la procédure complète de saisie d'une évaluation, de l'ouverture du module jusqu'à la vérification de la moyenne et de la mention."
+    },
+    {
+      "question": "Pourquoi votre exactitude de saisie est-elle déterminante pour la justesse des résultats officiels des élèves-maîtres ?"
+    },
+    {
+      "question": "Quelles bonnes pratiques retiendrez-vous pour fiabiliser vos saisies et exploiter utilement vos statistiques au quotidien ?"
+    },
+    {
+      "question": "Comment réagirez-vous désormais face à un onglet de gestion absent ou à une structure (module, groupe-classe) manquante dans votre espace ?"
+    }
+  ]
+},
+
+  apfc_admin: {
+  "roleKey": "apfc_admin",
+  "roleLabel": "Admin APFC",
+  "moduleCode": "M12",
+  "preTest": [
+    {
+      "question": "Selon vous, quelle est la mission propre de l'APFC (Antenne de la Pédagogie et de la Formation Continue) et en quoi se distingue-t-elle de la formation initiale des enseignants ?"
+    },
+    {
+      "question": "Comment décririez-vous, avant cette formation, le lien entre une « antenne » et une « activité » de formation continue dans votre travail quotidien ?"
+    },
+    {
+      "question": "Quelles informations vous semblent indispensables pour bien décrire une antenne APFC (localisation, contact, responsable…) et pourquoi ?"
+    },
+    {
+      "question": "Avez-vous déjà importé des données en masse via un fichier CSV ? Quelles difficultés anticipez-vous lors de l'import d'un réseau d'antennes ?"
+    },
+    {
+      "question": "À votre avis, comment des indicateurs chiffrés (nombre d'antennes, volume d'activités) peuvent-ils aider à piloter la couverture de la formation continue sur un territoire ?"
+    }
+  ],
+  "qcm": [
+    {
+      "question": "Dans EduWeb Planner, par quel chemin de navigation ouvre-t-on le module APFC ?",
+      "choix": [
+        "Vie scolaire → APFC",
+        "Inspection & supervision → APFC",
+        "Centre de formation → APFC",
+        "Établissements → Antennes APFC"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le module APFC s'ouvre depuis « Inspection & supervision → APFC ». Il réunit ensuite deux sections : les Indicateurs (synthèse chiffrée) et les Antennes APFC (réseau et activités)."
+    },
+    {
+      "question": "L'APFC est une structure autonome dans EduWeb Planner. Qu'est-ce que cela implique concrètement pour son périmètre ?",
+      "choix": [
+        "Elle partage ses antennes et ses indicateurs avec les CAFOP pour mutualiser la formation",
+        "Elle puise les activités de formation dans les données de la vie scolaire",
+        "Elle ne partage ni données ni écrans avec les CAFOP (formation initiale) ni avec la vie scolaire",
+        "Elle dépend du module Établissements pour créer ses antennes"
+      ],
+      "bonneReponseIndex": 2,
+      "explication": "L'APFC est dédiée à la formation continue des enseignants en poste : c'est une structure autonome qui ne partage ni données ni écrans avec les CAFOP (formation initiale) ni avec la vie scolaire. Cette étanchéité garantit que chaque structure pilote son propre périmètre."
+    },
+    {
+      "question": "Quelle est la différence entre une « antenne » et une « activité » de formation continue ?",
+      "choix": [
+        "L'antenne est un événement daté ; l'activité est une structure permanente",
+        "L'antenne est le lieu/structure de formation (avec responsable et contact) ; l'activité est un événement daté et typé rattaché à une antenne",
+        "L'antenne et l'activité désignent la même réalité sous deux noms",
+        "L'antenne est un indicateur agrégé ; l'activité est une ligne du fichier CSV"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "L'antenne est l'unité de terrain (localisation, contact, responsable) qui porte la formation ; l'activité est un événement de formation daté et typé (atelier, séminaire, journée…) rattaché à une antenne. Le compteur d'activités d'une antenne découle de ces enregistrements."
+    },
+    {
+      "question": "Lors d'un import CSV d'antennes, quel est l'ordre exact des colonnes attendu par le modèle et quel séparateur faut-il utiliser ?",
+      "choix": [
+        "nom,code,pays,region,localite… avec la virgule comme séparateur",
+        "code;nom;localite;region;pays… avec le point-virgule comme séparateur",
+        "nom;code;pays;region;localite;adresse;telephone;email;responsable;contact_responsable avec le point-virgule comme séparateur",
+        "L'ordre des colonnes est libre tant que les en-têtes sont présents, séparateur tabulation"
+      ],
+      "bonneReponseIndex": 2,
+      "explication": "Le modèle impose l'en-tête exact « nom;code;pays;region;localite;adresse;telephone;email;responsable;contact_responsable » avec le point-virgule comme séparateur. Une colonne manquante ou décalée fausse l'import : il faut repartir du modèle téléchargé et conserver l'ordre des colonnes."
+    },
+    {
+      "question": "Une activité de formation continue est rattachée à une année scolaire. Qu'est-ce qui détermine ce rattachement ?",
+      "choix": [
+        "Le type d'activité choisi (atelier, séminaire…)",
+        "La date de l'activité, qui la rattache à l'année scolaire correspondante",
+        "Le nom du responsable de l'antenne",
+        "Le pays de l'antenne sélectionnée"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Chaque activité est datée, et c'est cette date qui la rattache à une année scolaire (ex. 2025-2026). Le compteur d'activités d'une antenne devient ainsi filtrable par année, ce qui permet de comparer une période à l'autre."
+    },
+    {
+      "question": "Dans la section Indicateurs, comment repérer de façon fiable une zone sous-dotée en formation continue ?",
+      "choix": [
+        "En comparant le nombre de responsables d'antenne d'une région à l'autre",
+        "En filtrant par pays et année scolaire, puis en comparant le volume d'activités entre antennes à période égale",
+        "En additionnant toutes les activités de toutes les années sans filtre",
+        "En consultant le module CAFOP qui centralise la couverture territoriale"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le pilotage repose sur des faits : on filtre par pays et par année scolaire, puis on compare le volume d'activités entre antennes. La comparaison doit se faire à période égale pour être valide ; un écart marqué signale une zone à renforcer."
+    }
+  ],
+  "exercice": {
+    "titre": "Administrer le réseau d'antennes APFC : du peuplement initial au pilotage par indicateurs",
+    "introduction": "Ces deux scénarios vous placent en situation réelle d'Admin APFC sur un périmètre ivoirien. Le premier scénario, de base, vous fait créer une antenne, y enregistrer une activité et lire les indicateurs associés. Le second, approfondi, vous confronte à un import CSV en masse, au diagnostic d'une zone sous-formée et à un plan de rééquilibrage. Dans les deux cas, vous restez dans le périmètre autonome du module APFC, sans aucune dépendance aux CAFOP ni à la vie scolaire. Travaillez en respectant scrupuleusement les chemins de navigation et les règles de saisie du module.",
+    "scenarios": [
+      {
+        "niveau": "de base",
+        "contexte": "Vous êtes Mme Coulibaly, Admin APFC. Votre réseau compte déjà trois antennes : Abidjan, Bouaké et Korhogo. Vous devez ouvrir une nouvelle antenne à Daloa pour couvrir le Haut-Sassandra. Le responsable pressenti est M. Kouassi Yao (téléphone +225 07 11 22 33 44, email apfc.daloa@education.ci). Le 14 novembre 2025, cette antenne organisera son premier atelier pédagogique intitulé « Évaluation par compétences au collège », pour l'année scolaire 2025-2026.",
+        "consignes": [
+          "Ouvrez le module APFC via « Inspection & supervision → APFC », puis la section « Antennes APFC », et créez l'« Antenne APFC de Daloa » en renseignant les quatre blocs : général (nom, code stable et unique), localisation (Côte d'Ivoire, région du Haut-Sassandra, localité Daloa, adresse), contact (téléphone, email) et responsable (M. Kouassi Yao).",
+          "Vérifiez la cohérence pays / région / localité avant d'enregistrer l'antenne.",
+          "Ouvrez l'antenne de Daloa, ajoutez l'activité du 14 novembre 2025 en choisissant le type « Atelier pédagogique » et l'intitulé « Évaluation par compétences au collège ».",
+          "Filtrez les activités de l'antenne par année scolaire 2025-2026 et vérifiez que le compteur d'activités s'incrémente correctement.",
+          "Ouvrez la section Indicateurs et confirmez que le réseau compte désormais quatre antennes."
+        ],
+        "criteresEvaluation": [
+          "L'antenne de Daloa est créée avec les quatre blocs complets et un code d'antenne stable et unique.",
+          "La cohérence pays / région / localité (Côte d'Ivoire / Haut-Sassandra / Daloa) est respectée et vérifiée avant enregistrement.",
+          "L'activité est correctement datée (14/11/2025), typée « Atelier pédagogique » et rattachée à l'année scolaire 2025-2026.",
+          "Le compteur d'activités de l'antenne et le nombre total d'antennes dans les indicateurs reflètent les ajouts effectués.",
+          "L'ensemble des manipulations reste dans le périmètre du module APFC, sans recours aux CAFOP ni à la vie scolaire."
+        ]
+      },
+      {
+        "niveau": "approfondi",
+        "contexte": "Toujours en tant que Mme Coulibaly, vous recevez de la coordination régionale la liste de 12 nouvelles antennes à intégrer pour la région des Savanes (autour de Korhogo, Ferkessédougou, Boundiali…). En parallèle, le bilan de mi-parcours révèle un déséquilibre : sur l'année 2025-2026, l'antenne de Korhogo n'affiche que 4 activités, contre 18 pour Abidjan. La direction vous demande un peuplement rapide du réseau, puis un plan de rééquilibrage de la couverture du Nord, à présenter avec des chiffres comparables.",
+        "consignes": [
+          "Depuis « APFC → Antennes APFC », téléchargez le modèle CSV, puis remplissez une ligne par antenne en respectant l'en-tête exact « nom;code;pays;region;localite;adresse;telephone;email;responsable;contact_responsable » et le séparateur point-virgule.",
+          "Lancez « Importer CSV », contrôlez l'aperçu avant validation, et corrigez toute colonne manquante ou décalée en repartant du modèle si nécessaire.",
+          "Dans la section Indicateurs, filtrez par pays (Côte d'Ivoire) et par année scolaire 2025-2026, puis comparez à période égale le volume d'activités de Korhogo (4) à celui d'Abidjan (18) et des nouvelles antennes des Savanes.",
+          "Sur la base de cet écart, planifiez et enregistrez au moins deux activités supplémentaires (par exemple deux séminaires) pour l'antenne de Korhogo afin de rééquilibrer la couverture du Nord.",
+          "Rédigez une courte note de pilotage justifiant le déséquilibre constaté et les mesures retenues, en vous appuyant uniquement sur les indicateurs comparés à période égale."
+        ],
+        "criteresEvaluation": [
+          "Le fichier CSV respecte strictement l'ordre des colonnes du modèle et le séparateur point-virgule ; l'aperçu est contrôlé avant validation de l'import.",
+          "Les 12 antennes des Savanes sont importées sans erreur, avec des codes stables, uniques et une cohérence pays / région / localité vérifiée.",
+          "La comparaison des volumes d'activités est faite à période égale (année 2025-2026) après filtrage par pays, mettant clairement en évidence l'écart Korhogo / Abidjan.",
+          "Au moins deux activités supplémentaires sont enregistrées pour Korhogo, correctement datées et typées, et l'effet sur le compteur et les indicateurs est vérifié.",
+          "La note de pilotage s'appuie sur des faits chiffrés issus des indicateurs et reste dans le périmètre autonome de l'APFC, sans données empruntées aux CAFOP ou à la vie scolaire."
+        ]
+      }
+    ]
+  },
+  "syntheseFormative": [
+    {
+      "question": "Au terme de cette formation, comment expliqueriez-vous à un collègue l'autonomie de l'APFC et les conséquences pratiques de cette autonomie sur la gestion des données ?"
+    },
+    {
+      "question": "Décrivez les étapes que vous suivriez pour créer une nouvelle antenne complète et y rattacher sa première activité, en citant les chemins de navigation."
+    },
+    {
+      "question": "Quelles vérifications réalisez-vous désormais avant de valider un import CSV pour éviter qu'il n'échoue, et pourquoi l'ordre des colonnes est-il déterminant ?"
+    },
+    {
+      "question": "Comment utiliseriez-vous les indicateurs, filtrés par pays et année scolaire, pour diagnostiquer un déséquilibre de couverture et décider d'un plan de rééquilibrage ?"
+    },
+    {
+      "question": "Quelles bonnes pratiques retenez-vous pour tenir à jour le réseau d'antennes (codes, responsables, contacts, saisie des activités au fil de l'eau) et garantir la fiabilité du pilotage ?"
+    }
+  ]
+},
+
+  chef_antenne: {
+  "roleKey": "chef_antenne",
+  "roleLabel": "Chef d'Antenne APFC",
+  "moduleCode": "M13",
+  "preTest": [
+    {
+      "question": "Selon vous, quelle est la frontière exacte entre ce qu'un chef d'antenne pilote et ce qui relève de l'Admin APFC ? Citez au moins deux tâches qui ne vous appartiennent pas."
+    },
+    {
+      "question": "Comment distingueriez-vous un rapport en brouillon d'un rapport validé, et quelles conséquences attachez-vous au passage de l'un à l'autre ?"
+    },
+    {
+      "question": "Lorsque vous ouvrez l'espace des rapports d'antennes, quel premier geste posez-vous pour ne consulter que les données relevant de votre périmètre ?"
+    },
+    {
+      "question": "De quelle manière organisez-vous aujourd'hui la communication avec vos formateurs et la planification de leurs rencontres ? Quelles traces en conservez-vous ?"
+    },
+    {
+      "question": "Quelle valeur de suivi accordez-vous à la régularité des rapports d'une période à l'autre, et comment l'exploitez-vous pour le bilan annuel ?"
+    }
+  ],
+  "qcm": [
+    {
+      "question": "Dans EduWeb Planner, par quel chemin de navigation le chef d'antenne accède-t-il à l'espace lui permettant de produire et suivre les rapports de son antenne ?",
+      "choix": [
+        "Inspection & supervision → Rapports d'antennes",
+        "Administration → Registre des antennes",
+        "Communication → Messages",
+        "Accueil → Aide → Centre de formation"
+      ],
+      "bonneReponseIndex": 0,
+      "explication": "Les rapports d'antenne se trouvent sous Inspection & supervision → Rapports d'antennes. C'est l'espace de pilotage du chef d'antenne. Le registre des antennes, lui, relève de l'Admin APFC ; la messagerie et le Centre de formation répondent à d'autres besoins."
+    },
+    {
+      "question": "Un formateur de votre antenne vous demande de créer une nouvelle antenne APFC et de lui attribuer un code. Quelle est la bonne réponse au regard de votre périmètre ?",
+      "choix": [
+        "Créer l'antenne moi-même puisque je supervise le réseau de formation continue",
+        "Refuser : la gestion du registre des antennes (création, codes, localisations) relève de l'Admin APFC, pas du chef d'antenne",
+        "Créer l'antenne en brouillon puis demander à un formateur de la valider",
+        "Dupliquer ma propre antenne et en modifier le nom pour gagner du temps"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le chef d'antenne ne gère PAS le registre global des antennes : création, codes et localisations sont réservés à l'Admin APFC. Cette séparation garantit l'intégrité du réseau. Le chef d'antenne se concentre sur l'animation et le reporting de sa seule antenne."
+    },
+    {
+      "question": "Quelle affirmation décrit correctement la différence entre un rapport en brouillon et un rapport validé ?",
+      "choix": [
+        "Le brouillon est public tandis que le validé reste privé à l'auteur",
+        "Les deux statuts sont équivalents ; seul l'intitulé change",
+        "Le brouillon est un rapport en cours, modifiable ; le validé est la version officielle de référence de la période",
+        "Le validé peut être modifié librement, le brouillon est verrouillé"
+      ],
+      "bonneReponseIndex": 2,
+      "explication": "Le brouillon se travaille jusqu'à validation ; le rapport validé devient la référence officielle de la période et alimente le bilan annuel. On ne valide donc qu'après relecture, car le statut « validé » engage l'antenne."
+    },
+    {
+      "question": "Avant de consulter ou de générer un rapport, quel réflexe garantit que vous ne travaillez que sur votre périmètre et évitez toute confusion avec les autres antennes ?",
+      "choix": [
+        "Trier la liste par date de création la plus récente",
+        "Sélectionner votre antenne dans le filtre « Antenne » en haut de l'espace Rapports d'antennes",
+        "Exporter tous les rapports en PDF pour les comparer",
+        "Créer un nouveau rapport à chaque consultation"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le filtre « Antenne » limite la liste et les indicateurs à votre périmètre. Travailler systématiquement antenne sélectionnée évite les confusions avec les autres antennes, comme le recommande le guide."
+    },
+    {
+      "question": "Vous préparez un regroupement disciplinaire pour les formateurs de votre antenne. Quels outils de la plateforme mobilisez-vous pour informer et planifier de façon traçable ?",
+      "choix": [
+        "Le registre des antennes pour ajouter une ligne d'activité",
+        "La messagerie (Communication → Messages) pour informer et les Rendez-vous (Vie scolaire → Rendez-vous) pour planifier",
+        "Uniquement un appel téléphonique aux formateurs concernés",
+        "Le module de bulletins pour notifier les formateurs"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "La communication avec les formateurs passe par Communication → Messages et la planification des rencontres par Vie scolaire → Rendez-vous. Une trace écrite et un agenda partagé transforment l'organisation informelle en suivi traçable et évitent oublis et malentendus."
+    },
+    {
+      "question": "Quelle pratique correspond aux bonnes habitudes recommandées pour la production des rapports d'antenne ?",
+      "choix": [
+        "Valider un rapport dès sa génération pour gagner du temps, puis le relire ensuite",
+        "Produire un rapport à chaque échéance et ne valider qu'après relecture, puis dater et archiver chaque rapport",
+        "Conserver tous les rapports en brouillon afin de pouvoir les modifier à tout moment",
+        "Ne produire qu'un seul rapport annuel global, sans découpage par période"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le guide recommande de produire un rapport à chaque échéance pour disposer d'une série comparable, de ne valider qu'après relecture car le statut « validé » engage l'antenne, et de dater et archiver chaque rapport : un rapport non archivé n'a pas de valeur de suivi."
+    }
+  ],
+  "exercice": {
+    "titre": "Piloter son antenne : du reporting trimestriel à l'animation des formateurs",
+    "introduction": "Ces deux mises en situation vous placent dans la peau d'un chef d'antenne APFC en Côte d'Ivoire. Elles vous conduisent du geste fondamental — produire et valider un rapport d'antenne dans le respect de votre périmètre — jusqu'au pilotage plus complet d'une échéance combinant reporting, communication et planification. Chaque scénario s'appuie sur les écrans réels d'EduWeb Planner (Inspection & supervision, Communication, Vie scolaire) et sur la distinction structurante entre brouillon et rapport validé.",
+    "scenarios": [
+      {
+        "niveau": "de base",
+        "contexte": "M. Bamba dirige l'« Antenne APFC Abidjan ». Nous sommes à la clôture du 2ᵉ trimestre. Au cours de cette période, son antenne a organisé 3 regroupements disciplinaires (Mathématiques, Lettres modernes, Sciences physiques) ayant mobilisé 47 formateurs. Il doit produire le rapport d'activités du trimestre et le rendre officiel. Un formateur lui demande au passage de « créer une antenne pour Grand-Bassam » : M. Bamba doit savoir traiter cette sollicitation.",
+        "consignes": [
+          "Ouvrez l'espace des rapports d'antennes en suivant le chemin Inspection & supervision → Rapports d'antennes, puis sélectionnez « Antenne APFC Abidjan » dans le filtre « Antenne » et la période « 2ᵉ trimestre ».",
+          "Générez le rapport intitulé « Activités du trimestre — Antenne Abidjan » et complétez-le avec les données réelles (3 regroupements disciplinaires, 47 formateurs mobilisés).",
+          "Relisez le rapport, puis faites-le passer du statut brouillon au statut validé, en justifiant pourquoi la validation n'intervient qu'après relecture.",
+          "Exportez le rapport validé (PDF ou Word), datez-le et archivez-le en vue du bilan annuel.",
+          "Formulez la réponse à donner au formateur qui demande la création d'une antenne pour Grand-Bassam, en précisant à qui cette tâche revient."
+        ],
+        "criteresEvaluation": [
+          "Le chemin de navigation correct est utilisé et l'antenne ainsi que la période sont bien sélectionnées via le filtre avant toute action.",
+          "Le rapport est généré avec un intitulé conforme et renseigné avec les chiffres exacts du scénario (3 regroupements, 47 formateurs).",
+          "Le passage de brouillon à validé est effectué après relecture, et la raison de ce séquencement (le validé engage l'antenne et devient la référence) est correctement expliquée.",
+          "Le rapport est exporté, daté et archivé, démontrant la compréhension qu'un rapport non archivé n'a pas de valeur de suivi.",
+          "La demande de création d'antenne est refusée à juste titre et renvoyée à l'Admin APFC, montrant la maîtrise du périmètre du chef d'antenne."
+        ]
+      },
+      {
+        "niveau": "approfondi",
+        "contexte": "Mme Koffi, cheffe de l'« Antenne APFC Yamoussoukro », prépare la clôture du 3ᵉ trimestre et le bilan annuel. Son antenne compte 62 formateurs répartis sur 5 disciplines. Deux rapports trimestriels antérieurs sont déjà validés (1ᵉʳ et 2ᵉ trimestres), un troisième est encore en brouillon. Elle doit, dans la même semaine, finaliser le rapport du 3ᵉ trimestre, organiser un regroupement disciplinaire de Sciences de la vie et de la terre réunissant 14 formateurs le 4 juillet, et préparer la consolidation pour le bilan annuel. Elle constate par ailleurs qu'un intitulé de rapport mentionne par erreur « Antenne Bouaké ».",
+        "consignes": [
+          "Filtrez les rapports sur « Antenne APFC Yamoussoukro » et vérifiez la cohérence de la série : identifiez les rapports validés des trimestres 1 et 2 et le brouillon du trimestre 3, et signalez l'anomalie de l'intitulé mentionnant « Antenne Bouaké ».",
+          "Complétez et validez le rapport du 3ᵉ trimestre après relecture, puis expliquez comment les trois rapports trimestriels validés alimenteront le bilan annuel en formant une série comparable.",
+          "Rédigez, via Communication → Messages, le message d'information destiné aux 14 formateurs de SVT concernés, puis créez le rendez-vous du regroupement du 4 juillet dans Vie scolaire → Rendez-vous.",
+          "Déterminez la conduite à tenir face à l'intitulé erroné « Antenne Bouaké » : ce qui relève de votre correction (intitulé d'un rapport de votre antenne) et ce qui relèverait de l'Admin APFC (registre et codes des antennes).",
+          "Préparez une courte note de synthèse de fin de période recensant les indicateurs clés (62 formateurs, 5 disciplines, 3 trimestres rapportés) à conserver pour le Centre de formation et le bilan."
+        ],
+        "criteresEvaluation": [
+          "La série trimestrielle est correctement reconstituée (deux validés, un brouillon) et l'anomalie d'intitulé est repérée et qualifiée avec discernement.",
+          "Le rapport du 3ᵉ trimestre est validé après relecture et le rôle des rapports validés dans la construction d'une série comparable pour le bilan annuel est clairement argumenté.",
+          "La communication et la planification sont réalisées sur les bons écrans (Messages puis Rendez-vous), avec un message clair aux 14 formateurs et un rendez-vous daté au 4 juillet, garantissant la traçabilité.",
+          "La conduite face à l'intitulé erroné distingue justement la correction d'un rapport de sa propre antenne (de son ressort) de la modification du registre des antennes (réservée à l'Admin APFC).",
+          "La note de synthèse mobilise les indicateurs concrets du scénario (62 formateurs, 5 disciplines, 3 trimestres) et témoigne d'une vision consolidée orientée bilan et archivage."
+        ]
+      }
+    ]
+  },
+  "syntheseFormative": [
+    {
+      "question": "À l'issue de cette formation, comment énonceriez-vous en une phrase le périmètre du chef d'antenne et ce qui le distingue clairement de l'Admin APFC ?"
+    },
+    {
+      "question": "Décrivez le cycle de vie complet d'un rapport d'antenne, de sa génération à son archivage, en précisant le rôle des statuts brouillon et validé."
+    },
+    {
+      "question": "Quels gestes adopterez-vous désormais pour garantir que vous travaillez toujours sur le bon périmètre dans l'espace Rapports d'antennes ?"
+    },
+    {
+      "question": "Comment articulerez-vous messagerie et rendez-vous pour rendre traçable l'animation de vos formateurs lors d'un regroupement disciplinaire ?"
+    },
+    {
+      "question": "En quoi la régularité et l'archivage de vos rapports trimestriels renforcent-ils la qualité du bilan annuel de votre antenne ?"
+    }
+  ]
+},
+
+  transport_chauffeur: {
+  "roleKey": "transport_chauffeur",
+  "roleLabel": "Chauffeur de car",
+  "moduleCode": "M14",
+  "preTest": [
+    {
+      "question": "Selon vous, en quoi consiste précisément votre mission lorsque vous transportez des élèves avec EduWeb Planner : conduire le car suffit-il, ou y a-t-il un service supplémentaire à rendre aux familles ? Expliquez avec vos mots."
+    },
+    {
+      "question": "D'après votre expérience ou votre intuition, suffit-il de posséder un compte « Chauffeur de car » pour pouvoir diffuser la position du car en temps réel ? Quelle étape pensez-vous nécessaire avant de pouvoir émettre une position ?"
+    },
+    {
+      "question": "Avant cette formation, sauriez-vous décrire le geste quotidien à accomplir, le matin et le soir, pour que les parents voient le car avancer sur une carte ? Détaillez les actions que vous imaginez."
+    },
+    {
+      "question": "Quels réflexes de sécurité au volant vous semblent indispensables lorsqu'un téléphone partage la position du car pendant que vous conduisez ? À quel moment estimez-vous pouvoir manipuler l'écran ?"
+    },
+    {
+      "question": "Pensez-vous avoir accès, en tant que chauffeur, aux notes, bulletins ou autres données scolaires des élèves transportés ? Justifiez votre réponse selon ce que vous croyez être votre périmètre."
+    }
+  ],
+  "qcm": [
+    {
+      "question": "Un chauffeur vient d'obtenir un compte « Chauffeur de car » activé, mais il ne voit pas le bouton « Mode conducteur » dans son espace Transport. Quelle est la cause la plus probable ?",
+      "choix": [
+        "Son téléphone n'a pas de GPS, donc le bouton reste masqué",
+        "Il n'a pas encore été désigné « conducteur » par l'établissement",
+        "Le créneau d'émission du matin n'est pas encore commencé",
+        "Il doit d'abord choisir son car avant que le bouton n'apparaisse"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Avoir un compte chauffeur ne suffit pas à émettre une position : l'établissement doit d'abord ajouter l'e-mail du chauffeur à la liste des « conducteurs désignés ». Tant que la désignation n'est pas faite, le bouton « Mode conducteur » n'apparaît pas — c'est normal. Le chauffeur doit recontacter l'établissement."
+    },
+    {
+      "question": "Comment un chauffeur devient-il « conducteur désigné », condition indispensable pour émettre la position d'un car ?",
+      "choix": [
+        "Il coche lui-même la case « Je suis conducteur » dans ses réglages",
+        "Le chef d'établissement ou l'administrateur ajoute son e-mail à la liste des conducteurs désignés",
+        "Il suffit qu'il active le GPS et autorise la localisation sur son téléphone",
+        "Tout chauffeur est automatiquement désigné dès l'activation de son compte"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "La désignation est une étape de sécurité : le chef d'établissement (ou l'administrateur) ajoute l'adresse e-mail exacte du compte chauffeur à la liste des « conducteurs désignés » de l'établissement. C'est cette action, et non une initiative du chauffeur, qui fait apparaître le bouton « Mode conducteur ». Seuls les conducteurs désignés peuvent diffuser une position."
+    },
+    {
+      "question": "Par quel chemin de navigation le chauffeur accède-t-il à son espace pour activer le mode conducteur et émettre la position ?",
+      "choix": [
+        "Accueil → Aide → Transport",
+        "Vie scolaire → Transport d'élèves",
+        "Paramètres → Géolocalisation",
+        "Accueil → Mon car → Émission"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "L'espace du chauffeur se trouve dans « Vie scolaire → Transport d'élèves ». C'est là qu'apparaît le bouton « Mode conducteur » (une fois la désignation faite), que l'on choisit son car et que l'on lance le partage de position. Le menu Aide sert quant à lui à retrouver le guide pratique."
+    },
+    {
+      "question": "À l'arrivée du car à l'école, que doit faire le chauffeur concernant l'émission de la position ?",
+      "choix": [
+        "Couper impérativement l'émission à la main, sinon elle continue toute la journée",
+        "Rien d'obligatoire : hors créneau, plus rien n'est diffusé et l'émission s'arrête seule",
+        "Supprimer le car sélectionné pour éviter de consommer de la batterie",
+        "Appeler l'établissement pour qu'il désactive le mode conducteur à distance"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "L'émission ne fonctionne que pendant les créneaux définis (matin, soir). Hors créneau, rien n'est diffusé : à l'arrivée, le créneau se termine et l'émission s'arrête seule. Il n'est donc pas nécessaire de couper manuellement, même si le chauffeur peut désactiver le mode conducteur s'il le souhaite."
+    },
+    {
+      "question": "Un parent appelle le chauffeur en plein trajet pour demander où se trouve le car. Quelle est la conduite à tenir, conforme aux règles de sécurité au volant ?",
+      "choix": [
+        "Répondre rapidement au téléphone tout en continuant à rouler pour rassurer le parent",
+        "Ne pas répondre en roulant : le parent voit déjà la position en direct sur sa carte, c'est le rôle de l'émission",
+        "S'arrêter brusquement sur la voie pour décrocher immédiatement",
+        "Confier le téléphone à un élève pour qu'il réponde à la place du chauffeur"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Aucune fonctionnalité ne passe avant la sécurité. Toute manipulation du téléphone se fait à l'arrêt. Le chauffeur ne répond pas en roulant : grâce à l'émission de position, le parent voit le car avancer en direct sur sa carte — c'est précisément à cela que sert le partage. En cas de problème technique, il faut s'arrêter en sécurité avant de toucher l'écran."
+    },
+    {
+      "question": "Le message « Position GPS indisponible » s'affiche au moment d'émettre. Quelle est la bonne marche à suivre ?",
+      "choix": [
+        "Continuer à rouler : le message disparaîtra de lui-même une fois sur la route",
+        "Autoriser la localisation pour EduWeb Planner dans les réglages du téléphone, activer le GPS, puis réappuyer sur « Mode conducteur »",
+        "Demander à l'établissement de retirer puis remettre la désignation de conducteur",
+        "Désinstaller puis réinstaller l'application pour réinitialiser le GPS"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le message « Position GPS indisponible » signale que la localisation n'est pas autorisée ou que le GPS est coupé. Il faut autoriser la localisation pour EduWeb Planner dans les réglages du téléphone et activer le GPS, puis réappuyer sur « Mode conducteur ». Cette manipulation se fait à l'arrêt, avant de démarrer."
+    }
+  ],
+  "exercice": {
+    "titre": "Mettre le car scolaire « en visibilité » : de la désignation à l'émission sécurisée",
+    "introduction": "Ces deux scénarios vous placent dans la peau d'un chauffeur de car scolaire utilisant EduWeb Planner. Le premier vous fait dérouler la routine quotidienne d'émission de position, du matin au soir. Le second vous confronte à une situation plus exigeante mêlant problème de désignation, incident technique et sécurité au volant. Dans les deux cas, restez strictement dans votre périmètre : vous rendez le trajet visible en temps réel, vous n'accédez à aucune donnée scolaire des élèves. Appuyez-vous sur les écrans réels (Vie scolaire → Transport d'élèves), sur la notion de conducteur désigné et sur la règle d'or : toute manipulation du téléphone se fait à l'arrêt.",
+    "scenarios": [
+      {
+        "niveau": "de base",
+        "contexte": "M. Yao est chauffeur du « Car 01 » au Collège Moderne de Yopougon, à Abidjan. Son compte « Chauffeur de car » est activé et le chef d'établissement vient d'ajouter son e-mail à la liste des conducteurs désignés. Le créneau du matin court de 6 h 00 à 7 h 30, celui du soir de 16 h 30 à 18 h 00. Ce lundi, M. Yao prend son service à 6 h 30 et doit rendre le trajet visible pour la trentaine de parents abonnés, dont la maman d'Awa qui attend de voir le car approcher de son arrêt.",
+        "consignes": [
+          "Connectez-vous à EduWeb Planner avec le compte chauffeur, puis ouvrez l'espace Transport via « Vie scolaire → Transport d'élèves ».",
+          "À l'arrêt, avant de démarrer, appuyez sur « Mode conducteur », sélectionnez « Car 01 » dans « Votre car » et autorisez la localisation (GPS) si le téléphone le demande.",
+          "Vérifiez sur le bandeau que le statut affiche bien « Émission en cours » (vert) et activez la cloche pour recevoir le bip de rappel au début du créneau.",
+          "Posez le téléphone sur son support fixe, écran visible, puis démarrez le trajet ; à l'arrivée à l'école, constatez que l'émission s'arrête seule à la fin du créneau sans aucune action de votre part."
+        ],
+        "criteresEvaluation": [
+          "L'espace Transport est atteint par le bon chemin (Vie scolaire → Transport d'élèves) et le mode conducteur est activé à l'arrêt, avant le démarrage.",
+          "Le bon car (« Car 01 ») est sélectionné et l'autorisation de localisation est correctement accordée.",
+          "Le statut « Émission en cours » (vert) est vérifié sur le bandeau, confirmant que la position est bien partagée pendant le créneau.",
+          "Le chauffeur n'effectue aucune manipulation en roulant et comprend que l'émission cesse seule hors créneau, sans coupure manuelle."
+        ]
+      },
+      {
+        "niveau": "approfondi",
+        "contexte": "M. Konan, nouvellement recruté, remplace M. Yao sur le « Car 02 » du Collège Moderne de Yopougon pour la tournée du soir (créneau 16 h 30 - 18 h 00). À 16 h 15, il ouvre « Vie scolaire → Transport d'élèves » mais ne voit pas le bouton « Mode conducteur ». Après un appel à l'administration, sa désignation est régularisée à 16 h 25. Une fois en mesure d'émettre, le message « Position GPS indisponible » s'affiche. En cours de route, vers 17 h 00, un parent inquiet l'appelle pour savoir où en est le car, alors que la batterie du téléphone descend à 15 %.",
+        "consignes": [
+          "Diagnostiquez l'absence du bouton « Mode conducteur » : identifiez qu'il s'agit d'un défaut de désignation, communiquez l'e-mail exact du compte chauffeur à l'établissement et faites régulariser la désignation, puis rouvrez la page pour faire apparaître le bouton.",
+          "Traitez le message « Position GPS indisponible » à l'arrêt : autorisez la localisation pour EduWeb Planner dans les réglages du téléphone, activez le GPS, puis réappuyez sur « Mode conducteur » et confirmez le passage au statut « Émission en cours ».",
+          "Gérez l'appel du parent à 17 h 00 sans compromettre la sécurité : ne répondez pas en roulant et expliquez (a posteriori, à l'arrêt) que le parent peut suivre le car en direct sur sa carte grâce à l'émission.",
+          "Anticipez le risque de batterie faible (15 %) en branchant ou rechargeant le téléphone, et énoncez clairement la limite de votre périmètre : vous ne consultez ni ne diffusez aucune donnée scolaire (notes, bulletins) des élèves transportés."
+        ],
+        "criteresEvaluation": [
+          "Le défaut est correctement attribué à l'absence de désignation, et la résolution passe par la communication de l'e-mail exact à l'établissement plutôt que par une action côté chauffeur.",
+          "Le message « Position GPS indisponible » est résolu à l'arrêt par l'autorisation de la localisation et l'activation du GPS, suivies d'une réactivation du mode conducteur vérifiée par le statut vert.",
+          "La sécurité au volant est respectée : aucune manipulation ni réponse téléphonique en roulant, et le recours à la visibilité temps réel est expliqué pour rassurer le parent.",
+          "Le chauffeur gère la contrainte de batterie (branchement/recharge) et délimite explicitement son périmètre, en confirmant qu'il n'a aucun accès aux données scolaires des élèves."
+        ]
+      }
+    ]
+  },
+  "syntheseFormative": [
+    {
+      "question": "Reformulez en une phrase la mission du chauffeur avec EduWeb Planner et expliquez en quoi rendre le trajet visible constitue un véritable service de sécurité pour les familles."
+    },
+    {
+      "question": "Expliquez pourquoi un compte chauffeur activé ne suffit pas à émettre une position, et décrivez précisément l'étape de désignation comme « conducteur » ainsi que son rôle de protection."
+    },
+    {
+      "question": "Détaillez, dans l'ordre, le geste quotidien complet pour émettre la position du « Car 01 » le matin, depuis l'ouverture de « Vie scolaire → Transport d'élèves » jusqu'à la vérification du statut « Émission en cours »."
+    },
+    {
+      "question": "Énoncez les réflexes de sécurité au volant que vous appliquerez désormais, en précisant à quel moment toute manipulation du téléphone est autorisée et comment réagir à un appel ou à un incident technique en cours de trajet."
+    },
+    {
+      "question": "Délimitez votre périmètre de permissions en tant que chauffeur : à quelles données avez-vous accès, et à quelles données (notamment scolaires) n'avez-vous aucun accès ? En quoi cette limite est-elle cohérente avec votre rôle ?"
+    }
+  ]
+},
 };
 
 /** Index général + grille de progression à 6 paliers. */

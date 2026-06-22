@@ -60,6 +60,12 @@ const MODULE_ORDER = [
   "educateur",
   "parent",
   "eleve",
+  "cafop_admin",
+  "cafop_directeur",
+  "cafop_professeur",
+  "apfc_admin",
+  "chef_antenne",
+  "transport_chauffeur",
 ] as const;
 
 export async function buildTrainingManualDocx(): Promise<Buffer> {

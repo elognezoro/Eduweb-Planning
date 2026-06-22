@@ -51,6 +51,12 @@ export default function SupportFormationPage() {
       "educateur",
       "parent",
       "eleve",
+      "cafop_admin",
+      "cafop_directeur",
+      "cafop_professeur",
+      "apfc_admin",
+      "chef_antenne",
+      "transport_chauffeur",
     ],
     [],
   );
