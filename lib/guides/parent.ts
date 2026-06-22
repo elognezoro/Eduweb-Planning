@@ -69,6 +69,7 @@ export const guideParent: Omit<GuideContent, "icon"> = {
         {
           title: "Lire l'emploi du temps hebdomadaire",
           body: "L'affichage par défaut présente la semaine en cours, avec les créneaux horaires, les matières, les salles et les enseignants. Les couleurs permettent de distinguer les disciplines. Un clic sur une séance affiche le détail (matière, enseignant, salle).",
+          example: "Le dimanche soir, Mme Diallo ouvre l'emploi du temps de la semaine : elle voit que mardi son fils finit à 17 h au lieu de 12 h. Elle réorganise le covoiturage en conséquence, sans mauvaise surprise le jour même.",
           steps: [
             {
               instruction: "Ouvrez le module Emplois du temps depuis le menu latéral.",
@@ -100,6 +101,7 @@ export const guideParent: Omit<GuideContent, "icon"> = {
         {
           title: "Consulter le registre d'appel",
           body: "Le registre d'appel récapitule les présences, absences et retards saisis par les enseignants à chaque séance. En tant que parent, vous accédez en consultation uniquement aux données de votre enfant. Les motifs renseignés par l'établissement apparaissent en regard de chaque absence.",
+          example: "Mme Diallo voit « Absent » au cours de 8 h le lundi. Comme son fils était bien parti à l'école, elle contacte aussitôt la vie scolaire via la messagerie pour signaler et justifier — plutôt que d'attendre la fin de la semaine.",
           steps: [
             {
               instruction: "Ouvrez le module Registre d'appel.",
@@ -120,6 +122,7 @@ export const guideParent: Omit<GuideContent, "icon"> = {
         {
           title: "Lire le cahier de texte",
           body: "Le cahier de texte regroupe, pour chaque séance, le contenu abordé, les ressources mises à disposition et les devoirs à effectuer pour les séances suivantes. Il est le complément indispensable de l'emploi du temps pour accompagner votre enfant.",
+          example: "Mercredi soir, Mme Diallo consulte le cahier de texte : en mathématiques, un exercice est à rendre vendredi, avec un PDF joint. Elle le télécharge et s'assure que son fils le commence dès le jeudi, sans attendre la dernière minute.",
           steps: [
             {
               instruction: "Ouvrez le module Cahier de texte.",
@@ -147,6 +150,7 @@ export const guideParent: Omit<GuideContent, "icon"> = {
         {
           title: "Consulter les notes et bulletins",
           body: "Le module Notes et bulletins affiche chronologiquement les évaluations corrigées par les enseignants. À la fin de chaque période, le conseil de classe valide un bulletin officiel téléchargeable au format PDF, avec moyennes pondérées et appréciations.",
+          example: "Une note de 12/20 apparaît en français. En cliquant dessus, Mme Diallo voit qu'il s'agit d'un devoir surveillé à coefficient 2 — une information utile pour relativiser, ou au contraire alerter, avant la consolidation du bulletin trimestriel.",
           steps: [
             {
               instruction: "Ouvrez le module Notes et bulletins.",
@@ -193,6 +197,7 @@ export const guideParent: Omit<GuideContent, "icon"> = {
         {
           title: "Recevoir et envoyer des messages",
           body: "Le module Communication présente votre boîte de réception et permet d'écrire à un enseignant, au secrétariat ou à la vie scolaire, dans le respect des destinataires autorisés par l'établissement.",
+          example: "Pour signaler que son fils sera absent jeudi (rendez-vous médical), Mme Diallo écrit à la vie scolaire avec l'objet « Absence justifiée — jeudi » : le message est tracé, et l'établissement dispose de l'information à l'avance.",
           steps: [
             {
               instruction: "Ouvrez le module Communication.",
@@ -228,6 +233,7 @@ export const guideParent: Omit<GuideContent, "icon"> = {
         {
           title: "Solliciter un créneau",
           body: "Vous pouvez consulter les disponibilités proposées par les enseignants de votre enfant et formuler une demande motivée. L'établissement confirme, propose un autre créneau ou refuse en justifiant.",
+          example: "Inquiète des résultats en mathématiques, Mme Diallo demande un rendez-vous au professeur principal en précisant l'objet « Difficultés en mathématiques ». L'enseignant, informé du motif à l'avance, prépare des exemples concrets pour l'entretien.",
           steps: [
             {
               instruction: "Ouvrez le module Rendez-vous.",
@@ -262,6 +268,7 @@ export const guideParent: Omit<GuideContent, "icon"> = {
         {
           title: "Consulter et activer les ressources premium",
           body: "Si votre famille a souscrit à l'offre, une entrée Académie Premium apparaît dans le menu. Elle donne accès à des ressources pédagogiques complémentaires définies par l'établissement et le partenaire académique.",
+          example: "Après souscription, Mme Diallo trouve dans l'Académie Premium des fiches de révision et des exercices supplémentaires en mathématiques — un complément qu'elle propose à son fils en plus des devoirs du cahier de texte, sans remplacer le travail de la classe.",
           steps: [
             {
               instruction: "Ouvrez la section Académie Premium depuis le menu.",
