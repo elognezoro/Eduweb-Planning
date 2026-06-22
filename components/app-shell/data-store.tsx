@@ -526,6 +526,13 @@ interface DataStore extends StoreState {
   ) => void;
   /** Fusionne des inscriptions venues du serveur (dédoublonné par user+cours). */
   mergeCourseEnrollments: (rows: CourseEnrollment[]) => void;
+  /**
+   * Normalise les inscriptions sans année (héritées) vers l'année courante puis
+   * dédoublonne par (utilisateur, cours, année) en gardant la plus ancienne.
+   * Corrige les doublons existants (une ligne « sans année » + une ligne de
+   * l'année courante formaient deux entrées distinctes).
+   */
+  normalizeAndDedupeEnrollments: (currentYear: string) => void;
   /** Supprime une inscription nominative. */
   removeEnrollment: (id: string) => void;
   /** Change le rôle de formation d'une inscription (admin/enseignant/…). */
@@ -1067,10 +1074,13 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         const yr = input.schoolYear ?? "";
         // Anti-doublon : on n'inscrit pas un utilisateur déjà inscrit à CE cours
         // POUR LA MÊME ANNÉE SCOLAIRE (une nouvelle année = réinscription permise).
+        // Une inscription héritée SANS année (e.schoolYear vide) est traitée comme
+        // l'année courante → elle bloque une nouvelle inscription de cette année
+        // (sinon les anciennes lignes « sans année » créaient des doublons).
         const already = new Set(
           s.courseEnrollments
             .filter(
-              (e) => e.courseId === input.courseId && (e.schoolYear ?? "") === yr,
+              (e) => e.courseId === input.courseId && (e.schoolYear || yr) === yr,
             )
             .map((e) => e.userId),
         );
@@ -1099,6 +1109,25 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
           merged.every((e, i) => e.id === s.courseEnrollments[i].id);
         if (unchanged) return s;
         return { ...s, courseEnrollments: merged };
+      }),
+    normalizeAndDedupeEnrollments: (currentYear) =>
+      setState((s) => {
+        const yr = currentYear || "";
+        // 1) Rattacher les inscriptions sans année à l'année courante.
+        const normalized = s.courseEnrollments.map((e) =>
+          e.schoolYear ? e : { ...e, schoolYear: yr },
+        );
+        // 2) Dédoublonner par (utilisateur, cours, année) — garder la plus ancienne.
+        const deduped = keepEarliestPerBucket(normalized);
+        const unchanged =
+          deduped.length === s.courseEnrollments.length &&
+          deduped.every(
+            (e, i) =>
+              e.id === s.courseEnrollments[i].id &&
+              e.schoolYear === s.courseEnrollments[i].schoolYear,
+          );
+        if (unchanged) return s;
+        return { ...s, courseEnrollments: deduped };
       }),
     removeEnrollment: (id) =>
       setState((s) => ({

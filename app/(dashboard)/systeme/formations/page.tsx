@@ -164,6 +164,22 @@ export default function FormationsAdminPage() {
 function FormationsContent() {
   const store = useStore();
   const app = useApp();
+  // Année scolaire courante (« AAAA-AAAA »), pour rattacher les inscriptions
+  // héritées et dédoublonner.
+  const currentYear = React.useMemo(
+    () => app.academicYear.label.match(/\d{4}/g)?.join("-") ?? "",
+    [app.academicYear.label],
+  );
+  // Nettoyage une fois au montage : rattache les inscriptions « sans année » à
+  // l'année courante et supprime les doublons (même utilisateur + même cours +
+  // même année), en gardant l'inscription la plus ancienne. Corrige les cas
+  // hérités (ex. plusieurs lignes identiques pour un même cours).
+  const dedupedRef = React.useRef(false);
+  React.useEffect(() => {
+    if (dedupedRef.current) return;
+    dedupedRef.current = true;
+    store.normalizeAndDedupeEnrollments(currentYear);
+  }, [store, currentYear]);
   // Annuaire des utilisateurs : vrais comptes Supabase en production, comptes
   // de démonstration sinon. Source unique pour tous les panneaux (inscription,
   // inscrits, cohortes, import CSV).
@@ -840,7 +856,14 @@ function QuickEnrollPanel({
                   </td>
                   <td className="px-3 py-1.5">
                     {(() => {
-                      const list = enrollByUser.get(u.id) ?? [];
+                      // Une chip PAR COURS (pas par ligne d'inscription) : si un
+                      // même cours a plusieurs inscriptions (années, héritage),
+                      // on n'affiche qu'une chip — la plus représentative.
+                      const byCourse = new Map<string, CourseEnrollment>();
+                      for (const e of enrollByUser.get(u.id) ?? []) {
+                        if (!byCourse.has(e.courseId)) byCourse.set(e.courseId, e);
+                      }
+                      const list = [...byCourse.values()];
                       if (list.length === 0)
                         return <span className="text-[10px] text-muted-foreground">—</span>;
                       return (
