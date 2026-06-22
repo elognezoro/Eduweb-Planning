@@ -318,6 +318,13 @@ export const NAVIGATION: NavGroup[] = [
         permission: "system:manage_apfc",
       },
       {
+        href: "/inspection-supervision/apfc-supervision",
+        label: "nav.items.apfcSupervision",
+        labelText: "Supervision APFC (connecté)",
+        icon: Network,
+        permission: "antenna_reports:view",
+      },
+      {
         href: "/inspection-supervision/rapports-antennes",
         label: "nav.items.rapportsAntennes",
         icon: Files,
