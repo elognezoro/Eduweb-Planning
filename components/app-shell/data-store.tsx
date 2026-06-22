@@ -700,6 +700,23 @@ function genId(prefix: string) {
  * muté par les actions CRUD des pages et persisté dans le navigateur (localStorage).
  * Remplaçable par des appels Supabase sans changer l'API consommée par les pages.
  */
+/**
+ * Déduplique les inscriptions par (utilisateur, cours) — un même utilisateur ne
+ * peut être inscrit qu'une fois à un cours (aligné sur la contrainte serveur
+ * `unique(user_id, course_id)`). Conserve la première occurrence rencontrée.
+ */
+function dedupeEnrollmentsByUserCourse(rows: CourseEnrollment[]): CourseEnrollment[] {
+  const seen = new Set<string>();
+  const out: CourseEnrollment[] = [];
+  for (const e of rows) {
+    const k = `${e.userId}|${e.courseId}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(e);
+  }
+  return out;
+}
+
 export function DataStoreProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = React.useState<StoreState>(DEFAULTS);
   const [hydrated, setHydrated] = React.useState(false);
@@ -707,8 +724,12 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw)
-        setState({ ...DEFAULTS, ...(JSON.parse(raw) as Partial<StoreState>) });
+      if (raw) {
+        const merged = { ...DEFAULTS, ...(JSON.parse(raw) as Partial<StoreState>) };
+        // Nettoyage : purge les inscriptions en double héritées du localStorage.
+        merged.courseEnrollments = dedupeEnrollmentsByUserCourse(merged.courseEnrollments);
+        setState(merged);
+      }
     } catch {
       /* ignore */
     }
@@ -1048,12 +1069,21 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
     enrollUsers: (userIds, input) =>
       setState((s) => {
         const now = new Date().toISOString();
-        const rows: CourseEnrollment[] = userIds.map((uid) => ({
-          ...input,
-          userId: uid,
-          id: genId("enr"),
-          enrolledAt: now,
-        }));
+        // Anti-doublon : on n'inscrit pas un utilisateur déjà inscrit à CE cours.
+        const already = new Set(
+          s.courseEnrollments
+            .filter((e) => e.courseId === input.courseId)
+            .map((e) => e.userId),
+        );
+        const rows: CourseEnrollment[] = userIds
+          .filter((uid) => !already.has(uid))
+          .map((uid) => ({
+            ...input,
+            userId: uid,
+            id: genId("enr"),
+            enrolledAt: now,
+          }));
+        if (rows.length === 0) return s;
         return { ...s, courseEnrollments: [...rows, ...s.courseEnrollments] };
       }),
     mergeCourseEnrollments: (rows) =>
