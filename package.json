@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "check:guides": "node scripts/check-guides-sync.mjs",
-    "build:pptx:comm": "tsx scripts/build-pptx-comm-pastorale.mts",
+    "build:pptx": "tsx scripts/build-pptx-comm-pastorale.mts",
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
