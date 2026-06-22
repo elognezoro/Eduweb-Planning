@@ -488,6 +488,16 @@ function QuickEnrollPanel({
   );
   const [toast, setToast] = React.useState<string | null>(null);
 
+  // Multi-sélection de formations : on peut inscrire les utilisateurs choisis à
+  // PLUSIEURS formations en une fois. La formation sélectionnée en haut est cible par défaut.
+  const courses = React.useMemo(() => sortedCourses(), []);
+  const [coursesPicked, setCoursesPicked] = React.useState<Set<string>>(
+    () => new Set([courseId]),
+  );
+  React.useEffect(() => {
+    setCoursesPicked((prev) => (prev.has(courseId) ? prev : new Set(prev).add(courseId)));
+  }, [courseId]);
+
   const cohortsForCourse = store.courseCohorts.filter(
     (c) => c.courseId === courseId,
   );
@@ -526,45 +536,56 @@ function QuickEnrollPanel({
       setToast("Sélectionnez au moins un utilisateur.");
       return;
     }
+    const targetCourses = Array.from(coursesPicked);
+    if (targetCourses.length === 0) {
+      setToast("Sélectionnez au moins une formation.");
+      return;
+    }
     const sourceKind = source === "cohort" ? "cohort" : "individual";
     const userIds = Array.from(picked);
     const expIso = expiresAt ? new Date(expiresAt + "T23:59:59").toISOString() : null;
-    store.enrollUsers(userIds, {
-      courseId,
-      enrolledBy: actor,
-      source: sourceKind,
-      cohortId: source === "cohort" ? cohortId || null : null,
-      expiresAt: expIso,
-      notes: notes.trim() || undefined,
-      formationRole,
-    });
+
+    for (const cId of targetCourses) {
+      store.enrollUsers(userIds, {
+        courseId: cId,
+        enrolledBy: actor,
+        source: sourceKind,
+        // La cohorte n'a de sens que pour la formation du haut (les cohortes sont par cours).
+        cohortId: source === "cohort" && cId === courseId ? cohortId || null : null,
+        expiresAt: expIso,
+        notes: notes.trim() || undefined,
+        formationRole,
+      });
+    }
 
     const count = userIds.length;
+    const nC = targetCourses.length;
     const roleLabel = FORMATION_ROLE_META[formationRole].label.toLowerCase();
+    const scope = `${count} utilisateur(s) × ${nC} formation(s)`;
 
     // Persistance EN LIGNE (mode réel) : l'admin a le droit d'insérer (RLS ce_insert).
     // La synchro descendante (CourseEnrollmentsSync) dédoublonne par user+cours.
     if (isSupabaseConfigured()) {
-      void insertCourseEnrollments(
-        createClient(),
+      const rows = targetCourses.flatMap((cId) =>
         userIds.map((uid) => ({
           userId: uid,
-          courseId,
+          courseId: cId,
           formationRole,
           source: sourceKind,
           enrolledBy: actor,
           expiresAt: expIso,
         })),
-      ).then((res) => {
+      );
+      void insertCourseEnrollments(createClient(), rows).then((res) => {
         setToast(
           res.ok
-            ? `${count} utilisateur(s) inscrit(s) en ligne comme ${roleLabel}.`
+            ? `${scope} inscrit(s) en ligne comme ${roleLabel}.`
             : `Inscrits localement, mais échec de l'enregistrement en ligne : ${res.error}`,
         );
         window.setTimeout(() => setToast(null), 5000);
       });
     } else {
-      setToast(`${count} utilisateur(s) inscrit(s) comme ${roleLabel}.`);
+      setToast(`${scope} inscrit(s) comme ${roleLabel}.`);
       window.setTimeout(() => setToast(null), 4000);
     }
 
@@ -574,6 +595,44 @@ function QuickEnrollPanel({
 
   return (
     <div className="space-y-4">
+      {/* Multi-sélection de formations : inscrire les utilisateurs à plusieurs formations à la fois. */}
+      <div className="space-y-1.5 rounded-xl border border-border bg-muted/20 p-3">
+        <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+          Formations ciblées ({coursesPicked.size})
+        </label>
+        <div className="flex flex-wrap gap-1.5">
+          {courses.map((c) => {
+            const on = coursesPicked.has(c.id);
+            return (
+              <button
+                key={c.id}
+                type="button"
+                aria-pressed={on}
+                onClick={() =>
+                  setCoursesPicked((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(c.id)) next.delete(c.id);
+                    else next.add(c.id);
+                    return next;
+                  })
+                }
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                  on
+                    ? "border-ew-green-600 bg-ew-green-50 text-ew-green-800"
+                    : "border-border text-muted-foreground hover:bg-muted/40",
+                )}
+              >
+                {c.shortTitle ?? c.title}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Les utilisateurs sélectionnés seront inscrits à <strong>toutes</strong> les formations cochées.
+        </p>
+      </div>
+
       <div className="grid gap-3 sm:grid-cols-4">
         <div className="space-y-1">
           <label className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
