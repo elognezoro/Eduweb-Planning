@@ -709,7 +709,7 @@ function dedupeEnrollmentsByUserCourse(rows: CourseEnrollment[]): CourseEnrollme
   const seen = new Set<string>();
   const out: CourseEnrollment[] = [];
   for (const e of rows) {
-    const k = `${e.userId}|${e.courseId}`;
+    const k = `${e.userId}|${e.courseId}|${e.schoolYear ?? ""}`;
     if (seen.has(k)) continue;
     seen.add(k);
     out.push(e);
@@ -1069,10 +1069,14 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
     enrollUsers: (userIds, input) =>
       setState((s) => {
         const now = new Date().toISOString();
-        // Anti-doublon : on n'inscrit pas un utilisateur déjà inscrit à CE cours.
+        const yr = input.schoolYear ?? "";
+        // Anti-doublon : on n'inscrit pas un utilisateur déjà inscrit à CE cours
+        // POUR LA MÊME ANNÉE SCOLAIRE (une nouvelle année = réinscription permise).
         const already = new Set(
           s.courseEnrollments
-            .filter((e) => e.courseId === input.courseId)
+            .filter(
+              (e) => e.courseId === input.courseId && (e.schoolYear ?? "") === yr,
+            )
             .map((e) => e.userId),
         );
         const rows: CourseEnrollment[] = userIds
@@ -1088,12 +1092,10 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       }),
     mergeCourseEnrollments: (rows) =>
       setState((s) => {
-        const seen = new Set(
-          s.courseEnrollments.map((e) => `${e.userId}|${e.courseId}`),
-        );
-        const additions = rows.filter(
-          (r) => !seen.has(`${r.userId}|${r.courseId}`),
-        );
+        const key = (e: CourseEnrollment) =>
+          `${e.userId}|${e.courseId}|${e.schoolYear ?? ""}`;
+        const seen = new Set(s.courseEnrollments.map(key));
+        const additions = rows.filter((r) => !seen.has(key(r)));
         if (additions.length === 0) return s;
         return {
           ...s,

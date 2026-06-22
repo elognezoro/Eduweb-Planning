@@ -26,6 +26,9 @@ export function EnrollmentIntentClaimer() {
   const app = useApp();
   const store = useStore();
   const claimedRef = React.useRef(false);
+  // Année scolaire courante au format canonique « AAAA-AAAA » (cf. DEFAULT serveur).
+  const schoolYear =
+    app.academicYear.label.match(/\d{4}/g)?.join("-") ?? null;
 
   React.useEffect(() => {
     if (claimedRef.current) return;
@@ -82,6 +85,11 @@ export function EnrollmentIntentClaimer() {
           enrolledBy: intent.source || "Lien d'inscription",
           source: "admin",
           formationRole: role,
+          // Aligner sur l'année scolaire courante : le trigger serveur
+          // (handle_new_user) inscrit avec school_year = current_school_year().
+          // Sans cette valeur, la ligne locale (année «») et la ligne serveur
+          // (année courante) formeraient deux entrées distinctes au merge.
+          schoolYear,
         });
         enrolledTitles.push(course.shortTitle);
       });
@@ -97,7 +105,7 @@ export function EnrollmentIntentClaimer() {
         description: `Ouvrez ${toPayTitles.join(", ")} pour régler et finaliser votre inscription.`,
       });
     }
-  }, [app.user.email, app.user.id, app.effectiveRole, store]);
+  }, [app.user.email, app.user.id, app.effectiveRole, store, schoolYear]);
 
   return null;
 }

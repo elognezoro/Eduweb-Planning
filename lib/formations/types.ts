@@ -76,6 +76,12 @@ export interface CourseEnrollment {
   expiresAt?: string | null;
   notes?: string;
   /**
+   * Année scolaire de l'inscription (« AAAA-AAAA », ex. 2025-2026). Permet de
+   * réinscrire au même cours sur une nouvelle année. Absent = inscription
+   * héritée (traitée comme l'année courante pour le dédoublonnage).
+   */
+  schoolYear?: string | null;
+  /**
    * Rôle de l'utilisateur DANS cette formation (admin/gestionnaire/
    * enseignant/tuteur/etudiant). Optionnel : absent = « etudiant ».
    * Voir lib/formations/formation-roles.ts.

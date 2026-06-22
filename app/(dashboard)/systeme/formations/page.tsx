@@ -476,6 +476,14 @@ function QuickEnrollPanel({
   actor: string;
 }) {
   const store = useStore();
+  const app = useApp();
+  // Année scolaire courante au format canonique « AAAA-AAAA » (ex. 2025-2026),
+  // alignée sur le DEFAULT serveur current_school_year(). Une réinscription est
+  // permise sur une NOUVELLE année (dédoublonnage par user+cours+année).
+  const schoolYear = React.useMemo(
+    () => app.academicYear.label.match(/\d{4}/g)?.join("-") ?? null,
+    [app.academicYear.label],
+  );
   const { users: dirUsers, loading: usersLoading } = useDirectoryUsers();
   const [search, setSearch] = React.useState("");
   const [picked, setPicked] = React.useState<Set<string>>(new Set());
@@ -572,6 +580,7 @@ function QuickEnrollPanel({
         expiresAt: expIso,
         notes: notes.trim() || undefined,
         formationRole,
+        schoolYear,
       });
     }
 
@@ -591,6 +600,7 @@ function QuickEnrollPanel({
           source: sourceKind,
           enrolledBy: actor,
           expiresAt: expIso,
+          schoolYear,
         })),
       );
       void insertCourseEnrollments(createClient(), rows).then((res) => {
@@ -966,6 +976,7 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
       void deleteCourseEnrollment(createClient(), {
         userId: enrollment.userId,
         courseId: enrollment.courseId,
+        schoolYear: enrollment.schoolYear,
       });
     }
   }
@@ -990,6 +1001,7 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
               <th className="px-3 py-2 text-left font-bold">Rôle global</th>
               <th className="px-3 py-2 text-left font-bold">Rôle formation</th>
               <th className="px-3 py-2 text-left font-bold">Source</th>
+              <th className="px-3 py-2 text-left font-bold">Année</th>
               <th className="px-3 py-2 text-left font-bold">Inscrit le</th>
               <th className="px-3 py-2 text-left font-bold">Expire</th>
               <th className="px-3 py-2 text-right font-bold">Action</th>
@@ -999,7 +1011,7 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
             {rows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={8}
                   className="px-3 py-6 text-center italic text-muted-foreground"
                 >
                   Aucun utilisateur inscrit à ce cours.
@@ -1031,6 +1043,7 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
                               userId: enr.userId,
                               courseId: enr.courseId,
                               formationRole: role,
+                              schoolYear: enr.schoolYear,
                             });
                           }
                         }}
@@ -1054,6 +1067,9 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
                   </td>
                   <td className="px-3 py-1.5 text-xs">
                     {enrollmentSourceLabel(verdict.source)}
+                  </td>
+                  <td className="px-3 py-1.5 text-xs text-muted-foreground">
+                    {verdict.enrollment?.schoolYear ?? "—"}
                   </td>
                   <td className="px-3 py-1.5 text-xs text-muted-foreground">
                     {verdict.enrollment

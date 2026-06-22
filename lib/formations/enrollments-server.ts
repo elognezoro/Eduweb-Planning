@@ -22,6 +22,7 @@ interface DbEnrollmentRow {
   source: string | null;
   enrolled_by: string | null;
   expires_at: string | null;
+  school_year: string | null;
   created_at: string | null;
 }
 
@@ -36,6 +37,7 @@ export function mapEnrollmentRow(r: DbEnrollmentRow): CourseEnrollment {
     source: ((r.source as EnrollmentSource) ?? "admin") as EnrollmentSource,
     formationRole: (r.formation_role as FormationRole | null) ?? undefined,
     expiresAt: r.expires_at ?? null,
+    schoolYear: r.school_year ?? null,
   };
 }
 
@@ -68,20 +70,26 @@ export async function insertCourseEnrollments(
     source?: string;
     enrolledBy?: string | null;
     expiresAt?: string | null;
+    schoolYear?: string | null;
   }[],
 ): Promise<{ ok: boolean; error?: string }> {
   if (rows.length === 0) return { ok: true };
-  const payload = rows.map((r) => ({
-    user_id: r.userId,
-    course_id: r.courseId,
-    formation_role: r.formationRole ?? null,
-    source: r.source ?? "admin",
-    enrolled_by: r.enrolledBy ?? null,
-    expires_at: r.expiresAt ?? null,
-  }));
+  const payload = rows.map((r) => {
+    const row: Record<string, unknown> = {
+      user_id: r.userId,
+      course_id: r.courseId,
+      formation_role: r.formationRole ?? null,
+      source: r.source ?? "admin",
+      enrolled_by: r.enrolledBy ?? null,
+      expires_at: r.expiresAt ?? null,
+    };
+    // Ne pas envoyer null : laisse le DEFAULT (année courante) s'appliquer.
+    if (r.schoolYear) row.school_year = r.schoolYear;
+    return row;
+  });
   const { error } = await supabase
     .from("course_enrollments")
-    .upsert(payload, { onConflict: "user_id,course_id", ignoreDuplicates: true });
+    .upsert(payload, { onConflict: "user_id,course_id,school_year", ignoreDuplicates: true });
   if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
@@ -93,29 +101,34 @@ export async function insertCourseEnrollments(
  */
 export async function updateEnrollmentRole(
   supabase: SupabaseClient,
-  key: { userId: string; courseId: string; formationRole: string },
+  key: { userId: string; courseId: string; formationRole: string; schoolYear?: string | null },
 ): Promise<{ ok: boolean; error?: string }> {
-  const { error } = await supabase
+  let q = supabase
     .from("course_enrollments")
     .update({ formation_role: key.formationRole })
     .eq("user_id", key.userId)
     .eq("course_id", key.courseId);
+  // Scoper à l'année si connue (sinon toutes les années de ce user+cours).
+  if (key.schoolYear) q = q.eq("school_year", key.schoolYear);
+  const { error } = await q;
   if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
 
 /**
- * Supprime une inscription (par utilisateur + cours). La RLS `ce_delete`
- * n'autorise que l'admin ou le propriétaire. Renvoie true si OK.
+ * Supprime une inscription (par utilisateur + cours, et année si connue). La RLS
+ * `ce_delete` n'autorise que l'admin ou le propriétaire. Renvoie true si OK.
  */
 export async function deleteCourseEnrollment(
   supabase: SupabaseClient,
-  key: { userId: string; courseId: string },
+  key: { userId: string; courseId: string; schoolYear?: string | null },
 ): Promise<boolean> {
-  const { error } = await supabase
+  let q = supabase
     .from("course_enrollments")
     .delete()
     .eq("user_id", key.userId)
     .eq("course_id", key.courseId);
+  if (key.schoolYear) q = q.eq("school_year", key.schoolYear);
+  const { error } = await q;
   return !error;
 }
