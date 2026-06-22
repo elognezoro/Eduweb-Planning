@@ -504,6 +504,21 @@ function QuickEnrollPanel({
     (c) => c.courseId === courseId,
   );
 
+  // Inscriptions par utilisateur (pour la colonne « Formations » de la liste).
+  const enrollByUser = React.useMemo(() => {
+    const m = new Map<string, CourseEnrollment[]>();
+    for (const e of store.courseEnrollments) {
+      const arr = m.get(e.userId);
+      if (arr) arr.push(e);
+      else m.set(e.userId, [e]);
+    }
+    return m;
+  }, [store.courseEnrollments]);
+  const courseShort = (id: string) =>
+    courses.find((c) => c.id === id)?.shortTitle ?? id;
+  /** Inscription automatique par lien d'invitation (cf. trigger handle_new_user). */
+  const isInviteAuto = (e: CourseEnrollment) => e.enrolledBy === "Lien d'inscription";
+
   const filtered = React.useMemo(() => {
     const q = search.trim().toLowerCase();
     return dirUsers.filter((u) => {
@@ -594,6 +609,9 @@ function QuickEnrollPanel({
     setPicked(new Set());
     setNotes("");
   }
+
+  const allChecked = filtered.length > 0 && filtered.every((u) => picked.has(u.id));
+  const someChecked = filtered.some((u) => picked.has(u.id));
 
   return (
     <div className="space-y-4">
@@ -755,9 +773,22 @@ function QuickEnrollPanel({
         <table className="w-full text-sm">
           <thead className="sticky top-0 bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-3 py-2 text-left font-bold w-10"></th>
+              <th className="px-3 py-2 text-left font-bold w-10">
+                <input
+                  type="checkbox"
+                  aria-label="Tout sélectionner"
+                  title="Tout sélectionner / désélectionner"
+                  checked={allChecked}
+                  ref={(el) => {
+                    if (el) el.indeterminate = !allChecked && someChecked;
+                  }}
+                  onChange={() => (allChecked ? clearSelection() : selectAllFiltered())}
+                  className="accent-ew-green-700"
+                />
+              </th>
               <th className="px-3 py-2 text-left font-bold">Nom</th>
               <th className="px-3 py-2 text-left font-bold">Rôle</th>
+              <th className="px-3 py-2 text-left font-bold">Formations</th>
               <th className="px-3 py-2 text-left font-bold">Email</th>
             </tr>
           </thead>
@@ -765,7 +796,7 @@ function QuickEnrollPanel({
             {filtered.length === 0 ? (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={5}
                   className="px-3 py-4 text-center text-muted-foreground italic"
                 >
                   {usersLoading
@@ -797,6 +828,46 @@ function QuickEnrollPanel({
                   <td className="px-3 py-1.5">
                     <Badge tone="green">{u.role}</Badge>
                   </td>
+                  <td className="px-3 py-1.5">
+                    {(() => {
+                      const list = enrollByUser.get(u.id) ?? [];
+                      if (list.length === 0)
+                        return <span className="text-[10px] text-muted-foreground">—</span>;
+                      return (
+                        <div className="flex flex-wrap gap-1">
+                          {list.map((e) => {
+                            const auto = isInviteAuto(e);
+                            const roleAuto = e.source === "role";
+                            return (
+                              <span
+                                key={e.courseId}
+                                title={`${courseShort(e.courseId)} · ${
+                                  auto
+                                    ? "automatique (lien d'invitation)"
+                                    : roleAuto
+                                      ? "automatique (par rôle)"
+                                      : e.source === "cohort"
+                                        ? "inscription manuelle (par cohorte)"
+                                        : "inscription manuelle"
+                                }`}
+                                className={cn(
+                                  "inline-flex max-w-[140px] items-center gap-1 truncate rounded-full border px-1.5 py-0.5 text-[10px] font-semibold",
+                                  auto
+                                    ? "border-ew-gold-400 bg-ew-gold-50 text-ew-gold-700"
+                                    : roleAuto
+                                      ? "border-blue-300 bg-blue-50 text-blue-700"
+                                      : "border-ew-green-300 bg-ew-green-50 text-ew-green-800",
+                                )}
+                              >
+                                {auto && <Link2 aria-hidden className="h-2.5 w-2.5 shrink-0" />}
+                                <span className="truncate">{courseShort(e.courseId)}</span>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+                  </td>
                   <td className="px-3 py-1.5 text-xs text-muted-foreground">
                     {u.email ?? "—"}
                   </td>
@@ -806,6 +877,15 @@ function QuickEnrollPanel({
           </tbody>
         </table>
       </div>
+
+      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+        <span className="font-semibold">Colonne « Formations » :</span>
+        <span className="inline-flex items-center gap-1">
+          <Link2 className="h-2.5 w-2.5 text-ew-gold-700" /> auto (lien d&apos;invitation)
+        </span>
+        <span className="text-blue-700">● auto (par rôle)</span>
+        <span className="text-ew-green-800">● inscription manuelle</span>
+      </p>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">
