@@ -7,7 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
    s'appuient sur la RLS (un Chef d'Antenne ne voit/écrit que SON antenne).
    ========================================================================== */
 
-/** Antenne APFC (vue minimale, alignée sur le schéma réel). */
+/** Antenne APFC (alignée sur le schéma réel, migrations 001/021/022). */
 export interface ApfcAntennaRow {
   id: string;
   name: string;
@@ -15,6 +15,32 @@ export interface ApfcAntennaRow {
   countryId: string | null;
   regionId: string | null;
   headProfileId: string | null;
+  /** Champs descriptifs (migration 022). */
+  region: string | null;
+  locality: string | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  responsable: string | null;
+  responsableContact: string | null;
+  subAntennas: number;
+  coordinators: number;
+}
+
+/** Champs modifiables d'une antenne (création / édition par la gestion globale). */
+export interface ApfcAntennaInput {
+  name: string;
+  code?: string | null;
+  countryId?: string | null;
+  region?: string | null;
+  locality?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  responsable?: string | null;
+  responsableContact?: string | null;
+  subAntennas?: number;
+  coordinators?: number;
 }
 
 /** Activité de formation continue d'une antenne. */
@@ -36,7 +62,34 @@ function mapAntenna(r: Record<string, unknown>): ApfcAntennaRow {
     countryId: (r.country_id as string | null) ?? null,
     regionId: (r.academic_region_id as string | null) ?? null,
     headProfileId: (r.head_profile_id as string | null) ?? null,
+    region: (r.region as string | null) ?? null,
+    locality: (r.locality as string | null) ?? null,
+    address: (r.address as string | null) ?? null,
+    phone: (r.phone as string | null) ?? null,
+    email: (r.email as string | null) ?? null,
+    responsable: (r.responsable as string | null) ?? null,
+    responsableContact: (r.responsable_contact as string | null) ?? null,
+    subAntennas: Number(r.sub_antennas ?? 0),
+    coordinators: Number(r.coordinators ?? 0),
   };
+}
+
+/** Construit la ligne SQL (snake_case) à partir d'un input partiel. */
+function antennaRow(input: Partial<ApfcAntennaInput>): Record<string, unknown> {
+  const row: Record<string, unknown> = {};
+  if (input.name !== undefined) row.name = input.name;
+  if (input.code !== undefined) row.code = input.code;
+  if (input.countryId !== undefined) row.country_id = input.countryId;
+  if (input.region !== undefined) row.region = input.region;
+  if (input.locality !== undefined) row.locality = input.locality;
+  if (input.address !== undefined) row.address = input.address;
+  if (input.phone !== undefined) row.phone = input.phone;
+  if (input.email !== undefined) row.email = input.email;
+  if (input.responsable !== undefined) row.responsable = input.responsable;
+  if (input.responsableContact !== undefined) row.responsable_contact = input.responsableContact;
+  if (input.subAntennas !== undefined) row.sub_antennas = input.subAntennas;
+  if (input.coordinators !== undefined) row.coordinators = input.coordinators;
+  return row;
 }
 
 function mapActivity(r: Record<string, unknown>): ApfcActivityRow {
@@ -51,7 +104,8 @@ function mapActivity(r: Record<string, unknown>): ApfcActivityRow {
   };
 }
 
-const ANTENNA_COLS = "id,name,code,country_id,academic_region_id,head_profile_id";
+const ANTENNA_COLS =
+  "id,name,code,country_id,academic_region_id,head_profile_id,region,locality,address,phone,email,responsable,responsable_contact,sub_antennas,coordinators";
 const ACTIVITY_COLS = "id,antenna_id,title,activity_type,starts_at,status";
 
 /** Toutes les antennes visibles (RLS : tout pour admin/apfc_admin ; sinon les siennes). */
@@ -81,19 +135,28 @@ export async function fetchMyApfcAntennas(sb: SupabaseClient): Promise<ApfcAnten
 /** Crée une antenne (RLS : réservé à la gestion globale — admin/apfc_admin). */
 export async function createApfcAntenna(
   sb: SupabaseClient,
-  input: { name: string; code?: string | null; countryId?: string | null },
+  input: ApfcAntennaInput,
 ): Promise<{ id?: string; error?: string }> {
   const { data, error } = await sb
     .from("apfc_antennas")
-    .insert({
-      name: input.name,
-      code: input.code ?? null,
-      country_id: input.countryId ?? null,
-    })
+    .insert(antennaRow(input))
     .select("id")
     .single();
   if (error) return { error: error.message };
   return { id: data?.id as string };
+}
+
+/** Met à jour les champs descriptifs d'une antenne (RLS : gestion globale). */
+export async function updateApfcAntenna(
+  sb: SupabaseClient,
+  id: string,
+  patch: Partial<ApfcAntennaInput>,
+): Promise<{ error?: string }> {
+  const row = antennaRow(patch);
+  if (Object.keys(row).length === 0) return {};
+  const { error } = await sb.from("apfc_antennas").update(row).eq("id", id);
+  if (error) return { error: error.message };
+  return {};
 }
 
 /**

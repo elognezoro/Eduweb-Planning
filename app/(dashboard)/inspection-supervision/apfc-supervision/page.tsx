@@ -10,6 +10,9 @@ import {
   UserX,
   CalendarDays,
   Database,
+  Pencil,
+  MapPin,
+  Phone,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ForbiddenState } from "@/components/layout/states";
@@ -20,6 +23,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -33,6 +44,7 @@ import {
   fetchApfcAntennas,
   fetchMyApfcAntennas,
   createApfcAntenna,
+  updateApfcAntenna,
   assignApfcHeadByEmail,
   fetchApfcActivities,
   addApfcActivity,
@@ -55,9 +67,8 @@ export default function ApfcSupervisionPage() {
   const [activities, setActivities] = React.useState<ApfcActivityRow[]>([]);
   const [loading, setLoading] = React.useState(REAL);
 
-  // Création d'antenne (gestion globale).
-  const [newName, setNewName] = React.useState("");
-  const [newCode, setNewCode] = React.useState("");
+  // Dialogue création / édition d'antenne (gestion globale).
+  const [antennaDialog, setAntennaDialog] = React.useState<ApfcAntennaRow | "new" | null>(null);
   // Affectation du chef (par antenne).
   const [headEmail, setHeadEmail] = React.useState<Record<string, string>>({});
   // Nouvelle activité.
@@ -98,23 +109,6 @@ export default function ApfcSupervisionPage() {
   const selected = antennas.find((a) => a.id === selId) ?? null;
 
   /* ---------------------------- Actions ---------------------------- */
-  const onCreate = async () => {
-    if (!newName.trim()) {
-      toast.error("Renseignez le nom de l'antenne");
-      return;
-    }
-    const sb = createClient();
-    const res = await createApfcAntenna(sb, { name: newName.trim(), code: newCode.trim() || null });
-    if (res.error) {
-      toast.error("Création impossible", { description: res.error });
-      return;
-    }
-    setNewName("");
-    setNewCode("");
-    toast.success("Antenne créée");
-    await reload();
-  };
-
   const onAssign = async (antennaId: string, email: string | null) => {
     const sb = createClient();
     const res = await assignApfcHeadByEmail(sb, antennaId, email);
@@ -204,66 +198,78 @@ export default function ApfcSupervisionPage() {
         <>
           {/* Registre + affectation des chefs (gestion globale uniquement) */}
           {isManager && (
-            <SectionCard title="Registre des antennes & affectation des chefs">
-              <div className="space-y-3">
-                {antennas.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Aucune antenne enregistrée.</p>
-                ) : (
-                  <ul className="divide-y divide-border">
-                    {antennas.map((a) => (
-                      <li key={a.id} className="flex flex-wrap items-center gap-3 py-3">
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-bold text-foreground">{a.name}</p>
-                          <p className="truncate text-xs text-muted-foreground">{a.code ?? "—"}</p>
-                        </div>
-                        <Badge tone={a.headProfileId ? "green" : "slate"}>
-                          {a.headProfileId ? "Chef affecté" : "Sans chef"}
-                        </Badge>
-                        <div className="flex items-center gap-1.5">
-                          <Input
-                            value={headEmail[a.id] ?? ""}
-                            onChange={(e) => setHeadEmail((m) => ({ ...m, [a.id]: e.target.value }))}
-                            placeholder="e-mail du chef"
-                            className="h-9 w-52"
-                          />
+            <SectionCard
+              title="Registre des antennes & affectation des chefs"
+              action={
+                <Button size="sm" className={GREEN_BTN} onClick={() => setAntennaDialog("new")}>
+                  <Plus className="h-4 w-4" /> Nouvelle antenne
+                </Button>
+              }
+            >
+              {antennas.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Aucune antenne enregistrée.</p>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {antennas.map((a) => (
+                    <li key={a.id} className="flex flex-wrap items-center gap-3 py-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-bold text-foreground">{a.name}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {[a.code, a.region, a.locality].filter(Boolean).join(" · ") || "—"}
+                        </p>
+                        {(a.responsable || a.subAntennas > 0 || a.coordinators > 0) && (
+                          <p className="truncate text-[11px] text-muted-foreground">
+                            {[
+                              a.responsable,
+                              a.subAntennas ? `${a.subAntennas} sous-antennes` : null,
+                              a.coordinators ? `${a.coordinators} coord.` : null,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </p>
+                        )}
+                      </div>
+                      <Badge tone={a.headProfileId ? "green" : "slate"}>
+                        {a.headProfileId ? "Chef affecté" : "Sans chef"}
+                      </Badge>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => setAntennaDialog(a)}
+                          aria-label={`Modifier ${a.name}`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Input
+                          value={headEmail[a.id] ?? ""}
+                          onChange={(e) => setHeadEmail((m) => ({ ...m, [a.id]: e.target.value }))}
+                          placeholder="e-mail du chef"
+                          className="h-9 w-48"
+                        />
+                        <Button
+                          size="sm"
+                          className={GREEN_BTN}
+                          onClick={() => onAssign(a.id, (headEmail[a.id] ?? "").trim() || null)}
+                        >
+                          <UserCheck className="h-4 w-4" /> Affecter
+                        </Button>
+                        {a.headProfileId && (
                           <Button
                             size="sm"
-                            className={GREEN_BTN}
-                            onClick={() => onAssign(a.id, (headEmail[a.id] ?? "").trim() || null)}
+                            variant="outline"
+                            className="border-red-200 text-red-600 hover:bg-red-50"
+                            onClick={() => onAssign(a.id, null)}
+                            aria-label="Retirer le chef"
                           >
-                            <UserCheck className="h-4 w-4" /> Affecter
+                            <UserX className="h-4 w-4" />
                           </Button>
-                          {a.headProfileId && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="border-red-200 text-red-600 hover:bg-red-50"
-                              onClick={() => onAssign(a.id, null)}
-                              aria-label="Retirer le chef"
-                            >
-                              <UserX className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                <div className="flex flex-wrap items-end gap-2 rounded-xl border border-border bg-muted/30 p-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">Nom de l&apos;antenne</Label>
-                    <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Antenne APFC d'Abidjan" className="h-9 w-64" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">Code</Label>
-                    <Input value={newCode} onChange={(e) => setNewCode(e.target.value)} placeholder="APFC-CI-001" className="h-9 w-40" />
-                  </div>
-                  <Button className={GREEN_BTN} onClick={onCreate}>
-                    <Plus className="h-4 w-4" /> Créer l&apos;antenne
-                  </Button>
-                </div>
-              </div>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </SectionCard>
           )}
 
@@ -298,6 +304,28 @@ export default function ApfcSupervisionPage() {
                 <p className="text-sm text-muted-foreground">Sélectionnez une antenne.</p>
               ) : (
                 <div className="space-y-3">
+                  {/* Détails de l'antenne sélectionnée */}
+                  <div className="rounded-xl border border-border bg-muted/20 p-3">
+                    <p className="font-bold text-foreground">{selected.name}</p>
+                    <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                      {selected.code && <span>{selected.code}</span>}
+                      {(selected.region || selected.locality) && (
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {[selected.region, selected.locality].filter(Boolean).join(" · ")}
+                        </span>
+                      )}
+                      {selected.responsable && <span>Responsable&nbsp;: {selected.responsable}</span>}
+                      {selected.phone && (
+                        <span className="inline-flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          {selected.phone}
+                        </span>
+                      )}
+                      {selected.email && <span>{selected.email}</span>}
+                    </div>
+                  </div>
+
                   {/* Ajout d'activité */}
                   <div className="flex flex-wrap items-end gap-2 rounded-xl border border-border bg-muted/30 p-3">
                     <div className="space-y-1.5">
@@ -362,6 +390,143 @@ export default function ApfcSupervisionPage() {
           )}
         </>
       )}
+
+      {antennaDialog && (
+        <AntennaFormDialog
+          antenna={antennaDialog}
+          onClose={() => setAntennaDialog(null)}
+          onSaved={() => {
+            setAntennaDialog(null);
+            void reload();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ----------------------- Dialogue création / édition d'antenne ----------------------- */
+function AntennaFormDialog({
+  antenna,
+  onClose,
+  onSaved,
+}: {
+  antenna: ApfcAntennaRow | "new";
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const isNew = antenna === "new";
+  const a = isNew ? null : antenna;
+  const [f, setF] = React.useState({
+    name: a?.name ?? "",
+    code: a?.code ?? "",
+    region: a?.region ?? "",
+    locality: a?.locality ?? "",
+    address: a?.address ?? "",
+    phone: a?.phone ?? "",
+    email: a?.email ?? "",
+    responsable: a?.responsable ?? "",
+    responsableContact: a?.responsableContact ?? "",
+    subAntennas: String(a?.subAntennas ?? 0),
+    coordinators: String(a?.coordinators ?? 0),
+  });
+  const [saving, setSaving] = React.useState(false);
+  const set =
+    (k: keyof typeof f) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setF((prev) => ({ ...prev, [k]: e.target.value }));
+
+  const save = async () => {
+    if (!f.name.trim()) {
+      toast.error("Renseignez le nom de l'antenne");
+      return;
+    }
+    setSaving(true);
+    const sb = createClient();
+    const input = {
+      name: f.name.trim(),
+      code: f.code.trim() || null,
+      region: f.region.trim() || null,
+      locality: f.locality.trim() || null,
+      address: f.address.trim() || null,
+      phone: f.phone.trim() || null,
+      email: f.email.trim() || null,
+      responsable: f.responsable.trim() || null,
+      responsableContact: f.responsableContact.trim() || null,
+      subAntennas: Number(f.subAntennas) || 0,
+      coordinators: Number(f.coordinators) || 0,
+    };
+    const res = isNew
+      ? await createApfcAntenna(sb, input)
+      : await updateApfcAntenna(sb, a!.id, input);
+    setSaving(false);
+    if (res.error) {
+      toast.error(isNew ? "Création impossible" : "Modification impossible", { description: res.error });
+      return;
+    }
+    toast.success(isNew ? "Antenne créée" : "Antenne modifiée");
+    onSaved();
+  };
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Network className="h-5 w-5 text-ew-green-700" />
+            {isNew ? "Nouvelle antenne APFC" : "Modifier l'antenne"}
+          </DialogTitle>
+          <DialogDescription>
+            Les informations descriptives de l&apos;antenne. Le Chef d&apos;Antenne s&apos;affecte
+            séparément, par e-mail, depuis le registre.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid max-h-[60vh] gap-3 overflow-y-auto sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <AntennaField label="Nom de l'antenne" value={f.name} onChange={set("name")} placeholder="Antenne APFC d'Abidjan" />
+          </div>
+          <AntennaField label="Code" value={f.code} onChange={set("code")} placeholder="APFC-CI-001" />
+          <AntennaField label="Région" value={f.region} onChange={set("region")} placeholder="Abidjan" />
+          <AntennaField label="Localité" value={f.locality} onChange={set("locality")} placeholder="Cocody" />
+          <AntennaField label="Adresse" value={f.address} onChange={set("address")} placeholder="BP 200" />
+          <AntennaField label="Téléphone" value={f.phone} onChange={set("phone")} placeholder="27 00 00 00 00" />
+          <AntennaField label="E-mail" value={f.email} onChange={set("email")} placeholder="antenne@formation.org" />
+          <AntennaField label="Responsable (nom)" value={f.responsable} onChange={set("responsable")} placeholder="M. KOUASSI Jean" />
+          <AntennaField label="Contact du responsable" value={f.responsableContact} onChange={set("responsableContact")} placeholder="07 00 00 00 00" />
+          <AntennaField label="Sous-antennes" value={f.subAntennas} onChange={set("subAntennas")} type="number" />
+          <AntennaField label="Coordonnateurs" value={f.coordinators} onChange={set("coordinators")} type="number" />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={saving}>
+            Annuler
+          </Button>
+          <Button className={GREEN_BTN} onClick={save} disabled={saving}>
+            {isNew ? "Créer" : "Enregistrer"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** Champ de formulaire d'antenne (composant stable, défini hors render pour préserver le focus). */
+function AntennaField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  type?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</Label>
+      <Input value={value} onChange={onChange} placeholder={placeholder} type={type} className="h-9" />
     </div>
   );
 }
