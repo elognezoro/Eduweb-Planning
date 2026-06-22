@@ -9,6 +9,7 @@ import { IdleLogoutWatcher } from "./idle-logout-watcher";
 import { SecuritySettingsSync } from "./security-settings-sync";
 import { EnrollmentIntentClaimer } from "@/components/formations/enrollment-intent-claimer";
 import { CourseEnrollmentsSync } from "@/components/formations/course-enrollments-sync";
+import { CohortsSync } from "@/components/formations/cohorts-sync";
 import { cn } from "@/lib/utils";
 
 const LS_COLLAPSED = "eduweb.sidebar.collapsed";
@@ -85,6 +86,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Charge les inscriptions persistées (Supabase) dans le store local en
           mode réel — visibilité cross-appareil + côté admin. */}
       <CourseEnrollmentsSync />
+      <CohortsSync />
     </div>
   );
 }

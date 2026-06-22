@@ -533,7 +533,9 @@ interface DataStore extends StoreState {
     formationRole: FormationRole,
   ) => void;
   /** Crée une cohorte nommée pour un cours. */
-  createCohort: (c: Omit<CourseCohort, "id" | "createdAt">) => void;
+  createCohort: (c: Omit<CourseCohort, "id" | "createdAt"> & { id?: string }) => void;
+  /** Fusionne des cohortes venues du serveur (dédoublonné par id). */
+  mergeCohorts: (rows: CourseCohort[]) => void;
   /** Met à jour la liste des membres d'une cohorte. */
   updateCohortMembers: (cohortId: string, memberUserIds: string[]) => void;
   /** Met à jour le nom / la description d'une cohorte. */
@@ -1084,10 +1086,17 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       setState((s) => ({
         ...s,
         courseCohorts: [
-          { ...c, id: genId("coh"), createdAt: new Date().toISOString() },
+          { ...c, id: c.id ?? genId("coh"), createdAt: new Date().toISOString() },
           ...s.courseCohorts,
         ],
       })),
+    mergeCohorts: (rows) =>
+      setState((s) => {
+        const seen = new Set(s.courseCohorts.map((c) => c.id));
+        const additions = rows.filter((r) => !seen.has(r.id));
+        if (additions.length === 0) return s;
+        return { ...s, courseCohorts: [...additions, ...s.courseCohorts] };
+      }),
     updateCohortMembers: (cohortId, memberUserIds) =>
       setState((s) => ({
         ...s,

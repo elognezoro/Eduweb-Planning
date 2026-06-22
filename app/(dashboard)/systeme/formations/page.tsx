@@ -55,7 +55,9 @@ import { createClient } from "@/lib/supabase/client";
 import {
   deleteCourseEnrollment,
   insertCourseEnrollments,
+  updateEnrollmentRole,
 } from "@/lib/formations/enrollments-server";
+import { upsertCohort, deleteCohort } from "@/lib/formations/cohorts-server";
 import {
   createShortInviteLink,
   shortInviteUrl,
@@ -939,12 +941,19 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
                           verdict.enrollment.formationRole ??
                           DEFAULT_FORMATION_ROLE
                         }
-                        onChange={(e) =>
-                          store.setEnrollmentFormationRole(
-                            verdict.enrollment!.id,
-                            e.target.value as FormationRole,
-                          )
-                        }
+                        onChange={(e) => {
+                          const enr = verdict.enrollment!;
+                          const role = e.target.value as FormationRole;
+                          store.setEnrollmentFormationRole(enr.id, role);
+                          // Persistance en ligne (mode réel) — RLS ce_update = admin.
+                          if (isSupabaseConfigured()) {
+                            void updateEnrollmentRole(createClient(), {
+                              userId: enr.userId,
+                              courseId: enr.courseId,
+                              formationRole: role,
+                            });
+                          }
+                        }}
                         className="h-8 rounded-md border border-input bg-background px-2 text-xs"
                         title="Modifier le rôle de ce participant dans la formation"
                       >
@@ -1024,13 +1033,17 @@ function CohortsPanel({
       window.alert("Donnez un nom à la cohorte.");
       return;
     }
-    store.createCohort({
+    const newCohort: CourseCohort = {
+      id: crypto.randomUUID(),
       courseId,
       name: newName.trim(),
       description: newDescription.trim() || undefined,
       createdBy: actor,
       memberUserIds: [],
-    });
+      createdAt: new Date().toISOString(),
+    };
+    store.createCohort(newCohort);
+    if (isSupabaseConfigured()) void upsertCohort(createClient(), newCohort);
     setNewName("");
     setNewDescription("");
   }
@@ -1110,11 +1123,19 @@ function CohortCard({
       )
     : others.slice(0, 12);
 
+  // Mirroring en ligne (mode réel) — RLS cc_all = admin. L'id local == id serveur.
+  function mirror(updated: CourseCohort) {
+    if (isSupabaseConfigured()) void upsertCohort(createClient(), updated);
+  }
+
   function save() {
-    store.updateCohort(cohort.id, {
+    const next: CourseCohort = {
+      ...cohort,
       name: name.trim() || cohort.name,
       description: description.trim() || undefined,
-    });
+    };
+    store.updateCohort(cohort.id, { name: next.name, description: next.description });
+    mirror(next);
     onToggleEdit();
   }
 
@@ -1126,17 +1147,22 @@ function CohortCard({
     )
       return;
     store.removeCohort(cohort.id);
+    if (isSupabaseConfigured()) void deleteCohort(createClient(), cohort.id);
   }
 
   function addMember(uid: string) {
-    store.updateCohortMembers(cohort.id, [...cohort.memberUserIds, uid]);
+    const next: CourseCohort = { ...cohort, memberUserIds: [...cohort.memberUserIds, uid] };
+    store.updateCohortMembers(cohort.id, next.memberUserIds);
+    mirror(next);
   }
 
   function removeMember(uid: string) {
-    store.updateCohortMembers(
-      cohort.id,
-      cohort.memberUserIds.filter((id) => id !== uid),
-    );
+    const next: CourseCohort = {
+      ...cohort,
+      memberUserIds: cohort.memberUserIds.filter((id) => id !== uid),
+    };
+    store.updateCohortMembers(cohort.id, next.memberUserIds);
+    mirror(next);
   }
 
   return (
@@ -1648,6 +1674,7 @@ function CsvImportZone({
 
   function importAll() {
     if (!drafted) return;
+    const sb = isSupabaseConfigured() ? createClient() : null;
     let createdCohorts = 0;
     let mergedCohorts = 0;
     let addedMembers = 0;
@@ -1660,18 +1687,23 @@ function CsvImportZone({
         const delta = next.length - item.existing.memberUserIds.length;
         if (delta > 0) {
           store.updateCohortMembers(item.existing.id, next);
+          if (sb) void upsertCohort(sb, { ...item.existing, memberUserIds: next });
           addedMembers += delta;
           mergedCohorts++;
         }
       } else {
         // Création d'une nouvelle cohorte avec les membres trouvés.
-        store.createCohort({
+        const newCohort: CourseCohort = {
+          id: crypto.randomUUID(),
           courseId,
           name: item.draft.name,
           description: item.draft.description || undefined,
           createdBy: actor,
           memberUserIds: item.matchedIds,
-        });
+          createdAt: new Date().toISOString(),
+        };
+        store.createCohort(newCohort);
+        if (sb) void upsertCohort(sb, newCohort);
         createdCohorts++;
         addedMembers += item.matchedIds.length;
       }

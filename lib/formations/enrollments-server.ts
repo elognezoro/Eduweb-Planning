@@ -87,6 +87,24 @@ export async function insertCourseEnrollments(
 }
 
 /**
+ * Change le rôle de formation d'un inscrit (par utilisateur + cours). La RLS
+ * `ce_update` (migration 023) n'autorise que l'admin. Mise à jour par clé
+ * naturelle (user_id + course_id) : robuste au fait que l'id local ≠ id serveur.
+ */
+export async function updateEnrollmentRole(
+  supabase: SupabaseClient,
+  key: { userId: string; courseId: string; formationRole: string },
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase
+    .from("course_enrollments")
+    .update({ formation_role: key.formationRole })
+    .eq("user_id", key.userId)
+    .eq("course_id", key.courseId);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+/**
  * Supprime une inscription (par utilisateur + cours). La RLS `ce_delete`
  * n'autorise que l'admin ou le propriétaire. Renvoie true si OK.
  */
