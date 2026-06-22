@@ -28,6 +28,7 @@ import {
   TRAINING_ABBREVIATIONS,
 } from "@/lib/guides/training-manual-data";
 import { CourseGate } from "@/components/formations/course-gate";
+import { useApp } from "@/components/app-shell/app-context";
 
 /**
  * Manuel académique imprimable — assemble la couverture, le colophon,
@@ -40,9 +41,15 @@ import { CourseGate } from "@/components/formations/course-gate";
  * demande d'un livrable « disponible à part ».
  */
 export default function SupportFormationPage() {
+  // Chaque utilisateur n'obtient que le module de SON rôle ; l'administrateur (et
+  // le super-admin, forcé en « admin ») garde le manuel complet. L'aperçu de rôle
+  // permet de consulter le module d'un autre rôle en basculant le rôle effectif.
+  const { effectiveRole } = useApp();
+  const isManualManager = effectiveRole === "admin";
+
   // Modules dans l'ordre stratégique recommandé par la revue d'harmonisation.
-  const MODULE_ORDER = React.useMemo(
-    () => [
+  const MODULE_ORDER = React.useMemo(() => {
+    const base = [
       "admin",
       "chef_etablissement",
       "inspecteur",
@@ -57,9 +64,9 @@ export default function SupportFormationPage() {
       "apfc_admin",
       "chef_antenne",
       "transport_chauffeur",
-    ],
-    [],
-  );
+    ];
+    return isManualManager ? base : base.filter((r) => r === effectiveRole);
+  }, [isManualManager, effectiveRole]);
 
   // Construction des entrées de table des matières (numérotation calculée).
   const tocEntries: { roman?: string; arabic?: number; label: string; level?: 1 | 2 }[] = React.useMemo(() => {
@@ -225,7 +232,7 @@ export default function SupportFormationPage() {
             </a>
           </Button>
           <Button size="sm" variant="outline" asChild>
-            <a href="/api/docx/training-manual">
+            <a href={`/api/docx/training-manual?role=${encodeURIComponent(effectiveRole)}`}>
               <FileDown className="h-4 w-4" /> Télécharger Word (.docx)
             </a>
           </Button>

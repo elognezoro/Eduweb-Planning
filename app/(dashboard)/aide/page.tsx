@@ -91,11 +91,17 @@ export default function AideIndexPage() {
     [effectiveRole],
   );
 
-  const sortedKeys = React.useMemo(() => {
-    return [...GUIDE_KEYS].sort((a, b) => ORDER.indexOf(a as string) - ORDER.indexOf(b as string));
-  }, []);
+  // Chaque utilisateur n'accède qu'au guide de SON rôle ; l'administrateur (et le
+  // super-admin, forcé en « admin ») garde l'accès à toute la bibliothèque.
+  // L'aperçu de rôle permet de consulter un autre guide en basculant le rôle effectif.
+  const isGuidesManager = effectiveRole === "admin";
 
-  const filteredKeys = sortedKeys.filter((key) => {
+  const visibleKeys = React.useMemo(() => {
+    const all = [...GUIDE_KEYS].sort((a, b) => ORDER.indexOf(a as string) - ORDER.indexOf(b as string));
+    return isGuidesManager ? all : all.filter((k) => (k as string) === effectiveRole);
+  }, [isGuidesManager, effectiveRole]);
+
+  const filteredKeys = visibleKeys.filter((key) => {
     if (family !== "all" && ROLE_FAMILY[key as string] !== family) return false;
     if (!query.trim()) return true;
     const q = query.trim().toLowerCase();
@@ -115,17 +121,17 @@ export default function AideIndexPage() {
       permission="dashboard:view"
       showContextBadge={false}
       kpis={[
-        { label: "Guides disponibles", value: GUIDE_KEYS.length, icon: Library, tone: "green" },
+        { label: isGuidesManager ? "Guides disponibles" : "Votre guide", value: visibleKeys.length, icon: Library, tone: "green" },
         { label: "Familles de rôles", value: FAMILIES.length, icon: Users, tone: "blue" },
         {
           label: "Chapitres au total",
-          value: GUIDE_KEYS.reduce((acc, k) => acc + GUIDES[k as string].chapters.length, 0),
+          value: visibleKeys.reduce((acc, k) => acc + GUIDES[k as string].chapters.length, 0),
           icon: BookOpen,
           tone: "gold",
         },
         {
           label: "Durée totale",
-          value: `${GUIDE_KEYS.reduce((acc, k) => {
+          value: `${visibleKeys.reduce((acc, k) => {
             const m = GUIDES[k as string].meta.duration.match(/\d+/);
             return acc + (m ? parseInt(m[0], 10) : 0);
           }, 0)} min`,
@@ -141,7 +147,7 @@ export default function AideIndexPage() {
       {myGuideKey && <RecommendedCard guideKey={myGuideKey} />}
 
       {/* Manuel académique téléchargeable en PDF (livrable « disponible à part ») */}
-      <DownloadManualBanner />
+      <DownloadManualBanner role={effectiveRole} isManager={isGuidesManager} />
 
       {/* Certificat de fin de formation (modèle officiel) */}
       <CertificateBanner />
@@ -156,45 +162,56 @@ export default function AideIndexPage() {
       <SeminaireIaCommunicationBanner />
 
 
-      {/* Filtres */}
-      <SectionCard contentClassName="p-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative min-w-[220px] flex-1">
-            <Filter className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Rechercher par rôle, objectif…"
-              className="h-9 pl-8"
-            />
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            <FamilyPill label="Tous" active={family === "all"} onClick={() => setFamily("all")} />
-            {FAMILIES.map((f) => (
-              <FamilyPill
-                key={f}
-                label={FAMILY_LABEL[f]}
-                active={family === f}
-                tone={FAMILY_TONE[f]}
-                onClick={() => setFamily(f)}
-              />
-            ))}
-          </div>
-        </div>
-      </SectionCard>
+      {/* Bibliothèque complète : réservée à l'administrateur. Les autres rôles
+          n'accèdent qu'à leur propre guide (mis en avant ci-dessus). */}
+      {isGuidesManager ? (
+        <>
+          {/* Filtres */}
+          <SectionCard contentClassName="p-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative min-w-[220px] flex-1">
+                <Filter className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Rechercher par rôle, objectif…"
+                  className="h-9 pl-8"
+                />
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                <FamilyPill label="Tous" active={family === "all"} onClick={() => setFamily("all")} />
+                {FAMILIES.map((f) => (
+                  <FamilyPill
+                    key={f}
+                    label={FAMILY_LABEL[f]}
+                    active={family === f}
+                    tone={FAMILY_TONE[f]}
+                    onClick={() => setFamily(f)}
+                  />
+                ))}
+              </div>
+            </div>
+          </SectionCard>
 
-      {/* Grille des guides */}
-      {filteredKeys.length === 0 ? (
+          {/* Grille des guides */}
+          {filteredKeys.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-border bg-card px-4 py-12 text-center text-sm text-muted-foreground">
+              Aucun guide ne correspond à votre recherche.
+            </p>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredKeys.map((key) => (
+                <GuideCard key={key as string} guideKey={key as string} />
+              ))}
+            </div>
+          )}
+        </>
+      ) : !myGuideKey ? (
         <p className="rounded-xl border border-dashed border-border bg-card px-4 py-12 text-center text-sm text-muted-foreground">
-          Aucun guide ne correspond à votre recherche.
+          Aucun guide dédié n&apos;est encore disponible pour votre rôle. Vous pouvez consulter le
+          manuel académique ci-dessus.
         </p>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredKeys.map((key) => (
-            <GuideCard key={key as string} guideKey={key as string} />
-          ))}
-        </div>
-      )}
+      ) : null}
     </ModulePage>
   );
 }
@@ -280,7 +297,7 @@ function GuideCard({ guideKey }: { guideKey: string }) {
 /* ---------------------------------------------------------------------- */
 /*  Bandeau « Support de formation académique » (lien vers PDF imprimable) */
 /* ---------------------------------------------------------------------- */
-function DownloadManualBanner() {
+function DownloadManualBanner({ role, isManager }: { role: string; isManager: boolean }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-ew-gold-500/40 bg-gradient-to-r from-ew-gold-100/60 via-card to-card p-5 shadow-sm">
       <div className="flex flex-wrap items-center gap-4">
@@ -289,7 +306,7 @@ function DownloadManualBanner() {
         </span>
         <div className="min-w-0 flex-1">
           <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-ew-gold-600">
-            Manuel académique complet
+            {isManager ? "Manuel académique complet" : "Votre module de formation"}
           </p>
           <div className="mt-0.5 flex flex-wrap items-center gap-2">
             <p className="font-display text-lg font-bold text-foreground">
@@ -298,8 +315,9 @@ function DownloadManualBanner() {
             <EnrollmentStatusChip courseId="manuel-formation" />
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Syllabus, 8 modules de formation (un par rôle), auto-évaluations, exercices pratiques, grille de
-            progression et glossaire général — mise en page A4 conforme aux standards académiques.
+            {isManager
+              ? "Syllabus, modules de formation (un par rôle), volume horaire, auto-évaluations, exercices pratiques, grille de progression et glossaire général — mise en page A4 conforme aux standards académiques."
+              : "Le module correspondant à votre rôle : syllabus, volume horaire, contenu pas-à-pas, auto-évaluation et exercice pratique — mise en page A4 conforme aux standards académiques."}
           </p>
         </div>
       </div>
@@ -311,7 +329,7 @@ function DownloadManualBanner() {
           <BookOpen className="h-4 w-4" /> Consulter & imprimer (PDF)
         </Link>
         <a
-          href="/api/docx/training-manual"
+          href={`/api/docx/training-manual?role=${encodeURIComponent(role)}`}
           className="inline-flex items-center gap-2 rounded-lg border border-ew-green-700 bg-card px-4 py-2 text-sm font-semibold text-ew-green-700 transition-colors hover:bg-ew-green-50"
         >
           <FileDown className="h-4 w-4" /> Télécharger en Word (.docx)

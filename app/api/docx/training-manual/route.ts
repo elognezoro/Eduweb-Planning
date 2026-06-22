@@ -11,11 +11,15 @@ export const runtime = "nodejs";
  *   chaque page, table des matières automatique mise à jour à l'ouverture)
  * - téléchargé sous un nom signifiant (code de référence + version)
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const buffer = await buildTrainingManualDocx();
+    // Le manuel est scopé au rôle (sauf admin) — cf. restriction d'accès aux guides.
+    // Contenu non sensible (documentation) : le paramètre client suffit au scoping.
+    const role = new URL(request.url).searchParams.get("role") || undefined;
+    const buffer = await buildTrainingManualDocx(role);
     const id = TRAINING_SYLLABUS.identification;
-    const filename = `${id.code}-v${id.version}-Manuel-Formation.docx`;
+    const suffix = role && role !== "admin" ? `-${role}` : "";
+    const filename = `${id.code}-v${id.version}-Manuel-Formation${suffix}.docx`;
     return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,
       headers: {

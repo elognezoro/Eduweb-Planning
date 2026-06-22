@@ -69,7 +69,11 @@ const MODULE_ORDER = [
   "transport_chauffeur",
 ] as const;
 
-export async function buildTrainingManualDocx(): Promise<Buffer> {
+export async function buildTrainingManualDocx(onlyRole?: string): Promise<Buffer> {
+  // Restriction par rôle : un rôle non-admin n'obtient que SON module ; l'admin
+  // (ou l'absence de filtre) génère le manuel complet.
+  const order: readonly string[] =
+    onlyRole && onlyRole !== "admin" ? MODULE_ORDER.filter((r) => r === onlyRole) : MODULE_ORDER;
   const logo = await loadLogoBuffer();
   const id = TRAINING_SYLLABUS.identification;
   const headerCenter = id.intituleAbrege || "EduWeb Planner — Support de formation";
@@ -266,7 +270,7 @@ export async function buildTrainingManualDocx(): Promise<Buffer> {
 
   // -------- MODULES --------
   const moduleChildren: Paragraph[] = [];
-  MODULE_ORDER.forEach((roleKey) => {
+  order.forEach((roleKey) => {
     const guide = GUIDES[roleKey];
     const ass = TRAINING_ASSESSMENTS[roleKey];
     if (!guide || !ass) return;
