@@ -15,6 +15,64 @@ export function isExpired(e: { expiresAt?: string | null }, now = new Date()): b
   return new Date(e.expiresAt).getTime() < now.getTime();
 }
 
+/**
+ * Clé de compartiment d'unicité d'une inscription : (utilisateur, cours, année
+ * scolaire). Une année scolaire absente/nulle est normalisée en « » — alignée
+ * sur la contrainte serveur `unique(user_id, course_id, school_year)` (024).
+ * Deux années réelles différentes = deux compartiments → réinscription légitime.
+ */
+export function enrollmentBucketKey(
+  e: Pick<CourseEnrollment, "userId" | "courseId" | "schoolYear">,
+): string {
+  return `${e.userId}|${e.courseId}|${e.schoolYear ?? ""}`;
+}
+
+/** Instant (ms epoch) d'une inscription ; +Infinity si date absente/illisible. */
+function enrollmentInstant(e: CourseEnrollment): number {
+  const t = Date.parse(e.enrolledAt || "");
+  return Number.isNaN(t) ? Infinity : t;
+}
+
+/**
+ * Vrai si `a` doit l'emporter sur `b` comme inscription la plus ANCIENNE de leur
+ * compartiment (règle métier : on privilégie l'inscription effectuée
+ * antérieurement, on supprime les plus récentes). Compare `enrolledAt` par
+ * INSTANT réel (`Date.parse`), pas par chaîne : le client écrit « …Z » alors
+ * que Postgres/PostgREST sérialise « +00:00 » (parfois avec fraction de
+ * seconde) — une comparaison lexicographique trierait alors à tort. Une date
+ * absente/illisible vaut +Infinity (donc perdante : une ligne sans date ne
+ * supplante jamais une ligne datée plus ancienne). Égalité d'instant tranchée
+ * par `id`, pour un résultat déterministe et indépendant de l'ordre du tableau.
+ */
+export function isEarlierEnrollment(a: CourseEnrollment, b: CourseEnrollment): boolean {
+  const at = enrollmentInstant(a);
+  const bt = enrollmentInstant(b);
+  if (at !== bt) return at < bt;
+  return (a.id ?? "") < (b.id ?? "");
+}
+
+/**
+ * Réduit une liste d'inscriptions à UNE par compartiment (utilisateur, cours,
+ * année), en conservant la plus ANCIENNE (cf. {@link isEarlierEnrollment}).
+ * L'ordre de sortie suit la première apparition de chaque compartiment dans
+ * l'entrée, ce qui préserve l'ordre d'affichage existant.
+ */
+export function keepEarliestPerBucket(rows: CourseEnrollment[]): CourseEnrollment[] {
+  const best = new Map<string, CourseEnrollment>();
+  const order: string[] = [];
+  for (const e of rows) {
+    const k = enrollmentBucketKey(e);
+    const cur = best.get(k);
+    if (!cur) {
+      best.set(k, e);
+      order.push(k);
+    } else if (isEarlierEnrollment(e, cur)) {
+      best.set(k, e);
+    }
+  }
+  return order.map((k) => best.get(k)!);
+}
+
 /** Décrit l'origine effective de l'accès d'un utilisateur à un cours. */
 export interface EnrollmentVerdict {
   enrolled: boolean;
@@ -50,10 +108,16 @@ export function getEnrollmentVerdict(
     return { enrolled: true, source: "role-auto" };
   }
 
-  // 2) Inscription nominative non expirée
-  const direct = enrollments.find(
-    (e) => e.userId === userId && e.courseId === courseId && !isExpired(e),
-  );
+  // 2) Inscription nominative non expirée. En cas de doublons (même cours, p.
+  // ex. une ligne locale + une ligne serveur, ou plusieurs années), on retient
+  // la PLUS ANCIENNE — cohérent avec la règle de dédoublonnage du store. L'accès
+  // n'est PAS restreint par année : toute inscription non expirée donne accès.
+  const direct = enrollments
+    .filter((e) => e.userId === userId && e.courseId === courseId && !isExpired(e))
+    .reduce<CourseEnrollment | undefined>(
+      (best, e) => (best && !isEarlierEnrollment(e, best) ? best : e),
+      undefined,
+    );
   if (direct) {
     return {
       enrolled: true,

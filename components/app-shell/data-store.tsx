@@ -51,6 +51,7 @@ import type {
 import type { CertificateConfig } from "@/lib/formations/certificate";
 import { getCourseCompletionRule } from "@/lib/formations/course-completion";
 import { getCourseModuleList } from "@/lib/formations/module-access";
+import { keepEarliestPerBucket } from "@/lib/formations/enrollment";
 
 type LessonEntry = (typeof LESSON_BOOK_ENTRIES)[number];
 type Announcement = (typeof ANNOUNCEMENTS)[number];
@@ -701,20 +702,14 @@ function genId(prefix: string) {
  * Remplaçable par des appels Supabase sans changer l'API consommée par les pages.
  */
 /**
- * Déduplique les inscriptions par (utilisateur, cours) — un même utilisateur ne
- * peut être inscrit qu'une fois à un cours (aligné sur la contrainte serveur
- * `unique(user_id, course_id)`). Conserve la première occurrence rencontrée.
+ * Déduplique les inscriptions par (utilisateur, cours, année scolaire) — aligné
+ * sur la contrainte serveur `unique(user_id, course_id, school_year)` (024). En
+ * cas de doublon, conserve l'inscription la PLUS ANCIENNE (plus petit
+ * `enrolledAt`) et supprime les plus récentes ; une année scolaire différente
+ * reste un compartiment distinct (réinscription légitime, non fusionnée).
  */
 function dedupeEnrollmentsByUserCourse(rows: CourseEnrollment[]): CourseEnrollment[] {
-  const seen = new Set<string>();
-  const out: CourseEnrollment[] = [];
-  for (const e of rows) {
-    const k = `${e.userId}|${e.courseId}|${e.schoolYear ?? ""}`;
-    if (seen.has(k)) continue;
-    seen.add(k);
-    out.push(e);
-  }
-  return out;
+  return keepEarliestPerBucket(rows);
 }
 
 export function DataStoreProvider({ children }: { children: React.ReactNode }) {
@@ -1092,15 +1087,18 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       }),
     mergeCourseEnrollments: (rows) =>
       setState((s) => {
-        const key = (e: CourseEnrollment) =>
-          `${e.userId}|${e.courseId}|${e.schoolYear ?? ""}`;
-        const seen = new Set(s.courseEnrollments.map(key));
-        const additions = rows.filter((r) => !seen.has(key(r)));
-        if (additions.length === 0) return s;
-        return {
-          ...s,
-          courseEnrollments: [...additions, ...s.courseEnrollments],
-        };
+        if (rows.length === 0) return s;
+        // Fusionne les lignes serveur avec l'état local en gardant, par
+        // compartiment (utilisateur, cours, année), l'inscription la PLUS
+        // ANCIENNE. L'ordre des compartiments existants est préservé ; les
+        // compartiments inédits (côté serveur) sont ajoutés à la fin.
+        const merged = keepEarliestPerBucket([...s.courseEnrollments, ...rows]);
+        // Aucun changement réel (mêmes ids, même ordre) → éviter un re-render.
+        const unchanged =
+          merged.length === s.courseEnrollments.length &&
+          merged.every((e, i) => e.id === s.courseEnrollments[i].id);
+        if (unchanged) return s;
+        return { ...s, courseEnrollments: merged };
       }),
     removeEnrollment: (id) =>
       setState((s) => ({
