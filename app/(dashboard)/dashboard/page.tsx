@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useApp } from "@/components/app-shell/app-context";
-import { getRole, type UserRole } from "@/lib/roles";
+import { getRole, USER_ROLES, type UserRole } from "@/lib/roles";
 import { hasPermission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -79,10 +79,11 @@ const TONE_PASTILLE: Record<string, string> = {
   slate: "bg-slate-100 text-slate-600",
 };
 
-// Un espace dédié pour chaque utilisateur (les 13 rôles)
+// Un espace dédié pour chaque rôle utilisateur
 const ROLE_SPACES: { id: UserRole; icon: LucideIcon; description: string }[] = [
   { id: "drena", icon: Globe, description: "Lecture régionale — rapports comparatifs inter-établissements, statistiques régionales." },
   { id: "cafop_admin", icon: GraduationCap, description: "Administration des CAFOP, gestion des élèves-maîtres, saisie des notes, génération des bulletins." },
+  { id: "cafop_directeur", icon: GraduationCap, description: "Direction de CAFOP : pilotage des promotions, des enseignements, des statistiques et des rapports." },
   { id: "etablissements_admin", icon: Building, description: "Administration des établissements scolaires, gestion des données, import / export." },
   { id: "apfc_admin", icon: Network, description: "Administration des APFC, gestion du personnel pédagogique, antennes et circonscriptions." },
   { id: "inspecteur", icon: ClipboardCheck, description: "Visites d'inspection, suivi des enseignants, rapports pédagogiques." },
@@ -90,7 +91,9 @@ const ROLE_SPACES: { id: UserRole; icon: LucideIcon; description: string }[] = [
   { id: "chef_antenne", icon: FolderTree, description: "Coordination pédagogique multi-établissements. Formules d'abonnement dédiées disponibles prochainement." },
   { id: "chef_etablissement", icon: Building, description: "Pilotage complet : configuration, emplois du temps, notes, bulletins, premium, facturation, audit." },
   { id: "enseignant", icon: Pencil, description: "Cahier de texte, saisie des notes, registre d'appel pour ses classes assignées." },
+  { id: "cafop_professeur", icon: Pencil, description: "Enseignement et évaluation des élèves-maîtres : saisie des notes au CAFOP." },
   { id: "educateur", icon: ClipboardList, description: "Registre d'appel toutes classes + alertes parents en cas d'absence ou retard." },
+  { id: "transport_chauffeur", icon: Map, description: "Espace conducteur : suivi du trajet du car et émission de la position en temps réel." },
   { id: "parent", icon: Heart, description: "Suivi des notes, bulletins PDF, présences de l'enfant. Catalogue d'abonnements optionnels." },
   { id: "eleve", icon: User, description: "Accès personnalisé : emploi du temps, notes, cahier de texte, présences, bulletins." },
   { id: "admin", icon: Settings, description: "Gestion des utilisateurs, permissions, journal d'activité, sauvegardes." },
@@ -166,7 +169,7 @@ export default function DashboardPage() {
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <KpiCard label="Rôles supportés" value={13} icon={ShieldCheck} tone="green" hint="Habilitations fines" />
+        <KpiCard label="Rôles supportés" value={USER_ROLES.length} icon={ShieldCheck} tone="green" hint="Habilitations fines" />
         <KpiCard label="Niveaux pédagogiques" value={7} icon={GraduationCap} tone="blue" hint="6ᵉ → Tˡᵉ" />
         <KpiCard label="Régions académiques" value={country.academicRegions.length} icon={Map} tone="gold" hint={country.academicRegionLabel} />
         <KpiCard label="Modules fonctionnels" value={ALL_NAV_ITEMS.length} icon={LayoutGrid} tone="purple" />

@@ -95,9 +95,9 @@ export const COURSE_CATALOG: Course[] = [
     title: "Bibliothèque des guides utilisateurs par rôle",
     shortTitle: "Guides utilisateurs",
     description:
-      "8 guides détaillés, un par rôle, pour démarrer rapidement avec EduWeb Planner.",
+      "Des guides détaillés, un par rôle, pour démarrer rapidement avec EduWeb Planner.",
     longDescription:
-      "Bibliothèque des guides utilisateurs adaptés à chaque rôle (administrateur, chef d'établissement, enseignant, éducateur, inspecteur, conseiller pédagogique, parent, élève). Chaque guide couvre les objectifs, prérequis, parcours pas-à-pas, FAQ et glossaire spécifiques au rôle.",
+      "Bibliothèque des guides utilisateurs adaptés à chaque rôle (administrateur, admin CAFOP, directeur de CAFOP, professeur de CAFOP, admin APFC, chef d'antenne APFC, inspecteur, conseiller pédagogique, chef d'établissement, enseignant, éducateur, chauffeur de car, parent, élève). Chaque guide couvre les objectifs, prérequis, parcours pas-à-pas, FAQ et glossaire spécifiques au rôle.",
     route: "/aide",
     accent: "blue",
     duration: "1 à 2 heures par guide",
@@ -108,6 +108,8 @@ export const COURSE_CATALOG: Course[] = [
       "admin",
       "etablissements_admin",
       "cafop_admin",
+      "cafop_directeur",
+      "cafop_professeur",
       "apfc_admin",
       "drena",
       "inspecteur",
@@ -116,6 +118,7 @@ export const COURSE_CATALOG: Course[] = [
       "chef_etablissement",
       "enseignant",
       "educateur",
+      "transport_chauffeur",
     ],
     order: 5,
   },

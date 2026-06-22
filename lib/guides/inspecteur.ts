@@ -59,6 +59,7 @@ export const guideInspecteur: Omit<GuideContent, "icon"> = {
         {
           title: "1.2 Comprendre la vue d'ensemble du périmètre supervisé",
           body: "Le module « Vue d'ensemble » synthétise votre périmètre d'inspection : nombre d'établissements rattachés, enseignants concernés, indicateurs clés du moment. Cette vue panoramique permet de repérer rapidement les zones nécessitant une attention prioritaire avant même d'ouvrir un dossier.",
+          example: "À la rentrée, votre vue d'ensemble affiche 22 établissements et 37 enseignants de mathématiques. Un indicateur signale une baisse de réussite au Lycée Moderne de Daloa : vous l'inscrivez en tête de votre plan d'inspection du trimestre.",
           steps: [
             {
               instruction: "Ouvrez la vue d'ensemble depuis le menu principal.",
@@ -104,6 +105,7 @@ export const guideInspecteur: Omit<GuideContent, "icon"> = {
         {
           title: "2.1 Planifier les visites d'inspection",
           body: "Le module « Inspection » centralise la planification des missions. L'inspecteur y déclare ses visites prévues, les établissements et enseignants concernés, ainsi que la période ciblée. Cette planification rend votre activité visible aux chefs d'établissement et permet le suivi institutionnel par la DRENA.",
+          example: "Vous programmez une inspection ordinaire de M. Kéita, professeur de mathématiques en 2ⁿᵈᵉ C au Lycée Moderne de Daloa, le mardi 14 octobre à 9 h. Dès l'enregistrement, la mission apparaît dans votre calendrier et le chef d'établissement en est informé.",
           steps: [
             {
               instruction: "Ouvrez le module Inspection.",
@@ -127,6 +129,7 @@ export const guideInspecteur: Omit<GuideContent, "icon"> = {
         {
           title: "2.2 Consulter le cahier de texte avant la visite",
           body: "Le cahier de texte numérique est un outil essentiel de préparation : il permet d'apprécier la progression pédagogique de l'enseignant, le respect du programme officiel et la régularité de l'inscription des séances. L'inspecteur le consulte impérativement avant la visite en classe.",
+          example: "En consultant le cahier de texte de M. Kéita sur les six dernières semaines, vous constatez deux séances non renseignées et un saut dans la progression sur les fonctions. Vous notez ces deux points pour l'entretien post-visite.",
           steps: [
             {
               instruction: "Ouvrez le cahier de texte.",
@@ -199,6 +202,7 @@ export const guideInspecteur: Omit<GuideContent, "icon"> = {
         {
           title: "3.2 Renseigner la grille pendant l'observation",
           body: "Pendant la séance, la grille se renseigne progressivement. Chaque critère reçoit une appréciation et, le cas échéant, un commentaire qualitatif. L'inspecteur veille à appuyer chaque évaluation par une observation factuelle pour préserver la qualité du rapport final.",
+          example: "Sur le critère « gestion du temps », vous notez « Satisfaisant » avec le commentaire factuel : « Mise en activité à 9 h 08 ; la phase de découverte a duré 22 min, au détriment de l'institutionnalisation, écourtée à 5 min. » L'appréciation s'appuie sur des faits, pas sur une impression.",
           steps: [
             {
               instruction: "Ouvrez la grille préparée pour la séance en cours.",
@@ -252,6 +256,7 @@ export const guideInspecteur: Omit<GuideContent, "icon"> = {
         {
           title: "4.2 Formuler les recommandations",
           body: "Chaque rapport d'inspection se conclut par des recommandations concrètes adressées à l'enseignant et, le cas échéant, à l'établissement. Une recommandation efficace est mesurable, datée et associée à un responsable identifié. Elle alimente le module de suivi.",
+          example: "Plutôt que « renforcer l'institutionnalisation », vous écrivez : « Consacrer au moins 10 min en fin de séance à la trace écrite et au bilan. Responsable : M. Kéita. Échéance : sous 6 semaines. Vérification : visite de suivi. » La recommandation est actionnable et mesurable.",
           steps: [
             {
               instruction: "Dans le rapport, accédez à la section Recommandations.",
@@ -280,6 +285,7 @@ export const guideInspecteur: Omit<GuideContent, "icon"> = {
         {
           title: "5.1 Suivre l'avancement des recommandations",
           body: "Le module « Suivi des recommandations » affiche l'état d'avancement de chaque recommandation émise : à faire, en cours, réalisée, abandonnée. L'inspecteur consulte régulièrement ce tableau de bord pour relancer les enseignants ou établissements en retard.",
+          example: "Deux mois après le rapport, le suivi montre que la recommandation faite à M. Kéita est « en cours » mais que celle adressée au chef d'établissement (réaménagement de la salle) est « à faire » et en retard. Vous adressez une relance ciblée à ce dernier.",
           steps: [
             {
               instruction: "Ouvrez le suivi des recommandations.",
@@ -349,6 +355,7 @@ export const guideInspecteur: Omit<GuideContent, "icon"> = {
         {
           title: "6.2 Apprécier la performance des enseignants",
           body: "Le module « Performance des enseignants » offre une lecture comparée des résultats obtenus par les enseignants d'un même établissement, d'une même discipline ou d'un même niveau. Il complète, sans s'y substituer, l'évaluation qualitative menée lors de l'inspection en classe.",
+          example: "Le comparatif des professeurs de mathématiques de Daloa fait ressortir une enseignante dont les classes progressent nettement plus que la moyenne. Vous repérez là une pratique exemplaire à valoriser et, pourquoi pas, à diffuser en regroupement disciplinaire.",
           steps: [
             {
               instruction: "Ouvrez le module Performance des enseignants.",
@@ -389,6 +396,7 @@ export const guideInspecteur: Omit<GuideContent, "icon"> = {
         {
           title: "7.1 Envoyer un message officiel",
           body: "Le module « Communication » permet d'adresser des messages aux enseignants inspectés, aux chefs d'établissement ou à d'autres inspecteurs. À la différence d'un courriel personnel, ces messages sont archivés dans le dossier institutionnel.",
+          example: "Après la restitution, vous adressez à M. Kéita un message faisant référence au rapport du 14 octobre et à la recommandation sur l'institutionnalisation, en y joignant une ressource méthodologique. L'échange reste tracé dans le dossier institutionnel.",
           steps: [
             {
               instruction: "Ouvrez le module Communication.",

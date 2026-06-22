@@ -156,8 +156,40 @@ export function roleProfileSection(role: UserRole, ctx: ProfileCtx): ProfileSect
           { label: "Région", value: R },
         ],
       };
+    case "cafop_directeur":
+      return {
+        title: "Direction de CAFOP",
+        fields: [
+          { label: "CAFOP dirigé", value: "CAFOP d'Abidjan" },
+          { label: "Fonction", value: "Directeur des études" },
+          { label: "Promotions pilotées", value: "3" },
+          { label: "Élèves-maîtres", value: "540" },
+          { label: "Première prise de service", value: "01 octobre 2019" },
+        ],
+      };
+    case "cafop_professeur":
+      return {
+        title: "Enseignement au CAFOP",
+        fields: [
+          { label: "CAFOP de rattachement", value: "CAFOP d'Abidjan" },
+          { label: "Discipline(s)", value: "Didactique du français" },
+          { label: "Groupes-classes", value: "2ⁿᵈᵉ année A · B" },
+          { label: "Élèves-maîtres suivis", value: "120" },
+          { label: "Première prise de service", value: "01 octobre 2020" },
+        ],
+      };
+    case "transport_chauffeur":
+      return {
+        title: "Conduite du transport scolaire",
+        fields: [
+          { label: "Établissement desservi", value: E },
+          { label: "Car affecté", value: "Car 01 — 33 places" },
+          { label: "Trajet", value: "Cocody ↔ Établissement" },
+          { label: "Créneaux", value: "Matin · Soir (jours de classe)" },
+          { label: "Première prise de service", value: "01 septembre 2024" },
+        ],
+      };
     case "admin":
-    default:
       return {
         title: "Administration de la plateforme",
         fields: [
@@ -165,6 +197,16 @@ export function roleProfileSection(role: UserRole, ctx: ProfileCtx): ProfileSect
           { label: "Modules administrés", value: "Comptes · Rôles · Établissements · Configuration" },
           { label: "Niveau d'accès", value: "Accès complet" },
           { label: "Établissements gérés", value: "Tous" },
+        ],
+      };
+    default:
+      // Défaut neutre : un rôle non encore traité ne doit PAS hériter du libellé
+      // « Administration / Accès complet ». Ajouter un case explicite par rôle.
+      return {
+        title: "Profil utilisateur",
+        fields: [
+          { label: "Établissement", value: E },
+          { label: "Structure de rattachement", value: R },
         ],
       };
   }

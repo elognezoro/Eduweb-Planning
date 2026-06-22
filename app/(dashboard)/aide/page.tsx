@@ -40,6 +40,11 @@ const ROLE_FAMILY: Record<string, "administration" | "supervision" | "etablissem
   inspecteur: "supervision",
   conseiller_pedagogique: "supervision",
   cafop_admin: "administration",
+  cafop_directeur: "administration",
+  apfc_admin: "administration",
+  chef_antenne: "supervision",
+  cafop_professeur: "etablissement",
+  transport_chauffeur: "etablissement",
 };
 
 const FAMILY_LABEL: Record<string, string> = {
@@ -60,11 +65,16 @@ const FAMILY_TONE: Record<string, "green" | "blue" | "gold" | "purple"> = {
 const ORDER: string[] = [
   "admin",
   "cafop_admin",
+  "cafop_directeur",
+  "apfc_admin",
   "chef_etablissement",
   "inspecteur",
   "conseiller_pedagogique",
+  "chef_antenne",
   "enseignant",
+  "cafop_professeur",
   "educateur",
+  "transport_chauffeur",
   "parent",
   "eleve",
 ];

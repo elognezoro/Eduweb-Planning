@@ -797,16 +797,19 @@ function EditUserDialog({
 /* ---------------------- Changement de rôle & rattachement ---------------------- */
 const SPECIALIZED_ROLES: { id: UserRole; label: string }[] = [
   { id: "cafop_admin", label: "Admin CAFOP" },
+  { id: "cafop_directeur", label: "Directeur de CAFOP" },
+  { id: "cafop_professeur", label: "Professeur de CAFOP" },
   { id: "etablissements_admin", label: "Admin Établissements" },
   { id: "apfc_admin", label: "Admin APFC" },
 ];
 const STANDARD_ROLES: { id: UserRole; label: string }[] = [
   { id: "chef_etablissement", label: "Chef d'établissement" },
   { id: "inspecteur", label: "Inspecteur Pédagogique" },
-  { id: "chef_antenne", label: "Chef d'Antenne Pédagogique" },
+  { id: "chef_antenne", label: "Chef d'Antenne APFC" },
   { id: "conseiller_pedagogique", label: "Conseiller Pédagogique" },
   { id: "enseignant", label: "Enseignant" },
   { id: "educateur", label: "Éducateur" },
+  { id: "transport_chauffeur", label: "Chauffeur de car" },
   { id: "parent", label: "Parent d'élève" },
   { id: "eleve", label: "Élève" },
   { id: "drena", label: "DRENAET" },

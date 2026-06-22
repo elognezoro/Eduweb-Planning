@@ -1,6 +1,6 @@
 /**
  * Définition centralisée des rôles EduWeb Planner.
- * 13 rôles couvrant l'administration, la supervision, l'établissement et la communauté.
+ * 16 rôles couvrant l'administration, la supervision, l'établissement et la communauté.
  * Les libellés sont configurables (multi-pays) : DRENA/CAFOP/APFC ne sont pas codés en dur
  * au niveau métier, seulement comme libellés par défaut du système ivoirien.
  */
@@ -9,6 +9,7 @@ export const USER_ROLES = [
   "admin",
   "etablissements_admin",
   "cafop_admin",
+  "cafop_directeur",
   "apfc_admin",
   "drena",
   "inspecteur",
@@ -16,7 +17,9 @@ export const USER_ROLES = [
   "chef_antenne",
   "chef_etablissement",
   "enseignant",
+  "cafop_professeur",
   "educateur",
+  "transport_chauffeur",
   "parent",
   "eleve",
 ] as const;
@@ -71,6 +74,15 @@ export const ROLE_DEFINITIONS: Record<UserRole, RoleDefinition> = {
     family: "administration",
     tone: "blue",
   },
+  cafop_directeur: {
+    id: "cafop_directeur",
+    label: "Directeur de CAFOP",
+    shortLabel: "Directeur CAFOP",
+    description:
+      "Direction d'un CAFOP : pilotage des promotions, des enseignements, des statistiques et des rapports.",
+    family: "administration",
+    tone: "teal",
+  },
   apfc_admin: {
     id: "apfc_admin",
     label: "Admin APFC",
@@ -105,9 +117,10 @@ export const ROLE_DEFINITIONS: Record<UserRole, RoleDefinition> = {
   },
   chef_antenne: {
     id: "chef_antenne",
-    label: "Chef d'antenne",
+    label: "Chef d'Antenne APFC",
     shortLabel: "Chef d'antenne",
-    description: "Responsable d'une antenne de formation pédagogique.",
+    description:
+      "Responsable d'une antenne APFC : activités de formation continue et rapports d'antenne.",
     family: "supervision",
     tone: "purple",
   },
@@ -127,6 +140,15 @@ export const ROLE_DEFINITIONS: Record<UserRole, RoleDefinition> = {
     family: "etablissement",
     tone: "blue",
   },
+  cafop_professeur: {
+    id: "cafop_professeur",
+    label: "Professeur de CAFOP",
+    shortLabel: "Prof. CAFOP",
+    description:
+      "Enseignement et évaluation des élèves-maîtres : saisie des notes au sein d'un CAFOP.",
+    family: "etablissement",
+    tone: "teal",
+  },
   educateur: {
     id: "educateur",
     label: "Éducateur",
@@ -134,6 +156,15 @@ export const ROLE_DEFINITIONS: Record<UserRole, RoleDefinition> = {
     description: "Vie scolaire : absences, retards, discipline.",
     family: "etablissement",
     tone: "gold",
+  },
+  transport_chauffeur: {
+    id: "transport_chauffeur",
+    label: "Chauffeur de car",
+    shortLabel: "Chauffeur",
+    description:
+      "Conduite du car scolaire : suivi du trajet et émission de la position en temps réel.",
+    family: "etablissement",
+    tone: "slate",
   },
   parent: {
     id: "parent",

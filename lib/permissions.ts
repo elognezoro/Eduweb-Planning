@@ -14,6 +14,7 @@ export const PERMISSIONS = [
   "system:approve_promotions",
   "system:manage_institutions",
   "system:manage_cafop",
+  "system:teach_cafop",
   "system:view_cafop_stats",
   "system:view_cafop_reports",
   "system:manage_apfc",
@@ -101,6 +102,7 @@ export const PERMISSION_DOMAINS: { id: string; label: string; permissions: Permi
     label: "CAFOP & APFC",
     permissions: [
       "system:manage_cafop",
+      "system:teach_cafop",
       "system:view_cafop_stats",
       "system:view_cafop_reports",
       "system:manage_apfc",
@@ -176,7 +178,7 @@ export const PERMISSION_DOMAINS: { id: string; label: string; permissions: Permi
     permissions: ["role_preview:use", "exports:pdf", "exports:word", "imports:csv"],
   },
   {
-    id: "formation",
+    id: "formation_accompagnement",
     label: "Formation & accompagnement",
     permissions: ["formations:access"],
   },
@@ -192,6 +194,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "system:approve_promotions": "Approuver les promotions",
   "system:manage_institutions": "Gérer les établissements",
   "system:manage_cafop": "Gérer les centres CAFOP",
+  "system:teach_cafop": "Enseigner et évaluer au CAFOP",
   "system:view_cafop_stats": "Voir les statistiques CAFOP",
   "system:view_cafop_reports": "Voir les rapports CAFOP",
   "system:manage_apfc": "Gérer les antennes APFC",
@@ -297,6 +300,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "system:view",
     "system:manage_profile",
     "system:manage_cafop",
+    "system:teach_cafop",
     "system:view_cafop_stats",
     "system:view_cafop_reports",
     "system:convert_csv",
@@ -305,6 +309,35 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "exports:pdf",
     "exports:word",
     "imports:csv",
+    "formations:access",
+  ],
+  // Directeur de CAFOP : mêmes accès qu'Admin CAFOP (pilotage complet de son CAFOP).
+  cafop_directeur: [
+    "dashboard:view",
+    "system:view",
+    "system:manage_profile",
+    "system:manage_cafop",
+    "system:teach_cafop",
+    "system:view_cafop_stats",
+    "system:view_cafop_reports",
+    "system:convert_csv",
+    "settings:view",
+    "statistics:analytics",
+    "exports:pdf",
+    "exports:word",
+    "imports:csv",
+    "formations:access",
+  ],
+  // Professeur de CAFOP : enseignement et évaluation uniquement (pas de gestion des
+  // centres/promotions). N'accède qu'aux onglets Enseignements & Évaluation et Statistiques.
+  cafop_professeur: [
+    "dashboard:view",
+    "system:view",
+    "system:manage_profile",
+    "system:teach_cafop",
+    "system:view_cafop_stats",
+    "exports:pdf",
+    "exports:word",
     "formations:access",
   ],
   apfc_admin: [
@@ -501,6 +534,14 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "sms:send",
     "statistics:class",
     "exports:pdf",
+    "formations:access",
+  ],
+  // Chauffeur de car : accès à son espace conducteur (module Transport via dashboard:view),
+  // à la communication de service et à son guide. Aucun accès aux données scolaires.
+  transport_chauffeur: [
+    "dashboard:view",
+    "system:manage_profile",
+    "communication:view",
     "formations:access",
   ],
   parent: [

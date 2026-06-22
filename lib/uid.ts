@@ -18,6 +18,8 @@ export const ROLE_UID_CODES: Record<UserRole, string> = {
   admin: "ADM",
   etablissements_admin: "AET",
   cafop_admin: "ACF",
+  cafop_directeur: "DCF",
+  cafop_professeur: "PCF",
   apfc_admin: "AAP",
   drena: "DRE",
   inspecteur: "INS",
@@ -26,6 +28,7 @@ export const ROLE_UID_CODES: Record<UserRole, string> = {
   chef_etablissement: "CET",
   enseignant: "ENS",
   educateur: "EDU",
+  transport_chauffeur: "CHA",
   parent: "PAR",
   eleve: "ELV",
 };

@@ -134,7 +134,9 @@ export default function TransportPage() {
   }, [reload]);
 
   // Le gestionnaire (admin / chef) accède à la carte de son périmètre sans abonnement.
-  const canView = canConfigure || subscription.subscribed;
+  // Le conducteur désigné (chauffeur) y accède aussi : il doit pouvoir émettre sa
+  // position sans avoir à souscrire un abonnement parent.
+  const canView = canConfigure || isDriver || subscription.subscribed;
 
   // Le super-admin choisit l'établissement géré via le référentiel CI ; on le
   // matérialise dans Supabase (UUID) à la sélection pour le scoping transport.

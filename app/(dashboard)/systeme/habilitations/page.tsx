@@ -31,9 +31,9 @@ import { formatDate, cn } from "@/lib/utils";
 /** Structures de rattachement, déduites du rôle. */
 const STRUCTURES: { id: string; label: string; roles: UserRole[] }[] = [
   { id: "drena", label: "DRENA / DRENAET", roles: ["drena", "inspecteur", "conseiller_pedagogique"] },
-  { id: "cafop", label: "CAFOP", roles: ["cafop_admin"] },
+  { id: "cafop", label: "CAFOP", roles: ["cafop_admin", "cafop_directeur", "cafop_professeur"] },
   { id: "apfc", label: "APFC", roles: ["apfc_admin", "chef_antenne"] },
-  { id: "etablissement", label: "Établissement", roles: ["chef_etablissement", "enseignant", "educateur", "parent", "eleve"] },
+  { id: "etablissement", label: "Établissement", roles: ["chef_etablissement", "enseignant", "educateur", "transport_chauffeur", "parent", "eleve"] },
   { id: "administration", label: "Administration", roles: ["admin", "etablissements_admin"] },
 ];
 const structureOf = (role: UserRole) => STRUCTURES.find((s) => s.roles.includes(role))?.id ?? "administration";

@@ -245,9 +245,10 @@ function bulletinData(cafop: Cafop, modules: ModuleRow[], promo: string, groupe:
 export default function CafopPage() {
   const t = useTranslations();
   const { can } = useApp();
+  const canManageCafop = can("system:manage_cafop");
   const { cafops, addCafop, addCafops, removeCafop, cafopModules, setCafopModules, cafopFormationYears, setCafopFormationYears } = useStore();
   const modules = cafopModules ?? CAFOP_MODULES_DEFAULT;
-  const [tab, setTab] = React.useState<"gestion" | "notes" | "stats" | "rapports">("gestion");
+  const [tab, setTab] = React.useState<"gestion" | "notes" | "stats" | "rapports">(canManageCafop ? "gestion" : "notes");
   const [query, setQuery] = React.useState("");
   const [templateOpen, setTemplateOpen] = React.useState(false);
   const [importOpen, setImportOpen] = React.useState(false);
@@ -255,7 +256,9 @@ export default function CafopPage() {
   const [modulesOpen, setModulesOpen] = React.useState(false);
   const [selectedCafop, setSelectedCafop] = React.useState<Cafop | null>(null);
 
-  if (!can("system:manage_cafop")) return <ForbiddenState />;
+  // Le Professeur de CAFOP (system:teach_cafop) accède en saisie des notes/évaluations,
+  // sans la gestion des centres/promotions (réservée à system:manage_cafop).
+  if (!canManageCafop && !can("system:teach_cafop")) return <ForbiddenState />;
 
   const q = query.trim().toLowerCase();
   const filtered = q
@@ -286,7 +289,9 @@ export default function CafopPage() {
               { id: "stats" as const, label: "Statistiques", icon: PieChart },
               { id: "rapports" as const, label: "Rapports", icon: FileText },
             ]
-          ).map((t) => {
+          )
+            .filter((t) => canManageCafop || t.id === "notes" || t.id === "stats")
+            .map((t) => {
             const Icon = t.icon;
             return (
               <button
@@ -305,8 +310,8 @@ export default function CafopPage() {
         </div>
       </div>
 
-      {/* Barre d'actions */}
-      {(tab === "gestion" || tab === "notes") && (
+      {/* Barre d'actions (gestion des CAFOP : réservée aux gestionnaires) */}
+      {canManageCafop && (tab === "gestion" || tab === "notes") && (
       <div className="flex flex-wrap gap-2">
         <Button variant="outline" onClick={() => toast.success("Liste actualisée", { description: `${cafops.length} CAFOP chargés.` })}>
           <RefreshCw className="h-4 w-4" /> Actualiser
@@ -438,6 +443,7 @@ export default function CafopPage() {
           years={cafopFormationYears[selectedCafop.country] ?? 2}
           onYearsChange={(y) => setCafopFormationYears(selectedCafop.country, y)}
           onBack={() => setSelectedCafop(null)}
+          canManage={canManageCafop}
         />
       ) : (
         /* ---------------- Enseignements & Evaluation — sélection d'un CAFOP ---------------- */
@@ -459,14 +465,17 @@ export default function CafopPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex shrink-0 gap-2">
-                <Button variant="outline" className="border-ew-orange/40 text-ew-orange hover:bg-ew-gold-100/60" onClick={() => setModulesOpen(true)}>
-                  <ListChecks className="h-4 w-4" /> Gérer les modules
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-ew-orange text-[11px] font-bold text-white">
-                    {modules.length}
-                  </span>
-                </Button>
-              </div>
+              {/* Gestion du référentiel de modules : réservée aux gestionnaires (system:manage_cafop). */}
+              {canManageCafop && (
+                <div className="flex shrink-0 gap-2">
+                  <Button variant="outline" className="border-ew-orange/40 text-ew-orange hover:bg-ew-gold-100/60" onClick={() => setModulesOpen(true)}>
+                    <ListChecks className="h-4 w-4" /> Gérer les modules
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-ew-orange text-[11px] font-bold text-white">
+                      {modules.length}
+                    </span>
+                  </Button>
+                </div>
+              )}
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               {[
@@ -530,7 +539,7 @@ export default function CafopPage() {
         </>
       ))}
 
-      {modulesOpen && (
+      {modulesOpen && canManageCafop && (
         <ModulesDialog
           modules={modules}
           onClose={() => setModulesOpen(false)}
@@ -2136,12 +2145,14 @@ function CafopDetail({
   years,
   onYearsChange,
   onBack,
+  canManage,
 }: {
   cafop: Cafop;
   modules: ModuleRow[];
   years: number;
   onYearsChange: (y: number) => void;
   onBack: () => void;
+  canManage: boolean;
 }) {
   const [sub, setSub] = React.useState<"cahier" | "registre" | "notes">("notes");
   const promos = promotionsFor(cafop, years);
@@ -2281,18 +2292,26 @@ function CafopDetail({
             </div>
             <div className="space-y-1.5">
               <Label>Durée de formation — {getUnCountry(cafop.country)?.name ?? cafop.country}</Label>
-              <Select value={String(years)} onValueChange={(v) => onYearsChange(Number(v))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4].map((y) => (
-                    <SelectItem key={y} value={String(y)}>
-                      {y} an{y > 1 ? "s" : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/* Paramètre de configuration : modifiable par les gestionnaires (system:manage_cafop) ;
+                  en lecture seule pour le Professeur de CAFOP (saisie de notes uniquement). */}
+              {canManage ? (
+                <Select value={String(years)} onValueChange={(v) => onYearsChange(Number(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4].map((y) => (
+                      <SelectItem key={y} value={String(y)}>
+                        {y} an{y > 1 ? "s" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex h-9 items-center rounded-md border border-input bg-muted px-3 text-sm text-muted-foreground">
+                  {years} an{years > 1 ? "s" : ""}
+                </div>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label>Cohorte (promotion)</Label>

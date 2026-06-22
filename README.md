@@ -13,7 +13,7 @@ mais aucun libellé spécifique (DRENA, CAFOP, APFC, FCFA…) n'est codé en dur
 
 ## 1. Présentation
 
-- **13 rôles** et un RBAC centralisé (~60 permissions) avec **mode aperçu de rôle**.
+- **16 rôles** et un RBAC centralisé (~60 permissions) avec **mode aperçu de rôle**.
 - **42 modules** : emplois du temps, registre d'appel, cahier de texte, notes &
   bulletins, livret scolaire, inspections, grilles d'évaluation, rapports,
   statistiques, CAFOP, APFC, convertisseur CSV Moodle, communication, rendez-vous,
@@ -106,7 +106,7 @@ Crée l'utilisateur `admin` (auth + profil) à partir de `SEED_ADMIN_EMAIL` /
 
 ## 9. Gestion des rôles (RBAC)
 
-- Rôles : [`lib/roles.ts`](lib/roles.ts) — 13 rôles, familles, libellés, tons.
+- Rôles : [`lib/roles.ts`](lib/roles.ts) — 16 rôles, familles, libellés, tons.
 - Permissions : [`lib/permissions.ts`](lib/permissions.ts) — catalogue, matrice rôle→permissions, `hasPermission()`.
 - Navigation filtrée : [`lib/navigation.ts`](lib/navigation.ts).
 - **Ajouter un rôle** : l'ajouter à `USER_ROLES`, définir ses permissions dans `ROLE_PERMISSIONS`.

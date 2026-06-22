@@ -32,6 +32,7 @@ export const guideParent: Omit<GuideContent, "icon"> = {
         {
           title: "Se connecter et accéder à l'accueil",
           body: "La connexion s'effectue sur la page d'accueil publique d'EduWeb Planner. Une fois authentifié, vous êtes automatiquement redirigé vers le tableau de bord adapté à votre rôle de parent. Ce tableau regroupe les alertes récentes (absences, messages, notes publiées) et les raccourcis vers les modules autorisés.",
+          example: "Mme Diallo reçoit ses identifiants par e-mail. À sa première connexion, son tableau de bord affiche déjà deux repères : « 1 nouveau message de la vie scolaire » et « notes de mathématiques publiées ». Elle sait immédiatement par où commencer.",
           steps: [
             {
               instruction: "Ouvrez le navigateur et saisissez l'adresse fournie par l'établissement.",

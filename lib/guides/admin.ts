@@ -83,7 +83,7 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
     {
       id: "comptes-utilisateurs",
       title: "2. Gestion des comptes utilisateurs",
-      intro: "La gestion des comptes est la mission centrale de l'administrateur système. Vous apprendrez à créer, approuver et faire évoluer les comptes pour les treize rôles, depuis l'enseignant jusqu'à l'inspecteur régional, en respectant les règles d'approbation.",
+      intro: "La gestion des comptes est la mission centrale de l'administrateur système. Vous apprendrez à créer, approuver et faire évoluer les comptes pour les seize rôles, depuis l'enseignant jusqu'à l'inspecteur régional, en respectant les règles d'approbation.",
       sections: [
         {
           title: "2.1 Créer un compte utilisateur",
