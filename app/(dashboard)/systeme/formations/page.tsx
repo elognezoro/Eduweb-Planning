@@ -52,7 +52,10 @@ import {
 import type { CourseCohort, CourseEnrollment } from "@/lib/formations/types";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
-import { deleteCourseEnrollment } from "@/lib/formations/enrollments-server";
+import {
+  deleteCourseEnrollment,
+  insertCourseEnrollments,
+} from "@/lib/formations/enrollments-server";
 import {
   createShortInviteLink,
   shortInviteUrl,
@@ -524,23 +527,49 @@ function QuickEnrollPanel({
       return;
     }
     const sourceKind = source === "cohort" ? "cohort" : "individual";
-    store.enrollUsers(Array.from(picked), {
+    const userIds = Array.from(picked);
+    const expIso = expiresAt ? new Date(expiresAt + "T23:59:59").toISOString() : null;
+    store.enrollUsers(userIds, {
       courseId,
       enrolledBy: actor,
       source: sourceKind,
       cohortId: source === "cohort" ? cohortId || null : null,
-      expiresAt: expiresAt
-        ? new Date(expiresAt + "T23:59:59").toISOString()
-        : null,
+      expiresAt: expIso,
       notes: notes.trim() || undefined,
       formationRole,
     });
-    setToast(
-      `${picked.size} utilisateur(s) inscrit(s) comme ${FORMATION_ROLE_META[formationRole].label.toLowerCase()}.`,
-    );
+
+    const count = userIds.length;
+    const roleLabel = FORMATION_ROLE_META[formationRole].label.toLowerCase();
+
+    // Persistance EN LIGNE (mode réel) : l'admin a le droit d'insérer (RLS ce_insert).
+    // La synchro descendante (CourseEnrollmentsSync) dédoublonne par user+cours.
+    if (isSupabaseConfigured()) {
+      void insertCourseEnrollments(
+        createClient(),
+        userIds.map((uid) => ({
+          userId: uid,
+          courseId,
+          formationRole,
+          source: sourceKind,
+          enrolledBy: actor,
+          expiresAt: expIso,
+        })),
+      ).then((res) => {
+        setToast(
+          res.ok
+            ? `${count} utilisateur(s) inscrit(s) en ligne comme ${roleLabel}.`
+            : `Inscrits localement, mais échec de l'enregistrement en ligne : ${res.error}`,
+        );
+        window.setTimeout(() => setToast(null), 5000);
+      });
+    } else {
+      setToast(`${count} utilisateur(s) inscrit(s) comme ${roleLabel}.`);
+      window.setTimeout(() => setToast(null), 4000);
+    }
+
     setPicked(new Set());
     setNotes("");
-    window.setTimeout(() => setToast(null), 4000);
   }
 
   return (
@@ -719,7 +748,10 @@ function QuickEnrollPanel({
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">
-          {toast ?? "Les inscriptions sont persistées localement (mode démo)."}
+          {toast ??
+            (isSupabaseConfigured()
+              ? "Les inscriptions sont enregistrées en ligne (Supabase) et visibles sur tous les appareils."
+              : "Les inscriptions sont persistées localement (mode démo).")}
         </p>
         <Button
           onClick={submit}

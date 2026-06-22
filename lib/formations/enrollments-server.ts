@@ -54,6 +54,39 @@ export async function fetchCourseEnrollments(
 }
 
 /**
+ * Inscrit (en masse) des utilisateurs à un cours, côté serveur. La RLS
+ * `ce_insert` n'autorise que l'admin (super-admin inclus). Les doublons
+ * (user_id, course_id) sont ignorés (ON CONFLICT DO NOTHING) — l'opération
+ * est donc idempotente et ne nécessite pas de policy UPDATE.
+ */
+export async function insertCourseEnrollments(
+  supabase: SupabaseClient,
+  rows: {
+    userId: string;
+    courseId: string;
+    formationRole?: string | null;
+    source?: string;
+    enrolledBy?: string | null;
+    expiresAt?: string | null;
+  }[],
+): Promise<{ ok: boolean; error?: string }> {
+  if (rows.length === 0) return { ok: true };
+  const payload = rows.map((r) => ({
+    user_id: r.userId,
+    course_id: r.courseId,
+    formation_role: r.formationRole ?? null,
+    source: r.source ?? "admin",
+    enrolled_by: r.enrolledBy ?? null,
+    expires_at: r.expiresAt ?? null,
+  }));
+  const { error } = await supabase
+    .from("course_enrollments")
+    .upsert(payload, { onConflict: "user_id,course_id", ignoreDuplicates: true });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+/**
  * Supprime une inscription (par utilisateur + cours). La RLS `ce_delete`
  * n'autorise que l'admin ou le propriétaire. Renvoie true si OK.
  */
