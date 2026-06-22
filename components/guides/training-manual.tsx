@@ -853,6 +853,105 @@ export function ManuelModuleBlock({ moduleCode, roleLabel, icon: Icon, duration,
 /*  Auto-évaluation : QCM + exercices + synthèse formative                 */
 /* ---------------------------------------------------------------------- */
 
+/**
+ * QCM interactif auto-corrigé — version ÉCRAN du QCM du module (no-print).
+ * L'apprenant choisit, vérifie, obtient son score et le corrigé par question.
+ * Le corrigé imprimable statique reste rendu à part (print:block) pour le PDF/Word.
+ */
+function ManuelInteractiveQcm({
+  questions,
+  idPrefix,
+}: {
+  questions: { question: string; choix: string[]; bonneReponseIndex: number; explication: string }[];
+  idPrefix: string;
+}) {
+  const [answers, setAnswers] = React.useState<Record<number, number>>({});
+  const [checked, setChecked] = React.useState(false);
+  const score = questions.reduce((acc, q, i) => (answers[i] === q.bonneReponseIndex ? acc + 1 : acc), 0);
+  const answeredAll = Object.keys(answers).length === questions.length;
+
+  return (
+    <div className="mt-4 space-y-3">
+      {questions.map((q, i) => (
+        <div key={i} className="rounded-lg border border-gray-300 p-3">
+          <p className="text-[12px] font-bold text-gray-900" id={`${idPrefix}-iq${i}`}>
+            Q{i + 1}. {q.question}
+          </p>
+          <div className="mt-2 space-y-1.5" role="radiogroup" aria-labelledby={`${idPrefix}-iq${i}`}>
+            {q.choix.map((c, ci) => {
+              const picked = answers[i] === ci;
+              const isCorrect = checked && ci === q.bonneReponseIndex;
+              const isWrong = checked && picked && ci !== q.bonneReponseIndex;
+              return (
+                <button
+                  key={ci}
+                  type="button"
+                  role="radio"
+                  aria-checked={picked}
+                  disabled={checked}
+                  onClick={() => setAnswers((a) => ({ ...a, [i]: ci }))}
+                  className={cn(
+                    "flex w-full items-start gap-2 rounded-md border px-2.5 py-1.5 text-left text-[11.5px] transition-colors",
+                    isCorrect
+                      ? "border-ew-green-600 bg-ew-green-50"
+                      : isWrong
+                        ? "border-red-400 bg-red-50"
+                        : picked
+                          ? "border-ew-green-500 bg-ew-green-50/50"
+                          : "border-gray-200 hover:bg-muted/40",
+                  )}
+                >
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-gray-400 text-[9px] font-bold">
+                    {String.fromCharCode(65 + ci)}
+                  </span>
+                  <span>{c}</span>
+                </button>
+              );
+            })}
+          </div>
+          {checked && (
+            <p className="mt-2 rounded border-l-2 border-ew-green-700 bg-ew-green-50/50 p-2 text-[10.5px] text-gray-700">
+              <span className="font-bold uppercase tracking-wide text-ew-green-700">Corrigé · </span>
+              Réponse <span className="font-bold">{String.fromCharCode(65 + q.bonneReponseIndex)}</span>. {q.explication}
+            </p>
+          )}
+        </div>
+      ))}
+      <div className="flex flex-wrap items-center gap-3">
+        {!checked ? (
+          <button
+            type="button"
+            disabled={!answeredAll}
+            onClick={() => setChecked(true)}
+            className="rounded-lg bg-ew-green-700 px-4 py-2 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
+          >
+            Vérifier mes réponses
+          </button>
+        ) : (
+          <>
+            <span className="text-sm font-bold text-ew-green-800">
+              Score : {score} / {questions.length}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setChecked(false);
+                setAnswers({});
+              }}
+              className="rounded-lg border border-border px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-muted/40"
+            >
+              Recommencer
+            </button>
+          </>
+        )}
+        {!answeredAll && !checked && (
+          <span className="text-xs text-muted-foreground">Répondez à toutes les questions pour vérifier.</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function ManuelAssessmentBlock({ assessment, startPage, watermark }: { assessment: ManuelAssessment; startPage: number; watermark?: string }) {
   let p = startPage;
   const pages: React.ReactNode[] = [];
@@ -872,54 +971,78 @@ export function ManuelAssessmentBlock({ assessment, startPage, watermark }: { as
             <p className="font-semibold text-gray-900">
               <span className="font-bold text-ew-green-800">Q{i + 1}.</span> {q.question}
             </p>
-            <div className="mt-2 h-16 rounded border border-gray-300 bg-gray-50" />
+            <textarea
+              className="no-print mt-2 w-full rounded border border-gray-300 bg-white p-2 text-[11.5px]"
+              rows={3}
+              placeholder="Votre réponse…"
+              aria-label={`Réponse à la question ${i + 1}`}
+            />
+            <div className="mt-2 hidden h-16 rounded border border-gray-300 bg-gray-50 print:block" />
           </li>
         ))}
       </ol>
     </ManuelPage>,
   );
 
-  // QCM (10 questions) — pages multiples si nécessaire (5 par page)
+  // QCM — version INTERACTIVE auto-corrigée à l'ÉCRAN, corrigé statique à l'IMPRESSION/PDF/Word.
   const qcmPages = chunk(assessment.qcm, 5);
+
+  // (a) Écran : QCM cliquable, auto-corrigé (score + corrigé instantanés). Masqué à l'impression.
+  pages.push(
+    <div key={`${M}-qcm-screen`} className="no-print">
+      <ManuelPage pageLabel={`${M} — QCM (interactif)`} pageNumber={p} watermark={watermark}>
+        <RunningHeader left={`Module ${M} · QCM d'auto-évaluation`} right={assessment.roleLabel} />
+        <h3 className="font-display text-2xl font-extrabold text-ew-green-900">QCM d'auto-évaluation</h3>
+        <p className="mt-1 text-[11px] italic text-gray-600">
+          Répondez à chaque question puis vérifiez : score et corrigé instantanés. À l'impression (PDF/Word),
+          le corrigé complet figure à la suite de chaque question.
+        </p>
+        <ManuelInteractiveQcm questions={assessment.qcm} idPrefix={M} />
+      </ManuelPage>
+    </div>,
+  );
+
+  // (b) Impression : corrigé statique chunké (5 par page). Masqué à l'écran (print:block).
   qcmPages.forEach((batch, batchIdx) => {
     const offset = batchIdx * 5;
     pages.push(
-      <ManuelPage key={`${M}-qcm-${batchIdx}`} pageLabel={`${M} — QCM`} pageNumber={p++} watermark={watermark}>
-        <RunningHeader left={`Module ${M} · QCM d'auto-évaluation`} right={assessment.roleLabel} />
-        {batchIdx === 0 && (
-          <>
-            <h3 className="font-display text-2xl font-extrabold text-ew-green-900">QCM d'auto-évaluation</h3>
-            <p className="mt-1 text-[11px] italic text-gray-600">
-              Pour chaque question, cochez la réponse qui vous paraît correcte. Une seule bonne réponse par question.
-              Le corrigé figure à la suite de chaque question.
-            </p>
-          </>
-        )}
-        <ol className="mt-5 space-y-5 text-[12px]" start={offset + 1}>
-          {batch.map((q, i) => (
-            <li key={i} className="manuel-no-break">
-              <p className="font-semibold text-gray-900">
-                <span className="font-bold text-ew-green-800">Q{offset + i + 1}.</span> {q.question}
+      <div key={`${M}-qcm-print-${batchIdx}`} className="hidden print:block">
+        <ManuelPage pageLabel={`${M} — QCM`} pageNumber={p++} watermark={watermark}>
+          <RunningHeader left={`Module ${M} · QCM d'auto-évaluation`} right={assessment.roleLabel} />
+          {batchIdx === 0 && (
+            <>
+              <h3 className="font-display text-2xl font-extrabold text-ew-green-900">QCM d'auto-évaluation (corrigé)</h3>
+              <p className="mt-1 text-[11px] italic text-gray-600">
+                Pour chaque question, une seule bonne réponse. Le corrigé figure à la suite de chaque question.
               </p>
-              <ul className="mt-2 space-y-1.5">
-                {q.choix.map((c, ci) => (
-                  <li key={ci} className="flex items-start gap-2">
-                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-gray-400 text-[9px] font-bold">
-                      {String.fromCharCode(65 + ci)}
-                    </span>
-                    <span>{c}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-2 rounded border-l-2 border-ew-green-700 bg-ew-green-50/50 p-2 text-[10.5px] text-gray-700">
-                <span className="font-bold uppercase tracking-wide text-ew-green-700">Corrigé · </span>
-                Réponse <span className="font-bold">{String.fromCharCode(65 + q.bonneReponseIndex)}</span>.{" "}
-                {q.explication}
-              </p>
-            </li>
-          ))}
-        </ol>
-      </ManuelPage>,
+            </>
+          )}
+          <ol className="mt-5 space-y-5 text-[12px]" start={offset + 1}>
+            {batch.map((q, i) => (
+              <li key={i} className="manuel-no-break">
+                <p className="font-semibold text-gray-900">
+                  <span className="font-bold text-ew-green-800">Q{offset + i + 1}.</span> {q.question}
+                </p>
+                <ul className="mt-2 space-y-1.5">
+                  {q.choix.map((c, ci) => (
+                    <li key={ci} className="flex items-start gap-2">
+                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-gray-400 text-[9px] font-bold">
+                        {String.fromCharCode(65 + ci)}
+                      </span>
+                      <span>{c}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 rounded border-l-2 border-ew-green-700 bg-ew-green-50/50 p-2 text-[10.5px] text-gray-700">
+                  <span className="font-bold uppercase tracking-wide text-ew-green-700">Corrigé · </span>
+                  Réponse <span className="font-bold">{String.fromCharCode(65 + q.bonneReponseIndex)}</span>.{" "}
+                  {q.explication}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </ManuelPage>
+      </div>,
     );
   });
 
@@ -982,7 +1105,13 @@ export function ManuelAssessmentBlock({ assessment, startPage, watermark }: { as
             <p className="font-semibold text-gray-900">
               <span className="font-bold text-ew-green-800">Q{i + 1}.</span> {q.question}
             </p>
-            <div className="mt-2 h-24 rounded border border-gray-300 bg-gray-50" />
+            <textarea
+              className="no-print mt-2 w-full rounded border border-gray-300 bg-white p-2 text-[11.5px]"
+              rows={4}
+              placeholder="Votre réponse…"
+              aria-label={`Réponse de synthèse ${i + 1}`}
+            />
+            <div className="mt-2 hidden h-24 rounded border border-gray-300 bg-gray-50 print:block" />
           </li>
         ))}
       </ol>
