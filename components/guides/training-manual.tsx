@@ -11,6 +11,7 @@
 import * as React from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { buildModuleSyllabus, formatMinutes } from "@/lib/guides/syllabus";
 
 /* ---------------------------------------------------------------------- */
 /*  Types                                                                  */
@@ -713,6 +714,52 @@ export function ManuelModuleBlock({ moduleCode, roleLabel, icon: Icon, duration,
           </li>
         ))}
       </ol>
+    </ManuelPage>,
+  );
+
+  // PAGE SYLLABUS & VOLUME HORAIRE (répartition horaire + programme du module)
+  const syllabus = buildModuleSyllabus(chapters, duration);
+  pages.push(
+    <ManuelPage key={`${moduleCode}-syllabus`} pageLabel={`${moduleCode} — Syllabus`} pageNumber={p++} watermark={watermark}>
+      <RunningHeader left={`Module ${moduleCode}`} right={roleLabel} />
+      <h3 className="font-display text-2xl font-extrabold text-ew-green-900">Syllabus &amp; volume horaire</h3>
+      <p className="mt-2 text-[12px] leading-relaxed text-gray-700">
+        Volume horaire indicatif d&apos;étude : <strong>{duration}</strong> · Niveau : {level}.
+        Répartition par chapitre ci-dessous (hors temps d&apos;évaluation).
+      </p>
+      <table className="mt-4 w-full border-collapse text-[11.5px]">
+        <thead>
+          <tr className="bg-ew-green-50 text-left text-ew-green-900">
+            <th className="w-10 border border-gray-300 px-2 py-1">§</th>
+            <th className="border border-gray-300 px-2 py-1">Chapitre &amp; contenu</th>
+            <th className="w-20 border border-gray-300 px-2 py-1 text-right">Durée</th>
+          </tr>
+        </thead>
+        <tbody>
+          {syllabus.rows.map((r) => (
+            <tr key={r.index} className="align-top">
+              <td className="border border-gray-300 px-2 py-1 font-mono text-ew-green-800">{r.index}</td>
+              <td className="border border-gray-300 px-2 py-1">
+                <p className="font-bold text-gray-900">{r.title}</p>
+                {r.summary && <p className="mt-0.5 text-[10.5px] leading-snug text-gray-600">{r.summary}</p>}
+              </td>
+              <td className="border border-gray-300 px-2 py-1 text-right font-mono">{formatMinutes(r.minutes)}</td>
+            </tr>
+          ))}
+          <tr className="bg-gray-50 font-bold">
+            <td className="border border-gray-300 px-2 py-1" colSpan={2}>
+              Volume horaire total (étude)
+            </td>
+            <td className="border border-gray-300 px-2 py-1 text-right font-mono">{duration}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div className="mt-4 rounded border border-ew-gold-300 bg-ew-gold-50/50 p-3 text-[11px] leading-relaxed text-gray-800">
+        <p>
+          <strong>Évaluation (en sus)</strong> : pré-test diagnostique, QCM d&apos;auto-évaluation,
+          exercice de mise en situation et synthèse formative — détaillés en fin de module.
+        </p>
+      </div>
     </ManuelPage>,
   );
 

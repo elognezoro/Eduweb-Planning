@@ -41,6 +41,7 @@ import {
   TRAINING_PROGRESSION,
   TRAINING_SYLLABUS,
 } from "@/lib/guides/training-manual-data";
+import { buildModuleSyllabus, formatMinutes } from "@/lib/guides/syllabus";
 
 /* ============================================================================
    Construit le manuel académique de formation en Word (.docx).
@@ -294,6 +295,33 @@ export async function buildTrainingManualDocx(): Promise<Buffer> {
         }),
       ),
     );
+
+    // Syllabus & volume horaire (répartition horaire par chapitre)
+    {
+      const syl = buildModuleSyllabus(guide.chapters, guide.meta.duration);
+      moduleChildren.push(
+        heading2(`Syllabus & volume horaire (${ass.moduleCode})`),
+        bodyText(
+          `Volume horaire indicatif d'étude : ${guide.meta.duration} · Niveau : ${guide.meta.level}. Répartition par chapitre (hors évaluation) :`,
+          { italic: true },
+        ),
+        ...syl.rows.map(
+          (r) =>
+            new Paragraph({
+              spacing: { after: 40 },
+              children: [
+                new TextRun({ text: `§ ${r.index}. `, bold: true, color: COLOR_GREEN, size: 22 }),
+                new TextRun({ text: `${r.title} — `, size: 22 }),
+                new TextRun({ text: formatMinutes(r.minutes), bold: true, size: 22, color: COLOR_GREEN }),
+              ],
+            }),
+        ),
+        bodyText(
+          `Volume horaire total (étude) : ${syl.totalLabel}. Évaluation (pré-test, QCM, exercice, synthèse formative) en sus.`,
+          { italic: true },
+        ),
+      );
+    }
 
     // Chapitres
     guide.chapters.forEach((c) => {

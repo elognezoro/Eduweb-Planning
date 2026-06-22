@@ -86,7 +86,13 @@ export default function SupportFormationPage() {
         label: `${ass.moduleCode} — ${guide.roleLabel}`,
         level: 1,
       });
-      const guidePages = 1 + guide.chapters.length;
+      entries.push({
+        arabic: moduleStart + 1,
+        label: `Syllabus & volume horaire (${ass.moduleCode})`,
+        level: 2,
+      });
+      // Page de garde + page syllabus + un chapitre par page (en moyenne).
+      const guidePages = 2 + guide.chapters.length;
       const qcmPages = Math.ceil(ass.qcm.length / 5);
       const assessmentPages = 1 + qcmPages + 1 + 1; // pre-test + qcm + exercice + synthèse
       const moduleTotal = guidePages + assessmentPages;
