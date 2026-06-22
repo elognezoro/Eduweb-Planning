@@ -2692,6 +2692,17 @@ export const TRAINING_ASSESSMENTS: Record<string, ManuelAssessment> = {
       ],
       "bonneReponseIndex": 1,
       "explication": "Le pilotage repose sur des faits : on filtre par pays et par année scolaire, puis on compare le volume d'activités entre antennes. La comparaison doit se faire à période égale pour être valide ; un écart marqué signale une zone à renforcer."
+    },
+    {
+      "question": "Dans la page « Supervision APFC (connecté) », comment confier le suivi d'une antenne à un Chef d'Antenne ?",
+      "choix": [
+        "En modifiant le rôle du compte depuis le module CAFOP",
+        "En saisissant l'e-mail du compte du chef sur l'antenne, puis en cliquant « Affecter »",
+        "Le chef se rattache lui-même à l'antenne de son choix",
+        "En important un fichier CSV de chefs d'antenne"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Dans l'espace connecté, on désigne le Chef d'Antenne par l'e-mail de son compte puis « Affecter ». L'isolation est ensuite garantie côté serveur (RLS) : le chef ne voit et ne gère que SON antenne. Il ne peut ni s'auto-affecter ni modifier le registre, qui reste de la responsabilité de l'Admin APFC."
     }
   ],
   "exercice": {
@@ -2842,6 +2853,17 @@ export const TRAINING_ASSESSMENTS: Record<string, ManuelAssessment> = {
       ],
       "bonneReponseIndex": 1,
       "explication": "Le guide recommande de produire un rapport à chaque échéance pour disposer d'une série comparable, de ne valider qu'après relecture car le statut « validé » engage l'antenne, et de dater et archiver chaque rapport : un rapport non archivé n'a pas de valeur de suivi."
+    },
+    {
+      "question": "Dans l'espace « Supervision APFC (connecté) », que peut faire le Chef d'Antenne ?",
+      "choix": [
+        "Créer de nouvelles antennes et affecter d'autres chefs",
+        "Gérer les activités de SON antenne (ajouter / supprimer), sans modifier le registre",
+        "Voir et modifier toutes les antennes du réseau",
+        "Changer le nom et le code de son antenne"
+      ],
+      "bonneReponseIndex": 1,
+      "explication": "Le Chef d'Antenne ne voit que SON antenne (isolation garantie par la RLS) et y gère les activités (ajout / suppression). Le registre (nom, code, responsable) et l'affectation des chefs restent à l'Admin APFC. S'il ne voit aucune antenne, c'est qu'il n'a pas encore été affecté — il doit communiquer l'e-mail de son compte à l'Admin APFC."
     }
   ],
   "exercice": {

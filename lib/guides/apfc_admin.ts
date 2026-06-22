@@ -166,8 +166,36 @@ export const guideApfcAdmin: Omit<GuideContent, "icon"> = {
       ],
     },
     {
+      id: "supervision-connectee",
+      title: "5. Délégation à un Chef d'Antenne (espace connecté)",
+      intro:
+        "Au-delà de la gestion d'ensemble, vous pouvez déléguer le suivi de proximité : confier une antenne à un Chef d'Antenne qui en gérera les activités, dans un espace isolé. Cette délégation se fait dans la page « Supervision APFC (connecté) ».",
+      sections: [
+        {
+          title: "Affecter un Chef d'Antenne à une antenne",
+          body:
+            "Dans l'espace connecté, chaque antenne peut recevoir un Chef d'Antenne, désigné par son adresse e-mail. Une fois affecté, ce chef ne voit et ne gère QUE son antenne et ses activités : l'isolation est garantie côté serveur, pas seulement à l'écran. Le registre des antennes, lui, reste sous votre seule responsabilité.",
+          example:
+            "Vous créez l'« Antenne APFC de Korhogo », puis saisissez l'e-mail du compte de M. Silué et cliquez « Affecter ». Dès sa prochaine connexion, M. Silué voit uniquement l'antenne de Korhogo et peut y enregistrer ses activités — sans accès aux autres antennes.",
+          steps: [
+            {
+              instruction: "Ouvrez la supervision connectée.",
+              navigation: "Inspection & supervision → Supervision APFC (connecté)",
+            },
+            {
+              instruction:
+                "Créez ou ouvrez une antenne, saisissez l'e-mail du Chef d'Antenne puis cliquez « Affecter ».",
+              tip: "Le compte du chef doit déjà exister (rôle « Chef d'Antenne APFC »). Pour retirer un chef, utilisez l'action de retrait.",
+            },
+          ],
+          caveat:
+            "La création/modification des antennes et l'affectation des chefs restent réservées à l'Admin APFC (et au super-admin). Le Chef d'Antenne ne peut pas modifier le registre ni s'auto-affecter.",
+        },
+      ],
+    },
+    {
       id: "centre-formation",
-      title: "5. Centre de formation",
+      title: "6. Centre de formation",
       intro:
         "Le Centre de formation est la bibliothèque d'accompagnement d'EduWeb Planner : séminaires interactifs, manuel académique et guides par rôle — dont le présent guide.",
       sections: [

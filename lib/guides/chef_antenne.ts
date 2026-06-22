@@ -119,8 +119,39 @@ export const guideChefAntenne: Omit<GuideContent, "icon"> = {
       ],
     },
     {
+      id: "activites-antenne",
+      title: "4. Gérer les activités de mon antenne (espace connecté)",
+      intro:
+        "Au-delà des rapports, vous disposez d'un espace dédié pour enregistrer directement les activités de formation continue de votre antenne. Vous n'y voyez que VOTRE antenne : l'isolation est garantie côté serveur.",
+      sections: [
+        {
+          title: "Enregistrer et suivre les activités de votre antenne",
+          body:
+            "Une fois que votre Admin APFC vous a affecté à une antenne, la page « Supervision APFC (connecté) » vous présente votre antenne, ses informations (localité, contact, responsable) et la liste de ses activités. Vous y ajoutez une activité (intitulé, type, date) ou en supprimez une. Vous ne pouvez pas modifier le registre de l'antenne (réservé à l'Admin APFC) : votre main porte sur les activités.",
+          example:
+            "M. Silué, chef de l'antenne de Korhogo, ouvre l'espace connecté : il voit son antenne et ajoute l'activité « Atelier pédagogique — Évaluation par compétences » datée du 14 novembre. Elle s'ajoute aussitôt à la liste de son antenne ; aucune autre antenne ne lui est visible.",
+          steps: [
+            {
+              instruction: "Ouvrez l'espace connecté.",
+              navigation: "Inspection & supervision → Supervision APFC (connecté)",
+            },
+            {
+              instruction:
+                "Vérifiez les informations de votre antenne, puis ajoutez une activité (intitulé, type, date).",
+              tip: "Si « Aucune antenne ne vous est rattachée » s'affiche, demandez à votre Admin APFC de vous affecter (par votre e-mail).",
+            },
+            {
+              instruction: "Supprimez une activité erronée via l'icône de suppression.",
+            },
+          ],
+          caveat:
+            "Vous gérez les activités de votre antenne, pas son registre (nom, code, responsable) : toute correction de ces informations passe par l'Admin APFC.",
+        },
+      ],
+    },
+    {
       id: "centre-formation",
-      title: "4. Centre de formation",
+      title: "5. Centre de formation",
       intro:
         "Le Centre de formation réunit les séminaires interactifs, le manuel académique et les guides par rôle — dont le présent guide.",
       sections: [
