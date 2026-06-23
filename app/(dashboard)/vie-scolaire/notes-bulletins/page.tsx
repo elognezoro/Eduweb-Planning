@@ -24,6 +24,9 @@ import { ImportCsvDialog } from "@/components/forms/import-csv-dialog";
 import { ELEVES } from "@/lib/mock-data";
 import { etabExportMeta, etabPeriods, type EtabExportMeta, type BulletinPeriod } from "@/lib/etab-config";
 import { toNomCase, toPrenomCase } from "@/lib/format-name";
+import { useStore } from "@/components/app-shell/data-store";
+import { cycleOfClassName } from "@/lib/livret/subjects";
+import type { TermIndex } from "@/lib/livret/grades";
 
 type Eleve = (typeof ELEVES)[number];
 interface NoteEntry {
@@ -48,6 +51,18 @@ const DISCIPLINES = [
 ];
 const COEFF_OF: Record<string, number> = Object.fromEntries(DISCIPLINES.map((d) => [d.name, d.coeff]));
 const PROF_OF: Record<string, string> = Object.fromEntries(DISCIPLINES.map((d) => [d.name, d.prof]));
+
+/** Correspondance discipline (saisie) → matière du livret, selon le cycle. */
+const LIVRET_SUBJECT_KEY: Record<string, { c1: string; c2: string }> = {
+  "Mathématiques": { c1: "mathematiques", c2: "mathematiques" },
+  "Français": { c1: "compo-francaise", c2: "dissertation-francaise" },
+  "Anglais": { c1: "langue-1", c2: "anglais" },
+  "Histoire-Géographie": { c1: "histoire", c2: "histoire-geo" },
+  "Physique-Chimie": { c1: "physique-chimie", c2: "physique-chimie" },
+  "SVT": { c1: "sciences-naturelles", c2: "sciences-naturelles" },
+  "EDHC": { c1: "edhc", c2: "edhc" },
+  "EPS": { c1: "eps", c2: "eps" },
+};
 const TYPES = ["Devoir surveillé", "Interrogation écrite", "Devoir de maison", "Exposé", "Composition"];
 
 const seedOf = (id: string) => [...id].reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -71,6 +86,7 @@ const avg = (a: number[]) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length
 
 export default function NotesBulletinsPage() {
   const t = useTranslations();
+  const store = useStore();
   const classOptions = React.useMemo(() => [...new Set(ELEVES.map((e) => e.className))], []);
   const [cls, setCls] = React.useState(classOptions[0]);
   const [periods, setPeriods] = React.useState<BulletinPeriod[]>(() => etabPeriods({}));
@@ -113,6 +129,39 @@ export default function NotesBulletinsPage() {
 
   const removeNote = (id: string) => setNotes((ns) => ns.filter((n) => n.id !== id));
 
+  /**
+   * Reporte les moyennes par discipline du trimestre courant vers la SOURCE DE
+   * NOTES PARTAGÉE du livret scolaire (lib/livret/grades). Le livret lit alors
+   * ces moyennes au lieu du repli auto. Le livret a 3 trimestres : on plafonne
+   * l'index de période à 2 (T1/T2/T3).
+   */
+  const pushToLivret = () => {
+    const p = Math.min(Math.max(Number(period), 0), 2) as TermIndex;
+    let count = 0;
+    for (const s of classStudents) {
+      const cycle = cycleOfClassName(s.className);
+      for (const d of DISCIPLINES) {
+        const m = discMoy(s.id, d.name);
+        if (m == null) continue;
+        const map = LIVRET_SUBJECT_KEY[d.name];
+        if (!map) continue;
+        store.setLivretGrade({
+          studentId: s.id,
+          schoolYear: meta.schoolYear,
+          subjectKey: cycle === 1 ? map.c1 : map.c2,
+          period: p,
+          moy: Math.round(m * 100) / 100,
+        });
+        count += 1;
+      }
+    }
+    toast.success(
+      count > 0
+        ? `${count} moyennes reportées au livret scolaire (${periodLabel}).`
+        : "Aucune moyenne à reporter.",
+    );
+  };
+
   return (
     <ModulePage title={t("pages.vieScolaireNotesBulletins.title")} description={t("pages.vieScolaireNotesBulletins.description")}
       icon={ClipboardList}
@@ -145,6 +194,14 @@ export default function NotesBulletinsPage() {
             </SelectContent>
           </Select>
         </Field>
+        <div className="flex items-end justify-between gap-2 sm:col-span-2">
+          <p className="text-xs text-muted-foreground">
+            Reporter les moyennes saisies vers le livret scolaire de chaque élève (matière par matière, pour {periodLabel}).
+          </p>
+          <Button variant="outline" size="sm" onClick={pushToLivret} className="shrink-0">
+            <UploadCloud className="h-4 w-4" /> Reporter au livret
+          </Button>
+        </div>
       </div>
 
       <div id="saisie" className="scroll-mt-24">
