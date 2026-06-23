@@ -15,6 +15,7 @@ import { etabExportMeta, type EtabExportMeta } from "@/lib/etab-config";
 import { toNomCase, toPrenomCase } from "@/lib/format-name";
 import { ELEVES } from "@/lib/mock-data";
 import { LivretSynthese, livretTerms, livretMention, livretOrd, buildLivretSynthese } from "@/components/livret/livret-synthese";
+import { LivretEditor } from "@/components/livret/livret-editor";
 import { downloadLivretSynthesePdf, downloadLivretSyntheseWord } from "@/lib/exports/livret-synthese";
 import { toast } from "sonner";
 
@@ -79,6 +80,7 @@ export default function LivretScolairePage() {
       icon={BookMarked}
       permission="school_record:view"
       sections={[
+        { id: "redaction", label: "Rédaction (13 pages)" },
         { id: "documents", label: "Documents du livret" },
         { id: "parcours", label: "Élève & résultats" },
       ]}
@@ -100,6 +102,20 @@ export default function LivretScolairePage() {
           options={classStudents.map((s) => ({ value: s.id, label: `${toNomCase(s.lastName)} ${toPrenomCase(s.firstName)}` }))}
         />
       </FilterBar>
+
+      {/* Rédaction automatisée du livret (13 pages) */}
+      <SectionCard id="redaction" title="Rédaction automatisée du livret (13 pages)">
+        <p className="mb-3 text-sm text-muted-foreground">
+          Identité (établissement &amp; élève) et notes auto-remplies ; observations auto-générées et modifiables par
+          les personnes habilitées (enseignant, chef d&apos;établissement, administrateur).
+        </p>
+        <LivretEditor
+          student={student}
+          meta={meta}
+          classmates={classStudents}
+          schoolYear={meta.schoolYear}
+        />
+      </SectionCard>
 
       {/* Documents téléchargeables du livret */}
       <SectionCard id="documents" title="Documents du livret scolaire">
