@@ -54,6 +54,7 @@ import { getCourseModuleList } from "@/lib/formations/module-access";
 import { keepEarliestPerBucket } from "@/lib/formations/enrollment";
 import type { LivretRecord, LivretOverrides } from "@/lib/livret/types";
 import { gradeKey, type LivretGradeEntry } from "@/lib/livret/grades";
+import { mergeLivretOverrides } from "@/lib/livret/overrides";
 
 type LessonEntry = (typeof LESSON_BOOK_ENTRIES)[number];
 type Announcement = (typeof ANNOUNCEMENTS)[number];
@@ -666,6 +667,10 @@ interface DataStore extends StoreState {
   ) => void;
   /** Réinitialise le livret d'un élève à l'auto-remplissage (supprime les overrides). */
   resetLivretOverrides: (studentId: string, schoolYear: string) => void;
+  /** Fusionne des notes de livret venues du serveur (clé naturelle ; serveur prioritaire). */
+  mergeLivretGrades: (rows: LivretGradeEntry[]) => void;
+  /** Fusionne des overrides de livret venus du serveur (élève+année ; serveur prioritaire). */
+  mergeLivretRecords: (rows: LivretRecord[]) => void;
   reset: () => void;
 }
 
@@ -741,38 +746,13 @@ function dedupeEnrollmentsByUserCourse(rows: CourseEnrollment[]): CourseEnrollme
   return keepEarliestPerBucket(rows);
 }
 
-/**
- * Fusionne un patch d'overrides de livret dans l'existant. Fusion profonde pour
- * les sous-objets (identity, appreciation+distinctions, medicalStages,
- * extension) ; remplacement intégral pour les tableaux (parents,
- * etabSuccessifs, diplomes) lorsque le patch les fournit.
- */
-function mergeLivretOverrides(
-  base: LivretOverrides | undefined,
-  patch: LivretOverrides,
-): LivretOverrides {
-  const b = base ?? {};
-  const out: LivretOverrides = { ...b, ...patch };
-  if (b.identity || patch.identity) out.identity = { ...b.identity, ...patch.identity };
-  if (b.appreciation || patch.appreciation) {
-    out.appreciation = {
-      ...b.appreciation,
-      ...patch.appreciation,
-      distinctions: { ...b.appreciation?.distinctions, ...patch.appreciation?.distinctions },
-    };
-  }
-  if (b.medicalStages || patch.medicalStages) {
-    // Fusion PAR INDEX (photo et observation d'une même étape ne s'écrasent pas).
-    const merged: NonNullable<LivretOverrides["medicalStages"]> = { ...b.medicalStages };
-    for (const [k, v] of Object.entries(patch.medicalStages ?? {})) {
-      const i = Number(k);
-      merged[i] = { ...merged[i], ...v };
-    }
-    out.medicalStages = merged;
-  }
-  if (b.extension || patch.extension) out.extension = { ...b.extension, ...patch.extension };
-  return out;
+/** Instant (ms) d'un updatedAt ISO ; 0 si absent/illisible. Comparaison par
+ * instant (et non lexicale) car le client écrit « …Z » et PostgREST « +00:00 ». */
+function livretInstant(s?: string | null): number {
+  const n = Date.parse(s || "");
+  return Number.isNaN(n) ? 0 : n;
 }
+
 
 export function DataStoreProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = React.useState<StoreState>(DEFAULTS);
@@ -1830,6 +1810,29 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
           (r) => !(r.studentId === studentId && r.schoolYear === schoolYear),
         ),
       })),
+    mergeLivretGrades: (rows) =>
+      setState((s) => {
+        if (rows.length === 0) return s;
+        const byKey = new Map(s.livretGrades.map((g) => [gradeKey(g), g]));
+        for (const r of rows) {
+          const cur = byKey.get(gradeKey(r));
+          // Last-write-wins : le serveur l'emporte SAUF si une édition locale est
+          // plus récente (non encore persistée) → on ne l'écrase pas.
+          if (!cur || livretInstant(r.updatedAt) >= livretInstant(cur.updatedAt)) byKey.set(gradeKey(r), r);
+        }
+        return { ...s, livretGrades: [...byKey.values()] };
+      }),
+    mergeLivretRecords: (rows) =>
+      setState((s) => {
+        if (rows.length === 0) return s;
+        const k = (r: LivretRecord) => `${r.studentId}|${r.schoolYear}`;
+        const byKey = new Map(s.livretRecords.map((r) => [k(r), r]));
+        for (const r of rows) {
+          const cur = byKey.get(k(r));
+          if (!cur || livretInstant(r.updatedAt) >= livretInstant(cur.updatedAt)) byKey.set(k(r), r);
+        }
+        return { ...s, livretRecords: [...byKey.values()] };
+      }),
     setSecuritySettings: (patch) =>
       setState((s) => {
         const minutes = patch.idleLogoutMinutes;

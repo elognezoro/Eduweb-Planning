@@ -11,6 +11,7 @@ import {
   RotateCcw,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -20,9 +21,14 @@ import { IdentityPhotoUpload } from "@/components/forms/identity-photo-upload";
 import type { EtabExportMeta } from "@/lib/etab-config";
 import type { Eleve } from "@/lib/types";
 import { computeLivret, resolveLivret } from "@/lib/livret/autofill";
+import { mergeLivretOverrides } from "@/lib/livret/overrides";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
+import { deleteLivretRecord, upsertLivretRecord } from "@/lib/livret/livret-server";
 import type {
   LivretDiplome,
   LivretEtabSuccessif,
+  LivretOverrides,
   LivretParentBlock,
   LivretResolved,
 } from "@/lib/livret/types";
@@ -391,9 +397,31 @@ export function LivretEditor({
     return resolveLivret(computed, record?.overrides);
   }, [student, meta, store.livretGrades, classmates, schoolYear, record]);
 
+  // Accumulateur SYNCHRONE des overrides pour le write-through serveur : évite
+  // de fusionner sur un `record` mémoïsé périmé si deux champs sont sauvegardés
+  // avant un re-render (le store, lui, fusionne déjà sur l'état frais).
+  const pendingRef = React.useRef<LivretOverrides | undefined>(record?.overrides);
+  React.useEffect(() => {
+    pendingRef.current = record?.overrides;
+  }, [record]);
+
   const save = React.useCallback(
-    (patch: Parameters<typeof store.upsertLivretOverrides>[2]) =>
-      store.upsertLivretOverrides(student.id, schoolYear, patch, actor),
+    (patch: LivretOverrides) => {
+      store.upsertLivretOverrides(student.id, schoolYear, patch, actor);
+      // Write-through Supabase (mode réel) : persiste les overrides COMPLETS
+      // fusionnés (depuis l'accumulateur frais), pour un partage durable.
+      if (isSupabaseConfigured()) {
+        const merged = mergeLivretOverrides(pendingRef.current, patch);
+        pendingRef.current = merged;
+        void upsertLivretRecord(createClient(), student.id, schoolYear, merged, actor).then((res) => {
+          if (!res.ok) {
+            toast.error("Livret enregistré localement, mais échec de la synchro en ligne.", {
+              id: "livret-online-error",
+            });
+          }
+        });
+      }
+    },
     [store, student.id, schoolYear, actor],
   );
 
@@ -432,6 +460,12 @@ export function LivretEditor({
               onClick={() => {
                 if (window.confirm("Réinitialiser ce livret à l'auto-remplissage ? Les champs édités seront effacés.")) {
                   store.resetLivretOverrides(student.id, schoolYear);
+                  pendingRef.current = undefined;
+                  if (isSupabaseConfigured()) {
+                    void deleteLivretRecord(createClient(), student.id, schoolYear).then((ok) => {
+                      if (!ok) toast.error("Réinitialisé localement, mais échec côté serveur.", { id: "livret-online-error" });
+                    });
+                  }
                 }
               }}
             >

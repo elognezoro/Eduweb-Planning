@@ -27,6 +27,9 @@ import { toNomCase, toPrenomCase } from "@/lib/format-name";
 import { useStore } from "@/components/app-shell/data-store";
 import { cycleOfClassName } from "@/lib/livret/subjects";
 import type { TermIndex } from "@/lib/livret/grades";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
+import { upsertLivretGrade } from "@/lib/livret/livret-server";
 
 type Eleve = (typeof ELEVES)[number];
 interface NoteEntry {
@@ -135,9 +138,12 @@ export default function NotesBulletinsPage() {
    * ces moyennes au lieu du repli auto. Le livret a 3 trimestres : on plafonne
    * l'index de période à 2 (T1/T2/T3).
    */
-  const pushToLivret = () => {
+  const pushToLivret = async () => {
     const p = Math.min(Math.max(Number(period), 0), 2) as TermIndex;
+    const online = isSupabaseConfigured();
+    const client = online ? createClient() : null;
     let count = 0;
+    const pending: Promise<{ ok: boolean; error?: string }>[] = [];
     for (const s of classStudents) {
       const cycle = cycleOfClassName(s.className);
       for (const d of DISCIPLINES) {
@@ -145,21 +151,37 @@ export default function NotesBulletinsPage() {
         if (m == null) continue;
         const map = LIVRET_SUBJECT_KEY[d.name];
         if (!map) continue;
-        store.setLivretGrade({
+        const entry = {
           studentId: s.id,
           schoolYear: meta.schoolYear,
           subjectKey: cycle === 1 ? map.c1 : map.c2,
           period: p,
           moy: Math.round(m * 100) / 100,
-        });
+        };
+        store.setLivretGrade(entry);
+        // Write-through Supabase (mode réel) : partage durable multi-appareils.
+        if (client) pending.push(upsertLivretGrade(client, entry));
         count += 1;
       }
     }
-    toast.success(
-      count > 0
-        ? `${count} moyennes reportées au livret scolaire (${periodLabel}).`
-        : "Aucune moyenne à reporter.",
-    );
+    if (count === 0) {
+      toast.success("Aucune moyenne à reporter.");
+      return;
+    }
+    if (!client) {
+      toast.success(`${count} moyennes reportées au livret scolaire (${periodLabel}).`);
+      return;
+    }
+    // On vérifie réellement le succès de l'enregistrement en ligne.
+    const settled = await Promise.all(pending);
+    const failed = settled.filter((r) => !r.ok).length;
+    if (failed === 0) {
+      toast.success(`${count} moyennes reportées et enregistrées en ligne (${periodLabel}).`);
+    } else {
+      toast.warning(
+        `${count} moyennes reportées localement ; échec de l'enregistrement en ligne de ${failed} (migration 025 non appliquée ou droits insuffisants).`,
+      );
+    }
   };
 
   return (
@@ -198,7 +220,7 @@ export default function NotesBulletinsPage() {
           <p className="text-xs text-muted-foreground">
             Reporter les moyennes saisies vers le livret scolaire de chaque élève (matière par matière, pour {periodLabel}).
           </p>
-          <Button variant="outline" size="sm" onClick={pushToLivret} className="shrink-0">
+          <Button variant="outline" size="sm" onClick={() => void pushToLivret()} className="shrink-0">
             <UploadCloud className="h-4 w-4" /> Reporter au livret
           </Button>
         </div>
