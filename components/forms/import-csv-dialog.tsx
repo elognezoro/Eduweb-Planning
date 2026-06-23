@@ -22,6 +22,13 @@ interface ImportCsvDialogProps {
   expectedColumns: string[];
   sampleRow?: string[];
   templateFilename?: string;
+  /**
+   * Traitement réel de l'import. Si fourni, le bouton « Importer » l'appelle avec
+   * le CSV analysé et adapte le toast au résultat ; sinon comportement vitrine.
+   */
+  onImport?: (
+    parsed: ParsedCsv,
+  ) => Promise<{ imported: number; failed?: number; error?: string }> | void;
 }
 
 /** Boîte de dialogue d'import CSV : dépôt, prévisualisation, validation, modèle. */
@@ -32,7 +39,9 @@ export function ImportCsvDialog({
   expectedColumns,
   sampleRow,
   templateFilename = "modele.csv",
+  onImport,
 }: ImportCsvDialogProps) {
+  const [importing, setImporting] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [parsed, setParsed] = React.useState<ParsedCsv | null>(null);
   const [fileName, setFileName] = React.useState<string>("");
@@ -156,14 +165,30 @@ export function ImportCsvDialog({
               </Button>
             )}
             <Button
-              disabled={!parsed}
-              onClick={() => {
-                toast.success("Import effectué", { description: `${validRows} ligne(s) importée(s) avec succès.` });
+              disabled={!parsed || importing}
+              onClick={async () => {
+                if (onImport && parsed) {
+                  setImporting(true);
+                  try {
+                    const res = await onImport(parsed);
+                    if (res?.error) {
+                      toast.error("Import en échec", { description: res.error });
+                    } else if (res) {
+                      toast.success("Import effectué", {
+                        description: `${res.imported} ligne(s) importée(s)${res.failed ? ` · ${res.failed} en échec` : ""}.`,
+                      });
+                    }
+                  } finally {
+                    setImporting(false);
+                  }
+                } else {
+                  toast.success("Import effectué", { description: `${validRows} ligne(s) importée(s) avec succès.` });
+                }
                 setOpen(false);
                 reset();
               }}
             >
-              Importer
+              {importing ? "Import…" : "Importer"}
             </Button>
           </DialogFooter>
         </DialogContent>

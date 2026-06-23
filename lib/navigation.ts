@@ -163,6 +163,13 @@ export const NAVIGATION: NavGroup[] = [
         permission: "system:manage_institutions",
       },
       {
+        href: "/systeme/eleves",
+        label: "nav.items.eleves",
+        labelText: "Élèves",
+        icon: GraduationCap,
+        permission: "students:manage",
+      },
+      {
         href: "/systeme/cafop",
         label: "nav.items.cafop",
         icon: GraduationCap,
