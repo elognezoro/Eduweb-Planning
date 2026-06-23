@@ -16,7 +16,11 @@ import { toNomCase, toPrenomCase } from "@/lib/format-name";
 import { ELEVES } from "@/lib/mock-data";
 import { LivretSynthese, livretTerms, livretMention, livretOrd, buildLivretSynthese } from "@/components/livret/livret-synthese";
 import { LivretEditor } from "@/components/livret/livret-editor";
+import { LivretFullModal } from "@/components/livret/livret-document";
 import { downloadLivretSynthesePdf, downloadLivretSyntheseWord } from "@/lib/exports/livret-synthese";
+import { downloadLivretScolaireWord } from "@/lib/docx/livret-scolaire";
+import { useStore } from "@/components/app-shell/data-store";
+import { computeLivret, resolveLivret } from "@/lib/livret/autofill";
 import { toast } from "sonner";
 
 const COMPETENCES = [
@@ -43,10 +47,12 @@ export default function LivretScolairePage() {
   const student = classStudents.find((s) => s.id === studentId) ?? classStudents[0];
   const effectif = classStudents.length;
 
+  const store = useStore();
   const [meta, setMeta] = React.useState<EtabExportMeta>(() => etabExportMeta({}));
   React.useEffect(() => setMeta(etabExportMeta()), []);
 
   const [openSynthese, setOpenSynthese] = React.useState(false);
+  const [openFull, setOpenFull] = React.useState(false);
 
   const terms = React.useMemo(() => (student ? livretTerms(student.id, effectif) : []), [student, effectif]);
   const results = terms.map((t, i) => ({
@@ -73,6 +79,22 @@ export default function LivretScolairePage() {
     } else {
       void downloadLivretSyntheseWord(data, `${recapFile}.docx`).then(() => toast.success("Récapitulatif Word téléchargé"));
     }
+  };
+
+  const livretFile = `livret-scolaire-${`${student.lastName}-${student.firstName}`
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .toLowerCase()}`;
+  const downloadFullWord = () => {
+    const record = store.livretRecords.find(
+      (r) => r.studentId === student.id && r.schoolYear === meta.schoolYear,
+    );
+    const resolved = resolveLivret(
+      computeLivret({ student, meta, grades: store.livretGrades, classmates: classStudents, schoolYear: meta.schoolYear }),
+      record?.overrides,
+    );
+    void downloadLivretScolaireWord(resolved, `${livretFile}.docx`).then(() => toast.success("Livret (Word) téléchargé"));
   };
 
   return (
@@ -120,6 +142,31 @@ export default function LivretScolairePage() {
       {/* Documents téléchargeables du livret */}
       <SectionCard id="documents" title="Documents du livret scolaire">
         <div className="space-y-3">
+          {/* Livret officiel — modèle 13 pages (auto-rempli) */}
+          <div className="flex flex-col items-start justify-between gap-3 rounded-xl border border-ew-green-200 bg-ew-green-50/40 p-3 sm:flex-row sm:items-center">
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ew-green-100 text-ew-green-700">
+                <BookMarked className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="font-bold text-foreground">Livret officiel — modèle 13 pages (auto‑rempli)</p>
+                <p className="text-sm text-muted-foreground">
+                  Couverture, identité, suivi médical, parents, notes par cycle, appréciations &amp; décision,
+                  établissements successifs, diplômes, extension. Auto‑rempli depuis la configuration et les notes ;
+                  observations rédigées dans la section « Rédaction (13 pages) ».
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 gap-2">
+              <Button variant="outline" onClick={() => setOpenFull(true)}>
+                <Eye className="h-4 w-4" /> Aperçu &amp; PDF
+              </Button>
+              <Button variant="outline" onClick={downloadFullWord}>
+                <FileType2 className="h-4 w-4" /> Word
+              </Button>
+            </div>
+          </div>
+
           {/* Livret complet (7 pages, imprimable) */}
           <div className="flex flex-col items-start justify-between gap-3 rounded-xl border border-border p-3 sm:flex-row sm:items-center">
             <div className="flex items-start gap-3">
@@ -243,6 +290,15 @@ export default function LivretScolairePage() {
         meta={meta}
         effectif={effectif}
         onClose={() => setOpenSynthese(false)}
+      />
+
+      <LivretFullModal
+        open={openFull}
+        student={student}
+        meta={meta}
+        classmates={classStudents}
+        schoolYear={meta.schoolYear}
+        onClose={() => setOpenFull(false)}
       />
     </ModulePage>
   );
