@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
+import { IdentityPhotoUpload } from "@/components/forms/identity-photo-upload";
 import type { EtabExportMeta } from "@/lib/etab-config";
 import type { Eleve } from "@/lib/types";
 import { computeLivret, resolveLivret } from "@/lib/livret/autofill";
@@ -552,15 +553,22 @@ export function LivretEditor({
             <SectionTitle>Observations diverses (suivi médical)</SectionTitle>
             {data.medicalStages.map((m, i) => (
               <div key={i} className="rounded-lg border border-border p-3">
-                <p className="mb-1.5 text-sm font-bold text-foreground">{m.classe}</p>
-                <EditField
-                  label="Observation du médecin (s'il y a lieu)"
-                  value={m.observationMedecin}
-                  canEdit={canWrite}
-                  multiline
-                  onCommit={(v) => save({ medicalStages: { [i]: { observationMedecin: v } } })}
-                />
-                <p className="mt-1 text-[10px] italic text-muted-foreground">Photo à l'étape : ajout dans l'export (à venir).</p>
+                <p className="mb-2 text-sm font-bold text-foreground">{m.classe}</p>
+                <div className="grid gap-3 sm:grid-cols-[auto_1fr]">
+                  <IdentityPhotoUpload
+                    label={`Photo — ${m.classe}`}
+                    value={m.photo}
+                    disabled={!canWrite}
+                    onChange={(v) => save({ medicalStages: { [i]: { photo: v } } })}
+                  />
+                  <EditField
+                    label="Observation du médecin (s'il y a lieu)"
+                    value={m.observationMedecin}
+                    canEdit={canWrite}
+                    multiline
+                    onCommit={(v) => save({ medicalStages: { [i]: { observationMedecin: v } } })}
+                  />
+                </div>
               </div>
             ))}
           </div>

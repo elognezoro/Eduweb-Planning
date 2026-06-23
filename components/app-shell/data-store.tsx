@@ -762,7 +762,13 @@ function mergeLivretOverrides(
     };
   }
   if (b.medicalStages || patch.medicalStages) {
-    out.medicalStages = { ...b.medicalStages, ...patch.medicalStages };
+    // Fusion PAR INDEX (photo et observation d'une même étape ne s'écrasent pas).
+    const merged: NonNullable<LivretOverrides["medicalStages"]> = { ...b.medicalStages };
+    for (const [k, v] of Object.entries(patch.medicalStages ?? {})) {
+      const i = Number(k);
+      merged[i] = { ...merged[i], ...v };
+    }
+    out.medicalStages = merged;
   }
   if (b.extension || patch.extension) out.extension = { ...b.extension, ...patch.extension };
   return out;

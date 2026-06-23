@@ -375,7 +375,7 @@ export function LivretFullDocument({ data }: { data: LivretResolved }) {
         <H>Observations diverses (suivi médical)</H>
         {data.medicalStages.map((m, i) => (
           <div key={i} className="mb-3 flex gap-3">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded border border-gray-300 text-center text-[8px] text-gray-400">
+            <div className="flex h-24 w-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded border border-gray-300 text-center text-[8px] text-gray-400">
               {m.photo ? <img src={m.photo} alt="" className="h-full w-full object-cover" /> : <span>PHOTO<br />{m.classe}</span>}
             </div>
             <div className="flex-1">

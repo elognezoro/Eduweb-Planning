@@ -57,7 +57,7 @@ const LIVRET_SUBJECT_KEY: Record<string, { c1: string; c2: string }> = {
   "Mathématiques": { c1: "mathematiques", c2: "mathematiques" },
   "Français": { c1: "compo-francaise", c2: "dissertation-francaise" },
   "Anglais": { c1: "langue-1", c2: "anglais" },
-  "Histoire-Géographie": { c1: "histoire", c2: "histoire-geo" },
+  "Histoire-Géographie": { c1: "histoire-geo", c2: "histoire-geo" },
   "Physique-Chimie": { c1: "physique-chimie", c2: "physique-chimie" },
   "SVT": { c1: "sciences-naturelles", c2: "sciences-naturelles" },
   "EDHC": { c1: "edhc", c2: "edhc" },
