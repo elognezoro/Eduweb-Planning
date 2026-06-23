@@ -52,6 +52,8 @@ import type { CertificateConfig } from "@/lib/formations/certificate";
 import { getCourseCompletionRule } from "@/lib/formations/course-completion";
 import { getCourseModuleList } from "@/lib/formations/module-access";
 import { keepEarliestPerBucket } from "@/lib/formations/enrollment";
+import type { LivretRecord, LivretOverrides } from "@/lib/livret/types";
+import { gradeKey, type LivretGradeEntry } from "@/lib/livret/grades";
 
 type LessonEntry = (typeof LESSON_BOOK_ENTRIES)[number];
 type Announcement = (typeof ANNOUNCEMENTS)[number];
@@ -346,6 +348,10 @@ interface StoreState {
   matrixSubmissions: MatrixSubmission[];
   /** Critiques rédigées par les formateurs sur les soumissions de matrices. */
   matrixReviews: MatrixReview[];
+  /** Notes du livret scolaire (moyenne par élève+année+matière+trimestre). */
+  livretGrades: LivretGradeEntry[];
+  /** Overrides éditables du livret scolaire (par élève + année). */
+  livretRecords: LivretRecord[];
 }
 
 /** Réponse à un sondage d'activité (par ex. « 0.1 Sondage d'entrée »). */
@@ -646,6 +652,20 @@ interface DataStore extends StoreState {
   setMatrixReviewPublished: (id: string, published: boolean) => void;
   /** Supprime une critique. */
   removeMatrixReview: (id: string) => void;
+  /** Notes du livret : crée/met à jour la moyenne (élève+année+matière+trimestre). */
+  setLivretGrade: (
+    entry: Omit<LivretGradeEntry, "id" | "updatedAt" | "updatedBy">,
+    actor?: string,
+  ) => void;
+  /** Fusionne des champs édités du livret d'un élève (par année). */
+  upsertLivretOverrides: (
+    studentId: string,
+    schoolYear: string,
+    patch: LivretOverrides,
+    actor?: string,
+  ) => void;
+  /** Réinitialise le livret d'un élève à l'auto-remplissage (supprime les overrides). */
+  resetLivretOverrides: (studentId: string, schoolYear: string) => void;
   reset: () => void;
 }
 
@@ -691,6 +711,8 @@ const DEFAULTS: StoreState = {
   mindMapContributions: [],
   matrixSubmissions: [],
   matrixReviews: [],
+  livretGrades: [],
+  livretRecords: [],
 };
 
 // Incrémenter la version à chaque changement de schéma persisté (nouveaux champs/tranches) :
@@ -717,6 +739,33 @@ function genId(prefix: string) {
  */
 function dedupeEnrollmentsByUserCourse(rows: CourseEnrollment[]): CourseEnrollment[] {
   return keepEarliestPerBucket(rows);
+}
+
+/**
+ * Fusionne un patch d'overrides de livret dans l'existant. Fusion profonde pour
+ * les sous-objets (identity, appreciation+distinctions, medicalStages,
+ * extension) ; remplacement intégral pour les tableaux (parents,
+ * etabSuccessifs, diplomes) lorsque le patch les fournit.
+ */
+function mergeLivretOverrides(
+  base: LivretOverrides | undefined,
+  patch: LivretOverrides,
+): LivretOverrides {
+  const b = base ?? {};
+  const out: LivretOverrides = { ...b, ...patch };
+  if (b.identity || patch.identity) out.identity = { ...b.identity, ...patch.identity };
+  if (b.appreciation || patch.appreciation) {
+    out.appreciation = {
+      ...b.appreciation,
+      ...patch.appreciation,
+      distinctions: { ...b.appreciation?.distinctions, ...patch.appreciation?.distinctions },
+    };
+  }
+  if (b.medicalStages || patch.medicalStages) {
+    out.medicalStages = { ...b.medicalStages, ...patch.medicalStages };
+  }
+  if (b.extension || patch.extension) out.extension = { ...b.extension, ...patch.extension };
+  return out;
 }
 
 export function DataStoreProvider({ children }: { children: React.ReactNode }) {
@@ -1719,6 +1768,61 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       setState((s) => ({
         ...s,
         matrixReviews: s.matrixReviews.filter((r) => r.id !== id),
+      })),
+    setLivretGrade: (entry, actor) =>
+      setState((s) => {
+        const now = new Date().toISOString();
+        const k = gradeKey(entry);
+        const existing = s.livretGrades.find((g) => gradeKey(g) === k);
+        if (existing) {
+          return {
+            ...s,
+            livretGrades: s.livretGrades.map((g) =>
+              g.id === existing.id
+                ? { ...existing, moy: entry.moy, updatedBy: actor ?? null, updatedAt: now }
+                : g,
+            ),
+          };
+        }
+        return {
+          ...s,
+          livretGrades: [
+            { ...entry, id: genId("lg"), updatedBy: actor ?? null, updatedAt: now },
+            ...s.livretGrades,
+          ],
+        };
+      }),
+    upsertLivretOverrides: (studentId, schoolYear, patch, actor) =>
+      setState((s) => {
+        const now = new Date().toISOString();
+        const existing = s.livretRecords.find(
+          (r) => r.studentId === studentId && r.schoolYear === schoolYear,
+        );
+        const overrides = mergeLivretOverrides(existing?.overrides, patch);
+        if (existing) {
+          return {
+            ...s,
+            livretRecords: s.livretRecords.map((r) =>
+              r.id === existing.id
+                ? { ...existing, overrides, updatedBy: actor ?? existing.updatedBy ?? null, updatedAt: now }
+                : r,
+            ),
+          };
+        }
+        return {
+          ...s,
+          livretRecords: [
+            { id: genId("liv"), studentId, schoolYear, overrides, updatedBy: actor ?? null, updatedAt: now },
+            ...s.livretRecords,
+          ],
+        };
+      }),
+    resetLivretOverrides: (studentId, schoolYear) =>
+      setState((s) => ({
+        ...s,
+        livretRecords: s.livretRecords.filter(
+          (r) => !(r.studentId === studentId && r.schoolYear === schoolYear),
+        ),
       })),
     setSecuritySettings: (patch) =>
       setState((s) => {
