@@ -39,6 +39,9 @@ export interface ComposerEnrollee {
 
 const COLUMNS = ["N°", "Nom & prénoms", "E-mail", "Rôle global", "Source", "Inscrit·e le", "Expire"];
 
+/** Statuts proposés au filtrage (cases à cocher) : Étudiant / Enseignant / Tuteur. */
+const STATUS_ROLES: FormationRole[] = ["etudiant", "enseignant", "tuteur"];
+
 function rowOf(e: ComposerEnrollee, n: number): (string | number)[] {
   return [n, e.name, e.email || "—", e.globalRole, e.source, e.enrolledAt, e.expiresAt];
 }
@@ -78,7 +81,7 @@ export function EnrolledListComposer({
   const [excluded, setExcluded] = React.useState<Set<string>>(new Set());
   const [format, setFormat] = React.useState<"pdf" | "csv" | "word">("pdf");
 
-  const presentRoles = FORMATION_ROLES.filter((r) => enrollees.some((e) => e.formationRole === r));
+  const presentRoles = STATUS_ROLES;
 
   function openDialog() {
     setRoles(new Set(presentRoles));
@@ -206,7 +209,7 @@ export function EnrolledListComposer({
             <DialogTitle>Éditer la liste des inscrits</DialogTitle>
           </DialogHeader>
 
-          {presentRoles.length === 0 ? (
+          {enrollees.length === 0 ? (
             <p className="text-sm italic text-muted-foreground">Aucun inscrit à ce cours.</p>
           ) : (
             <div className="space-y-4">
@@ -308,7 +311,12 @@ export function EnrolledListComposer({
               onClick={produce}
               disabled={busy || selected.length === 0}
             >
-              <Download className="h-4 w-4" /> {busy ? "Génération…" : `Produire (${selected.length})`}
+              <Download className="h-4 w-4" />{" "}
+              {busy
+                ? "Génération…"
+                : `Générer le fichier ${
+                    format === "pdf" ? "PDF" : format === "word" ? "Word" : "CSV"
+                  } (${selected.length})`}
             </Button>
           </DialogFooter>
         </DialogContent>

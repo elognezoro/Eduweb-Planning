@@ -547,6 +547,31 @@ function QuickEnrollPanel({
   /** Inscription automatique par lien d'invitation (cf. trigger handle_new_user). */
   const isInviteAuto = (e: CourseEnrollment) => e.enrolledBy === "Lien d'inscription";
 
+  /**
+   * Désinscrit (en un clic, depuis la pastille de cours) un utilisateur d'un cours.
+   * Les inscriptions automatiques PAR RÔLE (source "role") ne sont pas retirables
+   * ici (elles découlent du rôle — passer par la matrice des rôles). Suppression
+   * non scopée sur l'année (retire le cours quelle que soit l'année stockée).
+   */
+  async function removeFromCourse(userName: string, e: CourseEnrollment) {
+    if (e.source === "role") {
+      window.alert(
+        "Inscription automatique par rôle : modifiez la matrice des rôles de formation pour la retirer.",
+      );
+      return;
+    }
+    if (!window.confirm(`Désinscrire ${userName} de « ${courseShort(e.courseId)} » ?`)) return;
+    store.removeEnrollment(e.id);
+    if (isSupabaseConfigured()) {
+      const res = await deleteCourseEnrollment(createClient(), {
+        userId: e.userId,
+        courseId: e.courseId,
+        schoolYear: null,
+      });
+      if (!res.ok) window.alert(`Échec de la désinscription en ligne : ${res.error ?? ""}`);
+    }
+  }
+
   const filtered = React.useMemo(() => {
     const q = search.trim().toLowerCase();
     return dirUsers.filter((u) => {
@@ -898,6 +923,17 @@ function QuickEnrollPanel({
                               >
                                 {auto && <Link2 aria-hidden className="h-2.5 w-2.5 shrink-0" />}
                                 <span className="truncate">{courseShort(e.courseId)}</span>
+                                {!roleAuto && (
+                                  <button
+                                    type="button"
+                                    onClick={() => removeFromCourse(u.name, e)}
+                                    title={`Désinscrire de ${courseShort(e.courseId)}`}
+                                    aria-label={`Désinscrire ${u.name} de ${courseShort(e.courseId)}`}
+                                    className="-mr-0.5 shrink-0 rounded-full p-0.5 transition-colors hover:bg-destructive/15 hover:text-destructive"
+                                  >
+                                    <X aria-hidden className="h-2.5 w-2.5" />
+                                  </button>
+                                )}
                               </span>
                             );
                           })}
@@ -922,6 +958,7 @@ function QuickEnrollPanel({
         </span>
         <span className="text-blue-700">● auto (par rôle)</span>
         <span className="text-ew-green-800">● inscription manuelle</span>
+        <span className="italic">— cliquez le ✕ d&apos;une pastille pour désinscrire de ce cours.</span>
       </p>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
