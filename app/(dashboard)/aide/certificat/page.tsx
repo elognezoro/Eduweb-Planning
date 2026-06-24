@@ -328,7 +328,21 @@ function GenericTrainingCertificate() {
       </div>
 
       {/* Aperçu + impression — nouveau modèle visuel unique */}
-      <style>{`@media print { @page { size: A4 landscape; margin: 0; } }`}</style>
+      <style>{`@media print {
+        @page { size: A4 landscape; margin: 0; }
+        html, body { height: 100%; margin: 0; overflow: hidden; background: #fff; }
+        body * { visibility: hidden !important; }
+        #certificat-print, #certificat-print * { visibility: visible !important; }
+        #certificat-print {
+          position: fixed !important; inset: 0 !important;
+          width: 100vw !important; height: 100vh !important; max-width: none !important;
+          margin: 0 !important; padding: 0 !important;
+          display: flex !important; align-items: center !important; justify-content: center !important;
+        }
+        #certificat-print > div {
+          width: auto !important; height: 100% !important; max-height: 100vh !important;
+        }
+      }`}</style>
       <div className="bg-muted/40 py-6 print:bg-white print:py-0">
         <CourseCertificate
           certNumber={certificateNumber}
@@ -473,7 +487,21 @@ function CourseCertificateView({ courseId }: { courseId: string }) {
 
   return (
     <div className="space-y-5">
-      <style>{`@media print { @page { size: A4 landscape; margin: 0; } }`}</style>
+      <style>{`@media print {
+        @page { size: A4 landscape; margin: 0; }
+        html, body { height: 100%; margin: 0; overflow: hidden; background: #fff; }
+        body * { visibility: hidden !important; }
+        #certificat-print, #certificat-print * { visibility: visible !important; }
+        #certificat-print {
+          position: fixed !important; inset: 0 !important;
+          width: 100vw !important; height: 100vh !important; max-width: none !important;
+          margin: 0 !important; padding: 0 !important;
+          display: flex !important; align-items: center !important; justify-content: center !important;
+        }
+        #certificat-print > div {
+          width: auto !important; height: 100% !important; max-height: 100vh !important;
+        }
+      }`}</style>
 
       {/* Barre d'actions (masquée à l'impression) */}
       <div className="no-print sticky top-16 z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card/85 px-4 py-3 backdrop-blur sm:-mx-6">

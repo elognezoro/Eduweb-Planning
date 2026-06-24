@@ -119,7 +119,13 @@ function FitText({
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(box);
-    return () => ro.disconnect();
+    // Recalcul avant impression : le cadre change de taille (mode page A4), il
+    // faut réajuster la police pour ne pas déborder/clipper sur le PDF.
+    window.addEventListener("beforeprint", fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("beforeprint", fit);
+    };
   }, [text, maxPx, minPx, multiline]);
 
   return (
@@ -150,6 +156,7 @@ export function CourseCertificate({
 }: CourseCertificateProps) {
   return (
     <div
+      id="certificat-print"
       className="certificate-print mx-auto w-full max-w-[1100px]"
       style={{ fontFamily: SERIF }}
     >
