@@ -2377,7 +2377,7 @@ function CertificateConfigCard({ courseId }: { courseId: string }) {
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
         Formateur et date imprimés sur le certificat de ce cours. La signature
-        et le cachet proviennent de l&apos;onglet « Identité visuelle ». Le
+        et le cachet sont ceux de l&apos;autorité EduWeb (Directeur Général). Le
         numéro est généré automatiquement, unique par participant.
       </p>
 

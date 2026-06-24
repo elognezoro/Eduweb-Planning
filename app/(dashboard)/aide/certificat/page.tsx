@@ -19,6 +19,7 @@ import { TRAINING_SYLLABUS } from "@/lib/guides/training-manual-data";
 import { useStore } from "@/components/app-shell/data-store";
 import { useApp } from "@/components/app-shell/app-context";
 import { etabExportMeta } from "@/lib/etab-config";
+import { fetchImageData } from "@/lib/exports/image";
 import {
   consumeNextCertificateNumber,
   peekNextCertificateNumber,
@@ -105,6 +106,9 @@ function GenericTrainingCertificate() {
   async function downloadWord() {
     setDownloading(true);
     try {
+      // Signature + cachet de l'autorité EduWeb (DG) — assets plateforme.
+      const dgSig = await fetchImageData("/brand/dg-signature.png");
+      const dgStamp = await fetchImageData("/brand/eduweb-cachet.png");
       const res = await fetch("/api/docx/certificat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -113,14 +117,16 @@ function GenericTrainingCertificate() {
           beneficiaryRole: role,
           certificateNumber,
           issueDate,
-          institution: meta.institution,
+          // Formations PROPRIÉTÉ d'EdTech EduWeb : marque EduWeb, aucune mention
+          // Ministère / République (le certificat n'est pas un diplôme d'État).
+          institution: "EdTech EduWeb",
           headName: meta.headName,
-          headFunction: meta.headFunction,
-          officialCountry: meta.official || meta.countryName,
-          officialSlogan: meta.slogan,
-          ministry: meta.ministry,
-          signatureDataUrl: meta.signature ?? undefined,
-          stampDataUrl: meta.stamp ?? undefined,
+          headFunction: meta.headFunction || "Directeur Général",
+          officialCountry: "EdTech EduWeb",
+          officialSlogan: "EduWeb, le pas dans le futur !",
+          ministry: undefined,
+          signatureDataUrl: dgSig?.dataUrl,
+          stampDataUrl: dgStamp?.dataUrl,
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -569,13 +575,13 @@ function CourseCertificateView({ courseId }: { courseId: string }) {
             value={dateLabel}
           />
         </div>
-        {missingTrainer || !meta.signature || !meta.stamp ? (
+        {missingTrainer ? (
           <p className="mt-3 text-xs italic text-muted-foreground">
             Astuce : le <strong>formateur</strong> et la <strong>date</strong>{" "}
             se règlent dans Système → Inscriptions aux formations → onglet «
             Réussite du cours ». La <strong>signature</strong> et le{" "}
-            <strong>cachet</strong> proviennent de l&apos;onglet « Identité
-            visuelle ».
+            <strong>cachet</strong> sont ceux de l&apos;autorité EduWeb (Directeur
+            Général).
           </p>
         ) : null}
       </div>

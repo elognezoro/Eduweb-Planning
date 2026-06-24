@@ -86,9 +86,12 @@ export async function buildCertificateDocx(data: CertificateData = {}): Promise<
   const logo = await loadLogoBuffer();
   const id = TRAINING_SYLLABUS.identification;
 
-  const country = data.officialCountry?.trim() || "République de Côte d'Ivoire";
-  const slogan = data.officialSlogan?.trim() || "Union — Discipline — Travail";
-  const ministry = data.ministry?.trim() || "Ministère de l'Éducation Nationale";
+  // Formations PROPRIÉTÉ de l'EdTech EduWeb : aucune mention Ministère / République
+  // — l'en-tête est EduWeb. Le certificat ne doit pas se faire passer pour un
+  // diplôme d'État / du Ministère de l'Éducation nationale.
+  const country = data.officialCountry?.trim() || "EdTech EduWeb";
+  const slogan = data.officialSlogan?.trim() || "EduWeb, le pas dans le futur !";
+  const ministry = data.ministry?.trim() || "";
 
   const placeholder = (v: string | undefined, fallback: string) => v?.trim() || fallback;
 
@@ -114,11 +117,8 @@ export async function buildCertificateDocx(data: CertificateData = {}): Promise<
     data.headName,
     "Nom de l'autorité hiérarchique",
   );
-  const headFunction = placeholder(
-    data.headFunction,
-    "Chef d'établissement",
-  );
-  const institutionLabel = placeholder(data.institution, "Établissement");
+  const headFunction = placeholder(data.headFunction, "Directeur Général");
+  const institutionLabel = placeholder(data.institution, "EdTech EduWeb");
 
   const signatureBlock: Paragraph[] = [
     // Étiquettes des deux blocs
@@ -127,7 +127,7 @@ export async function buildCertificateDocx(data: CertificateData = {}): Promise<
       spacing: { after: 60 },
       children: [
         new TextRun({
-          text: "Le formateur                                                    L'autorité hiérarchique",
+          text: "Le formateur                                                    Le Directeur Général",
           italics: true,
           size: 20,
           color: COLOR_GRAY,
@@ -175,7 +175,7 @@ export async function buildCertificateDocx(data: CertificateData = {}): Promise<
       spacing: { after: 40 },
       children: [
         new TextRun({
-          text: `${headFunction}            DRENA / CAFOP / APFC selon le cas`,
+          text: `${headFunction}            EdTech EduWeb`,
           italics: true,
           size: 18,
           color: COLOR_GRAY,
@@ -205,7 +205,9 @@ export async function buildCertificateDocx(data: CertificateData = {}): Promise<
         children: [
           centeredLine(country, { bold: true, size: 20, color: COLOR_GRAY }),
           centeredLine(slogan, { italic: true, size: 18, color: COLOR_GRAY }),
-          centeredLine(ministry, { bold: true, size: 20, color: COLOR_GRAY }),
+          ...(ministry
+            ? [centeredLine(ministry, { bold: true, size: 20, color: COLOR_GRAY })]
+            : []),
           centeredImage(logo, 130),
           centeredLine("CERTIFICAT DE FIN DE FORMATION", {
             bold: true,
