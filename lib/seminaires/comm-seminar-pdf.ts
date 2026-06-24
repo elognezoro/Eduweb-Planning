@@ -1,5 +1,6 @@
 import type { ReportPayload, ReportSection } from "@/lib/exports/types";
 import type { EtabExportMeta } from "@/lib/etab-config";
+import { EDUWEB_LIST_BRANDING } from "@/lib/formations/enroll-list";
 import type {
   CommSeminaire,
   CommSeminaireActivity,
@@ -193,19 +194,18 @@ export function buildSeminarContentPayload(
     });
   }
 
+  // Formation PROPRIÉTÉ d'EdTech EduWeb (espace Aide & Formation) : marque EduWeb,
+  // PAS de mentions Ministère / République / Côte d'Ivoire (≠ documents scolaires
+  // officiels comme bulletins/livret, qui gardent l'identité de l'établissement).
   return {
     title: m.title,
     subtitle: m.subtitle,
     country: meta.countryName,
-    institution: meta.institution,
     period: m.duration,
     author,
     generatedAt,
-    official: meta.official,
-    ministry: meta.ministry,
-    slogan: meta.slogan,
     schoolYear: meta.schoolYear,
-    emblem: meta.nationalEmblem,
+    ...EDUWEB_LIST_BRANDING,
     sections,
   };
 }
