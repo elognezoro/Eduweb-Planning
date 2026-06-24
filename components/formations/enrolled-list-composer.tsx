@@ -18,6 +18,7 @@ import {
   FORMATION_ROLE_META,
   type FormationRole,
 } from "@/lib/formations/formation-roles";
+import { EDUWEB_LIST_BRANDING } from "@/lib/formations/enroll-list";
 
 /* ============================================================================
    Éditeur de liste d'inscrits — « jeu de sélection » pour composer puis
@@ -139,15 +140,11 @@ export function EnrolledListComposer({
       title: `Inscrits — ${courseTitle}`,
       subtitle: `Groupés par rôle de formation · ${selected.length} inscrit·e·s`,
       country: meta.countryName,
-      institution: meta.institution,
       period: schoolYear,
       author: app.user.displayName,
       generatedAt: new Date().toLocaleDateString("fr-FR"),
-      official: meta.official,
-      ministry: meta.ministry,
-      slogan: meta.slogan,
       schoolYear,
-      emblem: meta.nationalEmblem,
+      ...EDUWEB_LIST_BRANDING,
       sections: groups().map((g) => ({
         heading: `${FORMATION_ROLE_META[g.role].label} — ${g.list.length} inscrit·e·s`,
         table: { columns: COLUMNS, rows: g.list.map((e, i) => rowOf(e, i + 1)) },

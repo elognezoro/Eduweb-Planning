@@ -93,9 +93,23 @@ export function downloadEnrollListCsv(rows: EnrollCsvRow[], filename: string): v
 }
 
 /**
+ * Marque EduWeb pour les documents « liste des inscrits aux cours ». Ces listes
+ * concernent des cours organisés par l'EdTech EduWeb (SENEC), et non un
+ * établissement scolaire : on remplace donc l'en-tête hérité de la configuration
+ * établissement (ministère / République / emblème / devise CI).
+ */
+export const EDUWEB_LIST_BRANDING = {
+  institution: "SENEC",
+  ministry: "EdTech EduWeb",
+  official: undefined as string | undefined,
+  slogan: "EduWeb, le pas dans le futur !",
+  emblem: "/brand/logo.png" as string,
+};
+
+/**
  * Construit le `ReportPayload` commun (PDF + Word) pour la liste des inscrits :
- * en-tête institutionnel hérité de la configuration + une section (avec tableau)
- * par cours. Colonnes du document de service (sans e-mail).
+ * en-tête EduWeb (cf. EDUWEB_LIST_BRANDING) + une section (avec tableau) par
+ * cours. Colonnes du document de service (sans e-mail).
  */
 export function buildEnrollListReport(
   sections: EnrollListSection[],
@@ -110,15 +124,11 @@ export function buildEnrollListReport(
       ? `${single.courseTitle} (${single.courseType})`
       : `${sections.length} formation(s)`,
     country: meta.countryName,
-    institution: meta.institution,
     period: meta.schoolYear,
     author: editedBy,
     generatedAt,
-    official: meta.official,
-    ministry: meta.ministry,
-    slogan: meta.slogan,
     schoolYear: meta.schoolYear,
-    emblem: meta.nationalEmblem,
+    ...EDUWEB_LIST_BRANDING,
     sections: sections.map((s) => ({
       heading: `${s.courseTitle} (${s.courseType})`,
       paragraphs: [`Effectif : ${s.rows.length} inscrit·e·s.`],
