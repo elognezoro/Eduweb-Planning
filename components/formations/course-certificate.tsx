@@ -37,8 +37,8 @@ const POS = {
   // Lignes du modèle (mesurées) : nom 47,3% · formation 58% · formateur/date 83,5%.
   number: { left: "84.5%", top: "20.4%", maxW: "17%" },
   name: { left: "50%", top: "45.6%", maxW: "60%" },
-  course: { left: "50%", top: "56.2%", maxW: "60%" },
-  trainer: { left: "18.3%", top: "81.8%", maxW: "21%" },
+  course: { left: "50%", top: "57%", maxW: "62%", height: "13%" },
+  trainer: { left: "18.3%", top: "81.8%", maxW: "28%" },
   date: { left: "81.4%", top: "81.8%", maxW: "21%" },
   sign: { left: "81.4%", top: "79.6%", maxW: "20%" },
 } as const;
@@ -47,19 +47,94 @@ function Centered({
   left,
   top,
   maxW,
+  height,
   children,
 }: {
   left: string;
   top: string;
   maxW: string;
+  height?: string;
   children: React.ReactNode;
 }) {
   return (
     <div
       className="absolute -translate-x-1/2 -translate-y-1/2 text-center leading-tight"
-      style={{ left, top, width: maxW, maxWidth: maxW }}
+      style={{ left, top, width: maxW, maxWidth: maxW, height }}
     >
       {children}
+    </div>
+  );
+}
+
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
+
+/**
+ * Texte auto-ajusté : réduit (ou agrandit jusqu'à maxPx) la taille de police par
+ * recherche dichotomique pour que le texte tienne EXACTEMENT dans son cadre
+ * (largeur, et hauteur si le cadre a une hauteur fixe). Recalcule au redimensionnement.
+ * - mode 1 ligne (multiline=false) : ajuste à la largeur (nom de formateur complet).
+ * - mode multi-lignes (multiline) : enroule + centre verticalement (titre de formation).
+ */
+function FitText({
+  text,
+  maxPx,
+  minPx = 8,
+  color,
+  multiline = false,
+  title,
+}: {
+  text: string;
+  maxPx: number;
+  minPx?: number;
+  color?: string;
+  multiline?: boolean;
+  title?: string;
+}) {
+  const boxRef = React.useRef<HTMLDivElement>(null);
+  const spanRef = React.useRef<HTMLSpanElement>(null);
+
+  useIsoLayoutEffect(() => {
+    const box = boxRef.current;
+    const span = spanRef.current;
+    if (!box || !span) return;
+    const fit = () => {
+      let lo = minPx;
+      let hi = maxPx;
+      let best = minPx;
+      for (let i = 0; i < 16; i++) {
+        const mid = (lo + hi) / 2;
+        span.style.fontSize = `${mid}px`;
+        const fitsW = span.scrollWidth <= box.clientWidth + 0.5;
+        const fitsH = box.clientHeight === 0 || span.scrollHeight <= box.clientHeight + 0.5;
+        if (fitsW && fitsH) {
+          best = mid;
+          lo = mid;
+        } else {
+          hi = mid;
+        }
+      }
+      span.style.fontSize = `${best}px`;
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(box);
+    return () => ro.disconnect();
+  }, [text, maxPx, minPx, multiline]);
+
+  return (
+    <div
+      ref={boxRef}
+      title={title}
+      className="flex h-full w-full items-center justify-center overflow-hidden"
+    >
+      <span
+        ref={spanRef}
+        className={`font-bold ${multiline ? "max-w-full whitespace-normal text-balance" : "whitespace-nowrap"}`}
+        style={{ color, lineHeight: 1.15 }}
+      >
+        {text || " "}
+      </span>
     </div>
   );
 }
@@ -111,31 +186,28 @@ export function CourseCertificate({
             </span>
           </Centered>
 
-          {/* Intitulé de la formation — auto-ajusté : retour à la ligne (2-3
-             lignes) et marge pour ne pas toucher les extrémités de la ligne. */}
+          {/* Intitulé de la formation — centré et auto-ajusté (largeur + hauteur)
+             dans la bande entre les deux lignes orange. */}
           <Centered {...POS.course}>
-            <span
-              className="block line-clamp-3 font-bold text-balance"
-              style={{
-                fontSize: "clamp(0.65rem, 1.5vw, 1.15rem)",
-                lineHeight: 1.15,
-                color: NAVY,
-              }}
+            <FitText
+              text={courseTitle}
+              maxPx={34}
+              minPx={9}
+              color={NAVY}
+              multiline
               title={courseTitle}
-            >
-              {courseTitle || " "}
-            </span>
+            />
           </Centered>
 
-          {/* Formateur */}
+          {/* Formateur — NOM COMPLET, taille auto-ajustée à la largeur disponible. */}
           <Centered {...POS.trainer}>
-            <span
-              className="block truncate font-bold"
-              style={{ fontSize: "clamp(0.62rem, 1.4vw, 1.05rem)" }}
+            <FitText
+              text={(trainerName ?? "").trim()}
+              maxPx={24}
+              minPx={8}
+              color={GREEN}
               title={trainerName}
-            >
-              {trainerName?.trim() || " "}
-            </span>
+            />
           </Centered>
 
           {/* Date */}

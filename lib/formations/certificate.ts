@@ -34,6 +34,8 @@ export interface CertificateConfig {
   dgName?: string;
   /** Fonction du signataire central (par défaut « Directeur Général »). */
   dgFunction?: string;
+  /** Horodatage (ms) du dernier enregistrement de la configuration. */
+  updatedAt?: number;
 }
 
 /** Récupère la config d'un cours, ou une config par défaut. */

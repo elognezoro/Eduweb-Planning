@@ -2349,9 +2349,25 @@ function CertificateConfigCard({ courseId }: { courseId: string }) {
         dateMode === "custom" ? customDate.trim() || undefined : undefined,
       dgName: dgName.trim() || undefined,
       dgFunction: dgFunction.trim() || undefined,
+      updatedAt: Date.now(),
     });
     setSavedAt(Date.now());
   }
+
+  // Détection « modifié depuis le dernier enregistrement » : tant que le
+  // formulaire correspond à la config enregistrée, le bouton est désactivé.
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+  const dirty =
+    trainerName.trim() !== (current.trainerName ?? "") ||
+    dateMode !== (current.dateMode ?? "download") ||
+    (dateMode === "end" ? endDate.trim() : "") !==
+      (current.dateMode === "end" ? current.endDate ?? "" : "") ||
+    (dateMode === "custom" ? customDate.trim() : "") !==
+      (current.dateMode === "custom" ? current.customDate ?? "" : "") ||
+    dgName.trim() !== (current.dgName ?? "") ||
+    dgFunction.trim() !== (current.dgFunction ?? "Directeur Général");
+  const lastSaved = savedAt ?? current.updatedAt ?? null;
 
   return (
     <article className="rounded-2xl border border-border bg-card p-4">
@@ -2446,11 +2462,21 @@ function CertificateConfigCard({ courseId }: { courseId: string }) {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-end gap-2">
-        {savedAt ? (
-          <span className="text-xs text-ew-green-700">✓ Enregistré.</span>
+      <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
+        {dirty ? (
+          <span className="text-xs italic text-muted-foreground">
+            Modifications non enregistrées
+          </span>
+        ) : mounted && lastSaved ? (
+          <span className="text-xs text-ew-green-700">
+            ✓ Enregistré le {new Date(lastSaved).toLocaleDateString("fr-FR")} à{" "}
+            {new Date(lastSaved).toLocaleTimeString("fr-FR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
         ) : null}
-        <Button size="sm" onClick={save}>
+        <Button size="sm" onClick={save} disabled={!dirty}>
           <Save className="h-4 w-4" /> Enregistrer le certificat
         </Button>
       </div>
