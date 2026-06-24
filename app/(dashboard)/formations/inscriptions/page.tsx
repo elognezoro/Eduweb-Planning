@@ -26,6 +26,10 @@ import {
   downloadEnrollListCsv,
   type EnrollCsvRow,
 } from "@/lib/formations/enroll-list";
+import {
+  EnrolledListComposer,
+  type ComposerEnrollee,
+} from "@/components/formations/enrolled-list-composer";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -249,6 +253,19 @@ function InscriptionsCours() {
   const enrolledRows = enrolled.filter(({ user }) =>
     matchesSearch(user.name, user.email, user.role),
   );
+  // Inscrits du cours pour l'éditeur de liste (composer) — tous, hors recherche.
+  const composerEnrollees: ComposerEnrollee[] = enrolled.map(({ user, verdict }) => ({
+    id: user.id,
+    name: user.name,
+    email: user.email ?? "",
+    globalRole: user.role,
+    formationRole: verdict.enrollment?.formationRole ?? DEFAULT_FORMATION_ROLE,
+    source: enrollmentSourceLabel(verdict.source),
+    enrolledAt: verdict.enrollment
+      ? new Date(verdict.enrollment.enrolledAt).toLocaleDateString("fr-FR")
+      : "—",
+    expiresAt: verdict.expiresAt ? new Date(verdict.expiresAt).toLocaleDateString("fr-FR") : "—",
+  }));
   const candidates = withVerdict
     .filter(({ verdict }) => !verdict.enrolled)
     .filter(({ user }) => matchesSearch(user.name, user.email, user.role))
@@ -409,6 +426,14 @@ function InscriptionsCours() {
       </SectionCard>
 
       <SectionCard title="Inscrits au cours">
+        <div className="mb-3 flex justify-end">
+          <EnrolledListComposer
+            courseTitle={course?.title ?? "Cours"}
+            schoolYear={schoolYear ?? ""}
+            enrollees={composerEnrollees}
+            triggerLabel="Télécharger / éditer"
+          />
+        </div>
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
