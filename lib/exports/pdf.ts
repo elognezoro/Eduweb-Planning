@@ -79,18 +79,20 @@ export async function downloadReportPdf(
     y = bandBottom + 22;
   }
 
-  // Bloc titre
+  // Bloc titre — ENROULÉ pour ne jamais déborder de la largeur de page.
   doc.setTextColor(...TEXT);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16 + fb);
-  doc.text(A(payload.title), margin, y);
-  y += 18;
+  const titleLines = doc.splitTextToSize(A(payload.title), pageWidth - margin * 2);
+  doc.text(titleLines, margin, y);
+  y += titleLines.length * (16 + fb) * 1.15 + 4;
   if (payload.subtitle) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11 + fb);
     doc.setTextColor(110, 110, 110);
-    doc.text(A(payload.subtitle), margin, y);
-    y += 16;
+    const subLines = doc.splitTextToSize(A(payload.subtitle), pageWidth - margin * 2);
+    doc.text(subLines, margin, y);
+    y += subLines.length * (11 + fb) * 1.3 + 6;
   }
 
   // Métadonnées
