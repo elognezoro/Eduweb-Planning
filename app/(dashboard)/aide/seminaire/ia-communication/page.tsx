@@ -36,6 +36,7 @@ import type { CommSeminaireActivity } from "@/lib/seminaires/communication-pasto
 import { CourseGate } from "@/components/formations/course-gate";
 import { useSupportAccess } from "@/components/formations/use-support-access";
 import { GatedSupportButton } from "@/components/formations/gated-support-button";
+import { SeminarPdfButton } from "@/components/seminaires/seminar-pdf-button";
 import {
   MagnificaBook,
   type BookPage,
@@ -400,6 +401,7 @@ export default function IaCommunicationPage() {
               icon={<Presentation className="h-4 w-4" />}
               label="Support PowerPoint"
             />
+            <SeminarPdfButton courseId="ia-communication" seminaire={s} />
             <GatedSupportButton
               access={supportAccess("certificat")}
               internal

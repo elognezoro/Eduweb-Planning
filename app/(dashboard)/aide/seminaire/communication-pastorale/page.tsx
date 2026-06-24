@@ -26,6 +26,7 @@ import { COMMUNICATION_PASTORALE } from "@/lib/seminaires/communication-pastoral
 import { CourseGate } from "@/components/formations/course-gate";
 import { useSupportAccess } from "@/components/formations/use-support-access";
 import { GatedSupportButton } from "@/components/formations/gated-support-button";
+import { SeminarPdfButton } from "@/components/seminaires/seminar-pdf-button";
 import {
   MagnificaBook,
   type BookPage,
@@ -285,6 +286,7 @@ export default function CommPastoralePage() {
               icon={<Presentation className="h-4 w-4" />}
               label="Support PowerPoint"
             />
+            <SeminarPdfButton courseId="communication-pastorale" seminaire={s} />
             <GatedSupportButton
               access={supportAccess("certificat")}
               internal

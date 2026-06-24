@@ -12,20 +12,26 @@ const TEXT: [number, number, number] = [23, 35, 29];
  * Génère un PDF institutionnel EduWeb Planner (en-tête, pied de page, sections,
  * tableaux) et déclenche le téléchargement. Conçu pour s'exécuter côté client.
  */
-export async function downloadReportPdf(payload: ReportPayload, filename = "rapport.pdf") {
+export async function downloadReportPdf(
+  payload: ReportPayload,
+  filename = "rapport.pdf",
+  opts: { fontBump?: number } = {},
+) {
   const emblem = await fetchImageData(payload.emblem);
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 40;
+  // Décalage de police optionnel (ex. +2 pt pour les supports de formation).
+  const fb = opts.fontBump ?? 0;
 
   // En-tête
   doc.setFillColor(...GREEN);
   doc.rect(0, 0, pageWidth, 70, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
+  doc.setFontSize(18 + fb);
   doc.text("EduWeb Planner", margin, 32);
-  doc.setFontSize(10);
+  doc.setFontSize(10 + fb);
   doc.setFont("helvetica", "normal");
   doc.text("Plateforme de pilotage scolaire", margin, 50);
   doc.setFillColor(...GOLD);
@@ -39,7 +45,7 @@ export async function downloadReportPdf(payload: ReportPayload, filename = "rapp
     const rightX = pageWidth - margin;
     doc.setTextColor(...TEXT);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.5);
+    doc.setFontSize(8.5 + fb);
     if (payload.ministry) {
       doc.text(doc.splitTextToSize(A(payload.ministry), pageWidth / 2 - margin - 6), margin, y);
     }
@@ -55,14 +61,14 @@ export async function downloadReportPdf(payload: ReportPayload, filename = "rapp
     }
     if (payload.slogan) {
       doc.setFont("helvetica", "italic");
-      doc.setFontSize(8);
+      doc.setFontSize(8 + fb);
       doc.setTextColor(110, 110, 110);
       doc.text(A(payload.slogan), rightX, cursor + 7, { align: "right" });
       cursor += 11;
     }
     if (payload.schoolYear) {
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(8);
+      doc.setFontSize(8 + fb);
       doc.setTextColor(...TEXT);
       doc.text(A(`Année Scolaire ${payload.schoolYear}`), rightX, cursor + 7, { align: "right" });
       cursor += 11;
@@ -76,19 +82,19 @@ export async function downloadReportPdf(payload: ReportPayload, filename = "rapp
   // Bloc titre
   doc.setTextColor(...TEXT);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
+  doc.setFontSize(16 + fb);
   doc.text(A(payload.title), margin, y);
   y += 18;
   if (payload.subtitle) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
+    doc.setFontSize(11 + fb);
     doc.setTextColor(110, 110, 110);
     doc.text(A(payload.subtitle), margin, y);
     y += 16;
   }
 
   // Métadonnées
-  doc.setFontSize(9);
+  doc.setFontSize(9 + fb);
   doc.setTextColor(90, 90, 90);
   const meta = [
     `Pays : ${payload.country}`,
@@ -103,22 +109,36 @@ export async function downloadReportPdf(payload: ReportPayload, filename = "rapp
   });
   y += 8;
 
-  // Sections
+  // Sections — pagination MANUELLE (jsPDF ne pagine jamais doc.text()).
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const bottom = pageHeight - 56; // réserve l'espace du pied de page
+  const lineH = (10 + fb) * 1.35; // interligne indexé sur la police (suit fontBump)
+
   payload.sections.forEach((section) => {
+    // Saut de page si le titre + au moins 2 lignes ne tiennent pas (anti-titre orphelin).
+    if (y + lineH * 3 > bottom) {
+      doc.addPage();
+      y = 60;
+    }
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
+    doc.setFontSize(12 + fb);
     doc.setTextColor(...GREEN);
     doc.text(A(section.heading), margin, y);
-    y += 14;
+    y += lineH + 2;
 
     if (section.paragraphs?.length) {
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.setTextColor(...TEXT);
       section.paragraphs.forEach((p) => {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10 + fb);
+        doc.setTextColor(...TEXT);
         const lines = doc.splitTextToSize(A(p), pageWidth - margin * 2);
+        // Saut de page AVANT de tracer si le bloc déborde (sinon chevauchement du pied).
+        if (y + lines.length * lineH > bottom) {
+          doc.addPage();
+          y = 60;
+        }
         doc.text(lines, margin, y);
-        y += lines.length * 13 + 4;
+        y += lines.length * lineH + 4;
       });
     }
 
@@ -128,7 +148,7 @@ export async function downloadReportPdf(payload: ReportPayload, filename = "rapp
         head: [section.table.columns.map(A)],
         body: section.table.rows.map((r) => r.map((c) => A(String(c)))),
         margin: { left: margin, right: margin },
-        styles: { fontSize: 9, cellPadding: 5 },
+        styles: { fontSize: 9 + fb, cellPadding: 5 },
         headStyles: { fillColor: GREEN, textColor: 255 },
         alternateRowStyles: { fillColor: [240, 251, 245] },
       });
@@ -136,11 +156,6 @@ export async function downloadReportPdf(payload: ReportPayload, filename = "rapp
       y = (doc.lastAutoTable?.finalY ?? y) + 16;
     } else {
       y += 6;
-    }
-
-    if (y > doc.internal.pageSize.getHeight() - 80) {
-      doc.addPage();
-      y = 60;
     }
   });
 
@@ -151,7 +166,7 @@ export async function downloadReportPdf(payload: ReportPayload, filename = "rapp
     const h = doc.internal.pageSize.getHeight();
     doc.setDrawColor(...GOLD);
     doc.line(margin, h - 40, pageWidth - margin, h - 40);
-    doc.setFontSize(8);
+    doc.setFontSize(8 + fb);
     doc.setTextColor(120, 120, 120);
     doc.text("EduWeb Planner — Document généré automatiquement", margin, h - 26);
     doc.text(`Page ${i} / ${pageCount}`, pageWidth - margin - 60, h - 26);
