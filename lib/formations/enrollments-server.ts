@@ -116,19 +116,26 @@ export async function updateEnrollmentRole(
 }
 
 /**
- * Supprime une inscription (par utilisateur + cours, et année si connue). La RLS
- * `ce_delete` n'autorise que l'admin ou le propriétaire. Renvoie true si OK.
+ * Supprime une inscription (par utilisateur + cours, et année si fournie). La
+ * RLS `ce_delete` n'autorise que l'admin, le propriétaire, ou l'enseignant pour
+ * son établissement (migration 029).
+ *
+ * Renvoie le nombre de lignes EFFECTIVEMENT supprimées (`.select()`), afin que
+ * l'appelant distingue un vrai succès d'un no-op (0 ligne) — typiquement quand
+ * l'année scopée ne correspond à aucune ligne serveur. Pour « désinscrire du
+ * cours quelle que soit l'année », appeler sans `schoolYear` (ou à null).
  */
 export async function deleteCourseEnrollment(
   supabase: SupabaseClient,
   key: { userId: string; courseId: string; schoolYear?: string | null },
-): Promise<boolean> {
+): Promise<{ ok: boolean; deleted: number; error?: string }> {
   let q = supabase
     .from("course_enrollments")
     .delete()
     .eq("user_id", key.userId)
     .eq("course_id", key.courseId);
   if (key.schoolYear) q = q.eq("school_year", key.schoolYear);
-  const { error } = await q;
-  return !error;
+  const { data, error } = await q.select("id");
+  if (error) return { ok: false, deleted: 0, error: error.message };
+  return { ok: true, deleted: data?.length ?? 0 };
 }

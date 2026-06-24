@@ -202,7 +202,7 @@ function InscriptionsCours() {
     }
   }
 
-  function unenroll(enrollment: CourseEnrollment | undefined, userName: string) {
+  async function unenroll(enrollment: CourseEnrollment | undefined, userName: string) {
     if (!enrollment) {
       window.alert(
         "Cette inscription provient d'une cohorte ou d'une auto-inscription par rôle : elle ne peut pas être retirée individuellement ici.",
@@ -217,11 +217,19 @@ function InscriptionsCours() {
     // l'année stockée (évite un DELETE sans effet si l'année locale du verdict
     // diffère de celle de la ligne serveur).
     if (isSupabaseConfigured()) {
-      void deleteCourseEnrollment(createClient(), {
+      const res = await deleteCourseEnrollment(createClient(), {
         userId: enrollment.userId,
         courseId: enrollment.courseId,
         schoolYear: null,
       });
+      if (!res.ok) {
+        flash(`Retiré localement, mais échec de la désinscription en ligne : ${res.error}`);
+        return;
+      }
+      if (res.deleted === 0) {
+        flash(`${userName} retiré·e localement (inscription introuvable côté serveur).`);
+        return;
+      }
     }
     flash(`${userName} désinscrit·e.`);
   }

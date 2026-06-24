@@ -984,7 +984,7 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
     search,
   ]);
 
-  function unenroll(enrollment: CourseEnrollment | undefined) {
+  async function unenroll(enrollment: CourseEnrollment | undefined) {
     if (!enrollment) {
       window.alert(
         "Cette inscription provient d'une cohorte ou d'une auto-inscription par rôle. Retirez l'utilisateur de la cohorte (onglet Cohortes) ou modifiez la matrice des rôles.",
@@ -995,12 +995,20 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
     store.removeEnrollment(enrollment.id);
     // Mode réel : supprime aussi côté serveur, sinon la synchronisation
     // descendante (CourseEnrollmentsSync) la ré-ajouterait au rechargement.
+    // On NE scope PAS par année (schoolYear: null) : « désinscrire du cours »
+    // retire l'inscription quelle que soit l'année stockée côté serveur (qui
+    // peut différer de celle du verdict — DEFAULT/dérive calendaire).
     if (isSupabaseConfigured()) {
-      void deleteCourseEnrollment(createClient(), {
+      const res = await deleteCourseEnrollment(createClient(), {
         userId: enrollment.userId,
         courseId: enrollment.courseId,
-        schoolYear: enrollment.schoolYear,
+        schoolYear: null,
       });
+      if (!res.ok) {
+        window.alert(`Échec de la désinscription en ligne : ${res.error ?? ""}`);
+      } else if (res.deleted === 0) {
+        window.alert("Inscription introuvable côté serveur (peut-être déjà retirée).");
+      }
     }
   }
 
