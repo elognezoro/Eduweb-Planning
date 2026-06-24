@@ -161,6 +161,12 @@ export function CourseCertificate({
                     src={signatureUrl}
                     alt="Signature"
                     className="max-h-full max-w-[70%] object-contain"
+                    // mix-blend multiply : le fond clair de l'image disparaît sur
+                    // le certificat (équivaut à un fond transparent).
+                    style={{ mixBlendMode: "multiply" }}
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
                   />
                 ) : null}
                 {stampUrl ? (
@@ -169,12 +175,16 @@ export function CourseCertificate({
                     src={stampUrl}
                     alt="Cachet"
                     aria-hidden
-                    className="pointer-events-none absolute -top-[1.6vw] right-0 object-contain opacity-85"
+                    className="pointer-events-none absolute -top-[1.6vw] right-0 object-contain opacity-90"
                     style={{
-                      height: "5vw",
-                      width: "5vw",
-                      maxHeight: 70,
-                      maxWidth: 70,
+                      height: "5.4vw",
+                      width: "5.4vw",
+                      maxHeight: 78,
+                      maxWidth: 78,
+                      mixBlendMode: "multiply",
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
                     }}
                   />
                 ) : null}

@@ -338,8 +338,8 @@ function GenericTrainingCertificate() {
           dateLabel={issueDate}
           dgName={meta.headName}
           dgFunction={meta.headFunction || "Directeur Général"}
-          signatureUrl={meta.signature}
-          stampUrl={meta.stamp}
+          signatureUrl="/brand/dg-signature.png"
+          stampUrl="/brand/eduweb-cachet.png"
         />
       </div>
     </div>
@@ -562,8 +562,8 @@ function CourseCertificateView({ courseId }: { courseId: string }) {
           dateLabel={dateLabel}
           dgName={dgName}
           dgFunction={dgFunction}
-          signatureUrl={meta.signature}
-          stampUrl={meta.stamp}
+          signatureUrl="/brand/dg-signature.png"
+          stampUrl="/brand/eduweb-cachet.png"
         />
       </div>
     </div>
