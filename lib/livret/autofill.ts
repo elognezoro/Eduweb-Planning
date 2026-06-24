@@ -229,9 +229,12 @@ export function resolveLivret(computed: LivretComputed, overrides?: LivretOverri
     }
   }
 
-  if (overrides.parents) out.parents = overrides.parents.map((p) => ({ ...p }));
-  if (overrides.etabSuccessifs) out.etabSuccessifs = overrides.etabSuccessifs.map((e) => ({ ...e }));
-  if (overrides.diplomes) out.diplomes = overrides.diplomes.map((d) => ({ ...d }));
+  // Array.isArray (et non simple truthiness) : une ligne livret_records
+  // corrompue/legacy pourrait fournir un objet au lieu d'un tableau — .map
+  // planterait alors en plein rendu (page blanche). On ignore proprement.
+  if (Array.isArray(overrides.parents)) out.parents = overrides.parents.map((p) => ({ ...p }));
+  if (Array.isArray(overrides.etabSuccessifs)) out.etabSuccessifs = overrides.etabSuccessifs.map((e) => ({ ...e }));
+  if (Array.isArray(overrides.diplomes)) out.diplomes = overrides.diplomes.map((d) => ({ ...d }));
   if (overrides.extension?.observationsComplementaires != null) {
     out.extension.observationsComplementaires = overrides.extension.observationsComplementaires;
   }

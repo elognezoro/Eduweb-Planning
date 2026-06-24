@@ -53,7 +53,7 @@ function studentToEleve(s: Student): Eleve {
 
 export default function LivretScolairePage() {
   const t = useTranslations();
-  const { students } = useStudents();
+  const { students, loading } = useStudents();
   const classOptions = React.useMemo(
     () => [...new Set(students.map((e) => e.className).filter(Boolean))].sort(),
     [students],
@@ -94,7 +94,31 @@ export default function LivretScolairePage() {
   const annual = terms.length ? terms.reduce((a, t) => a + t.moyGen, 0) / terms.length : 0;
   const conduite = terms[2]?.conduite ?? "Bonne";
 
-  if (!student) return null;
+  // Jamais d'écran blanc : tant que les élèves chargent (mode réel async) ou
+  // si l'établissement n'a aucun élève, on rend la coquille de page avec un
+  // état de chargement / un état vide explicite plutôt que `null`.
+  if (loading || !student) {
+    return (
+      <ModulePage
+        title={t("pages.vieScolaireLivretScolaire.title")}
+        description={t("pages.vieScolaireLivretScolaire.description")}
+        icon={BookMarked}
+        permission="school_record:view"
+      >
+        <div className="py-16 text-center text-sm text-muted-foreground">
+          {loading ? (
+            "Chargement des élèves…"
+          ) : (
+            <>
+              Aucun élève à afficher pour le moment.
+              <br />
+              Ajoutez ou importez des élèves depuis <strong>Système&nbsp;→&nbsp;Élèves</strong>.
+            </>
+          )}
+        </div>
+      </ModulePage>
+    );
+  }
   const fullName = `${toNomCase(student.lastName)} ${toPrenomCase(student.firstName)}`;
 
   const recapFile = `recapitulatif-${`${student.lastName}-${student.firstName}`

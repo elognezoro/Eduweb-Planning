@@ -201,7 +201,10 @@ input::-ms-clear {
   body {
     background: #fff !important;
   }
-  body * {
+  /* N'occulter la page QUE si un conteneur d'export est réellement monté.
+     Sinon « Imprimer / Enregistrer en PDF » d'une page ordinaire (accueil,
+     élèves, paramétrage…) donnerait une page entièrement blanche. */
+  body:has(#bulletin-print, #livret-print, #manuel-print, #seminaire-print) * {
     visibility: hidden !important;
   }
   #bulletin-print,

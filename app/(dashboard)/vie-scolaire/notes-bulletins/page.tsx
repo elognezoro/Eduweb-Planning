@@ -32,6 +32,7 @@ import type { TermIndex } from "@/lib/livret/grades";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
 import { upsertLivretGrade } from "@/lib/livret/livret-server";
+import { deleteNoteEntry, fetchNoteEntries, insertNoteEntry } from "@/lib/notes/notes-server";
 
 type Eleve = Student;
 interface NoteEntry {
@@ -116,7 +117,22 @@ export default function NotesBulletinsPage() {
     [students, cls],
   );
   const [notes, setNotes] = React.useState<NoteEntry[]>([]);
-  React.useEffect(() => setNotes(genNotes(classStudents)), [classStudents]);
+  // Notes de la période courante : réel = chargées depuis Supabase (cloisonné
+  // par établissement via RLS, filtrées à la classe + période) ; démo = générées.
+  React.useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      setNotes(genNotes(classStudents));
+      return;
+    }
+    let cancelled = false;
+    const ids = new Set(classStudents.map((s) => s.id));
+    void fetchNoteEntries(createClient(), meta.schoolYear, Number(period)).then((rows) => {
+      if (!cancelled) setNotes(rows.filter((r) => ids.has(r.studentId)));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [classStudents, period, meta.schoolYear]);
 
   const [bulletin, setBulletin] = React.useState<{ student: Eleve; autoPrint: boolean } | null>(null);
 
@@ -143,7 +159,37 @@ export default function NotesBulletinsPage() {
   const rankOf = (sid: string) => ranked.findIndex((s) => s.id === sid) + 1;
   const notesOf = (sid: string) => notes.filter((n) => n.studentId === sid).length;
 
-  const removeNote = (id: string) => setNotes((ns) => ns.filter((n) => n.id !== id));
+  // Ajout d'une note : optimiste en mémoire, puis persistance en ligne (réel).
+  // L'id temporaire est remplacé par l'id serveur au retour de l'insert.
+  const addNote = (n: NoteEntry) => {
+    setNotes((ns) => [n, ...ns]);
+    if (!isSupabaseConfigured()) return;
+    void insertNoteEntry(
+      createClient(),
+      {
+        studentId: n.studentId,
+        discipline: n.discipline,
+        type: n.type,
+        note: n.note,
+        bareme: n.bareme,
+        coeff: n.coeff,
+        period: Number(period),
+        schoolYear: meta.schoolYear,
+      },
+      app.user.etablissementId ?? null,
+    ).then((res) => {
+      if (res.ok && res.id) {
+        setNotes((ns) => ns.map((x) => (x.id === n.id ? { ...x, id: res.id as string } : x)));
+      } else if (!res.ok) {
+        toast.error("Note enregistrée localement, échec de la synchronisation en ligne.", { id: "note-online-error" });
+      }
+    });
+  };
+
+  const removeNote = (id: string) => {
+    setNotes((ns) => ns.filter((n) => n.id !== id));
+    if (isSupabaseConfigured()) void deleteNoteEntry(createClient(), id);
+  };
 
   /**
    * Reporte les moyennes par discipline du trimestre courant vers la SOURCE DE
@@ -240,7 +286,7 @@ export default function NotesBulletinsPage() {
       </div>
 
       <div id="saisie" className="scroll-mt-24">
-        <NoteForm classStudents={classStudents} onAdd={(n) => setNotes((ns) => [n, ...ns])} />
+        <NoteForm classStudents={classStudents} onAdd={addNote} />
       </div>
 
       <SectionCard id="notes" title={t("pages.vieScolaireNotesBulletins.notesSection.title", { class: cls, period: periodLabel })} contentClassName="p-0 overflow-x-auto">
