@@ -86,6 +86,8 @@ import {
   DEFAULT_FORMATION_ROLE,
   type FormationRole,
 } from "@/lib/formations/formation-roles";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { etabExportMeta } from "@/lib/etab-config";
 import {
   SUPPORT_KINDS,
   SUPPORT_KIND_LABEL,
@@ -1012,17 +1014,178 @@ function EnrolledPanel({ courseId }: { courseId: string }) {
     }
   }
 
+  // ---- Téléchargement PDF des inscrits, GROUPÉS PAR RÔLE DE FORMATION ----
+  const app = useApp();
+  const [pdfOpen, setPdfOpen] = React.useState(false);
+  const [pdfBusy, setPdfBusy] = React.useState(false);
+  const [pdfRoles, setPdfRoles] = React.useState<Set<FormationRole>>(new Set());
+
+  // Tous les inscrits (hors filtre de recherche), groupés par rôle de formation.
+  const enrolledAll = React.useMemo(
+    () =>
+      dirUsers
+        .map((u) => ({
+          user: { id: u.id, name: u.name, role: u.role, email: u.email },
+          verdict: getEnrollmentVerdict(
+            u.id,
+            u.role,
+            courseId,
+            store.courseEnrollments,
+            store.courseCohorts,
+          ),
+        }))
+        .filter(({ verdict }) => verdict.enrolled),
+    [dirUsers, store.courseEnrollments, store.courseCohorts, courseId],
+  );
+  const byRole = React.useMemo(() => {
+    const m = new Map<FormationRole, typeof enrolledAll>();
+    FORMATION_ROLES.forEach((r) => m.set(r, []));
+    enrolledAll.forEach((e) =>
+      m.get(e.verdict.enrollment?.formationRole ?? DEFAULT_FORMATION_ROLE)?.push(e),
+    );
+    return m;
+  }, [enrolledAll]);
+  const presentRoles = FORMATION_ROLES.filter((r) => (byRole.get(r)?.length ?? 0) > 0);
+
+  function openPdfDialog() {
+    setPdfRoles(new Set(presentRoles));
+    setPdfOpen(true);
+  }
+  function togglePdfRole(r: FormationRole) {
+    setPdfRoles((prev) => {
+      const next = new Set(prev);
+      if (next.has(r)) next.delete(r);
+      else next.add(r);
+      return next;
+    });
+  }
+
+  async function downloadRolesPdf() {
+    const roles = presentRoles.filter((r) => pdfRoles.has(r));
+    if (!roles.length) return;
+    setPdfBusy(true);
+    try {
+      const meta = etabExportMeta();
+      const course = getCourse(courseId);
+      const sections = roles.map((r) => {
+        const list = (byRole.get(r) ?? [])
+          .slice()
+          .sort((a, b) => a.user.name.localeCompare(b.user.name, "fr"));
+        return {
+          heading: `${FORMATION_ROLE_META[r].label} — ${list.length} inscrit·e·s`,
+          table: {
+            columns: ["N°", "Nom & prénoms", "Rôle global", "Source", "Inscrit·e le", "Expire"],
+            rows: list.map((e, i) => [
+              i + 1,
+              e.user.name,
+              e.user.role,
+              enrollmentSourceLabel(e.verdict.source),
+              e.verdict.enrollment
+                ? new Date(e.verdict.enrollment.enrolledAt).toLocaleDateString("fr-FR")
+                : "—",
+              e.verdict.expiresAt
+                ? new Date(e.verdict.expiresAt).toLocaleDateString("fr-FR")
+                : "—",
+            ]),
+          },
+        };
+      });
+      const total = roles.reduce((a, r) => a + (byRole.get(r)?.length ?? 0), 0);
+      const slug = (course?.title ?? "cours")
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .replace(/[^a-zA-Z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .toLowerCase();
+      const { downloadReportPdf } = await import("@/lib/exports/pdf");
+      await downloadReportPdf(
+        {
+          title: `Inscrits — ${course?.title ?? "Cours"}`,
+          subtitle: `Groupés par rôle de formation · ${total} inscrit·e·s · ${roles.length} groupe(s)`,
+          country: meta.countryName,
+          institution: meta.institution,
+          period: meta.schoolYear,
+          author: app.user.displayName,
+          generatedAt: new Date().toLocaleDateString("fr-FR"),
+          official: meta.official,
+          ministry: meta.ministry,
+          slogan: meta.slogan,
+          schoolYear: meta.schoolYear,
+          emblem: meta.nationalEmblem,
+          sections,
+        },
+        `inscrits-${slug}-par-role.pdf`,
+      );
+      setPdfOpen(false);
+    } catch {
+      window.alert("Échec de la génération du PDF. Réessayez.");
+    } finally {
+      setPdfBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-3">
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Nom, rôle, email…"
-          className="h-9 pl-9"
-        />
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[200px] flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Nom, rôle, email…"
+            className="h-9 pl-9"
+          />
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={openPdfDialog}
+          disabled={presentRoles.length === 0}
+        >
+          <Download className="h-4 w-4" /> Télécharger
+        </Button>
       </div>
+
+      <Dialog open={pdfOpen} onOpenChange={setPdfOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Télécharger les inscrits par rôle</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Choisissez un ou plusieurs rôles de formation. Le PDF présente les inscrits
+            <strong> groupés par rôle</strong> — une section par rôle sélectionné, avec son effectif.
+          </p>
+          <div className="space-y-1.5">
+            {presentRoles.length === 0 ? (
+              <p className="text-sm italic text-muted-foreground">Aucun inscrit à ce cours.</p>
+            ) : (
+              presentRoles.map((r) => (
+                <label
+                  key={r}
+                  className="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    checked={pdfRoles.has(r)}
+                    onChange={() => togglePdfRole(r)}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  <span className="flex-1">{FORMATION_ROLE_META[r].label}</span>
+                  <Badge tone="blue">{byRole.get(r)?.length ?? 0}</Badge>
+                </label>
+              ))
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setPdfRoles(new Set(presentRoles))}>
+              Tout sélectionner
+            </Button>
+            <Button size="sm" onClick={downloadRolesPdf} disabled={pdfBusy || pdfRoles.size === 0}>
+              <Download className="h-4 w-4" /> {pdfBusy ? "Génération…" : "Télécharger le PDF"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full text-sm">
