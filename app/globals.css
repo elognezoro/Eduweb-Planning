@@ -196,6 +196,11 @@ input::-ms-clear {
   display: none;
 }
 
+/* Document « liste des inscrits » : masqué à l'écran, révélé à l'impression. */
+#enroll-list-print {
+  display: none;
+}
+
 /* Impression : n'imprimer que le bulletin (#bulletin-print) ou le livret (#livret-print). */
 @media print {
   body {
@@ -204,7 +209,7 @@ input::-ms-clear {
   /* N'occulter la page QUE si un conteneur d'export est réellement monté.
      Sinon « Imprimer / Enregistrer en PDF » d'une page ordinaire (accueil,
      élèves, paramétrage…) donnerait une page entièrement blanche. */
-  body:has(#bulletin-print, #livret-print, #manuel-print, #seminaire-print) * {
+  body:has(#bulletin-print, #livret-print, #manuel-print, #seminaire-print, #enroll-list-print) * {
     visibility: hidden !important;
   }
   #bulletin-print,
@@ -214,7 +219,9 @@ input::-ms-clear {
   #manuel-print,
   #manuel-print *,
   #seminaire-print,
-  #seminaire-print * {
+  #seminaire-print *,
+  #enroll-list-print,
+  #enroll-list-print * {
     visibility: visible !important;
   }
   /* Livret de séminaire : document académique multi-pages A4. */
@@ -240,6 +247,128 @@ input::-ms-clear {
     margin-top: 0 !important;
     padding-top: 0 !important;
     border-top: none !important;
+  }
+  /* Liste des inscrits : document A4 portrait, une section (page) par cours. */
+  #enroll-list-print {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    color: #111 !important;
+    font-size: 11px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .enroll-list-page {
+    break-after: page;
+    page-break-after: always;
+    padding: 14mm 12mm;
+  }
+  .enroll-list-page:last-of-type {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .enroll-list-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid #111;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+  .enroll-list-header-col {
+    max-width: 48%;
+    line-height: 1.35;
+  }
+  .enroll-list-header-right {
+    text-align: right;
+  }
+  .enroll-list-strong {
+    font-weight: 700;
+  }
+  .enroll-list-italic {
+    font-style: italic;
+  }
+  .enroll-list-logo,
+  .enroll-list-emblem {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+  }
+  .enroll-list-emblem {
+    margin-left: auto;
+  }
+  .enroll-list-title {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    margin: 6px 0 2px;
+  }
+  .enroll-list-subtitle {
+    text-align: center;
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+  .enroll-list-kind {
+    font-style: italic;
+    color: #444;
+  }
+  .enroll-list-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 10.5px;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  .enroll-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10.5px;
+  }
+  .enroll-list-table th,
+  .enroll-list-table td {
+    border: 1px solid #999;
+    padding: 4px 6px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .enroll-list-table thead th {
+    background: #eee;
+    font-weight: 700;
+  }
+  .enroll-list-empty {
+    text-align: center;
+    font-style: italic;
+    padding: 10px;
+  }
+  .enroll-list-footer {
+    margin-top: 14px;
+    font-size: 10.5px;
+  }
+  .enroll-list-sign {
+    margin-top: 22px;
+    text-align: right;
+    position: relative;
+  }
+  .enroll-list-sign-label {
+    margin-top: 2px;
+    font-style: italic;
+  }
+  .enroll-list-signimg {
+    height: 46px;
+    width: auto;
+    display: inline-block;
+  }
+  .enroll-list-stamp {
+    height: 70px;
+    width: auto;
+    opacity: 0.9;
+    position: absolute;
+    right: 90px;
+    top: 0;
   }
   /* Manuel de formation : document académique multi-pages. */
   #manuel-print {

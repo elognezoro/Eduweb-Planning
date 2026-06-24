@@ -9,6 +9,7 @@ import {
   KeyRound,
   Users,
   UserCheck,
+  UserPlus,
   Building2,
   GraduationCap,
   Network,
@@ -143,6 +144,13 @@ export const NAVIGATION: NavGroup[] = [
         icon: GraduationCap,
         permission: "system:manage_permissions",
         description: "Inscrire des utilisateurs aux séminaires et formations.",
+      },
+      {
+        href: "/formations/inscriptions",
+        label: "Inscriptions aux cours",
+        icon: UserPlus,
+        permission: "formations:enroll",
+        description: "Inscrire ou désinscrire un utilisateur d'un cours (admin, enseignant).",
       },
       {
         href: "/systeme/comptes-utilisateurs",

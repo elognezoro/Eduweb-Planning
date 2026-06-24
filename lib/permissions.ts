@@ -71,6 +71,7 @@ export const PERMISSIONS = [
   "exports:word",
   "imports:csv",
   "formations:access",
+  "formations:enroll",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -184,7 +185,7 @@ export const PERMISSION_DOMAINS: { id: string; label: string; permissions: Permi
   {
     id: "formation_accompagnement",
     label: "Formation & accompagnement",
-    permissions: ["formations:access"],
+    permissions: ["formations:access", "formations:enroll"],
   },
 ];
 
@@ -255,6 +256,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "exports:word": "Exporter en Word",
   "imports:csv": "Importer des CSV",
   "formations:access": "Accéder à l'espace formation",
+  "formations:enroll": "Inscrire / désinscrire aux formations",
 };
 
 const ALL: Permission[] = [...PERMISSIONS];
@@ -526,6 +528,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "statistics:class",
     "exports:pdf",
     "formations:access",
+    "formations:enroll",
   ],
   educateur: [
     "dashboard:view",
