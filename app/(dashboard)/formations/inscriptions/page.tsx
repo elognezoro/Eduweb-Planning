@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { GraduationCap, Plus, Printer, Search, Trash2, UserPlus } from "lucide-react";
+import { Download, FileSpreadsheet, FileText, GraduationCap, Plus, Printer, Search, Trash2, UserPlus } from "lucide-react";
 import { ModulePage, SectionCard } from "@/components/modules/module-page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,11 @@ import {
   EnrollListPrintDocument,
   type EnrollListSection,
 } from "@/components/formations/enroll-list-document";
+import {
+  buildEnrollListReport,
+  downloadEnrollListCsv,
+  type EnrollCsvRow,
+} from "@/lib/formations/enroll-list";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -125,12 +130,96 @@ function InscriptionsCours() {
     [courses, printSet, dirUsers, store.courseEnrollments, store.courseCohorts],
   );
 
-  function printList() {
+  function guardSelection(): boolean {
     if (printSet.size === 0) {
       flash("Sélectionnez au moins un cours à inclure dans la liste.");
-      return;
+      return false;
     }
+    return true;
+  }
+
+  function printList() {
+    if (!guardSelection()) return;
     window.print();
+  }
+
+  // Lignes plates (avec e-mail) pour l'export CSV — groupées par cours.
+  const csvRows = React.useMemo<EnrollCsvRow[]>(
+    () =>
+      courses
+        .filter((c) => printSet.has(c.id))
+        .flatMap((c) =>
+          dirUsers
+            .map((u) => ({
+              u,
+              v: getEnrollmentVerdict(u.id, u.role, c.id, store.courseEnrollments, store.courseCohorts),
+            }))
+            .filter(({ v }) => v.enrolled)
+            .sort((a, b) => a.u.name.localeCompare(b.u.name, "fr"))
+            .map(({ u, v }) => ({
+              course: c.title,
+              name: u.name,
+              email: u.email,
+              role: u.role,
+              formationRole:
+                FORMATION_ROLE_META[v.enrollment?.formationRole ?? DEFAULT_FORMATION_ROLE].label,
+              source: enrollmentSourceLabel(v.source),
+              enrolledAt: v.enrollment
+                ? new Date(v.enrollment.enrolledAt).toLocaleDateString("fr-FR")
+                : "—",
+              expiresAt: v.expiresAt ? new Date(v.expiresAt).toLocaleDateString("fr-FR") : null,
+            })),
+        ),
+    [courses, printSet, dirUsers, store.courseEnrollments, store.courseCohorts],
+  );
+
+  // Nom de fichier : inscrits-<cours>-<annee> (1 cours) ou inscrits-<n>-formations-<annee>.
+  function downloadBaseName(): string {
+    const slug = (s: string) =>
+      s
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .replace(/[^a-zA-Z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .toLowerCase();
+    const sel = courses.filter((c) => printSet.has(c.id));
+    const base = sel.length === 1 ? `inscrits-${slug(sel[0].title)}` : `inscrits-${sel.length}-formations`;
+    return schoolYear ? `${base}-${schoolYear}` : base;
+  }
+
+  function downloadCsv() {
+    if (!guardSelection()) return;
+    try {
+      downloadEnrollListCsv(csvRows, `${downloadBaseName()}.csv`);
+    } catch {
+      flash("Échec de la génération du CSV. Réessayez.");
+    }
+  }
+
+  async function downloadPdf() {
+    if (!guardSelection()) return;
+    try {
+      const { downloadReportPdf } = await import("@/lib/exports/pdf");
+      await downloadReportPdf(
+        buildEnrollListReport(printSections, meta, app.user.displayName, editedAt),
+        `${downloadBaseName()}.pdf`,
+      );
+    } catch {
+      flash("Échec de la génération du PDF. Réessayez.");
+    }
+  }
+
+  async function downloadWord() {
+    if (!guardSelection()) return;
+    try {
+      const { downloadReportWord } = await import("@/lib/exports/word");
+      await downloadReportWord(
+        buildEnrollListReport(printSections, meta, app.user.displayName, editedAt),
+        `${downloadBaseName()}.docx`,
+      );
+    } catch {
+      flash("Échec de la génération du document Word. Réessayez.");
+    }
   }
 
   // Verdict d'inscription par utilisateur pour le cours sélectionné.
@@ -373,12 +462,12 @@ function InscriptionsCours() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Imprimer la liste des inscrits (PDF)">
+      <SectionCard title="Imprimer / télécharger la liste des inscrits">
         <p className="mb-3 text-sm text-muted-foreground">
-          Sélectionnez une ou plusieurs formations, puis lancez l'impression : le document
-          (en-tête institutionnel, tableau nominatif trié, récapitulatif d'effectif et zone
-          cachet/signature) s'ouvre dans la boîte d'impression du navigateur — choisissez «&nbsp;Enregistrer
-          au format PDF&nbsp;». Une page par formation.
+          Sélectionnez une ou plusieurs formations, puis <strong>téléchargez</strong> la liste
+          (CSV pour Excel, Word éditable, ou PDF) — ou <strong>imprimez‑la</strong>. Document
+          officiel : en‑tête institutionnel, tableau nominatif trié, récapitulatif d'effectif.
+          Une page (ou section) par formation ; le CSV inclut l'e‑mail et une colonne «&nbsp;Cours&nbsp;».
         </p>
         <div className="grid gap-2 sm:grid-cols-2">
           {courses.map((c) => {
@@ -406,11 +495,20 @@ function InscriptionsCours() {
             );
           })}
         </div>
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <Button onClick={printList} disabled={printSet.size === 0}>
-            <Printer className="h-4 w-4" /> Aperçu &amp; impression PDF ({printSet.size})
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Button onClick={downloadCsv} disabled={printSet.size === 0} variant="outline" size="sm">
+            <FileSpreadsheet className="h-4 w-4" /> CSV
           </Button>
-          <span className="text-xs text-muted-foreground">
+          <Button onClick={downloadWord} disabled={printSet.size === 0} variant="outline" size="sm">
+            <FileText className="h-4 w-4" /> Word
+          </Button>
+          <Button onClick={downloadPdf} disabled={printSet.size === 0} variant="outline" size="sm">
+            <Download className="h-4 w-4" /> PDF
+          </Button>
+          <Button onClick={printList} disabled={printSet.size === 0} size="sm">
+            <Printer className="h-4 w-4" /> Imprimer ({printSet.size})
+          </Button>
+          <span className="ml-1 text-xs text-muted-foreground">
             {printSections.reduce((a, s) => a + s.rows.length, 0)} inscrit·e·s au total dans la sélection.
           </span>
         </div>

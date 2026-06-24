@@ -143,6 +143,9 @@ export default function AideIndexPage() {
       {/* Mes formations actives — toujours en tête pour visibilité immédiate. */}
       <MyEnrollmentsPanel />
 
+      {/* Gestion des inscriptions + téléchargement des listes — admin / enseignant. */}
+      <EnrollListAccessBanner />
+
       {/* Recommandation personnalisée selon le rôle effectif */}
       {myGuideKey && <RecommendedCard guideKey={myGuideKey} />}
 
@@ -389,6 +392,48 @@ function CertificateBanner() {
         >
           <FileDown className="h-4 w-4" /> Modèle vierge (.docx)
         </a>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Bandeau « Inscrits & listes » — admin / enseignant (formations:enroll)  */
+/* ---------------------------------------------------------------------- */
+function EnrollListAccessBanner() {
+  const { can } = useApp();
+  if (!can("formations:enroll")) return null;
+  return (
+    <div className="overflow-hidden rounded-2xl border border-ew-green-200 bg-gradient-to-r from-ew-green-50 via-card to-card p-5 shadow-sm">
+      <div className="flex flex-wrap items-center gap-4">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ew-green-700 text-white">
+          <Users className="h-6 w-6" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-xs font-bold uppercase tracking-[0.16em] text-ew-green-700">
+            Gestion des inscriptions
+          </p>
+          <p className="mt-0.5 font-display text-lg font-bold text-foreground">Inscrits &amp; listes</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Inscrivez ou désinscrivez un utilisateur à chacune des formations ci-dessous, et
+            <strong> téléchargez la liste des inscrits</strong> (CSV, Word ou PDF) — une page par
+            formation, avec en-tête institutionnel et effectif.
+          </p>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link
+          href="/formations/inscriptions"
+          className="inline-flex items-center gap-2 rounded-lg bg-ew-green-700 px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+        >
+          <Users className="h-4 w-4" /> Gérer les inscriptions
+        </Link>
+        <Link
+          href="/formations/inscriptions"
+          className="inline-flex items-center gap-2 rounded-lg border border-ew-green-700 bg-card px-4 py-2 text-sm font-semibold text-ew-green-700 transition-colors hover:bg-ew-green-50"
+        >
+          <Download className="h-4 w-4" /> Télécharger la liste des inscrits
+        </Link>
       </div>
     </div>
   );
