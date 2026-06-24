@@ -49,34 +49,34 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
 
   // -------- COUVERTURE --------
   const cover: Paragraph[] = [
-    centeredLine("République de Côte d'Ivoire", { bold: true, size: 20, color: COLOR_GRAY }),
-    centeredLine("Union — Discipline — Travail", { italic: true, size: 18, color: COLOR_GRAY }),
+    centeredLine("République de Côte d'Ivoire", { bold: true, size: 24, color: COLOR_GRAY }),
+    centeredLine("Union — Discipline — Travail", { italic: true, size: 22, color: COLOR_GRAY }),
     centeredLine("Séminaire des communicateurs de l'Éducation Catholique", {
       italic: true,
-      size: 18,
+      size: 22,
       color: COLOR_GRAY,
     }),
     spacer(120),
     centeredImage(logo, 150),
     spacer(120),
-    centeredLine("Livret académique", { bold: true, size: 22, color: COLOR_GOLD }),
+    centeredLine("Livret académique", { bold: true, size: 26, color: COLOR_GOLD }),
     spacer(80),
-    centeredLine(m.title, { bold: true, size: 40, color: COLOR_GREEN }),
+    centeredLine(m.title, { bold: true, size: 44, color: COLOR_GREEN }),
     spacer(80),
-    centeredLine(m.subtitle, { italic: true, size: 22, color: COLOR_GRAY }),
+    centeredLine(m.subtitle, { italic: true, size: 26, color: COLOR_GRAY }),
     spacer(300),
-    centeredLine(`Référence : ${m.reference}`, { bold: true, size: 20 }),
-    centeredLine(`Date : ${m.referenceDate}`, { bold: true, size: 20 }),
-    centeredLine(`Format : ${m.format}`, { italic: true, size: 18, color: COLOR_GRAY }),
-    centeredLine(`Durée : ${m.duration}`, { bold: true, size: 20 }),
-    centeredLine(`Niveau : ${m.level}`, { bold: true, size: 20 }),
-    centeredLine(`Public : ${m.audience}`, { italic: true, size: 18, color: COLOR_GRAY }),
-    centeredLine(`Organisateur : ${m.organiser}`, { bold: true, size: 18, color: COLOR_GREEN }),
+    centeredLine(`Référence : ${m.reference}`, { bold: true, size: 24 }),
+    centeredLine(`Date : ${m.referenceDate}`, { bold: true, size: 24 }),
+    centeredLine(`Format : ${m.format}`, { italic: true, size: 22, color: COLOR_GRAY }),
+    centeredLine(`Durée : ${m.duration}`, { bold: true, size: 24 }),
+    centeredLine(`Niveau : ${m.level}`, { bold: true, size: 24 }),
+    centeredLine(`Public : ${m.audience}`, { italic: true, size: 22, color: COLOR_GRAY }),
+    centeredLine(`Organisateur : ${m.organiser}`, { bold: true, size: 22, color: COLOR_GREEN }),
     spacer(300),
-    centeredLine("EduWeb Planner", { bold: true, size: 22, color: COLOR_GREEN }),
+    centeredLine("EduWeb Planner", { bold: true, size: 26, color: COLOR_GREEN }),
     centeredLine("Plateforme de pilotage scolaire — https://planning.eduweb.ci", {
       italic: true,
-      size: 16,
+      size: 20,
       color: COLOR_GRAY,
     }),
   ];
@@ -131,7 +131,7 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
             text: `Diapositive ${String(s.num).padStart(2, "0")}`,
             color: COLOR_GOLD,
             bold: true,
-            size: 18,
+            size: 22,
           }),
         ],
       }),
@@ -161,7 +161,7 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
           new Paragraph({
             spacing: { after: 40 },
             children: [
-              new TextRun({ text: `${p.letter} — ${p.label}`, bold: true, color: COLOR_GREEN, size: 22 }),
+              new TextRun({ text: `${p.letter} — ${p.label}`, bold: true, color: COLOR_GREEN, size: 26 }),
             ],
           }),
           bodyText(p.detail),
@@ -175,7 +175,7 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
           new Paragraph({
             spacing: { after: 40 },
             children: [
-              new TextRun({ text: `${v.letter} ${v.label}`, bold: true, color: COLOR_GREEN, size: 22 }),
+              new TextRun({ text: `${v.letter} ${v.label}`, bold: true, color: COLOR_GREEN, size: 26 }),
             ],
           }),
           bodyText(v.detail),
@@ -190,8 +190,8 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
           new Paragraph({
             spacing: { after: 60 },
             children: [
-              new TextRun({ text: `${r.letter} — `, bold: true, color: COLOR_GREEN, size: 22 }),
-              new TextRun({ text: r.label, size: 22 }),
+              new TextRun({ text: `${r.letter} — `, bold: true, color: COLOR_GREEN, size: 26 }),
+              new TextRun({ text: r.label, size: 26 }),
             ],
           }),
       ),
@@ -200,7 +200,7 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
         new Paragraph({
           spacing: { after: 40 },
           children: [
-            new TextRun({ text: `${v.letter} ${v.label}`, bold: true, color: COLOR_GREEN, size: 22 }),
+            new TextRun({ text: `${v.letter} ${v.label}`, bold: true, color: COLOR_GREEN, size: 26 }),
           ],
         }),
         bodyText(v.detail),
@@ -229,7 +229,7 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
         new Paragraph({
           spacing: { before: 80, after: 40 },
           children: [
-            new TextRun({ text: `${p.num}. ${p.title}`, bold: true, color: COLOR_GREEN, size: 22 }),
+            new TextRun({ text: `${p.num}. ${p.title}`, bold: true, color: COLOR_GREEN, size: 26 }),
           ],
         }),
         ...p.items.map((it) => bodyText(`• ${it}`)),
@@ -248,7 +248,7 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
             text: plan.columns.join(" | "),
             bold: true,
             color: COLOR_GREEN,
-            size: 22,
+            size: 26,
           }),
         ],
       }),
@@ -256,7 +256,7 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
         (row) =>
           new Paragraph({
             spacing: { after: 40 },
-            children: [new TextRun({ text: row.values.join(" | "), size: 22 })],
+            children: [new TextRun({ text: row.values.join(" | "), size: 26 })],
           }),
       ),
     ];
@@ -271,8 +271,8 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
         new Paragraph({
           spacing: { after: 40 },
           children: [
-            new TextRun({ text: s.hours + "  ·  ", bold: true, color: COLOR_GREEN, size: 20 }),
-            new TextRun({ text: s.activity, size: 20 }),
+            new TextRun({ text: s.hours + "  ·  ", bold: true, color: COLOR_GREEN, size: 24 }),
+            new TextRun({ text: s.activity, size: 24 }),
           ],
         }),
     ),
@@ -291,8 +291,8 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
           spacing: { after: 80 },
           indent: { left: 360, hanging: 360 },
           children: [
-            new TextRun({ text: g.term, bold: true, color: COLOR_GREEN, size: 22 }),
-            new TextRun({ text: " — " + g.definition, size: 22 }),
+            new TextRun({ text: g.term, bold: true, color: COLOR_GREEN, size: 26 }),
+            new TextRun({ text: " — " + g.definition, size: 26 }),
           ],
         }),
     ),
@@ -304,10 +304,10 @@ export async function buildCommPastoraleDocx(seminaire: CommSeminaire): Promise<
     heading1("Message de clôture"),
     ...multiParagraph(seminaire.closingMessage),
     spacer(200),
-    centeredLine("Fin du livret académique", { bold: true, size: 24, color: COLOR_GREEN }),
+    centeredLine("Fin du livret académique", { bold: true, size: 28, color: COLOR_GREEN }),
     centeredLine(`EduWeb Planner · Séminaire SENEC · ${m.referenceDate}`, {
       italic: true,
-      size: 18,
+      size: 22,
       color: COLOR_GRAY,
     }),
   ];
@@ -406,8 +406,8 @@ function renderBlock(b: CommSlideBlock): Paragraph[] {
           new Paragraph({
             spacing: { before: 60, after: 30 },
             children: [
-              new TextRun({ text: `${it.label} · `, bold: true, color: COLOR_GOLD, size: 22 }),
-              new TextRun({ text: it.title, bold: true, color: COLOR_GREEN, size: 22 }),
+              new TextRun({ text: `${it.label} · `, bold: true, color: COLOR_GOLD, size: 26 }),
+              new TextRun({ text: it.title, bold: true, color: COLOR_GREEN, size: 26 }),
             ],
           }),
         );
@@ -423,8 +423,8 @@ function renderBlock(b: CommSlideBlock): Paragraph[] {
           new Paragraph({
             spacing: { before: 80, after: 40 },
             children: [
-              new TextRun({ text: `${it.letter}  `, bold: true, color: COLOR_GOLD, size: 28 }),
-              new TextRun({ text: it.label, bold: true, color: COLOR_GREEN, size: 24 }),
+              new TextRun({ text: `${it.letter}  `, bold: true, color: COLOR_GOLD, size: 32 }),
+              new TextRun({ text: it.label, bold: true, color: COLOR_GREEN, size: 28 }),
             ],
           }),
         );
@@ -441,7 +441,7 @@ function renderBlock(b: CommSlideBlock): Paragraph[] {
               text: b.items.join("  ›  "),
               bold: true,
               color: COLOR_GREEN,
-              size: 22,
+              size: 26,
             }),
           ],
         }),
@@ -453,8 +453,8 @@ function renderBlock(b: CommSlideBlock): Paragraph[] {
           new Paragraph({
             spacing: { after: 40 },
             children: [
-              new TextRun({ text: c.name + " — ", bold: true, color: COLOR_GREEN, size: 22 }),
-              new TextRun({ text: c.purpose, italics: true, size: 22 }),
+              new TextRun({ text: c.name + " — ", bold: true, color: COLOR_GREEN, size: 26 }),
+              new TextRun({ text: c.purpose, italics: true, size: 26 }),
             ],
           }),
         );
@@ -471,7 +471,7 @@ function renderBlock(b: CommSlideBlock): Paragraph[] {
               text: b.headers.join(" | "),
               bold: true,
               color: COLOR_GREEN,
-              size: 20,
+              size: 24,
             }),
           ],
         }),
@@ -481,9 +481,9 @@ function renderBlock(b: CommSlideBlock): Paragraph[] {
           new Paragraph({
             spacing: { after: 40 },
             children: [
-              new TextRun({ text: `${r.public}  ·  `, bold: true, size: 20 }),
-              new TextRun({ text: r.verbs.join(" / ") + "  ·  ", italics: true, size: 20 }),
-              new TextRun({ text: r.columns.join("  |  "), size: 20 }),
+              new TextRun({ text: `${r.public}  ·  `, bold: true, size: 24 }),
+              new TextRun({ text: r.verbs.join(" / ") + "  ·  ", italics: true, size: 24 }),
+              new TextRun({ text: r.columns.join("  |  "), size: 24 }),
             ],
           }),
         );
@@ -497,8 +497,8 @@ function renderBlock(b: CommSlideBlock): Paragraph[] {
           new Paragraph({
             spacing: { before: 60, after: 30 },
             children: [
-              new TextRun({ text: `Étape ${s.num} · `, bold: true, color: COLOR_GREEN, size: 22 }),
-              new TextRun({ text: s.label, bold: true, size: 22 }),
+              new TextRun({ text: `Étape ${s.num} · `, bold: true, color: COLOR_GREEN, size: 26 }),
+              new TextRun({ text: s.label, bold: true, size: 26 }),
             ],
           }),
         );
@@ -518,8 +518,8 @@ function renderActivity(a: CommSeminaireActivity): Paragraph[] {
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: "Modalité : ", bold: true, color: COLOR_GREEN, size: 20 }),
-          new TextRun({ text: a.recommendation, italics: true, size: 20 }),
+          new TextRun({ text: "Modalité : ", bold: true, color: COLOR_GREEN, size: 24 }),
+          new TextRun({ text: a.recommendation, italics: true, size: 24 }),
         ],
       }),
     );
@@ -532,9 +532,9 @@ function renderActivity(a: CommSeminaireActivity): Paragraph[] {
         new Paragraph({
           spacing: { after: 40 },
           children: [
-            new TextRun({ text: "□  ", color: COLOR_GREEN, size: 22 }),
-            new TextRun({ text: it.label, bold: true, size: 22 }),
-            it.helper ? new TextRun({ text: " — " + it.helper, italics: true, size: 20 }) : new TextRun({ text: "" }),
+            new TextRun({ text: "□  ", color: COLOR_GREEN, size: 26 }),
+            new TextRun({ text: it.label, bold: true, size: 26 }),
+            it.helper ? new TextRun({ text: " — " + it.helper, italics: true, size: 24 }) : new TextRun({ text: "" }),
           ],
         }),
       ),
@@ -547,8 +547,8 @@ function renderActivity(a: CommSeminaireActivity): Paragraph[] {
         new Paragraph({
           spacing: { before: 60, after: 30 },
           children: [
-            new TextRun({ text: `Q${i + 1}. `, bold: true, color: COLOR_GREEN, size: 22 }),
-            new TextRun({ text: q.question, bold: true, size: 22 }),
+            new TextRun({ text: `Q${i + 1}. `, bold: true, color: COLOR_GREEN, size: 26 }),
+            new TextRun({ text: q.question, bold: true, size: 26 }),
           ],
         }),
       );
@@ -560,12 +560,12 @@ function renderActivity(a: CommSeminaireActivity): Paragraph[] {
             children: [
               new TextRun({
                 text: `${String.fromCharCode(65 + j)}. ${o}`,
-                size: 20,
+                size: 24,
                 bold: j === q.correctIdx,
                 color: j === q.correctIdx ? COLOR_GREEN : undefined,
               }),
               j === q.correctIdx
-                ? new TextRun({ text: "  ✓", bold: true, color: COLOR_GREEN, size: 20 })
+                ? new TextRun({ text: "  ✓", bold: true, color: COLOR_GREEN, size: 24 })
                 : new TextRun({ text: "" }),
             ],
           }),
@@ -577,7 +577,7 @@ function renderActivity(a: CommSeminaireActivity): Paragraph[] {
             indent: { left: 360 },
             spacing: { after: 60 },
             children: [
-              new TextRun({ text: q.rationale, italics: true, color: COLOR_GRAY, size: 18 }),
+              new TextRun({ text: q.rationale, italics: true, color: COLOR_GRAY, size: 22 }),
             ],
           }),
         );
@@ -594,7 +594,7 @@ function renderActivity(a: CommSeminaireActivity): Paragraph[] {
             text: a.tableHeaders.join(" | "),
             bold: true,
             color: COLOR_GREEN,
-            size: 20,
+            size: 24,
           }),
         ],
       }),
@@ -604,12 +604,12 @@ function renderActivity(a: CommSeminaireActivity): Paragraph[] {
         new Paragraph({
           spacing: { after: 40 },
           children: [
-            new TextRun({ text: row + "  |  ", bold: true, size: 20 }),
+            new TextRun({ text: row + "  |  ", bold: true, size: 24 }),
             new TextRun({
               text: "…  |  ".repeat(a.tableHeaders!.length - 1).trim(),
               italics: true,
               color: COLOR_GRAY,
-              size: 20,
+              size: 24,
             }),
           ],
         }),
@@ -622,8 +622,8 @@ function renderActivity(a: CommSeminaireActivity): Paragraph[] {
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: "Livrable : ", bold: true, size: 20 }),
-          new TextRun({ text: a.deliverable, italics: true, size: 20 }),
+          new TextRun({ text: "Livrable : ", bold: true, size: 24 }),
+          new TextRun({ text: a.deliverable, italics: true, size: 24 }),
         ],
       }),
     );

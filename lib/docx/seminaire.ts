@@ -51,31 +51,31 @@ export async function buildSeminaireDocx(seminaire: Seminaire): Promise<Buffer> 
 
   // -------- COUVERTURE --------
   const cover: Paragraph[] = [
-    centeredLine("République de Côte d'Ivoire", { bold: true, size: 20, color: COLOR_GRAY }),
-    centeredLine("Union — Discipline — Travail", { italic: true, size: 18, color: COLOR_GRAY }),
-    centeredLine("Séminaire des écoles catholiques", { italic: true, size: 18, color: COLOR_GRAY }),
+    centeredLine("République de Côte d'Ivoire", { bold: true, size: 24, color: COLOR_GRAY }),
+    centeredLine("Union — Discipline — Travail", { italic: true, size: 22, color: COLOR_GRAY }),
+    centeredLine("Séminaire des écoles catholiques", { italic: true, size: 22, color: COLOR_GRAY }),
     spacer(120),
     centeredImage(logo, 150),
     spacer(120),
-    centeredLine("Livret académique", { bold: true, size: 22, color: COLOR_GOLD }),
+    centeredLine("Livret académique", { bold: true, size: 26, color: COLOR_GOLD }),
     spacer(80),
-    centeredLine(m.title, { bold: true, size: 44, color: COLOR_GREEN }),
+    centeredLine(m.title, { bold: true, size: 48, color: COLOR_GREEN }),
     spacer(80),
-    centeredLine(m.subtitle, { italic: true, size: 22, color: COLOR_GRAY }),
+    centeredLine(m.subtitle, { italic: true, size: 26, color: COLOR_GRAY }),
     spacer(300),
     centeredLine(`Référence : ${m.reference}${m.referenceDate ? ` (${m.referenceDate})` : ""}`, {
       bold: true,
-      size: 20,
+      size: 24,
     }),
-    centeredLine(`Format : ${m.courseType}`, { italic: true, size: 18, color: COLOR_GRAY }),
-    centeredLine(`Durée : ${m.duration}`, { bold: true, size: 20 }),
-    centeredLine(`Niveau : ${m.level}`, { bold: true, size: 20 }),
-    centeredLine(`Public : ${m.audience}`, { italic: true, size: 18, color: COLOR_GRAY }),
+    centeredLine(`Format : ${m.courseType}`, { italic: true, size: 22, color: COLOR_GRAY }),
+    centeredLine(`Durée : ${m.duration}`, { bold: true, size: 24 }),
+    centeredLine(`Niveau : ${m.level}`, { bold: true, size: 24 }),
+    centeredLine(`Public : ${m.audience}`, { italic: true, size: 22, color: COLOR_GRAY }),
     spacer(300),
-    centeredLine("EduWeb Planner", { bold: true, size: 22, color: COLOR_GREEN }),
+    centeredLine("EduWeb Planner", { bold: true, size: 26, color: COLOR_GREEN }),
     centeredLine("Plateforme de pilotage scolaire — https://planning.eduweb.ci", {
       italic: true,
-      size: 16,
+      size: 20,
       color: COLOR_GRAY,
     }),
   ];
@@ -129,18 +129,18 @@ export async function buildSeminaireDocx(seminaire: Seminaire): Promise<Buffer> 
       new Paragraph({
         spacing: { before: 80, after: 20 },
         children: [
-          new TextRun({ text: `${row.section} · `, bold: true, color: COLOR_GREEN, size: 22 }),
-          new TextRun({ text: row.contentType, size: 22 }),
+          new TextRun({ text: `${row.section} · `, bold: true, color: COLOR_GREEN, size: 26 }),
+          new TextRun({ text: row.contentType, size: 26 }),
         ],
       }),
       new Paragraph({
         indent: { left: 360 },
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: "Activité : ", bold: true, size: 20 }),
-          new TextRun({ text: row.activity, size: 20 }),
-          new TextRun({ text: "  ·  Évaluation : ", bold: true, size: 20 }),
-          new TextRun({ text: row.evaluation, size: 20 }),
+          new TextRun({ text: "Activité : ", bold: true, size: 24 }),
+          new TextRun({ text: row.activity, size: 24 }),
+          new TextRun({ text: "  ·  Évaluation : ", bold: true, size: 24 }),
+          new TextRun({ text: row.evaluation, size: 24 }),
         ],
       }),
     ]),
@@ -155,7 +155,7 @@ export async function buildSeminaireDocx(seminaire: Seminaire): Promise<Buffer> 
       new Paragraph({
         spacing: { after: 60 },
         children: [
-          new TextRun({ text: mod.displayTitle, italics: true, size: 22, color: COLOR_GOLD }),
+          new TextRun({ text: mod.displayTitle, italics: true, size: 26, color: COLOR_GOLD }),
         ],
       }),
     );
@@ -163,10 +163,10 @@ export async function buildSeminaireDocx(seminaire: Seminaire): Promise<Buffer> 
       new Paragraph({
         spacing: { after: 80 },
         children: [
-          new TextRun({ text: "Durée : ", bold: true, size: 20 }),
-          new TextRun({ text: mod.duration, size: 20 }),
-          new TextRun({ text: "    ·    Objectif : ", bold: true, size: 20 }),
-          new TextRun({ text: mod.objective, size: 20 }),
+          new TextRun({ text: "Durée : ", bold: true, size: 24 }),
+          new TextRun({ text: mod.duration, size: 24 }),
+          new TextRun({ text: "    ·    Objectif : ", bold: true, size: 24 }),
+          new TextRun({ text: mod.objective, size: 24 }),
         ],
       }),
     );
@@ -207,14 +207,12 @@ export async function buildSeminaireDocx(seminaire: Seminaire): Promise<Buffer> 
     h5pContent.push(
       new Paragraph({
         spacing: { after: 60 },
-        children: [new TextRun({ text: h.displayTitle, bold: true, size: 22 })],
+        children: [new TextRun({ text: h.displayTitle, bold: true, size: 26 })],
       }),
     );
     if (h.description) h5pContent.push(bodyText(h.description, { italic: true }));
-    if (h.slides) {
-      h5pContent.push(heading4("Diapositives suggérées"));
-      h.slides.forEach((s, i) => h5pContent.push(numberedItem(s, `${i + 1}.`)));
-    }
+    // Les diapositives du PowerPoint ne sont volontairement PAS reprises dans le
+    // livret imprimable (support PPTX distinct).
     if (h.outcomes) {
       h5pContent.push(heading4("Résultats attendus"));
       h.outcomes.forEach((o) => h5pContent.push(bulletItem(o)));
@@ -255,20 +253,20 @@ export async function buildSeminaireDocx(seminaire: Seminaire): Promise<Buffer> 
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: c.criterion + " — ", size: 22 }),
-          new TextRun({ text: `${c.points} points`, bold: true, color: COLOR_GREEN, size: 22 }),
+          new TextRun({ text: c.criterion + " — ", size: 26 }),
+          new TextRun({ text: `${c.points} points`, bold: true, color: COLOR_GREEN, size: 26 }),
         ],
       }),
     ),
     new Paragraph({
       spacing: { before: 80, after: 80 },
       children: [
-        new TextRun({ text: "Total : ", bold: true, size: 24 }),
+        new TextRun({ text: "Total : ", bold: true, size: 28 }),
         new TextRun({
           text: `${seminaire.evaluation.totalPoints} points`,
           bold: true,
           color: COLOR_GREEN,
-          size: 24,
+          size: 28,
         }),
       ],
     }),
@@ -277,8 +275,8 @@ export async function buildSeminaireDocx(seminaire: Seminaire): Promise<Buffer> 
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: `${lv.range} : `, bold: true, color: COLOR_GREEN, size: 22 }),
-          new TextRun({ text: lv.label, size: 22 }),
+          new TextRun({ text: `${lv.range} : `, bold: true, color: COLOR_GREEN, size: 26 }),
+          new TextRun({ text: lv.label, size: 26 }),
         ],
       }),
     ),
@@ -292,8 +290,8 @@ export async function buildSeminaireDocx(seminaire: Seminaire): Promise<Buffer> 
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: `${w.element} : `, bold: true, size: 22 }),
-          new TextRun({ text: w.weight, bold: true, color: COLOR_GREEN, size: 22 }),
+          new TextRun({ text: `${w.element} : `, bold: true, size: 26 }),
+          new TextRun({ text: w.weight, bold: true, color: COLOR_GREEN, size: 26 }),
         ],
       }),
     ),
@@ -319,8 +317,8 @@ export async function buildSeminaireDocx(seminaire: Seminaire): Promise<Buffer> 
     new Paragraph({
       spacing: { before: 100, after: 40 },
       children: [
-        new TextRun({ text: "Forum de suivi : ", bold: true, size: 22 }),
-        new TextRun({ text: seminaire.actionPlan.forumTitle, italics: true, size: 22 }),
+        new TextRun({ text: "Forum de suivi : ", bold: true, size: 26 }),
+        new TextRun({ text: seminaire.actionPlan.forumTitle, italics: true, size: 26 }),
       ],
     }),
 
@@ -345,8 +343,8 @@ export async function buildSeminaireDocx(seminaire: Seminaire): Promise<Buffer> 
           spacing: { after: 80 },
           indent: { left: 360, hanging: 360 },
           children: [
-            new TextRun({ text: g.term, bold: true, color: COLOR_GREEN, size: 22 }),
-            new TextRun({ text: " — " + g.definition, size: 22 }),
+            new TextRun({ text: g.term, bold: true, color: COLOR_GREEN, size: 26 }),
+            new TextRun({ text: " — " + g.definition, size: 26 }),
           ],
         }),
     ),
@@ -385,10 +383,10 @@ export async function buildSeminaireDocx(seminaire: Seminaire): Promise<Buffer> 
     heading2("Message de clôture"),
     ...multiParagraph(seminaire.closingMessage),
     spacer(200),
-    centeredLine("Fin du livret académique", { bold: true, size: 24, color: COLOR_GREEN }),
+    centeredLine("Fin du livret académique", { bold: true, size: 28, color: COLOR_GREEN }),
     centeredLine("EduWeb Planner · Séminaire des écoles catholiques", {
       italic: true,
-      size: 18,
+      size: 22,
       color: COLOR_GRAY,
     }),
   ];
@@ -474,8 +472,8 @@ function renderBlocks(blocks: SeminaireBlock[]): Paragraph[] {
             spacing: { after: 80 },
             indent: { left: 300 },
             children: [
-              new TextRun({ text: "Application : ", bold: true, color: COLOR_GREEN, size: 20 }),
-              new TextRun({ text: b.application, italics: true, size: 20 }),
+              new TextRun({ text: "Application : ", bold: true, color: COLOR_GREEN, size: 24 }),
+              new TextRun({ text: b.application, italics: true, size: 24 }),
             ],
           }),
         );
@@ -486,7 +484,7 @@ function renderBlocks(blocks: SeminaireBlock[]): Paragraph[] {
         out.push(
           new Paragraph({
             spacing: { before: 60, after: 40 },
-            children: [new TextRun({ text: "Risques", bold: true, color: COLOR_GOLD, size: 20 })],
+            children: [new TextRun({ text: "Risques", bold: true, color: COLOR_GOLD, size: 24 })],
           }),
         );
         b.risks.forEach((r) => out.push(bulletItem(r)));
@@ -494,8 +492,8 @@ function renderBlocks(blocks: SeminaireBlock[]): Paragraph[] {
           new Paragraph({
             spacing: { before: 60, after: 80 },
             children: [
-              new TextRun({ text: "Solution : ", bold: true, color: COLOR_GREEN, size: 20 }),
-              new TextRun({ text: b.solution, italics: true, size: 20 }),
+              new TextRun({ text: "Solution : ", bold: true, color: COLOR_GREEN, size: 24 }),
+              new TextRun({ text: b.solution, italics: true, size: 24 }),
             ],
           }),
         );
@@ -510,7 +508,7 @@ function renderBlocks(blocks: SeminaireBlock[]): Paragraph[] {
           new Paragraph({
             spacing: { after: 40 },
             children: [
-              new TextRun({ text: b.headers.join(" | "), bold: true, color: COLOR_GREEN, size: 20 }),
+              new TextRun({ text: b.headers.join(" | "), bold: true, color: COLOR_GREEN, size: 24 }),
             ],
           }),
         );
@@ -518,7 +516,7 @@ function renderBlocks(blocks: SeminaireBlock[]): Paragraph[] {
           out.push(
             new Paragraph({
               spacing: { after: 40 },
-              children: [new TextRun({ text: row.join(" | "), size: 20 })],
+              children: [new TextRun({ text: row.join(" | "), size: 24 })],
             }),
           );
         });
@@ -545,8 +543,8 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: "Outil recommandé : ", bold: true, color: COLOR_GREEN, size: 20 }),
-          new TextRun({ text: a.recommendation, italics: true, size: 20 }),
+          new TextRun({ text: "Outil recommandé : ", bold: true, color: COLOR_GREEN, size: 24 }),
+          new TextRun({ text: a.recommendation, italics: true, size: 24 }),
         ],
       }),
     );
@@ -559,8 +557,8 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
         new Paragraph({
           spacing: { before: 60, after: 30 },
           children: [
-            new TextRun({ text: `Q${i + 1}. `, bold: true, color: COLOR_GREEN, size: 22 }),
-            new TextRun({ text: q.question, bold: true, size: 22 }),
+            new TextRun({ text: `Q${i + 1}. `, bold: true, color: COLOR_GREEN, size: 26 }),
+            new TextRun({ text: q.question, bold: true, size: 26 }),
           ],
         }),
       );
@@ -572,12 +570,12 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
             children: [
               new TextRun({
                 text: `${String.fromCharCode(65 + j)}. ${o}`,
-                size: 20,
+                size: 24,
                 bold: j === q.correctIdx,
                 color: j === q.correctIdx ? COLOR_GREEN : undefined,
               }),
               j === q.correctIdx
-                ? new TextRun({ text: "  ✓", bold: true, color: COLOR_GREEN, size: 20 })
+                ? new TextRun({ text: "  ✓", bold: true, color: COLOR_GREEN, size: 24 })
                 : new TextRun({ text: "" }),
             ],
           }),
@@ -591,10 +589,10 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
         new Paragraph({
           spacing: { after: 40 },
           children: [
-            new TextRun({ text: `${i + 1}. ${t.statement}`, size: 20 }),
-            new TextRun({ text: `  → ${t.answer}`, bold: true, color: COLOR_GREEN, size: 20 }),
+            new TextRun({ text: `${i + 1}. ${t.statement}`, size: 24 }),
+            new TextRun({ text: `  → ${t.answer}`, bold: true, color: COLOR_GREEN, size: 24 }),
             t.explanation
-              ? new TextRun({ text: " — " + t.explanation, italics: true, size: 20 })
+              ? new TextRun({ text: " — " + t.explanation, italics: true, size: 24 })
               : new TextRun({ text: "" }),
           ],
         }),
@@ -607,8 +605,8 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
         new Paragraph({
           spacing: { after: 40 },
           children: [
-            new TextRun({ text: mt.situation + " → ", size: 20 }),
-            new TextRun({ text: mt.principle, bold: true, color: COLOR_GREEN, size: 20 }),
+            new TextRun({ text: mt.situation + " → ", size: 24 }),
+            new TextRun({ text: mt.principle, bold: true, color: COLOR_GREEN, size: 24 }),
           ],
         }),
       );
@@ -620,8 +618,8 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
         new Paragraph({
           spacing: { before: 60, after: 40 },
           children: [
-            new TextRun({ text: `Étape ${s.num}. `, bold: true, color: COLOR_GREEN, size: 20 }),
-            new TextRun({ text: s.description, size: 20 }),
+            new TextRun({ text: `Étape ${s.num}. `, bold: true, color: COLOR_GREEN, size: 24 }),
+            new TextRun({ text: s.description, size: 24 }),
           ],
         }),
       );
@@ -633,7 +631,7 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
             children: [
               new TextRun({
                 text: `${String.fromCharCode(65 + j)}. ${c}`,
-                size: 20,
+                size: 24,
                 bold: j === s.bestIdx,
                 color: j === s.bestIdx ? COLOR_GREEN : undefined,
               }),
@@ -642,7 +640,7 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
                     text: "  ✓ (meilleur choix)",
                     italics: true,
                     color: COLOR_GREEN,
-                    size: 20,
+                    size: 24,
                   })
                 : new TextRun({ text: "" }),
             ],
@@ -656,8 +654,8 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: "Cas : ", bold: true, color: COLOR_GREEN, size: 20 }),
-          new TextRun({ text: a.caseStudy.description, size: 20 }),
+          new TextRun({ text: "Cas : ", bold: true, color: COLOR_GREEN, size: 24 }),
+          new TextRun({ text: a.caseStudy.description, size: 24 }),
         ],
       }),
     );
@@ -666,8 +664,8 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: "Production attendue : ", bold: true, size: 20 }),
-          new TextRun({ text: a.caseStudy.production, italics: true, size: 20 }),
+          new TextRun({ text: "Production attendue : ", bold: true, size: 24 }),
+          new TextRun({ text: a.caseStudy.production, italics: true, size: 24 }),
         ],
       }),
     );
@@ -681,7 +679,7 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
             text: a.tableHeaders.join(" | "),
             bold: true,
             color: COLOR_GREEN,
-            size: 20,
+            size: 24,
           }),
         ],
       }),
@@ -692,7 +690,7 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
           new Paragraph({
             spacing: { after: 30 },
             children: [
-              new TextRun({ text: e.content + " | …", size: 20 }),
+              new TextRun({ text: e.content + " | …", size: 24 }),
             ],
           }),
         );
@@ -712,8 +710,8 @@ function renderActivity(a: SeminaireActivity): Paragraph[] {
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: "Livrable attendu : ", bold: true, size: 20 }),
-          new TextRun({ text: a.deliverable, italics: true, size: 20 }),
+          new TextRun({ text: "Livrable attendu : ", bold: true, size: 24 }),
+          new TextRun({ text: a.deliverable, italics: true, size: 24 }),
         ],
       }),
     );
@@ -733,8 +731,8 @@ function renderQuiz(quiz: SeminaireQuiz): Paragraph[] {
       new Paragraph({
         spacing: { before: 80, after: 30 },
         children: [
-          new TextRun({ text: `Q${i + 1}. `, bold: true, color: COLOR_GREEN, size: 22 }),
-          new TextRun({ text: q.question, bold: true, size: 22 }),
+          new TextRun({ text: `Q${i + 1}. `, bold: true, color: COLOR_GREEN, size: 26 }),
+          new TextRun({ text: q.question, bold: true, size: 26 }),
         ],
       }),
     );
@@ -746,12 +744,12 @@ function renderQuiz(quiz: SeminaireQuiz): Paragraph[] {
           children: [
             new TextRun({
               text: `${String.fromCharCode(65 + j)}. ${o}`,
-              size: 20,
+              size: 24,
               bold: j === q.correctIdx,
               color: j === q.correctIdx ? COLOR_GREEN : undefined,
             }),
             j === q.correctIdx
-              ? new TextRun({ text: "  ✓", bold: true, color: COLOR_GREEN, size: 20 })
+              ? new TextRun({ text: "  ✓", bold: true, color: COLOR_GREEN, size: 24 })
               : new TextRun({ text: "" }),
           ],
         }),
@@ -767,8 +765,8 @@ function renderScheduleRows(rows: { hours: string; activity: string }[]): Paragr
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: r.hours + "  ·  ", bold: true, color: COLOR_GREEN, size: 20 }),
-          new TextRun({ text: r.activity, size: 20 }),
+          new TextRun({ text: r.hours + "  ·  ", bold: true, color: COLOR_GREEN, size: 24 }),
+          new TextRun({ text: r.activity, size: 24 }),
         ],
       }),
   );

@@ -53,7 +53,7 @@ export async function buildGuideDocx(roleKey: string): Promise<Buffer> {
   const cover: Paragraph[] = [
     centeredLine("Document de formation", {
       italic: true,
-      size: 20,
+      size: 24,
       color: COLOR_GRAY,
     }),
     spacer(200),
@@ -61,28 +61,28 @@ export async function buildGuideDocx(roleKey: string): Promise<Buffer> {
     spacer(120),
     centeredLine("Guide utilisateur", {
       bold: true,
-      size: 22,
+      size: 26,
       color: COLOR_GOLD,
     }),
     spacer(120),
-    centeredLine(guide.roleLabel, { bold: true, size: 56, color: COLOR_GREEN }),
+    centeredLine(guide.roleLabel, { bold: true, size: 60, color: COLOR_GREEN }),
     spacer(120),
     centeredLine(guide.meta.targetAudience, {
       italic: true,
-      size: 22,
+      size: 26,
       color: COLOR_GRAY,
     }),
     spacer(300),
-    centeredLine(`Niveau : ${guide.meta.level}`, { bold: true, size: 22 }),
+    centeredLine(`Niveau : ${guide.meta.level}`, { bold: true, size: 26 }),
     centeredLine(`Durée estimée : ${guide.meta.duration}`, {
       bold: true,
-      size: 22,
+      size: 26,
     }),
     ...(guide.meta.context
       ? [
           centeredLine(`Contexte : ${guide.meta.context}`, {
             italic: true,
-            size: 20,
+            size: 24,
             color: COLOR_GRAY,
           }),
         ]
@@ -90,14 +90,14 @@ export async function buildGuideDocx(roleKey: string): Promise<Buffer> {
     spacer(400),
     centeredLine("EduWeb Planner", {
       bold: true,
-      size: 24,
+      size: 28,
       color: COLOR_GREEN,
     }),
     centeredLine(
       "Plateforme de pilotage scolaire — https://planning.eduweb.ci",
       {
         italic: true,
-        size: 18,
+        size: 22,
         color: COLOR_GRAY,
       },
     ),
@@ -161,11 +161,11 @@ export async function buildGuideDocx(roleKey: string): Promise<Buffer> {
                     text: "Chemin · ",
                     bold: true,
                     color: COLOR_GREEN,
-                    size: 20,
+                    size: 24,
                   }),
                   new TextRun({
                     text: st.navigation,
-                    size: 20,
+                    size: 24,
                     color: COLOR_GRAY,
                   }),
                 ],
@@ -186,7 +186,7 @@ export async function buildGuideDocx(roleKey: string): Promise<Buffer> {
                 text: "Bonnes pratiques",
                 bold: true,
                 color: COLOR_GREEN,
-                size: 22,
+                size: 26,
               }),
             ],
           }),
@@ -226,9 +226,9 @@ export async function buildGuideDocx(roleKey: string): Promise<Buffer> {
             text: g.term,
             bold: true,
             color: COLOR_GREEN,
-            size: 22,
+            size: 26,
           }),
-          new TextRun({ text: " — " + g.definition, size: 22 }),
+          new TextRun({ text: " — " + g.definition, size: 26 }),
         ],
       }),
     ),
