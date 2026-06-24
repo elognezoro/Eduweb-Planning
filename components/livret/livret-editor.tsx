@@ -385,6 +385,7 @@ export function LivretEditor({
   const canWrite = app.can("school_record:write");
   const canManage = app.can("school_record:manage");
   const actor = app.user.displayName;
+  const etabId = app.user.etablissementId ?? null;
 
   const [page, setPage] = React.useState(1);
 
@@ -413,7 +414,7 @@ export function LivretEditor({
       if (isSupabaseConfigured()) {
         const merged = mergeLivretOverrides(pendingRef.current, patch);
         pendingRef.current = merged;
-        void upsertLivretRecord(createClient(), student.id, schoolYear, merged, actor).then((res) => {
+        void upsertLivretRecord(createClient(), student.id, schoolYear, merged, actor, etabId).then((res) => {
           if (!res.ok) {
             toast.error("Livret enregistré localement, mais échec de la synchro en ligne.", {
               id: "livret-online-error",
@@ -422,7 +423,7 @@ export function LivretEditor({
         });
       }
     },
-    [store, student.id, schoolYear, actor],
+    [store, student.id, schoolYear, actor, etabId],
   );
 
   const cur = PAGES.find((p) => p.num === page) ?? PAGES[0];

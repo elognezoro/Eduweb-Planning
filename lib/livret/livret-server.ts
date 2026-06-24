@@ -77,6 +77,7 @@ export async function upsertLivretGrade(
   supabase: SupabaseClient,
   entry: { studentId: string; schoolYear: string; subjectKey: string; period: TermIndex; moy: number },
   actor?: string,
+  etablissementId?: string | null,
 ): Promise<{ ok: boolean; error?: string }> {
   const { error } = await supabase.from("livret_grades").upsert(
     {
@@ -85,6 +86,7 @@ export async function upsertLivretGrade(
       subject_key: entry.subjectKey,
       period: entry.period,
       moy: entry.moy,
+      etablissement_id: etablissementId ?? null,
       updated_by: actor ?? null,
       updated_at: new Date().toISOString(),
     },
@@ -101,12 +103,14 @@ export async function upsertLivretRecord(
   schoolYear: string,
   overrides: LivretOverrides,
   actor?: string,
+  etablissementId?: string | null,
 ): Promise<{ ok: boolean; error?: string }> {
   const { error } = await supabase.from("livret_records").upsert(
     {
       student_id: studentId,
       school_year: schoolYear,
       overrides,
+      etablissement_id: etablissementId ?? null,
       updated_by: actor ?? null,
       updated_at: new Date().toISOString(),
     },

@@ -21,7 +21,9 @@ import {
 } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ImportCsvDialog } from "@/components/forms/import-csv-dialog";
-import { ELEVES } from "@/lib/mock-data";
+import { useStudents } from "@/components/app-shell/use-students";
+import { useApp } from "@/components/app-shell/app-context";
+import type { Student } from "@/lib/students/students-server";
 import { etabExportMeta, etabPeriods, type EtabExportMeta, type BulletinPeriod } from "@/lib/etab-config";
 import { toNomCase, toPrenomCase } from "@/lib/format-name";
 import { useStore } from "@/components/app-shell/data-store";
@@ -31,7 +33,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
 import { upsertLivretGrade } from "@/lib/livret/livret-server";
 
-type Eleve = (typeof ELEVES)[number];
+type Eleve = Student;
 interface NoteEntry {
   id: string;
   studentId: string;
@@ -90,8 +92,16 @@ const avg = (a: number[]) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length
 export default function NotesBulletinsPage() {
   const t = useTranslations();
   const store = useStore();
-  const classOptions = React.useMemo(() => [...new Set(ELEVES.map((e) => e.className))], []);
-  const [cls, setCls] = React.useState(classOptions[0]);
+  const app = useApp();
+  const { students } = useStudents();
+  const classOptions = React.useMemo(
+    () => [...new Set(students.map((e) => e.className).filter(Boolean))].sort(),
+    [students],
+  );
+  const [cls, setCls] = React.useState("");
+  React.useEffect(() => {
+    if (!cls && classOptions.length) setCls(classOptions[0]);
+  }, [classOptions, cls]);
   const [periods, setPeriods] = React.useState<BulletinPeriod[]>(() => etabPeriods({}));
   const [period, setPeriod] = React.useState("0");
   const [meta, setMeta] = React.useState<EtabExportMeta>(() => etabExportMeta({}));
@@ -101,7 +111,10 @@ export default function NotesBulletinsPage() {
     setMeta(etabExportMeta());
   }, []);
 
-  const classStudents = React.useMemo(() => ELEVES.filter((e) => e.className === cls).slice(0, 12), [cls]);
+  const classStudents = React.useMemo(
+    () => students.filter((e) => e.className === cls && e.status !== "archived"),
+    [students, cls],
+  );
   const [notes, setNotes] = React.useState<NoteEntry[]>([]);
   React.useEffect(() => setNotes(genNotes(classStudents)), [classStudents]);
 
@@ -159,8 +172,8 @@ export default function NotesBulletinsPage() {
           moy: Math.round(m * 100) / 100,
         };
         store.setLivretGrade(entry);
-        // Write-through Supabase (mode réel) : partage durable multi-appareils.
-        if (client) pending.push(upsertLivretGrade(client, entry));
+        // Write-through Supabase (mode réel) : partage durable, cloisonné par établissement.
+        if (client) pending.push(upsertLivretGrade(client, entry, undefined, app.user.etablissementId ?? null));
         count += 1;
       }
     }

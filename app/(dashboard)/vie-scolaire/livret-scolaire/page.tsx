@@ -13,7 +13,9 @@ import { SimpleTable } from "@/components/data-table/simple-table";
 import { initials } from "@/lib/utils";
 import { etabExportMeta, type EtabExportMeta } from "@/lib/etab-config";
 import { toNomCase, toPrenomCase } from "@/lib/format-name";
-import { ELEVES } from "@/lib/mock-data";
+import { useStudents } from "@/components/app-shell/use-students";
+import type { Student } from "@/lib/students/students-server";
+import type { Eleve } from "@/lib/types";
 import { LivretSynthese, livretTerms, livretMention, livretOrd, buildLivretSynthese } from "@/components/livret/livret-synthese";
 import { LivretEditor } from "@/components/livret/livret-editor";
 import { LivretFullModal } from "@/components/livret/livret-document";
@@ -32,19 +34,47 @@ const COMPETENCES = [
 
 const TRIM_LABELS = ["1ᵉʳ Trimestre", "2ᵉ Trimestre", "3ᵉ Trimestre"];
 
+/** Adapte un élève du référentiel (Student) à la forme Eleve attendue par les
+ * composants du livret (les champs average/attendanceRate ne sont pas utilisés). */
+function studentToEleve(s: Student): Eleve {
+  return {
+    id: s.id,
+    matricule: s.matricule,
+    firstName: s.firstName,
+    lastName: s.lastName,
+    gender: s.gender === "F" ? "F" : "M",
+    birthDate: s.birthDate,
+    className: s.className,
+    average: 0,
+    attendanceRate: 0,
+    status: s.status === "archived" ? "suspended" : "active",
+  };
+}
+
 export default function LivretScolairePage() {
   const t = useTranslations();
-  const classOptions = React.useMemo(() => [...new Set(ELEVES.map((e) => e.className))], []);
-  const [cls, setCls] = React.useState(classOptions[0]);
-  const classStudents = React.useMemo(() => ELEVES.filter((e) => e.className === cls), [cls]);
-  const [studentId, setStudentId] = React.useState(classStudents[0]?.id ?? "");
+  const { students } = useStudents();
+  const classOptions = React.useMemo(
+    () => [...new Set(students.map((e) => e.className).filter(Boolean))].sort(),
+    [students],
+  );
+  const [cls, setCls] = React.useState("");
+  React.useEffect(() => {
+    if (!cls && classOptions.length) setCls(classOptions[0]);
+  }, [classOptions, cls]);
+  const classStudents = React.useMemo(
+    () => students.filter((e) => e.className === cls && e.status !== "archived"),
+    [students, cls],
+  );
+  const [studentId, setStudentId] = React.useState("");
 
   // Garder un élève valide quand la classe change.
   React.useEffect(() => {
     if (!classStudents.some((s) => s.id === studentId)) setStudentId(classStudents[0]?.id ?? "");
   }, [classStudents, studentId]);
 
-  const student = classStudents.find((s) => s.id === studentId) ?? classStudents[0];
+  const studentRaw = classStudents.find((s) => s.id === studentId) ?? classStudents[0];
+  const student: Eleve | undefined = studentRaw ? studentToEleve(studentRaw) : undefined;
   const effectif = classStudents.length;
 
   const store = useStore();
