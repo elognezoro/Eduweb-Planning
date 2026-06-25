@@ -2,6 +2,10 @@
 
 import * as React from "react";
 import {
+  matrixSubmissionId,
+  matrixReviewId,
+} from "@/lib/seminaires/production-keys";
+import {
   USER_DIRECTORY,
   ETABLISSEMENTS,
   LESSON_BOOK_ENTRIES,
@@ -653,6 +657,10 @@ interface DataStore extends StoreState {
   setMatrixReviewPublished: (id: string, published: boolean) => void;
   /** Supprime une critique. */
   removeMatrixReview: (id: string) => void;
+  /** Fusionne des soumissions de matrice venues de Supabase (migration 031). */
+  mergeMatrixSubmissions: (incoming: MatrixSubmission[]) => void;
+  /** Fusionne des critiques de matrice venues de Supabase (migration 031). */
+  mergeMatrixReviews: (incoming: MatrixReview[]) => void;
   /** Notes du livret : crée/met à jour la moyenne (élève+année+matière+trimestre). */
   setLivretGrade: (
     entry: Omit<LivretGradeEntry, "id" | "updatedAt" | "updatedBy">,
@@ -1694,19 +1702,26 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
           (m) => m.userId === input.userId && m.activityId === input.activityId,
         );
         if (existing) {
+          // Normalise vers l'id DÉTERMINISTE : une éventuelle ligne héritée (id
+          // aléatoire d'avant la persistance) reçoit l'id stable, cohérent avec
+          // le push Supabase → pas de doublon serveur.
+          const id = matrixSubmissionId(input.userId, input.activityId);
           return {
             ...s,
             matrixSubmissions: s.matrixSubmissions.map((m) =>
-              m.id === existing.id
-                ? { ...existing, ...input, updatedAt: now }
-                : m,
+              m.id === existing.id ? { ...existing, ...input, id, updatedAt: now } : m,
             ),
           };
         }
         return {
           ...s,
           matrixSubmissions: [
-            { ...input, id: genId("ms"), createdAt: now, updatedAt: now },
+            {
+              ...input,
+              id: matrixSubmissionId(input.userId, input.activityId),
+              createdAt: now,
+              updatedAt: now,
+            },
             ...s.matrixSubmissions,
           ],
         };
@@ -1720,19 +1735,23 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
             r.reviewerId === input.reviewerId,
         );
         if (existing) {
+          const id = matrixReviewId(input.submissionId, input.reviewerId);
           return {
             ...s,
             matrixReviews: s.matrixReviews.map((r) =>
-              r.id === existing.id
-                ? { ...existing, ...input, updatedAt: now }
-                : r,
+              r.id === existing.id ? { ...existing, ...input, id, updatedAt: now } : r,
             ),
           };
         }
         return {
           ...s,
           matrixReviews: [
-            { ...input, id: genId("mr"), createdAt: now, updatedAt: now },
+            {
+              ...input,
+              id: matrixReviewId(input.submissionId, input.reviewerId),
+              createdAt: now,
+              updatedAt: now,
+            },
             ...s.matrixReviews,
           ],
         };
@@ -1755,6 +1774,28 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         ...s,
         matrixReviews: s.matrixReviews.filter((r) => r.id !== id),
       })),
+    // Fusion descendante depuis Supabase (migration 031). Dédoublonne par id
+    // (déterministe) ; en cas de collision, la version la plus récente gagne.
+    mergeMatrixSubmissions: (incoming) =>
+      setState((s) => {
+        if (!incoming.length) return s;
+        const byId = new Map(s.matrixSubmissions.map((m) => [m.id, m]));
+        for (const sub of incoming) {
+          const ex = byId.get(sub.id);
+          if (!ex || (sub.updatedAt ?? "") >= (ex.updatedAt ?? "")) byId.set(sub.id, sub);
+        }
+        return { ...s, matrixSubmissions: Array.from(byId.values()) };
+      }),
+    mergeMatrixReviews: (incoming) =>
+      setState((s) => {
+        if (!incoming.length) return s;
+        const byId = new Map(s.matrixReviews.map((r) => [r.id, r]));
+        for (const rev of incoming) {
+          const ex = byId.get(rev.id);
+          if (!ex || (rev.updatedAt ?? "") >= (ex.updatedAt ?? "")) byId.set(rev.id, rev);
+        }
+        return { ...s, matrixReviews: Array.from(byId.values()) };
+      }),
     setLivretGrade: (entry, actor) =>
       setState((s) => {
         const now = new Date().toISOString();

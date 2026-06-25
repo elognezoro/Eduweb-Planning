@@ -21,6 +21,7 @@ import {
   Maximize2,
   Minimize2,
   MessageSquare,
+  RefreshCw,
   Sparkles,
   StickyNote,
   Target,
@@ -35,6 +36,15 @@ import { generateMatrixCritique } from "@/lib/seminaires/matrix-critique";
 import { NarrationButton } from "@/components/seminaires/narration-button";
 import { useFormationRole } from "@/components/formations/use-formation-role";
 import { isFacilitatorRole } from "@/lib/formations/formation-roles";
+import {
+  fetchCourseMatrix,
+  persistMatrixSubmission,
+  persistMatrixReview,
+} from "@/lib/seminaires/productions-server";
+import {
+  matrixSubmissionId,
+  matrixReviewId,
+} from "@/lib/seminaires/production-keys";
 import type {
   CommSeminaire,
   CommSeminaireActivity,
@@ -2177,6 +2187,28 @@ function EngagementAppreciation({
 }
 
 /* -------- Matrice / plan (tableaux saisissables) -------- */
+/* Synchro Supabase descendante des productions « matrice » (migration 031).
+   Coalescée (1,5 s) pour éviter des requêtes redondantes quand plusieurs
+   matrices sont montées en même temps ; `force` contourne pour le bouton
+   « Rafraîchir ». Inerte en mode démo (fetchCourseMatrix renvoie null). */
+const lastMatrixFetch: Record<string, number> = {};
+async function pullCourseMatrix(
+  courseId: string,
+  store: ReturnType<typeof useStore>,
+  force = false,
+) {
+  const now = Date.now();
+  if (!force && lastMatrixFetch[courseId] && now - lastMatrixFetch[courseId] < 1500) {
+    return;
+  }
+  lastMatrixFetch[courseId] = now;
+  const data = await fetchCourseMatrix(courseId);
+  if (data) {
+    store.mergeMatrixSubmissions(data.submissions);
+    store.mergeMatrixReviews(data.reviews);
+  }
+}
+
 function FillableMatrix({
   headers,
   rowLabels,
@@ -2196,6 +2228,13 @@ function FillableMatrix({
   const moduleId = "senec-workshops";
   const activityId = idPrefix;
 
+  // Synchro descendante au montage (mode réel) : récupère les soumissions des
+  // participants (pour le formateur) et les critiques publiées (pour l'apprenant).
+  React.useEffect(() => {
+    void pullCourseMatrix(courseId, store);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseId]);
+
   const mine = React.useMemo(
     () =>
       store.matrixSubmissions.find(
@@ -2205,10 +2244,51 @@ function FillableMatrix({
   );
   const cells = mine?.cells ?? {};
 
+  // Push différé vers Supabase (anti-rafale de frappe) ; inerte en mode démo.
+  // `pendingRef` retient la dernière soumission à pousser → flush à la sortie
+  // (navigation juste après une frappe) pour ne rien perdre.
+  const pushTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingRef = React.useRef<
+    Parameters<typeof persistMatrixSubmission>[0] | null
+  >(null);
+  React.useEffect(
+    () => () => {
+      if (pushTimer.current) {
+        clearTimeout(pushTimer.current);
+        if (pendingRef.current) void persistMatrixSubmission(pendingRef.current);
+        pendingRef.current = null;
+      }
+    },
+    [],
+  );
+  function schedulePush(nextCells: Record<string, string>) {
+    const nowIso = new Date().toISOString();
+    pendingRef.current = {
+      id: matrixSubmissionId(app.user.id, activityId),
+      userId: app.user.id,
+      userName: app.user.displayName,
+      userRole: app.effectiveRole,
+      courseId,
+      moduleId,
+      activityId,
+      headers,
+      rowLabels,
+      cells: nextCells,
+      createdAt: mine?.createdAt ?? nowIso,
+      updatedAt: nowIso,
+    };
+    if (pushTimer.current) clearTimeout(pushTimer.current);
+    pushTimer.current = setTimeout(() => {
+      if (pendingRef.current) void persistMatrixSubmission(pendingRef.current);
+      pendingRef.current = null;
+    }, 1200);
+  }
+
   function key(r: number, c: number) {
     return `${r}-${c}`;
   }
   function updateCell(r: number, c: number, value: string) {
+    const nextCells = { ...cells, [key(r, c)]: value };
     store.upsertMatrixSubmission({
       userId: app.user.id,
       userName: app.user.displayName,
@@ -2218,8 +2298,9 @@ function FillableMatrix({
       activityId,
       headers,
       rowLabels,
-      cells: { ...cells, [key(r, c)]: value },
+      cells: nextCells,
     });
+    schedulePush(nextCells);
   }
   function copy() {
     const lines: string[] = [];
@@ -2300,7 +2381,9 @@ function FillableMatrix({
       {/* Panneau de critiques — visible uniquement par les formateurs/admins.
           Liste les soumissions des autres participants ; possibilité de
           générer une critique, l'éditer, la publier ou la dépublier. */}
-      {canReview ? <FacilitatorReviewPanel activityId={activityId} /> : null}
+      {canReview ? (
+        <FacilitatorReviewPanel activityId={activityId} courseId={courseId} />
+      ) : null}
     </div>
   );
 }
@@ -2328,46 +2411,70 @@ function PublishedReview({ review }: { review: ReturnType<typeof useStore>["matr
 }
 
 /* ----- Panneau de critique réservé aux formateurs/admins ----- */
-function FacilitatorReviewPanel({ activityId }: { activityId: string }) {
+function FacilitatorReviewPanel({
+  activityId,
+  courseId,
+}: {
+  activityId: string;
+  courseId: string;
+}) {
   const app = useApp();
   const store = useStore();
+  const [refreshing, setRefreshing] = React.useState(false);
   const submissions = store.matrixSubmissions
     .filter((m) => m.activityId === activityId && m.userId !== app.user.id)
     .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
 
-  if (submissions.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-border bg-background/60 p-3 text-xs italic text-muted-foreground">
-        Aucune autre soumission à critiquer pour le moment. Dès qu&apos;un
-        participant remplit sa matrice, elle apparaîtra ici pour évaluation.
-      </div>
-    );
+  async function refresh() {
+    setRefreshing(true);
+    try {
+      await pullCourseMatrix(courseId, store, true);
+    } finally {
+      setRefreshing(false);
+    }
   }
 
   return (
     <div className="rounded-2xl border border-ew-gold-200 bg-ew-gold-50/40 p-3">
-      <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-gold-700">
-        <Eye aria-hidden className="h-4 w-4" /> Espace formateur — {submissions.length}{" "}
-        soumission{submissions.length > 1 ? "s" : ""} à critiquer
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ew-gold-700">
+          <Eye aria-hidden className="h-4 w-4" /> Espace formateur — {submissions.length}{" "}
+          soumission{submissions.length > 1 ? "s" : ""} à critiquer
+        </p>
+        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing}>
+          <RefreshCw aria-hidden className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
+          {refreshing ? "Actualisation…" : "Rafraîchir"}
+        </Button>
+      </div>
       <p className="mt-1 text-[11px] italic text-muted-foreground">
         Réservé à l&apos;administrateur, à l&apos;enseignant ou au tuteur.
         Générez une première critique objective, éditez-la si besoin, puis
         publiez-la pour la rendre accessible au participant.
       </p>
-      <div className="mt-2 space-y-2">
-        {submissions.map((sub) => (
-          <SubmissionReviewCard key={sub.id} submission={sub} />
-        ))}
-      </div>
+      {submissions.length === 0 ? (
+        <div className="mt-2 rounded-xl border border-dashed border-border bg-background/60 p-3 text-xs italic text-muted-foreground">
+          Aucune soumission visible pour le moment. Dès qu&apos;un participant
+          remplit sa matrice, cliquez sur «&nbsp;Rafraîchir&nbsp;» pour la faire
+          apparaître ici (en mode démo, les productions du même navigateur
+          s&apos;affichent automatiquement).
+        </div>
+      ) : (
+        <div className="mt-2 space-y-2">
+          {submissions.map((sub) => (
+            <SubmissionReviewCard key={sub.id} submission={sub} courseId={courseId} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 function SubmissionReviewCard({
   submission,
+  courseId,
 }: {
   submission: ReturnType<typeof useStore>["matrixSubmissions"][number];
+  courseId: string;
 }) {
   const app = useApp();
   const store = useStore();
@@ -2395,6 +2502,27 @@ function SubmissionReviewCard({
     setContent(draft);
   }
 
+  // Persiste la critique côté Supabase (best-effort, inerte en mode démo) avec le
+  // même id déterministe que le store → l'apprenant et les autres formateurs la
+  // voient (selon la RLS) sur n'importe quel appareil.
+  function pushReview(publishedFlag: boolean, text: string) {
+    const nowIso = new Date().toISOString();
+    void persistMatrixReview(
+      {
+        id: matrixReviewId(submission.id, app.user.id),
+        submissionId: submission.id,
+        reviewerId: app.user.id,
+        reviewerName: app.user.displayName,
+        reviewerRole: app.effectiveRole,
+        content: text,
+        publishedToLearner: publishedFlag,
+        createdAt: myReview?.createdAt ?? nowIso,
+        updatedAt: nowIso,
+      },
+      courseId,
+    );
+  }
+
   function save() {
     if (!content.trim()) return;
     store.upsertMatrixReview({
@@ -2405,6 +2533,7 @@ function SubmissionReviewCard({
       content: content.trim(),
       publishedToLearner: published,
     });
+    pushReview(published, content.trim());
   }
 
   function togglePublication() {
@@ -2420,11 +2549,13 @@ function SubmissionReviewCard({
         publishedToLearner: true,
       });
       setPublished(true);
+      pushReview(true, content.trim());
       return;
     }
     const next = !myReview.publishedToLearner;
     store.setMatrixReviewPublished(myReview.id, next);
     setPublished(next);
+    pushReview(next, content.trim() || myReview.content);
   }
 
   return (
