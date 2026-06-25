@@ -47,6 +47,10 @@ import {
 } from "@/lib/seminaires/production-keys";
 import { useReflectionSync } from "@/components/seminaires/use-reflection-sync";
 import { ReflectionFacilitatorPanel } from "@/components/seminaires/reflection-facilitator-panel";
+import {
+  SeminaireActivityProvider,
+  useSeminaireActivityContext,
+} from "@/components/seminaires/activity-context";
 import type {
   CommSeminaire,
   CommSeminaireActivity,
@@ -717,11 +721,22 @@ function SlideBlockView({ block: b }: { block: CommSlideBlock }) {
 /* ============================================================================
    ACTIVITÉS
    ========================================================================== */
-export function ActivityList({ activities }: { activities: CommSeminaireActivity[] }) {
+export function ActivityList({
+  activities,
+  courseId,
+  moduleId = "ateliers",
+}: {
+  activities: CommSeminaireActivity[];
+  /** Cours du séminaire — fournit le contexte aux activités pour la persistance
+   *  Supabase (QCM, correction IA, engagement). Sans lui, ces productions ne se
+   *  sauvegardent pas. */
+  courseId?: string;
+  moduleId?: string;
+}) {
   // Accordéon exclusif : un seul atelier ouvert à la fois. Le précédent se
   // ferme automatiquement quand l'apprenant en ouvre un autre.
   const [openId, setOpenId] = React.useState<string | null>(null);
-  return (
+  const list = (
     <div className="space-y-3">
       {activities.map((a) => (
         <ActivityCard
@@ -732,6 +747,13 @@ export function ActivityList({ activities }: { activities: CommSeminaireActivity
         />
       ))}
     </div>
+  );
+  return courseId ? (
+    <SeminaireActivityProvider value={{ courseId, moduleId }}>
+      {list}
+    </SeminaireActivityProvider>
+  ) : (
+    list
   );
 }
 
@@ -2371,8 +2393,9 @@ function FillableMatrix({
   // ensuite consulter et critiquer les soumissions des participants.
   const app = useApp();
   const store = useStore();
-  const courseId = "communication-pastorale";
-  const moduleId = "senec-workshops";
+  const ctx = useSeminaireActivityContext();
+  const courseId = ctx?.courseId ?? "communication-pastorale";
+  const moduleId = ctx?.moduleId ?? "senec-workshops";
   const activityId = idPrefix;
 
   // Synchro descendante au montage (mode réel) : récupère les soumissions des
@@ -2903,8 +2926,11 @@ export function CommSchedule({ seminaire }: { seminaire: CommSeminaire }) {
    ========================================================================== */
 export function FinalSelfEvaluation({
   data,
+  courseId,
 }: {
   data: CommSeminaire["finalSelfEvaluation"];
+  /** Cours (pour la persistance Supabase — rendu hors SeminaireActivityProvider). */
+  courseId?: string;
 }) {
   const app = useApp();
   const { competences, levels, reinforceLabel, objective, durationMin } = data;
@@ -2945,6 +2971,32 @@ export function FinalSelfEvaluation({
       pasEncore[0] ?? enProgres[0] ?? null;
     return { pct, acquis, enProgres, pasEncore, collectifs, priorityIdx };
   }, [competences, picked, reinforce, maxLevel]);
+
+  // Persistance Supabase (production privée, migration 032) : ré-hydratation +
+  // sauvegarde différée ; le formateur du cours voit l'auto-évaluation des
+  // participants. courseId passé en prop (rendu hors SeminaireActivityProvider).
+  const refl = useReflectionSync<{
+    picked: Record<number, number>;
+    reinforce: Record<number, boolean>;
+  }>("final-self-evaluation", "selfeval", courseId);
+  const hydrated = React.useRef(false);
+  React.useEffect(() => {
+    if (hydrated.current || !refl.loaded) return;
+    hydrated.current = true;
+    if (refl.own) {
+      setPicked(refl.own.picked ?? {});
+      setReinforce(refl.own.reinforce ?? {});
+    }
+  }, [refl.loaded, refl.own]);
+  const saveTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => {
+    if (Object.keys(picked).length === 0) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => refl.save({ picked, reinforce }), 1000);
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [picked, reinforce, refl.save]);
 
   function levelName(i: number): string {
     const lvl = picked[i];
@@ -3109,6 +3161,33 @@ export function FinalSelfEvaluation({
           bilan={bilan}
           onCopy={copyReport}
           copied={copied}
+        />
+      ) : null}
+
+      {refl.canReview ? (
+        <ReflectionFacilitatorPanel<{
+          picked: Record<number, number>;
+          reinforce: Record<number, boolean>;
+        }>
+          title="Auto-évaluation"
+          others={refl.others}
+          onRefresh={refl.refresh}
+          render={(p) => {
+            const tw = competences.reduce(
+              (acc, _, i) => acc + (p.picked?.[i] ?? 0),
+              0,
+            );
+            const denom = Math.max(1, competences.length) * maxLevel;
+            const pct = Math.round((tw / denom) * 100);
+            const ans = Object.keys(p.picked ?? {}).length;
+            return (
+              <p>
+                Niveau global : <strong>{pct}%</strong> · {ans}/
+                {competences.length} compétence{competences.length > 1 ? "s" : ""}{" "}
+                évaluée{competences.length > 1 ? "s" : ""}
+              </p>
+            );
+          }}
         />
       ) : null}
     </div>

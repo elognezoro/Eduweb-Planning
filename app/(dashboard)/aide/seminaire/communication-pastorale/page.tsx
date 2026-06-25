@@ -166,7 +166,9 @@ export default function CommPastoralePage() {
         shortTitle: "Ateliers",
         title: "Ateliers interactifs",
         subtitle: `${s.activities.length} ateliers pour passer à la pratique`,
-        content: <ActivityList activities={s.activities} />,
+        content: (
+          <ActivityList activities={s.activities} courseId="communication-pastorale" />
+        ),
         narration: narrations.workshopsIntro,
       },
       {
@@ -175,7 +177,7 @@ export default function CommPastoralePage() {
         shortTitle: "Auto-évaluation",
         title: "Auto-évaluation finale & engagement d'action",
         subtitle: `${s.finalSelfEvaluation.durationMin} minutes — vérifiez vos acquis et engagez une action concrète`,
-        content: <FinalSelfEvaluation data={s.finalSelfEvaluation} />,
+        content: <FinalSelfEvaluation data={s.finalSelfEvaluation} courseId="communication-pastorale" />,
         narration: narrations.selfEvaluation,
       },
       {

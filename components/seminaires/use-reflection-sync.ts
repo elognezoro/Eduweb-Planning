@@ -53,10 +53,13 @@ export interface ReflectionSync<T> {
 export function useReflectionSync<T>(
   activityId: string,
   kind: string,
+  /** Force le cours (composants rendus HORS SeminaireActivityProvider, ex.
+   *  l'auto-évaluation finale qui reçoit son courseId en prop). */
+  courseIdOverride?: string,
 ): ReflectionSync<T> {
   const app = useApp();
   const ctx = useSeminaireActivityContext();
-  const courseId = ctx?.courseId ?? null;
+  const courseId = courseIdOverride ?? ctx?.courseId ?? null;
   const moduleId = ctx?.moduleId ?? "";
   const formationRole = useFormationRole(courseId ?? "");
   const canReview = isFacilitatorRole(formationRole);

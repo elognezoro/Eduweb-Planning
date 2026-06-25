@@ -201,7 +201,7 @@ export default function IaCommunicationPage() {
         content: (
           <div className="space-y-6">
             <IaDiagnostic />
-            <ActivityList activities={act("diag-ia")} />
+            <ActivityList activities={act("diag-ia")} courseId="ia-communication" />
           </div>
         ),
         narration: narrations.diagnostic,
@@ -216,7 +216,7 @@ export default function IaCommunicationPage() {
         content: (
           <div className="space-y-6">
             <IaUsageMap seminaire={s} />
-            <ActivityList activities={act("reformuler-ia")} />
+            <ActivityList activities={act("reformuler-ia")} courseId="ia-communication" />
           </div>
         ),
         narration: narrations.usages,
@@ -248,7 +248,7 @@ export default function IaCommunicationPage() {
         content: (
           <div className="space-y-6">
             <IaAtelierPratique />
-            <ActivityList activities={act("corriger-promo-ia")} />
+            <ActivityList activities={act("corriger-promo-ia")} courseId="ia-communication" />
           </div>
         ),
         narration: narrations.atelierPratique,
@@ -261,8 +261,8 @@ export default function IaCommunicationPage() {
         subtitle: `Séquence 7 — ${s.finalSelfEvaluation.durationMin} minutes : vérifiez vos acquis et engagez une action concrète`,
         content: (
           <div className="space-y-6">
-            <FinalSelfEvaluation data={s.finalSelfEvaluation} />
-            <ActivityList activities={act("engagement-ia")} />
+            <FinalSelfEvaluation data={s.finalSelfEvaluation} courseId="ia-communication" />
+            <ActivityList activities={act("engagement-ia")} courseId="ia-communication" />
           </div>
         ),
         narration: narrations.selfEvaluation,
@@ -273,7 +273,7 @@ export default function IaCommunicationPage() {
         shortTitle: "Évaluations",
         title: "Évaluations interactives",
         subtitle: "Pré-test — 8 QCM rapides auto-corrigés",
-        content: <ActivityList activities={act("qcm-ia")} />,
+        content: <ActivityList activities={act("qcm-ia")} courseId="ia-communication" />,
         narration: narrations.evaluations,
       },
       {
