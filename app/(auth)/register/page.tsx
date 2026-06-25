@@ -169,7 +169,7 @@ export default function RegisterPage() {
           },
           emailRedirectTo:
             typeof window !== "undefined"
-              ? `${window.location.origin}/login`
+              ? `${window.location.origin}/auth/callback?next=/dashboard`
               : undefined,
         },
       });
