@@ -62,7 +62,6 @@ import { DirectoryUsersProvider, useDirectoryUsers } from "@/components/app-shel
 import { useApp } from "@/components/app-shell/app-context";
 import { isSuperAdminEmail } from "@/lib/super-admins";
 import type { DirectoryUser } from "@/lib/mock-data";
-import { ETABLISSEMENTS } from "@/lib/mock-data";
 import {
   EtablissementCombobox,
   type EtablissementSelection,
@@ -172,7 +171,7 @@ export default function ComptesUtilisateursPage() {
 
 function ComptesUtilisateursContent() {
   const t = useTranslations();
-  const { users, addUser, loading, realMode, refresh } = useDirectoryUsers();
+  const { users, createAccount, loading, realMode, refresh } = useDirectoryUsers();
   const [role, setRole] = React.useState("all");
   const [status, setStatus] = React.useState("all");
   const [country, setCountry] = React.useState("all");
@@ -224,7 +223,7 @@ function ComptesUtilisateursContent() {
               </Button>
             )}
           />
-          <CreateUserDialog onCreate={addUser} />
+          <CreateUserDialog onCreate={createAccount} />
         </div>
       }
       kpis={[
@@ -949,7 +948,19 @@ function ChangeRoleDialog({
   );
 }
 
-function CreateUserDialog({ onCreate }: { onCreate: (u: Omit<DirectoryUser, "id">) => void }) {
+function CreateUserDialog({
+  onCreate,
+}: {
+  onCreate: (input: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    role: UserRole;
+    password: string;
+    status?: DirectoryUser["status"];
+  }) => Promise<{ ok: boolean; error?: string }>;
+}) {
   const t = useTranslations();
   const [open, setOpen] = React.useState(false);
   const [firstName, setFirstName] = React.useState("");
@@ -957,6 +968,9 @@ function CreateUserDialog({ onCreate }: { onCreate: (u: Omit<DirectoryUser, "id"
   const [email, setEmail] = React.useState("");
   const [role, setRole] = React.useState<UserRole>("enseignant");
   const [phone, setPhone] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [confirm, setConfirm] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
   const [phoneCountry, setPhoneCountry] = React.useState("CI");
   React.useEffect(() => setPhoneCountry(loadEtabConfig().countryCode ?? "CI"), []);
 
@@ -966,23 +980,40 @@ function CreateUserDialog({ onCreate }: { onCreate: (u: Omit<DirectoryUser, "id"
     setEmail("");
     setRole("enseignant");
     setPhone("");
+    setPassword("");
+    setConfirm("");
   };
 
-  const canSubmit = firstName.trim() && lastName.trim() && /.+@.+\..+/.test(email);
+  const pwTooShort = password.length > 0 && password.length < 8;
+  const pwMismatch = confirm.length > 0 && confirm !== password;
+  const canSubmit =
+    !!firstName.trim() &&
+    !!lastName.trim() &&
+    /.+@.+\..+/.test(email) &&
+    password.length >= 8 &&
+    confirm === password &&
+    !busy;
 
-  const submit = () => {
-    onCreate({
-      name: `${lastName.trim()} ${firstName.trim()}`,
+  const submit = async () => {
+    if (!canSubmit) return;
+    setBusy(true);
+    const res = await onCreate({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       email: email.trim(),
-      role,
-      status: "pending",
-      etablissement: ETABLISSEMENTS[0].shortName,
-      region: ETABLISSEMENTS[0].academicRegionCode,
       phone: phone.trim() || undefined,
-      country: phoneCountry,
-      createdAt: new Date().toISOString(),
+      role,
+      password,
+      status: "pending",
     });
-    toast.success(t("pages.systemeComptesUtilisateurs.toasts.userCreated"), { description: t("pages.systemeComptesUtilisateurs.toasts.userCreatedDesc") });
+    setBusy(false);
+    if (!res.ok) {
+      toast.error("Création impossible", { description: res.error });
+      return;
+    }
+    toast.success(t("pages.systemeComptesUtilisateurs.toasts.userCreated"), {
+      description: t("pages.systemeComptesUtilisateurs.toasts.userCreatedDesc"),
+    });
     reset();
     setOpen(false);
   };
@@ -1044,11 +1075,40 @@ function CreateUserDialog({ onCreate }: { onCreate: (u: Omit<DirectoryUser, "id"
               </SelectContent>
             </Select>
           </div>
+          <div className="col-span-2 space-y-1.5">
+            <Label>Mot de passe</Label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              placeholder="8 caractères minimum"
+            />
+            {pwTooShort ? (
+              <p className="text-xs text-red-600">8 caractères minimum.</p>
+            ) : null}
+          </div>
+          <div className="col-span-2 space-y-1.5">
+            <Label>Confirmer le mot de passe</Label>
+            <Input
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              autoComplete="new-password"
+            />
+            {pwMismatch ? (
+              <p className="text-xs text-red-600">
+                Les mots de passe ne correspondent pas.
+              </p>
+            ) : null}
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>{t("pages.systemeComptesUtilisateurs.actions.cancel")}</Button>
           <Button disabled={!canSubmit} onClick={submit}>
-            {t("pages.systemeComptesUtilisateurs.actions.createAccount")}
+            {busy
+              ? "Création…"
+              : t("pages.systemeComptesUtilisateurs.actions.createAccount")}
           </Button>
         </DialogFooter>
       </DialogContent>

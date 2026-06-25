@@ -23,6 +23,20 @@ interface DirectoryUsersValue {
   realMode: boolean;
   refresh: () => void;
   addUser: (u: Omit<DirectoryUser, "id">) => void;
+  /**
+   * Crée un compte CONNECTABLE : en mode réel, un vrai utilisateur Auth (mot de
+   * passe, e-mail confirmé) via la route serviceur + le profil ; en démo, ajout
+   * local. Renvoie { ok, error? }.
+   */
+  createAccount: (input: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    role: UserRole;
+    password: string;
+    status?: DirectoryUser["status"];
+  }) => Promise<{ ok: boolean; error?: string }>;
   updateUser: (id: string, patch: Partial<DirectoryUser>) => void;
   setUserStatus: (id: string, status: DirectoryUser["status"]) => void;
   removeUser: (id: string) => void;
@@ -139,10 +153,37 @@ export function DirectoryUsersProvider({ children }: { children: React.ReactNode
         realMode: true,
         refresh: () => void refresh(),
         addUser: () =>
-          toast.info("Création manuelle indisponible en production", {
+          toast.info("Utilisez « Créer le compte »", {
             description:
-              "Les utilisateurs créent eux-mêmes leur compte (page « Créer un compte ») ; validez-les ici dès leur inscription.",
+              "La création passe par le formulaire (compte Auth + mot de passe).",
           }),
+        createAccount: async (input) => {
+          try {
+            const res = await fetch("/api/admin/users/create", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email: input.email,
+                password: input.password,
+                firstName: input.firstName,
+                lastName: input.lastName,
+                phone: input.phone ?? "",
+                role: input.role,
+                status: input.status ?? "pending",
+              }),
+            });
+            const data = (await res.json().catch(() => ({}))) as {
+              error?: string;
+            };
+            if (!res.ok) {
+              return { ok: false, error: data.error ?? `Erreur ${res.status}` };
+            }
+            await refresh();
+            return { ok: true };
+          } catch {
+            return { ok: false, error: "Route de création injoignable (réseau)." };
+          }
+        },
         updateUser: (id, patch) => {
           const dbPatch: Record<string, unknown> = {};
           if (patch.role) dbPatch.role = patch.role;
@@ -155,7 +196,28 @@ export function DirectoryUsersProvider({ children }: { children: React.ReactNode
           if (Object.keys(dbPatch).length === 0) return;
           void patchProfile([id], dbPatch, patch);
         },
-        setUserStatus: (id, status) => void patchProfile([id], { status }, { status }),
+        setUserStatus: (id, status) => {
+          void patchProfile([id], { status }, { status });
+          // Valider un compte doit aussi confirmer son e-mail côté Auth : sinon un
+          // compte auto-inscrit (confirmation d'e-mail requise) ne peut pas se
+          // connecter, même passé en « actif ».
+          if (status === "active") {
+            void fetch("/api/admin/users/confirm-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ userId: id }),
+            })
+              .then((r) => r.json().catch(() => ({})))
+              .then((d: { error?: string }) => {
+                if (d?.error) {
+                  toast.warning("Compte validé, mais e-mail non confirmé", {
+                    description: d.error,
+                  });
+                }
+              })
+              .catch(() => {});
+          }
+        },
         removeUser: (id) => {
           // Suppression définitive réservée au serveur (RLS) → archivage (réversible).
           void patchProfile([id], { status: "archived" }, { status: "archived" });
@@ -222,6 +284,20 @@ export function DirectoryUsersProvider({ children }: { children: React.ReactNode
         realMode: false,
         refresh: () => {},
         addUser: store.addUser,
+        createAccount: async (input) => {
+          store.addUser({
+            name: `${input.lastName.trim()} ${input.firstName.trim()}`.trim(),
+            email: input.email.trim(),
+            role: input.role,
+            status: input.status ?? "pending",
+            etablissement: "",
+            region: "",
+            phone: input.phone?.trim() || undefined,
+            country: "CI",
+            createdAt: new Date().toISOString(),
+          });
+          return { ok: true };
+        },
         updateUser: store.updateUser,
         setUserStatus: store.setUserStatus,
         removeUser: store.removeUser,
