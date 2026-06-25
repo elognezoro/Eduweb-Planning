@@ -45,6 +45,8 @@ import {
   matrixSubmissionId,
   matrixReviewId,
 } from "@/lib/seminaires/production-keys";
+import { useReflectionSync } from "@/components/seminaires/use-reflection-sync";
+import { ReflectionFacilitatorPanel } from "@/components/seminaires/reflection-facilitator-panel";
 import type {
   CommSeminaire,
   CommSeminaireActivity,
@@ -1687,6 +1689,35 @@ function AiCorrectionChallenge({
   const [revealed, setRevealed] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
 
+  // Persistance Supabase (production privée, migration 032) : ré-hydratation de
+  // ma saisie + sauvegarde différée ; le formateur du cours voit les productions
+  // des participants via le panneau ci-dessous.
+  const refl = useReflectionSync<{ problems: string; correction: string }>(
+    idPrefix,
+    "aicorrection",
+  );
+  const hydrated = React.useRef(false);
+  React.useEffect(() => {
+    if (hydrated.current || !refl.loaded) return;
+    hydrated.current = true;
+    if (refl.own) {
+      setProblemsText(refl.own.problems ?? "");
+      setCorrectionText(refl.own.correction ?? "");
+    }
+  }, [refl.loaded, refl.own]);
+  const saveTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => {
+    if (!problemsText.trim() && !correctionText.trim()) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(
+      () => refl.save({ problems: problemsText, correction: correctionText }),
+      1200,
+    );
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [problemsText, correctionText, refl.save]);
+
   const attempted =
     problemsText.trim().length > 0 || correctionText.trim().length > 0;
 
@@ -1840,6 +1871,30 @@ function AiCorrectionChallenge({
             ) : null}
           </div>
         </div>
+      ) : null}
+
+      {refl.canReview ? (
+        <ReflectionFacilitatorPanel<{ problems: string; correction: string }>
+          title="Correction IA"
+          others={refl.others}
+          onRefresh={refl.refresh}
+          render={(p) => (
+            <div className="space-y-2">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-ew-gold-700">
+                  Problèmes identifiés
+                </p>
+                <p className="whitespace-pre-line">{p.problems?.trim() || "—"}</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-ew-green-700">
+                  Version corrigée proposée
+                </p>
+                <p className="whitespace-pre-line">{p.correction?.trim() || "—"}</p>
+              </div>
+            </div>
+          )}
+        />
       ) : null}
     </div>
   );
