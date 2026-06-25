@@ -1,36 +1,28 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isSuperAdminEmail } from "@/lib/super-admins";
 
 export const runtime = "nodejs";
 
 /**
- * Confirme l'e-mail d'un compte (API admin, service role).
+ * Confirme l'e-mail d'un compte (→ connexion possible).
  *
- * Appelée quand l'admin VALIDE un compte (statut → actif). La confirmation de
- * compte côté app (`profiles.status`) ne confirme PAS l'e-mail côté Auth ;
- * or, si la confirmation d'e-mail est activée, un utilisateur auto-inscrit ne
- * peut pas se connecter tant que son e-mail n'est pas confirmé. Cette route
- * lève ce blocage.
+ * Appelée quand l'admin VALIDE un compte (statut → actif). La confirmation côté
+ * app (`profiles.status`) ne confirme PAS l'e-mail côté Auth ; or, si la
+ * confirmation d'e-mail est activée, un compte auto-inscrit ne peut pas se
+ * connecter tant que son e-mail n'est pas confirmé.
  *
- * Autorisation : appelant administrateur (RPC `is_admin`). Service role requis.
+ * Implémentation SANS clé service role : RPC `admin_confirm_email` (SECURITY
+ * DEFINER, migration 033) — l'autorisation (admin) est vérifiée dans la base et
+ * l'appel se fait avec la session de l'administrateur. Évite l'erreur
+ * « clé incorrecte » de l'API admin avec les nouvelles clés `sb_secret_`.
  */
 export async function POST(request: Request) {
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       { error: "Indisponible : backend non configuré." },
       { status: 503 },
-    );
-  }
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return NextResponse.json(
-      {
-        error:
-          "Confirmation d'e-mail indisponible : définissez SUPABASE_SERVICE_ROLE_KEY (Vercel → Environment Variables) puis redéployez.",
-      },
-      { status: 501 },
     );
   }
 
@@ -62,12 +54,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "userId requis." }, { status: 400 });
   }
 
-  const admin = createAdminClient();
-  const { error } = await admin.auth.admin.updateUserById(userId, {
-    email_confirm: true,
+  const { error } = await supabase.rpc("admin_confirm_email", {
+    p_user_id: userId,
   });
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 502 });
+    const msg = error.message ?? "";
+    if (/could not find|does not exist|schema cache/i.test(msg)) {
+      return NextResponse.json(
+        {
+          error:
+            "Fonction de confirmation absente côté base : appliquez la migration 033.",
+        },
+        { status: 501 },
+      );
+    }
+    const status = /administrateur|refusé|protégé/i.test(msg) ? 403 : 502;
+    return NextResponse.json({ error: msg }, { status });
   }
 
   return NextResponse.json({ ok: true });
