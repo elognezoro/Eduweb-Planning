@@ -157,3 +157,104 @@ export async function persistMatrixReview(
     /* best effort */
   }
 }
+
+/* ============================================================================
+   Productions GÉNÉRIQUES (migration 032) — sondages, forum, carte mentale, …
+   Table unique `seminar_productions` : colonnes indexées + payload JSON.
+   ========================================================================== */
+
+export interface SeminarProductionRow {
+  id: string;
+  userId: string;
+  userName: string;
+  userRole?: string;
+  courseId: string;
+  moduleId?: string;
+  activityId: string;
+  kind: string;
+  payload: unknown;
+}
+
+interface DbProductionRow {
+  id: string;
+  user_id: string;
+  user_name: string | null;
+  user_role: string | null;
+  course_id: string;
+  module_id: string | null;
+  activity_id: string;
+  kind: string;
+  payload: unknown;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+function mapProduction(r: DbProductionRow): SeminarProductionRow {
+  return {
+    id: r.id,
+    userId: r.user_id,
+    userName: r.user_name ?? "",
+    userRole: r.user_role ?? undefined,
+    courseId: r.course_id,
+    moduleId: r.module_id ?? undefined,
+    activityId: r.activity_id,
+    kind: r.kind,
+    payload: r.payload,
+  };
+}
+
+/** Toutes les productions d'un cours visibles par l'appelant (RLS : la sienne /
+ *  toutes si facilitateur). Renvoie null en démo ou en cas d'échec. */
+export async function fetchCourseProductions(
+  courseId: string,
+): Promise<SeminarProductionRow[] | null> {
+  if (!REAL_MODE) return null;
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("seminar_productions")
+      .select("*")
+      .eq("course_id", courseId);
+    if (error || !data) return null;
+    return (data as DbProductionRow[]).map(mapProduction);
+  } catch {
+    return null;
+  }
+}
+
+/** Upsert en lot de productions (chaque ligne porte son objet métier complet
+ *  dans `payload`). Best-effort, inerte en démo. */
+export async function persistProductions(rows: SeminarProductionRow[]): Promise<void> {
+  if (!REAL_MODE || rows.length === 0) return;
+  try {
+    const supabase = createClient();
+    await supabase.from("seminar_productions").upsert(
+      rows.map((r) => ({
+        id: r.id,
+        user_id: r.userId,
+        user_name: r.userName,
+        user_role: r.userRole ?? null,
+        course_id: r.courseId,
+        module_id: r.moduleId ?? null,
+        activity_id: r.activityId,
+        kind: r.kind,
+        payload: r.payload,
+        updated_at: new Date().toISOString(),
+      })),
+      { onConflict: "id" },
+    );
+  } catch {
+    /* best effort */
+  }
+}
+
+/** Supprime une production (l'apprenant la sienne, ou admin). Best-effort. */
+export async function deleteProductionRemote(id: string): Promise<void> {
+  if (!REAL_MODE) return;
+  try {
+    const supabase = createClient();
+    await supabase.from("seminar_productions").delete().eq("id", id);
+  } catch {
+    /* best effort */
+  }
+}

@@ -18,3 +18,14 @@ export function matrixSubmissionId(userId: string, activityId: string): string {
 export function matrixReviewId(submissionId: string, reviewerId: string): string {
   return `mr_${sane(reviewerId)}__${sane(submissionId)}`;
 }
+
+/** Id stable d'une production SINGLETON (une par user+activité) — ex. sondage,
+ *  QCM, auto-évaluation. Les productions multiples (forum, carte mentale) gardent
+ *  leur id de ligne propre (créé une fois). */
+export function seminarProductionId(
+  kind: string,
+  userId: string,
+  activityId: string,
+): string {
+  return `sp_${sane(kind)}_${sane(userId)}__${sane(activityId)}`;
+}

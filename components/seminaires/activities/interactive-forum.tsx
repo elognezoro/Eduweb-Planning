@@ -13,6 +13,10 @@ import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
 import type { ForumPost } from "@/components/app-shell/data-store";
 import {
+  useProductionSync,
+  removeProductionRemote,
+} from "@/components/seminaires/use-production-sync";
+import {
   synthesizeForum,
   type ForumMessage,
 } from "@/lib/seminaires/forum-synthesis";
@@ -54,6 +58,10 @@ export function InteractiveForum({
   const myPosts = posts.filter((p) => p.userId === app.user.id);
   const roots = posts.filter((p) => p.parentId === null);
 
+  // Persistance Supabase : mes messages remontent ; le fil affiché agrège tous
+  // les participants (RLS) après le pull du cours.
+  useProductionSync(courseId, "forum", myPosts);
+
   const [draft, setDraft] = React.useState("");
   const [replyTo, setReplyTo] = React.useState<string | null>(null);
   const [showSynthesis, setShowSynthesis] = React.useState(false);
@@ -80,6 +88,10 @@ export function InteractiveForum({
     const ok = window.confirm("Supprimer ce message (et ses réponses) ?");
     if (!ok) return;
     store.removeForumPost(p.id);
+    removeProductionRemote(p.id);
+    posts
+      .filter((r) => r.parentId === p.id)
+      .forEach((r) => removeProductionRemote(r.id));
   }
 
   const personalSynthesis = React.useMemo(

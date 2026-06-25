@@ -4,6 +4,10 @@ import * as React from "react";
 import { BarChart3, CheckCircle2, RefreshCw, Users } from "lucide-react";
 import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
+import {
+  useProductionSync,
+  removeProductionRemote,
+} from "@/components/seminaires/use-production-sync";
 
 /**
  * Sondage interactif d'activité de formation.
@@ -48,6 +52,10 @@ export function InteractivePoll({
     return counts;
   }, [responsesForActivity, options]);
 
+  // Persistance Supabase : ma réponse remonte ; l'agrégat affiché reflète tous
+  // les participants (RLS) après le pull du cours.
+  useProductionSync(courseId, "poll", myResponse ? [myResponse] : []);
+
   function vote(value: string) {
     store.submitPollResponse({
       userId: app.user.id,
@@ -62,6 +70,7 @@ export function InteractivePoll({
   function changeVote() {
     if (myResponse) {
       store.removePollResponse(app.user.id, activityId);
+      removeProductionRemote(myResponse.id);
     }
   }
 

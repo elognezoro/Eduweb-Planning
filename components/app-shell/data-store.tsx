@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   matrixSubmissionId,
   matrixReviewId,
+  seminarProductionId,
 } from "@/lib/seminaires/production-keys";
 import {
   USER_DIRECTORY,
@@ -661,6 +662,10 @@ interface DataStore extends StoreState {
   mergeMatrixSubmissions: (incoming: MatrixSubmission[]) => void;
   /** Fusionne des critiques de matrice venues de Supabase (migration 031). */
   mergeMatrixReviews: (incoming: MatrixReview[]) => void;
+  /** Fusionne des productions génériques venues de Supabase (migration 032). */
+  mergePollResponses: (incoming: PollResponse[]) => void;
+  mergeForumPosts: (incoming: ForumPost[]) => void;
+  mergeMindMapContributions: (incoming: MindMapContribution[]) => void;
   /** Notes du livret : crée/met à jour la moyenne (élève+année+matière+trimestre). */
   setLivretGrade: (
     entry: Omit<LivretGradeEntry, "id" | "updatedAt" | "updatedBy">,
@@ -1634,6 +1639,9 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       })),
     submitPollResponse: (input) =>
       setState((s) => {
+        // Id DÉTERMINISTE (un vote par user+activité) → cohérent inter-appareils
+        // avec la persistance Supabase (migration 032).
+        const id = seminarProductionId("poll", input.userId, input.activityId);
         const existing = s.pollResponses.find(
           (r) => r.userId === input.userId && r.activityId === input.activityId,
         );
@@ -1642,7 +1650,7 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
             ...s,
             pollResponses: s.pollResponses.map((r) =>
               r.id === existing.id
-                ? { ...existing, ...input, createdAt: new Date().toISOString() }
+                ? { ...existing, ...input, id, createdAt: new Date().toISOString() }
                 : r,
             ),
           };
@@ -1650,11 +1658,7 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         return {
           ...s,
           pollResponses: [
-            {
-              ...input,
-              id: genId("poll"),
-              createdAt: new Date().toISOString(),
-            },
+            { ...input, id, createdAt: new Date().toISOString() },
             ...s.pollResponses,
           ],
         };
@@ -1695,6 +1699,32 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         ...s,
         mindMapContributions: s.mindMapContributions.filter((c) => c.id !== id),
       })),
+    // Fusion descendante depuis Supabase (migration 032) : dédup par id, la
+    // version la plus récente gagne ; ne supprime jamais de ligne locale.
+    mergePollResponses: (incoming) =>
+      setState((s) => {
+        if (!incoming.length) return s;
+        const byId = new Map(s.pollResponses.map((r) => [r.id, r]));
+        for (const r of incoming) {
+          const ex = byId.get(r.id);
+          if (!ex || (r.createdAt ?? "") >= (ex.createdAt ?? "")) byId.set(r.id, r);
+        }
+        return { ...s, pollResponses: Array.from(byId.values()) };
+      }),
+    mergeForumPosts: (incoming) =>
+      setState((s) => {
+        if (!incoming.length) return s;
+        const byId = new Map(s.forumPosts.map((p) => [p.id, p]));
+        for (const p of incoming) byId.set(p.id, p);
+        return { ...s, forumPosts: Array.from(byId.values()) };
+      }),
+    mergeMindMapContributions: (incoming) =>
+      setState((s) => {
+        if (!incoming.length) return s;
+        const byId = new Map(s.mindMapContributions.map((c) => [c.id, c]));
+        for (const c of incoming) byId.set(c.id, c);
+        return { ...s, mindMapContributions: Array.from(byId.values()) };
+      }),
     upsertMatrixSubmission: (input) =>
       setState((s) => {
         const now = new Date().toISOString();

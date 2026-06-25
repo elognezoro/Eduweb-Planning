@@ -18,6 +18,10 @@ import {
 import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
 import type { MindMapContribution } from "@/components/app-shell/data-store";
+import {
+  useProductionSync,
+  removeProductionRemote,
+} from "@/components/seminaires/use-production-sync";
 import { cn } from "@/lib/utils";
 
 /**
@@ -101,6 +105,14 @@ export function InteractiveMindMap({
     [store.mindMapContributions, activityId],
   );
 
+  // Persistance Supabase : mes contributions remontent ; la carte affiche
+  // l'agrégat de tous les participants (RLS) après le pull du cours.
+  const mine = React.useMemo(
+    () => all.filter((c) => c.userId === app.user.id),
+    [all, app.user.id],
+  );
+  useProductionSync(courseId, "mindmap", mine);
+
   function add(poleId: string, categoryId: string, content: string) {
     const value = content.trim();
     if (!value) return;
@@ -119,6 +131,7 @@ export function InteractiveMindMap({
   function remove(c: MindMapContribution) {
     if (!isAdmin && c.userId !== app.user.id) return;
     store.removeMindMapContribution(c.id);
+    removeProductionRemote(c.id);
   }
 
   // Statistiques globales pour l'en-tête.
