@@ -2,7 +2,11 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured, SUPABASE_URL, SUPABASE_ANON_KEY } from "./config";
 
-/** Préfixes des routes du tableau de bord (protégées en mode réel). */
+/** Préfixes des routes du tableau de bord (protégées en mode réel).
+ *  NB : tout segment de premier niveau sous app/(dashboard)/ doit figurer ici,
+ *  sinon une session expirée n'est pas redirigée vers /login et l'utilisateur
+ *  tombe sur l'écran fail-closed « Profil indisponible » (perçu comme « aucune
+ *  réaction » au clic). `/aide` (Aide & Formation) et `/formations` manquaient. */
 const PROTECTED_PREFIXES = [
   "/dashboard",
   "/systeme",
@@ -11,6 +15,8 @@ const PROTECTED_PREFIXES = [
   "/inspection-supervision",
   "/parametrage",
   "/pilotage",
+  "/aide",
+  "/formations",
 ];
 const AUTH_PAGES = ["/login", "/register", "/reset-password"];
 
