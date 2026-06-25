@@ -858,6 +858,32 @@ function InteractiveQcm({
     [answers, questions],
   );
 
+  // Persistance Supabase (production privée, migration 032) : ré-hydratation des
+  // réponses + sauvegarde différée ; le formateur voit les résultats des
+  // participants. Couvre aussi le scénario de crise (dérivé des mêmes réponses).
+  const refl = useReflectionSync<{
+    answers: Record<number, number | null>;
+    checked: boolean;
+  }>(idPrefix, "qcm");
+  const hydrated = React.useRef(false);
+  React.useEffect(() => {
+    if (hydrated.current || !refl.loaded) return;
+    hydrated.current = true;
+    if (refl.own) {
+      setAnswers(refl.own.answers ?? {});
+      setChecked(!!refl.own.checked);
+    }
+  }, [refl.loaded, refl.own]);
+  const saveTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => {
+    if (Object.keys(answers).length === 0) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => refl.save({ answers, checked }), 800);
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [answers, checked, refl.save]);
+
   return (
     <div className="space-y-3">
       {questions.map((q, i) => (
@@ -966,6 +992,30 @@ function InteractiveQcm({
           answers={answers}
           score={score}
           idPrefix={idPrefix}
+        />
+      ) : null}
+
+      {refl.canReview ? (
+        <ReflectionFacilitatorPanel<{
+          answers: Record<number, number | null>;
+          checked: boolean;
+        }>
+          title="QCM"
+          others={refl.others}
+          onRefresh={refl.refresh}
+          render={(p) => {
+            const s = questions.reduce(
+              (acc, q, i) => (p.answers?.[i] === q.correctIdx ? acc + 1 : acc),
+              0,
+            );
+            const ans = Object.keys(p.answers ?? {}).length;
+            return (
+              <p>
+                Score : <strong>{s}/{questions.length}</strong> · {ans} réponse
+                {ans > 1 ? "s" : ""} {p.checked ? "(validé)" : "(en cours)"}
+              </p>
+            );
+          }}
         />
       ) : null}
     </div>
@@ -1932,6 +1982,28 @@ function ReflectionFields({
     .length;
   const canEvaluate = filledCount >= 1;
 
+  // Persistance Supabase (production privée, migration 032) : ré-hydratation +
+  // sauvegarde différée ; le formateur voit l'engagement des participants.
+  const refl = useReflectionSync<{ values: Record<number, string> }>(
+    idPrefix,
+    "engagement",
+  );
+  const hydrated = React.useRef(false);
+  React.useEffect(() => {
+    if (hydrated.current || !refl.loaded) return;
+    hydrated.current = true;
+    if (refl.own?.values) setValues(refl.own.values);
+  }, [refl.loaded, refl.own]);
+  const saveTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => {
+    if (filledCount === 0) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => refl.save({ values }), 1000);
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [values, filledCount, refl.save]);
+
   return (
     <div className="space-y-2">
       {items.map((it, i) => (
@@ -1979,6 +2051,26 @@ function ReflectionFields({
           demande, depuis un snapshot des valeurs. Toute édition ultérieure
           invalide l'évaluation jusqu'à un nouveau clic. */}
       {evaluated ? <EngagementAppreciation items={items} values={evaluated} /> : null}
+
+      {refl.canReview ? (
+        <ReflectionFacilitatorPanel<{ values: Record<number, string> }>
+          title="Engagement"
+          others={refl.others}
+          onRefresh={refl.refresh}
+          render={(p) => (
+            <div className="space-y-1.5">
+              {items.map((it, i) => (
+                <div key={i}>
+                  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                    {it.label}
+                  </p>
+                  <p className="whitespace-pre-line">{p.values?.[i]?.trim() || "—"}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        />
+      ) : null}
     </div>
   );
 }
