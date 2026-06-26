@@ -434,6 +434,12 @@ function EnrollListAccessBanner() {
         >
           <Download className="h-4 w-4" /> Télécharger la liste des inscrits
         </Link>
+        <Link
+          href="/aide/travaux"
+          className="inline-flex items-center gap-2 rounded-lg border border-ew-green-700 bg-card px-4 py-2 text-sm font-semibold text-ew-green-700 transition-colors hover:bg-ew-green-50"
+        >
+          <FileText className="h-4 w-4" /> Travaux des participants
+        </Link>
       </div>
     </div>
   );
