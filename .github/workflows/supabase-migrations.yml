@@ -1,45 +1,58 @@
-name: Supabase migrations
+name: DB migrations
 
-# Applique automatiquement les migrations sur la base de PRODUCTION à chaque
-# push sur `main` qui touche supabase/migrations/.
+# Applique automatiquement les NOUVELLES migrations sur la base de PRODUCTION à
+# chaque push sur `main` touchant supabase/migrations/.
 #
-# ⚠️ Pré-requis (une seule fois) — sinon le job échoue / re-joue d'anciennes migrations :
-#   1) Secrets du dépôt (GitHub → Settings → Secrets and variables → Actions → New secret) :
-#        - SUPABASE_ACCESS_TOKEN  (Supabase → Account → Access Tokens → Generate)
-#        - SUPABASE_DB_PASSWORD   (mot de passe Postgres ; Supabase → Project Settings → Database)
-#   2) Aligner l'historique des migrations DÉJÀ appliquées manuellement (001→033)
-#      pour que `db push` ne les rejoue pas. En local, une fois :
-#        supabase login
-#        supabase link --project-ref gibzjknamimpevfcqpdg
-#        supabase migration repair --status applied 001 002 003 004 005 006 007 008 009 \
-#          015 016 019 020 021 022 023 024 025 026 027 028 029 030 031 032 033
-#      (ajoute tout numéro de migration déjà appliqué qui manquerait).
+# Méthode robuste (sans CLI) : chaque fichier supabase/migrations/*.sql est
+# appliqué via psql s'il n'est pas déjà dans la table de suivi
+# public._applied_migrations. La « baseline » (toutes les migrations déjà
+# appliquées à la main, 001→033) est posée UNE FOIS via le SQL d'initialisation
+# fourni → la CI n'applique donc QUE les fichiers AJOUTÉS ENSUITE.
 #
-# Les migrations du projet sont idempotentes (drop policy if exists / if not exists),
-# mais le repair évite de rejouer les premières (001…) qui ne le sont pas toutes.
+# ⚠️ Pré-requis (voir le pas-à-pas) :
+#   - Secret  SUPABASE_DB_URL  = chaîne de connexion « Session pooler » (IPv4),
+#     Supabase → Project Settings → Database → Connection string → URI.
+#   - Variable ENABLE_SUPABASE_MIGRATIONS = true (sinon le job ne tourne pas).
+#   - Avoir exécuté une fois le SQL d'initialisation (baseline) dans le SQL Editor.
 
 on:
   push:
     branches: [main]
     paths:
       - "supabase/migrations/**"
-  workflow_dispatch: {} # permet aussi un déclenchement manuel
+  workflow_dispatch: {}
 
 jobs:
   migrate:
-    runs-on: ubuntu-latest
-    # Ne s'exécute que si le token est configuré (sinon, ne casse pas le dépôt).
     if: ${{ vars.ENABLE_SUPABASE_MIGRATIONS == 'true' }}
-    env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-      PROJECT_REF: gibzjknamimpevfcqpdg
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
-        with:
-          version: latest
-      - name: Link au projet
-        run: supabase link --project-ref "$PROJECT_REF"
+
+      - name: Installer le client PostgreSQL
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
       - name: Appliquer les migrations en attente
-        run: supabase db push
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          # Filet de sécurité : crée la table de suivi si absente (la baseline
+          # devrait déjà l'avoir créée + remplie).
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c \
+            "create table if not exists public._applied_migrations (filename text primary key, applied_at timestamptz not null default now());"
+
+          for f in $(ls supabase/migrations/*.sql | sort); do
+            name="$(basename "$f")"
+            already="$(psql "$DATABASE_URL" -tAc "select 1 from public._applied_migrations where filename = '$name'")"
+            if [ "$already" = "1" ]; then
+              echo "✓ déjà appliqué : $name"
+            else
+              echo "→ application : $name"
+              psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+              psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c \
+                "insert into public._applied_migrations (filename) values ('$name') on conflict (filename) do nothing;"
+              echo "✓ appliqué + enregistré : $name"
+            fi
+          done
+          echo "Migrations à jour."
