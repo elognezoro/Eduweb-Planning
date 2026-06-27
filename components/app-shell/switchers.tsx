@@ -35,14 +35,17 @@ export function CountryFlag({ code }: { code: string }) {
 }
 
 export function CountrySwitcher() {
-  const { country, setCountryCode } = useApp();
-  // Liste ONU complète : pays opérationnels (configurés) sélectionnables en tête,
-  // puis tous les autres États membres, par ordre alphabétique, marqués « bientôt ».
+  const { country, setCountryCode, effectiveRole } = useApp();
+  // L'administrateur système accède à TOUS les pays (espaces de tous les pays) ;
+  // les autres rôles ne sélectionnent que les pays opérationnels (les autres,
+  // marqués « bientôt », restent désactivés).
+  const isAdmin = effectiveRole === "admin";
   const active = React.useMemo(() => new Set(COUNTRIES.filter((c) => c.isActive).map((c) => c.code)), []);
   const ordered = React.useMemo(
     () => [...UN_COUNTRIES.filter((c) => active.has(c.code)), ...UN_COUNTRIES.filter((c) => !active.has(c.code))],
     [active],
   );
+  const selectable = (code: string) => isAdmin || active.has(code);
   return (
     <Select value={country.code} onValueChange={setCountryCode}>
       <SelectTrigger className={triggerCls()} aria-label="Pays">
@@ -50,11 +53,11 @@ export function CountrySwitcher() {
       </SelectTrigger>
       <SelectContent>
         {ordered.map((c) => (
-          <SelectItem key={c.code} value={c.code} disabled={!active.has(c.code)}>
+          <SelectItem key={c.code} value={c.code} disabled={!selectable(c.code)}>
             <span className="flex items-center gap-2">
               <CountryFlag code={c.code} />
               {c.name}
-              {!active.has(c.code) && " (bientôt)"}
+              {!selectable(c.code) && " (bientôt)"}
             </span>
           </SelectItem>
         ))}

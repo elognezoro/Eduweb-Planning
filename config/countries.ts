@@ -5,6 +5,8 @@
  * Ajouter un pays = ajouter une entrée dans `COUNTRIES`.
  */
 
+import { UN_COUNTRIES } from "./un-countries";
+
 export interface AcademicRegionSeed {
   code: string;
   name: string;
@@ -179,7 +181,33 @@ export const COUNTRIES: CountryConfig[] = [
 export const DEFAULT_COUNTRY_CODE = "CI";
 
 export function getCountry(code: string): CountryConfig {
-  return COUNTRIES.find((c) => c.code === code) ?? COUNTRIES[0];
+  const found = COUNTRIES.find((c) => c.code === code);
+  if (found) return found;
+  // Pays membre de l'ONU pas encore configuré : on RENVOIE une configuration
+  // GÉNÉRIQUE (nom + libellés par défaut, sans régions ni données) plutôt que de
+  // retomber sur la Côte d'Ivoire. Permet à l'administrateur système d'ouvrir
+  // l'espace de n'importe quel pays (la sélection « tient » et affiche le bon
+  // drapeau / nom).
+  const un = UN_COUNTRIES.find((u) => u.code === code);
+  if (un) {
+    return {
+      code: un.code,
+      iso3: un.code,
+      nameFr: un.name,
+      nameEn: un.name,
+      flag: "",
+      currencyCode: "",
+      currencySymbol: "",
+      timezone: "UTC",
+      defaultLocale: "fr",
+      academicRegionLabel: "Régions académiques",
+      teacherTrainingCenterLabel: "Centres de formation",
+      continuingTrainingAntennaLabel: "Antennes de formation",
+      isActive: false,
+      academicRegions: [],
+    };
+  }
+  return COUNTRIES[0];
 }
 
 export const ACTIVE_COUNTRIES = COUNTRIES.filter((c) => c.isActive);
