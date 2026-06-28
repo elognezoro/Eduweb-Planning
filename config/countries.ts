@@ -271,6 +271,36 @@ export const COUNTRIES: CountryConfig[] = [
       { code: "ZIG", name: "Ziguinchor" },
     ],
   },
+  {
+    code: "CM",
+    iso3: "CMR",
+    nameFr: "Cameroun",
+    nameEn: "Cameroon",
+    flag: "🇨🇲",
+    currencyCode: "XAF",
+    currencySymbol: "FCFA",
+    timezone: "Africa/Douala",
+    defaultLocale: "fr",
+    academicRegionLabel: "Région",
+    teacherTrainingCenterLabel: "ENIEG / ENS",
+    continuingTrainingAntennaLabel: "Délégation départementale",
+    isActive: true,
+    // Les 10 régions (système bilingue FR/EN ; délégations régionales MINEDUB /
+    // MINESEC). Source : répertoire MINESEC + annuaires — 189 établissements
+    // nominatifs fournis (CSV importable). Régions éditables.
+    academicRegions: [
+      { code: "ADA", name: "Adamaoua" },
+      { code: "CEN", name: "Centre" },
+      { code: "EST", name: "Est" },
+      { code: "EXN", name: "Extrême-Nord" },
+      { code: "LIT", name: "Littoral" },
+      { code: "NOR", name: "Nord" },
+      { code: "NOU", name: "Nord-Ouest" },
+      { code: "OUE", name: "Ouest" },
+      { code: "SUD", name: "Sud" },
+      { code: "SOU", name: "Sud-Ouest" },
+    ],
+  },
 ];
 
 export const DEFAULT_COUNTRY_CODE = "CI";
