@@ -232,6 +232,24 @@ export default function HomePage() {
           </p>
         </div>
       </footer>
+
+      {/* Bouton flottant : diagnostic de maturité numérique CERTEL (EduWebBooking).
+          Oriente le visiteur vers un niveau de formation. Ouvre booking.eduweb.ci. */}
+      <a
+        href="https://booking.eduweb.ci/certel/diagnostic"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Test de niveau CERTEL — diagnostic de maturité numérique (gratuit)"
+        className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-3 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 px-4 py-3 text-white shadow-xl ring-1 ring-white/10 transition-transform hover:scale-[1.03] hover:shadow-2xl"
+      >
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15">
+          <GraduationCap className="h-5 w-5" />
+        </span>
+        <span className="text-left leading-tight">
+          <span className="block text-sm font-bold">Test de niveau</span>
+          <span className="block text-[11px] text-white/80">CERTEL · gratuit</span>
+        </span>
+      </a>
     </div>
   );
 }
