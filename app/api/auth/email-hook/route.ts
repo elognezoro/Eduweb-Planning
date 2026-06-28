@@ -130,7 +130,7 @@ export async function POST(request: Request) {
   const { error } = await resend.emails.send({ from, to, subject, html });
   if (error) {
     console.error(
-      `[email-hook] échec Resend (${action} → ${maskEmail(to)}) : ${error.name}`,
+      `[email-hook] échec Resend (${action} → ${maskEmail(to)}) : ${error.name} — ${error.message}`,
     );
     return NextResponse.json(
       { error: { http_code: 502, message: error.message } },
