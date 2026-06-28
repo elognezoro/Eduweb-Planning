@@ -248,9 +248,10 @@ export default function RegisterPage() {
               </>
             ) : (
               <>
-                Votre compte est <strong>en attente de validation</strong> par un
-                administrateur. Vous recevrez une notification dès son
-                activation.
+                Un <strong>e-mail de confirmation</strong> vient de vous être envoyé.
+                Cliquez sur le lien qu&apos;il contient : votre compte sera{" "}
+                <strong>immédiatement actif</strong> et vous serez connecté(e).
+                Pensez à vérifier vos courriers indésirables.
               </>
             )}
           </p>
