@@ -73,30 +73,41 @@ export function splitFullName(full: string): { lastname: string; firstname: stri
 }
 
 /**
- * Génère un nom d'utilisateur ≤ 10 caractères : début du nom + prénom + indicateur
- * de groupe, unique. `taken` est muté pour garantir l'unicité sur le lot.
+ * Génère un nom d'utilisateur ≤ `maxLen` caractères : début du NOM/Prénoms suivi
+ * d'un INDICATEUR (pays + établissement + groupe-classe), unique sur le lot.
+ *
+ * - L'indicateur est PRÉSERVÉ en priorité (c'est lui qui permet de déterminer
+ *   pays / établissement / groupe) ; le nom est raccourci si nécessaire.
+ * - En cas de collision (≥ 2 identiques), un chiffre est ajouté à la fin :
+ *   « username1 », « username2 »… (le nom est encore raccourci pour rester ≤ maxLen).
+ * - `taken` est muté pour garantir l'unicité.
  */
 export function makeUsername(
-  lastname: string,
-  firstname: string,
-  group: string,
+  namePart: string,
+  indicator: string,
   taken: Set<string>,
   maxLen = 10,
 ): string {
-  const g = slugLower(group).slice(0, 4); // indicateur groupe/TD
-  const nm = slugLower(lastname) + slugLower(firstname);
-  const avail = Math.max(1, maxLen - g.length);
-  const base = (nm.slice(0, avail) + g).slice(0, maxLen) || "user";
-
-  let candidate = base;
+  const ind = slugLower(indicator);
+  const nm = slugLower(namePart);
+  const compose = (suffix: string): string => {
+    const room = Math.max(0, maxLen - ind.length - suffix.length);
+    return (nm.slice(0, room) + ind + suffix).slice(0, maxLen) || "user";
+  };
+  let candidate = compose("");
   let n = 1;
   while (taken.has(candidate)) {
-    const suffix = String(n);
-    candidate = (base.slice(0, maxLen - suffix.length) + suffix).slice(0, maxLen);
-    n++;
+    candidate = compose(String(n));
+    n += 1;
   }
   taken.add(candidate);
   return candidate;
+}
+
+/** Adresse e-mail dérivée du nom d'utilisateur : « username@eduweb.ci ». */
+export function eduwebEmail(username: string, domain = "eduweb.ci"): string {
+  const local = slugLower(username) || "user";
+  return `${local}@${domain}`;
 }
 
 const csvCell = (value: string, sep: string): string =>

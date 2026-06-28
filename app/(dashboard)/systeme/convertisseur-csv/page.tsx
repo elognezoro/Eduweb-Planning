@@ -24,12 +24,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useApp } from "@/components/app-shell/app-context";
 import { buildCsvTemplate } from "@/lib/imports/csv";
 import { toNomCase, toPrenomCase } from "@/lib/format-name";
 import {
   parseTabular,
   splitFullName,
   makeUsername,
+  eduwebEmail,
   toCsv,
   slugLower,
   type Tabular,
@@ -38,9 +40,12 @@ import {
 /* ---------- Modèle de colonne de sortie ---------- */
 type ColKind =
   | "username"
+  | "email"
   | "lastname"
   | "firstname"
   | "fullname"
+  | "country"
+  | "establishment"
   | "group"
   | "column"
   | "constant";
@@ -55,27 +60,45 @@ interface OutCol {
 
 const KIND_LABEL: Record<ColKind, string> = {
   username: "Nom d'utilisateur (auto ≤10)",
+  email: "E-mail (username@eduweb.ci)",
   lastname: "NOM",
   firstname: "Prénoms",
   fullname: "NOM Prénoms",
+  country: "Pays (indicateur)",
+  establishment: "Établissement (indicateur)",
   group: "Groupe / TD",
   column: "Colonne du fichier…",
   constant: "Valeur fixe…",
 };
 
+/* ---------- Indicateurs composant le nom d'utilisateur ---------- */
+type IndMode = "constant" | "column";
+interface IndState {
+  mode: IndMode;
+  constant: string;
+  col: number;
+}
+const ind = (constant = "", col = 0): IndState => ({ mode: "constant", constant, col });
+/** Longueurs max de chaque partie dans l'indicateur (pour rester ≤ 10 car.). */
+const IND_CAP = { country: 2, establishment: 3, group: 3 } as const;
+
+function readInd(state: IndState, row: string[]): string {
+  return state.mode === "column" ? (row[state.col] ?? "") : state.constant;
+}
+
 let _id = 0;
 const nextId = () => `c${++_id}`;
 
 /** Colonnes Moodle par défaut. */
-function defaultColumns(emailCol?: number): OutCol[] {
+function defaultColumns(): OutCol[] {
   return [
     { id: nextId(), header: "username", kind: "username" },
     { id: nextId(), header: "firstname", kind: "firstname" },
     { id: nextId(), header: "lastname", kind: "lastname" },
-    { id: nextId(), header: "email", kind: "column", col: emailCol },
+    { id: nextId(), header: "email", kind: "email" },
     { id: nextId(), header: "password", kind: "constant", constant: "" },
-    { id: nextId(), header: "cohort1", kind: "constant", constant: "" },
-    { id: nextId(), header: "course1", kind: "constant", constant: "" },
+    { id: nextId(), header: "cohort1", kind: "country" },
+    { id: nextId(), header: "course1", kind: "establishment" },
     { id: nextId(), header: "group1", kind: "group" },
     { id: nextId(), header: "role1", kind: "constant", constant: "student" },
   ];
@@ -91,6 +114,7 @@ function findCol(headers: string[], ...keys: string[]): number | undefined {
 }
 
 export default function ConvertisseurCsvPage() {
+  const { country: appCountry } = useApp();
   const [data, setData] = React.useState<Tabular | null>(null);
 
   // Source des noms : une colonne combinée, ou deux colonnes séparées.
@@ -99,10 +123,10 @@ export default function ConvertisseurCsvPage() {
   const [lastCol, setLastCol] = React.useState(0);
   const [firstCol, setFirstCol] = React.useState(1);
 
-  // Indicateur de groupe (pour le username) : une colonne, ou une valeur fixe.
-  const [groupMode, setGroupMode] = React.useState<"column" | "constant">("constant");
-  const [groupCol, setGroupCol] = React.useState(0);
-  const [groupConst, setGroupConst] = React.useState("");
+  // Indicateurs intégrés au nom d'utilisateur (pays · établissement · groupe).
+  const [country, setCountry] = React.useState<IndState>(() => ind(slugLower(appCountry.code)));
+  const [establishment, setEstablishment] = React.useState<IndState>(() => ind());
+  const [group, setGroup] = React.useState<IndState>(() => ind());
 
   const [cols, setCols] = React.useState<OutCol[]>(() => defaultColumns());
 
@@ -121,8 +145,9 @@ export default function ConvertisseurCsvPage() {
         i !== prenom &&
         !slugLower(h).includes("prenom"),
     );
-    const email = findCol(t.headers, "email", "mail", "courriel");
-    const group = findCol(t.headers, "groupe", "group", "classe", "class", "td");
+    const groupeCol = findCol(t.headers, "groupe", "group", "classe", "class", "td");
+    const estabCol = findCol(t.headers, "etablissement", "ecole", "school", "estab", "lycee", "college");
+    const paysCol = findCol(t.headers, "pays", "country");
     if (prenom !== undefined && prenom >= 0 && nom >= 0) {
       setNameMode("two");
       setLastCol(nom);
@@ -131,14 +156,13 @@ export default function ConvertisseurCsvPage() {
       setNameMode("one");
       setCombinedCol(nom >= 0 ? nom : 0);
     }
-    if (group !== undefined) {
-      setGroupMode("column");
-      setGroupCol(group);
-    }
-    setCols(defaultColumns(email));
+    if (groupeCol !== undefined) setGroup({ mode: "column", constant: "", col: groupeCol });
+    if (estabCol !== undefined) setEstablishment({ mode: "column", constant: "", col: estabCol });
+    if (paysCol !== undefined) setCountry({ mode: "column", constant: "", col: paysCol });
+    setCols(defaultColumns());
   }
 
-  /** Résout NOM / Prénoms / Groupe d'une ligne source. */
+  /** Résout NOM / Prénoms + indicateurs (bruts + composés) d'une ligne source. */
   const resolveRow = React.useCallback(
     (row: string[]) => {
       let lastname = "";
@@ -151,33 +175,47 @@ export default function ConvertisseurCsvPage() {
         lastname = toNomCase(s.lastname);
         firstname = toPrenomCase(s.firstname);
       }
-      const group = groupMode === "column" ? (row[groupCol] ?? "") : groupConst;
-      return { lastname, firstname, group };
+      const countryRaw = readInd(country, row);
+      const estabRaw = readInd(establishment, row);
+      const groupRaw = readInd(group, row);
+      // Indicateur compact : pays(≤2) + établissement(≤3) + groupe(≤3).
+      const indicator =
+        slugLower(countryRaw).slice(0, IND_CAP.country) +
+        slugLower(estabRaw).slice(0, IND_CAP.establishment) +
+        slugLower(groupRaw).slice(0, IND_CAP.group);
+      return { lastname, firstname, countryRaw, estabRaw, groupRaw, indicator };
     },
-    [nameMode, lastCol, firstCol, combinedCol, groupMode, groupCol, groupConst],
+    [nameMode, lastCol, firstCol, combinedCol, country, establishment, group],
   );
 
-  /** Construit les lignes de sortie (username unique sur tout le lot). */
+  /** Construit les lignes de sortie (username + e-mail uniques sur tout le lot). */
   const output = React.useMemo(() => {
-    if (!data) return { headers: [], rows: [] as string[][] };
+    if (!data) return { headers: [] as string[], rows: [] as string[][] };
     const taken = new Set<string>();
     const headers = cols.map((c) => c.header || "colonne");
     const rows = data.rows.map((row) => {
-      const { lastname, firstname, group } = resolveRow(row);
-      const username = makeUsername(lastname, firstname, group, taken);
+      const { lastname, firstname, countryRaw, estabRaw, groupRaw, indicator } = resolveRow(row);
+      const username = makeUsername(`${lastname}${firstname}`, indicator, taken);
+      const email = eduwebEmail(username);
       const fullname = `${lastname} ${firstname}`.trim();
       return cols.map((c) => {
         switch (c.kind) {
           case "username":
             return username;
+          case "email":
+            return email;
           case "lastname":
             return lastname;
           case "firstname":
             return firstname;
           case "fullname":
             return fullname;
+          case "country":
+            return countryRaw;
+          case "establishment":
+            return estabRaw;
           case "group":
-            return group;
+            return groupRaw;
           case "column":
             return c.col != null ? (row[c.col] ?? "") : "";
           case "constant":
@@ -203,11 +241,7 @@ export default function ConvertisseurCsvPage() {
   }
 
   function exportCsv() {
-    download(
-      toCsv(output.headers, output.rows),
-      "export.csv",
-      "text/csv;charset=utf-8",
-    );
+    download(toCsv(output.headers, output.rows), "export.csv", "text/csv;charset=utf-8");
     toast.success("CSV généré", { description: `${output.rows.length} ligne(s).` });
   }
 
@@ -224,7 +258,7 @@ export default function ConvertisseurCsvPage() {
             download(
               buildCsvTemplate(
                 ["username", "firstname", "lastname", "email", "password", "group1", "role1"],
-                [["kkouame6a", "Koffi", "KOUAMÉ", "kkouame@exemple.ci", "", "6èmeA", "student"]],
+                [["cilmkof6a", "Koffi", "KOUAMÉ", "cilmkof6a@eduweb.ci", "", "6èmeA", "student"]],
               ),
               "modele-moodle.csv",
               "text/csv;charset=utf-8",
@@ -278,25 +312,20 @@ export default function ConvertisseurCsvPage() {
               </div>
             </SectionCard>
 
-            <SectionCard title="Indicateur de groupe / TD" description="Intégré au nom d'utilisateur (≤ 10 caractères).">
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  <ModeChip active={groupMode === "constant"} onClick={() => setGroupMode("constant")}>
-                    Valeur unique
-                  </ModeChip>
-                  <ModeChip active={groupMode === "column"} onClick={() => setGroupMode("column")}>
-                    Depuis une colonne
-                  </ModeChip>
-                </div>
-                {groupMode === "constant" ? (
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Indicateur (ex. 6a, td3, tle)</Label>
-                    <Input value={groupConst} onChange={(e) => setGroupConst(e.target.value)} placeholder="ex. 6a" />
-                  </div>
-                ) : (
-                  <ColSelect label="Colonne du groupe" headers={data.headers} value={groupCol} onChange={setGroupCol} />
-                )}
+            <SectionCard
+              title="Indicateurs du nom d'utilisateur"
+              description="Le username (≤ 10 car.) encode pays · établissement · groupe ; l'e-mail devient username@eduweb.ci."
+            >
+              <div className="space-y-4">
+                <IndicatorRow label="Pays" hint="ex. ci, al" headers={data.headers} state={country} onChange={setCountry} />
+                <IndicatorRow label="Établissement" hint="ex. lm (code court)" headers={data.headers} state={establishment} onChange={setEstablishment} />
+                <IndicatorRow label="Groupe / TD" hint="ex. 6a, td3, tle" headers={data.headers} state={group} onChange={setGroup} />
               </div>
+              <p className="mt-3 rounded-lg bg-muted/50 p-2.5 text-[11px] leading-relaxed text-muted-foreground">
+                Exemple : NOM « KOUAMÉ », pays <b>ci</b>, établissement <b>lm</b>, groupe <b>6a</b> →
+                username <b>cilmkof6a</b> (borné à 10 car.), e-mail <b>cilmkof6a@eduweb.ci</b>. En cas
+                de doublon : <b>…1</b>, <b>…2</b>…
+              </p>
               <Button variant="ghost" size="sm" className="mt-2" onClick={() => setData(null)}>
                 Changer de fichier
               </Button>
@@ -440,6 +469,57 @@ function ModeChip({ active, onClick, children }: { active: boolean; onClick: () 
     >
       {children}
     </button>
+  );
+}
+
+function IndicatorRow({
+  label,
+  hint,
+  headers,
+  state,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  headers: string[];
+  state: IndState;
+  onChange: (s: IndState) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <Label className="text-xs font-semibold">{label}</Label>
+        <div className="flex gap-1">
+          <ModeChip active={state.mode === "constant"} onClick={() => onChange({ ...state, mode: "constant" })}>
+            Valeur
+          </ModeChip>
+          <ModeChip active={state.mode === "column"} onClick={() => onChange({ ...state, mode: "column" })}>
+            Colonne
+          </ModeChip>
+        </div>
+      </div>
+      {state.mode === "constant" ? (
+        <Input
+          value={state.constant}
+          onChange={(e) => onChange({ ...state, constant: e.target.value })}
+          placeholder={hint}
+          className="h-8 text-xs"
+        />
+      ) : (
+        <Select value={String(state.col)} onValueChange={(v) => onChange({ ...state, col: Number(v) })}>
+          <SelectTrigger className="h-8 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {headers.map((h, i) => (
+              <SelectItem key={i} value={String(i)} className="text-xs">
+                {h || `colonne ${i + 1}`}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+    </div>
   );
 }
 
