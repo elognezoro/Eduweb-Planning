@@ -106,11 +106,42 @@ export default function RegisterPage() {
     handleSubmit,
     control,
     watch,
+    setValue,
     formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: { country: "CI", acceptTerms: false },
   });
+
+  // Auto-détection du pays (IP via en-tête géo serveur, repli sur la locale du
+  // navigateur). N'écrase JAMAIS un choix manuel de l'utilisateur. Le badge
+  // « Détecté automatiquement » n'apparaît qu'après une détection réussie.
+  const [countryDetected, setCountryDetected] = React.useState(false);
+  const userPickedCountry = React.useRef(false);
+  React.useEffect(() => {
+    let active = true;
+    (async () => {
+      let code: string | null = null;
+      try {
+        const res = await fetch("/api/geo");
+        if (res.ok) code = ((await res.json())?.country as string | null) ?? null;
+      } catch {
+        /* hors ligne / pas d'en-tête géo : on tentera la locale */
+      }
+      if (!code && typeof navigator !== "undefined") {
+        const region = (navigator.language || "").split("-")[1];
+        if (region && /^[A-Za-z]{2}$/.test(region)) code = region.toUpperCase();
+      }
+      if (!active || !code || userPickedCountry.current) return;
+      if (UN_COUNTRIES.some((c) => c.code === code)) {
+        setValue("country", code, { shouldValidate: false, shouldDirty: false });
+        setCountryDetected(true);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [setValue]);
 
   const password = watch("password") ?? "";
   const selectedCountry = watch("country") ?? "CI";
@@ -303,16 +334,25 @@ export default function RegisterPage() {
           icon={MapPin}
           error={errors.country?.message}
           badge={
-            <span className="flex items-center gap-1 rounded-full bg-ew-green-100 px-2 py-0.5 text-[11px] font-semibold text-ew-green-700">
-              <BadgeCheck className="h-3 w-3" /> Détecté automatiquement
-            </span>
+            countryDetected ? (
+              <span className="flex items-center gap-1 rounded-full bg-ew-green-100 px-2 py-0.5 text-[11px] font-semibold text-ew-green-700">
+                <BadgeCheck className="h-3 w-3" /> Détecté automatiquement
+              </span>
+            ) : undefined
           }
         >
           <Controller
             control={control}
             name="country"
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
+              <Select
+                value={field.value}
+                onValueChange={(v) => {
+                  userPickedCountry.current = true;
+                  setCountryDetected(false);
+                  field.onChange(v);
+                }}
+              >
                 <SelectTrigger className={authInputCls}>
                   <SelectValue />
                 </SelectTrigger>

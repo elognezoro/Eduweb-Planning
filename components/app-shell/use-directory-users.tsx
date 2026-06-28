@@ -76,7 +76,8 @@ function mapProfile(
     etablissementId: etabId,
     region: "",
     phone: (row.phone as string) ?? undefined,
-    country: "CI",
+    // Pays réel du profil (ISO2 dénormalisé, migration 034) ; CI par défaut.
+    country: ((row.country_code as string) || "CI").toUpperCase(),
     createdAt: (row.created_at as string) ?? undefined,
   };
 }
