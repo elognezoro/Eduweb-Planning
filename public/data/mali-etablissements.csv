@@ -1,64 +1,315 @@
 ﻿nom;pays;region;localite;type_etab;code_etab;regime;annee_scolaire
-Ecole fondamentale Medersa SABIL-HOUDA SC;ML;Bandiagara;Commune rurale Sokoura;École fondamentale;ML-0001;Privé;2024-2025
-Ecole fondamentale Medersa DJIGUIYA SC;ML;Bandiagara;Commune rurale Sokoura;École fondamentale;ML-0002;Privé;2024-2025
-Ecole fondamentale GSSNK SC;ML;Bandiagara;Commune rurale Sangha;École fondamentale;ML-0003;Privé;2024-2025
-Ecole fondamentale Medersa Kamba Bandié 2e Cycle;ML;Bandiagara;Commune rurale Sangha;École fondamentale;ML-0004;Privé;2024-2025
-Ecole fondamentale Tabitongo 2e Cycle;ML;Bandiagara;Commune rurale Sangha;École fondamentale;ML-0005;Privé;2024-2025
-Ecole fondamentale Pélou 2e Cycle;ML;Bandiagara;Commune rurale Sangha;École fondamentale;ML-0006;Privé;2024-2025
-Ecole fondamentale Biné 2e Cycle;ML;Bandiagara;Commune rurale Sangha;École fondamentale;ML-0007;Privé;2024-2025
-Ecole fondamentale Medersa IBI;ML;Bandiagara;Commune rurale Sangha;École fondamentale;ML-0008;Privé;2024-2025
-Ecole fondamentale Medersa Kamba Komodiguily 2e C;ML;Bandiagara;Commune rurale Sangha;École fondamentale;ML-0009;Privé;2024-2025
-Ecole fondamentale Ouroly 2e C;ML;Bandiagara;Commune rurale Sangha;École fondamentale;ML-0010;Privé;2024-2025
-Lycée KODA - Kalabancoro ADEKENE;ML;District De Bamako;4e Arrondissement;Lycée;ML-0011;Privé;2024-2025
-LYCEE Louise Ouimet (LLOD) - Hamdallaye ACI;ML;District De Bamako;4e Arrondissement;Lycée;ML-0012;Privé;2024-2025
-LYCÉE D'EXCELLENCE DE BAMAKO (LEXCEL);ML;District De Bamako;4e Arrondissement;Lycée;ML-0013;Privé;2024-2025
-Lycée privé Mama Kone (LP MAMA) - Kalaban Coro;ML;District De Bamako;4e Arrondissement;Lycée;ML-0014;Privé;2024-2025
-Lycée Privée Montesquieu - kalaban;ML;District De Bamako;4e Arrondissement;Lycée;ML-0015;Privé;2024-2025
-Groupe Scolaire Mama Ndiaye De Kati;ML;Koulikoro;Commune Urbaine de Kati;Lycée;ML-0016;Privé;2024-2025
-Complexe Scolaire Mama Théra (CMT);ML;District De Bamako;7e Arrondissement;Lycée;ML-0017;Privé;2024-2025
-EPSILON School;ML;District De Bamako;1er Arrondissement;Lycée;ML-0018;Privé;2024-2025
-LYCEE NOTRE DAME DU NIGER - QUARTIER DU FLEUVE Bamako;ML;District De Bamako;4e Arrondissement;Lycée;ML-0019;Ecole publique;2024-2025
-ETABLISSEMENT SCOLAIRE ALADDIN - Hamdallaye ACI 2000 Bamako;ML;District De Bamako;4e Arrondissement;Lycée;ML-0020;Ecole publique;2024-2025
-LA MAISON DU SAVOIR;ML;District De Bamako;Deuxième Arrondissement;École fondamentale;ML-0021;Privé;2024-2025
-LA REUSSITE (1er Cycle);ML;District De Bamako;Deuxième Arrondissement;École fondamentale;ML-0022;Privé;2024-2025
-CHERIFOULA;ML;District De Bamako;Deuxième Arrondissement;École fondamentale;ML-0023;Privé;2024-2025
-E.P. BADENYA;ML;District De Bamako;Deuxième Arrondissement;École fondamentale;ML-0024;Privé;2024-2025
-COMPLEXE SCOLAIRE;ML;District De Bamako;Deuxième Arrondissement;École fondamentale;ML-0025;Privé;2024-2025
-SIADA SAMAKE (2e Cycle);ML;District De Bamako;Deuxième Arrondissement;École fondamentale;ML-0026;Privé;2024-2025
-E.P. BAKARIBOUGOU;ML;District De Bamako;Deuxième Arrondissement;École fondamentale;ML-0027;Privé;2024-2025
-EP ASSETOU TRAORE;ML;District De Bamako;Deuxième Arrondissement;École fondamentale;ML-0028;Privé;2024-2025
-EP LES CHOUCHOUS (2e Cycle);ML;District De Bamako;Deuxième Arrondissement;École fondamentale;ML-0029;Privé;2024-2025
-LA PLEIODE;ML;District De Bamako;Deuxième Arrondissement;École fondamentale;ML-0030;Privé;2024-2025
-BA ALIMA;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0031;Privé;2024-2025
-François MITTERAND;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0032;Privé;2024-2025
-LE RAVIN;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0033;Privé;2024-2025
-VISION;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0034;Privé;2024-2025
-LES IMPACT DU CHRIS;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0035;Privé;2024-2025
-ECOLE MODERNE DE;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0036;Privé;2024-2025
-SABALIBOUGOU F;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0037;Privé;2024-2025
-BOUBACAR DIARRA;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0038;Privé;2024-2025
-JEANNE CHANTAL KO;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0039;Privé;2024-2025
-KWANG MYUNG;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0040;Privé;2024-2025
-DAR EL HADITH;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0041;Médersa;2024-2025
-SADA OUMAR TOURE;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0042;Médersa;2024-2025
-IHIYAOU DINE ISLAMIA;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0043;Médersa;2024-2025
-SIRADJOUL MINOUR;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0044;Médersa;2024-2025
-SAADATI DARAYNI;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0045;Médersa;2024-2025
-AL AMAL ESPOIR;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0046;Médersa;2024-2025
-DAR ALHIKMAT;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0047;Médersa;2024-2025
-HAYATOUL EL ISLAMIA;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0048;Médersa;2024-2025
-ASSOURA;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0049;Médersa;2024-2025
-DAR COURAN EN HAD;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0050;Médersa;2024-2025
-FRANCO ARABE SABA;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0051;Médersa;2024-2025
-DAROU RAHAMA;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0052;Médersa;2024-2025
-OUSMANE BOUNAFA;ML;District De Bamako;Cinquième Arrondissement;École fondamentale;ML-0053;Médersa;2024-2025
-Lycée Mamby SIDIBE de Kati (LMSK);ML;Koulikoro;Commune Urbaine de Kati;Lycée;ML-0054;Non précisé sur l’extrait;2024-2025
-COLLEGE MICHELLE A;ML;Bougouni;Commune urbaine de Bougouni;Lycée;ML-0055;Non précisé sur l’extrait;2024-2025
-Lycée privé Mama Kone (LP MAMA) - Kalaban Coro;ML;District De Bamako;4e Arrondissement;Lycée;ML-0056;Non précisé sur l’extrait;2024-2025
-Lycee Birgo - kalaban;ML;District De Bamako;4e Arrondissement;Lycée;ML-0057;Non précisé sur l’extrait;2024-2025
-Lycée Birgo - kalaban coura;ML;District De Bamako;4e Arrondissement;Lycée;ML-0058;Non précisé sur l’extrait;2024-2025
-Le complexe scolaire WASSA - Faladie Sema;ML;District De Bamako;6e Arrondissement;Lycée;ML-0059;Non précisé sur l’extrait;2024-2025
-Lycée Mamadou M'Bodj de Sébénikoro (LMBS) - Sébénikoro;ML;District De Bamako;4e Arrondissement;Lycée;ML-0060;Non précisé sur l’extrait;2024-2025
-Lycée KODA - Kalabancoro ADEKENE;ML;District De Bamako;4e Arrondissement;Lycée;ML-0061;Non précisé sur l’extrait;2024-2025
-GSPL (Groupe Scolaire Privée "lycée la lumière") - Hippodromme Bamako;ML;District De Bamako;2e Arrondissement;Lycée;ML-0062;Non précisé sur l’extrait;2024-2025
-Lycée Privée Montesquieu - kalaban;ML;District De Bamako;4e Arrondissement;Lycée;ML-0063;Non précisé sur l’extrait;2024-2025
+Ecole fondamentale Medersa SABIL-HOUDA SC;ML;Bandiagara;Commune rurale Sokoura;École fondamentale;MLI-0001;Privé;2024-2025
+Ecole fondamentale Medersa DJIGUIYA SC;ML;Bandiagara;Commune rurale Sokoura;École fondamentale;MLI-0002;Privé;2024-2025
+Ecole fondamentale GSSNK SC;ML;Bandiagara;Commune rurale Sangha;École fondamentale;MLI-0003;Privé;2024-2025
+Ecole fondamentale Medersa Kamba Bandié 2e Cycle;ML;Bandiagara;Commune rurale Sangha;École fondamentale;MLI-0004;Privé;2024-2025
+Ecole fondamentale Tabitongo 2e Cycle;ML;Bandiagara;Commune rurale Sangha;École fondamentale;MLI-0005;Privé;2024-2025
+Ecole fondamentale Pélou 2e Cycle;ML;Bandiagara;Commune rurale Sangha;École fondamentale;MLI-0006;Privé;2024-2025
+Ecole fondamentale Biné 2e Cycle;ML;Bandiagara;Commune rurale Sangha;École fondamentale;MLI-0007;Privé;2024-2025
+Ecole fondamentale Medersa IBI;ML;Bandiagara;Commune rurale Sangha;École fondamentale;MLI-0008;Privé;2024-2025
+Ecole fondamentale Medersa Kamba Komodiguily 2e C;ML;Bandiagara;Commune rurale Sangha;École fondamentale;MLI-0009;Privé;2024-2025
+Ecole fondamentale Ouroly 2e C;ML;Bandiagara;Commune rurale Sangha;École fondamentale;MLI-0010;Privé;2024-2025
+Lycée KODA - Kalabancoro ADEKENE;ML;Bamako;4e Arrondissement;Lycée;MLI-0011;Privé;2024-2025
+LYCEE Louise Ouimet (LLOD) - Hamdallaye ACI;ML;Bamako;4e Arrondissement;Lycée;MLI-0012;Privé;2024-2025
+LYCÉE D'EXCELLENCE DE BAMAKO (LEXCEL);ML;Bamako;4e Arrondissement;Lycée;MLI-0013;Privé;2024-2025
+Lycée privé Mama Kone (LP MAMA) - Kalaban Coro;ML;Bamako;4e Arrondissement;Lycée;MLI-0014;Privé;2024-2025
+Lycée Privée Montesquieu - kalaban;ML;Bamako;4e Arrondissement;Lycée;MLI-0015;Privé;2024-2025
+Groupe Scolaire Mama Ndiaye De Kati;ML;Koulikoro;Commune Urbaine de Kati;Lycée;MLI-0016;Privé;2024-2025
+Complexe Scolaire Mama Théra (CMT);ML;Bamako;7e Arrondissement;Lycée;MLI-0017;Privé;2024-2025
+EPSILON School;ML;Bamako;1er Arrondissement;Lycée;MLI-0018;Privé;2024-2025
+LYCEE NOTRE DAME DU NIGER - QUARTIER DU FLEUVE Bamako;ML;Bamako;4e Arrondissement;Lycée;MLI-0019;Public;2024-2025
+ETABLISSEMENT SCOLAIRE ALADDIN - Hamdallaye ACI 2000 Bamako;ML;Bamako;4e Arrondissement;Lycée;MLI-0020;Public;2024-2025
+LA MAISON DU SAVOIR;ML;Bamako;Deuxième Arrondissement;École fondamentale;MLI-0021;Privé;2024-2025
+LA REUSSITE (1er Cycle);ML;Bamako;Deuxième Arrondissement;École fondamentale;MLI-0022;Privé;2024-2025
+CHERIFOULA;ML;Bamako;Deuxième Arrondissement;École fondamentale;MLI-0023;Privé;2024-2025
+E.P. BADENYA;ML;Bamako;Deuxième Arrondissement;École fondamentale;MLI-0024;Privé;2024-2025
+COMPLEXE SCOLAIRE;ML;Bamako;Deuxième Arrondissement;École fondamentale;MLI-0025;Privé;2024-2025
+SIADA SAMAKE (2e Cycle);ML;Bamako;Deuxième Arrondissement;École fondamentale;MLI-0026;Privé;2024-2025
+E.P. BAKARIBOUGOU;ML;Bamako;Deuxième Arrondissement;École fondamentale;MLI-0027;Privé;2024-2025
+EP ASSETOU TRAORE;ML;Bamako;Deuxième Arrondissement;École fondamentale;MLI-0028;Privé;2024-2025
+EP LES CHOUCHOUS (2e Cycle);ML;Bamako;Deuxième Arrondissement;École fondamentale;MLI-0029;Privé;2024-2025
+LA PLEIODE;ML;Bamako;Deuxième Arrondissement;École fondamentale;MLI-0030;Privé;2024-2025
+BA ALIMA;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0031;Privé;2024-2025
+François MITTERAND;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0032;Privé;2024-2025
+LE RAVIN;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0033;Privé;2024-2025
+VISION;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0034;Privé;2024-2025
+LES IMPACT DU CHRIS;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0035;Privé;2024-2025
+ECOLE MODERNE DE;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0036;Privé;2024-2025
+SABALIBOUGOU F;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0037;Privé;2024-2025
+BOUBACAR DIARRA;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0038;Privé;2024-2025
+JEANNE CHANTAL KO;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0039;Privé;2024-2025
+KWANG MYUNG;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0040;Privé;2024-2025
+DAR EL HADITH;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0041;Privé (médersa);2024-2025
+SADA OUMAR TOURE;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0042;Privé (médersa);2024-2025
+IHIYAOU DINE ISLAMIA;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0043;Privé (médersa);2024-2025
+SIRADJOUL MINOUR;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0044;Privé (médersa);2024-2025
+SAADATI DARAYNI;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0045;Privé (médersa);2024-2025
+AL AMAL ESPOIR;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0046;Privé (médersa);2024-2025
+DAR ALHIKMAT;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0047;Privé (médersa);2024-2025
+HAYATOUL EL ISLAMIA;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0048;Privé (médersa);2024-2025
+ASSOURA;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0049;Privé (médersa);2024-2025
+DAR COURAN EN HAD;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0050;Privé (médersa);2024-2025
+FRANCO ARABE SABA;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0051;Privé (médersa);2024-2025
+DAROU RAHAMA;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0052;Privé (médersa);2024-2025
+OUSMANE BOUNAFA;ML;Bamako;Cinquième Arrondissement;École fondamentale;MLI-0053;Privé (médersa);2024-2025
+Lycée Mamby SIDIBE de Kati (LMSK);ML;Koulikoro;Commune Urbaine de Kati;Lycée;MLI-0054;Non précisé sur l’extrait;2024-2025
+COLLEGE MICHELLE A;ML;Bougouni;Commune urbaine de Bougouni;Lycée;MLI-0055;Non précisé sur l’extrait;2024-2025
+Lycee Birgo - kalaban;ML;Bamako;4e Arrondissement;Lycée;MLI-0056;Non précisé sur l’extrait;2024-2025
+Lycée Birgo - kalaban coura;ML;Bamako;4e Arrondissement;Lycée;MLI-0057;Non précisé sur l’extrait;2024-2025
+Le complexe scolaire WASSA - Faladie Sema;ML;Bamako;6e Arrondissement;Lycée;MLI-0058;Non précisé sur l’extrait;2024-2025
+Lycée Mamadou M'Bodj de Sébénikoro (LMBS) - Sébénikoro;ML;Bamako;4e Arrondissement;Lycée;MLI-0059;Non précisé sur l’extrait;2024-2025
+GSPL (Groupe Scolaire Privée "lycée la lumière") - Hippodromme Bamako;ML;Bamako;2e Arrondissement;Lycée;MLI-0060;Non précisé sur l’extrait;2024-2025
+Medersa DAR HADITH ANNEXE;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0062;Privé (médersa);2024-2025
+Medersa CHEICK AHMED BABA;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0063;Privé (médersa);2024-2025
+Medersa CHEICK AHAMED BAB;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0064;Privé (médersa);2024-2025
+Medersa SEYDINA BILAL ISLAM;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0065;Privé (médersa);2024-2025
+Medersa DAR TABLIQUE EL ISL;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0066;Privé (médersa);2024-2025
+Medersa DAR HADIT;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0067;Privé (médersa);2024-2025
+Medersa SEYDINA BILAL 1er Cycle;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0068;Privé (médersa);2024-2025
+Medersa SAAD ZIWAZA;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0069;Privé (médersa);2024-2025
+Ecole Fondamentale PIERRE DIARRA KODO;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0070;Communautaire;2024-2025
+Ecole Fondamentale DJEGUENINA ECOM;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0071;Communautaire;2024-2025
+Ecole Fondamentale N'GANALA ECOM;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0072;Communautaire;2024-2025
+Ecole Fondamentale NOUR YAKINI;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0073;Communautaire;2024-2025
+Ecole Fondamentale FOUGANI ECOM;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0074;Communautaire;2024-2025
+Ecole Fondamentale BIRILA ECOM;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0075;Communautaire;2024-2025
+Ecole Fondamentale DJAMBALA MEDERSA;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0076;Communautaire;2024-2025
+Ecole Fondamentale DALABANI;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0077;Communautaire;2024-2025
+Ecole Fondamentale ALMAMY TIMBO 1er Cycle;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0078;Public;2024-2025
+Ecole Fondamentale KABA DIAKITE 2CYCLE;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0079;Public;2024-2025
+Ecole Fondamentale FOULABOULA 1er Cycle;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0080;Public;2024-2025
+Ecole Fondamentale KABA DIAKITE 1er Cycle;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0081;Public;2024-2025
+Ecole Fondamentale SOGOLA;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0082;Public;2024-2025
+Ecole Fondamentale FOULABOULA 2e Cycle;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0083;Public;2024-2025
+Ecole Fondamentale DOUGOUNINA;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0084;Public;2024-2025
+Ecole Fondamentale MASSABLACOURA PR;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0085;Public;2024-2025
+Ecole Fondamentale FARABA II;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0086;Public;2024-2025
+Ecole Fondamentale FARABA 1er CYCLE B;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0087;Public;2024-2025
+Ecole fondamentale KENDE SC;ML;Bandiagara;Commune rurale Kendié;École fondamentale;MLI-0088;Privé;2024-2025
+Ecole fondamentale Medersa Nahar djoliba;ML;Bandiagara;Commune rurale Kendié;École fondamentale;MLI-0089;Privé;2024-2025
+Ecole fondamentale Medersa Mory;ML;Bandiagara;Commune rurale Kendié;École fondamentale;MLI-0090;Privé;2024-2025
+Ecole fondamentale Ningari SC I;ML;Bandiagara;Commune rurale Kendié;École fondamentale;MLI-0091;Privé;2024-2025
+Ecole fondamentale KENDIE SC;ML;Bandiagara;Commune rurale Kendié;École fondamentale;MLI-0092;Privé;2024-2025
+Ecole fondamentale Dè SC;ML;Bandiagara;Commune rurale Kendié;École fondamentale;MLI-0093;Privé;2024-2025
+Ecole fondamentale Kilègou SC;ML;Bandiagara;Commune rurale Kendié;École fondamentale;MLI-0094;Privé;2024-2025
+Ecole fondamentale Ningari SC II;ML;Bandiagara;Commune rurale Kendié;École fondamentale;MLI-0095;Privé;2024-2025
+Ecole fondamentale Guinekanda SC;ML;Bandiagara;Commune rurale Kendié;École fondamentale;MLI-0096;Privé;2024-2025
+Ecole fondamentale Ondogou SC;ML;Bandiagara;Commune rurale Kendié;École fondamentale;MLI-0097;Privé;2024-2025
+Ecole Fondamentale MEDERSA DAR HADIT;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0098;Public;2024-2025
+Ecole Fondamentale TORAKABOUGOU 2e Cycle;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0099;Public;2024-2025
+Ecole Fondamentale SOGOLA 2e Cycle;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0100;Public;2024-2025
+Ecole Fondamentale FARABA 1er CYCLE A;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0101;Public;2024-2025
+Ecole Fondamentale HEREMAKONO-NORD;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0102;Public;2024-2025
+Ecole Fondamentale MASSABLACOURA 1e;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0103;Public;2024-2025
+Ecole Fondamentale DANOU MOUSSA 1ER Cycle;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0104;Public;2024-2025
+Ecole Fondamentale MASSABLA 1er CYCLE;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0105;Public;2024-2025
+Ecole Fondamentale DOUGOUNINA 2e Cycle;ML;Bougouni;Commune urbaine de Bougouni;École fondamentale;MLI-0106;Public;2024-2025
+MEDERSA MANAKOT;ML;Kita;Commune rurale Namala Guimbala;École fondamentale;MLI-0107;Privé (médersa);2024-2025
+MEDERSA DJIDIAN 2 C;ML;Kita;Commune rurale Djidian;École fondamentale;MLI-0108;Privé (médersa);2024-2025
+MEDERSA DJIDIAN 1ER Cycle;ML;Kita;Commune rurale Djidian;École fondamentale;MLI-0109;Privé (médersa);2024-2025
+MEDERSA TOFASSADA;ML;Kita;Commune rurale Djidian;École fondamentale;MLI-0110;Privé (médersa);2024-2025
+MEDERSA FOUNTICO;ML;Kita;Commune rurale Djidian;École fondamentale;MLI-0111;Privé (médersa);2024-2025
+Medersa MANAROUL ILMI 1er Cycle;ML;Kita;Commune rurale Djidian;École fondamentale;MLI-0112;Privé (médersa);2024-2025
+MEDERSA SANDIAMB;ML;Kita;Commune rurale Djidian;École fondamentale;MLI-0113;Privé (médersa);2024-2025
+Medersa NOURDINE;ML;Kita;Commune urbaine Kita;École fondamentale;MLI-0114;Privé (médersa);2024-2025
+Medersa TARIBIATOUL BANINA;ML;Kita;Commune urbaine Kita;École fondamentale;MLI-0115;Privé (médersa);2024-2025
+Medersa DARLI HADISSOU DE S;ML;Kita;Commune urbaine Kita;École fondamentale;MLI-0116;Privé (médersa);2024-2025
+Université de Gao (U-Gao);ML;Gao;Gao;Université;MLI-0117;Public;2024-2025
+Université de Kayes (UKA);ML;Kayes;Kayes;Université;MLI-0118;Public;2024-2025
+Université de Ségou;ML;Ségou;Ségou;Université;MLI-0119;Public;2024-2025
+Université de Sikasso;ML;Sikasso;Sikasso;Université;MLI-0120;Public;2024-2025
+Université de Tombouctou (U-Tombouctou);ML;Tombouctou;Tombouctou;Université;MLI-0121;Public;2024-2025
+Université des Sciences Sociales et de Gestion de Bamako (USSGB);ML;Bamako;Bamako;Université;MLI-0122;Public;2024-2025
+Université des Sciences, des Techniques et des Technologies de Bamako (USTTB);ML;Bamako;Bamako;Université;MLI-0123;Public;2024-2025
+Université Kurukanfuga de Bamako (UKB);ML;Bamako;Bamako;Université;MLI-0124;Public;2024-2025
+Université Polytechnique de Bandiagara (UPB);ML;Bandiagara;Bandiagara;Université;MLI-0125;Public;2024-2025
+Université Yambo OUOLOGUEM de Bamako (UYOB);ML;Bamako;Bamako;Université;MLI-0126;Public;2024-2025
+Centre d’Intelligence Artificielle et de Robotique du Mali (CIAR-Mali);ML;Bamako;Bamako;Université;MLI-0127;Public;2024-2025
+Centre de Recherche et de Formation pour l’Industrie Légère et Textile (CERFILTEX);ML;Bamako;Bamako;Université;MLI-0128;Public;2024-2025
+Ecole Nationale d’Ingénieurs / Abderhamane Baba Touré (ENI-ABT);ML;Bamako;Bamako;Université;MLI-0129;Public;2024-2025
+Ecole Normale d’Enseignement Technique et Professionnel (ENETP);ML;Bamako;Bamako;Université;MLI-0130;Public;2024-2025
+Ecole Normale Supérieure (ENSUP);ML;Bamako;Bamako;Université;MLI-0131;Public;2024-2025
+Ecole Supérieure de Journalisme et des Sciences de la Communication (ESJSC);ML;Bamako;Bamako;Université;MLI-0132;Public;2024-2025
+Institut de Pédagogie Universitaire (IPU);ML;Bamako;Bamako;Université;MLI-0133;Public;2024-2025
+Institut des Hautes Études et de Recherche en Sciences Islamiques (IHERI-ABT);ML;Bamako;Bamako;Université;MLI-0134;Public;2024-2025
+Institut National de Formation des Travailleurs Sociaux (INFTS);ML;Bamako;Bamako;Université;MLI-0135;Public;2024-2025
+Institut National de Formation en Sciences de la Santé (INFSS);ML;Bamako;Bamako;Université;MLI-0136;Public;2024-2025
+Institut National de la Jeunesse et des Sports (INJS);ML;Bamako;Bamako;Université;MLI-0137;Public;2024-2025
+Institut Polytechnique Rural de Formation et de Recherche Appliquée (IPR/IFRA);ML;Koulikoro;Katibougou / Koulikoro;Université;MLI-0138;Public;2024-2025
+Institut Zayed des Sciences Economiques et Juridiques (IZSEJ);ML;Bamako;Bamako;Université;MLI-0139;Public;2024-2025
+African Business Private School ABPS;ML;Bamako;Hamdallaye ACI 2000;Université;MLI-0140;Privé;2024-2025
+Bamako Business School BBS;ML;Bamako;Bamako-Hamdallaye ACI 2000;Université;MLI-0141;Privé;2024-2025
+Centre de Formation des Techniciens Socio Sanitaires CFTSS;ML;Bamako;Bamako-Hamdallaye ACI 2000;Université;MLI-0142;Privé;2024-2025
+Centre de Formation des Techniciens Socio Sanitaires CFTSS;ML;Ségou;Ségou;Université;MLI-0143;Privé;2024-2025
+Centre de Formation en Banque et Micro Finance CFBF;ML;Bamako;Bamako-Hamdallaye ACI 2000;Université;MLI-0144;Privé;2024-2025
+Centre de Formation et d’Appui Conseil pour le Développement Local DELTA-C;ML;;Non précisé;Université;MLI-0145;Privé;2024-2025
+Centre du Droit Bancaire et des Affaires CDBA;ML;Bamako;Bamako-Hamdallaye;Université;MLI-0146;Privé;2024-2025
+Centre d’Etudes et de Formation en Informatique et Bureautique CEFIB;ML;Bamako;Bamako-Quinzambougou;Université;MLI-0147;Privé;2024-2025
+Centre d’Etudes Supérieures en Informatique, Gestion et Marketing CESIGEM;ML;Bamako;Bamako-Sogoniko;Université;MLI-0148;Privé;2024-2025
+Centre d’Ingénierie des Techniques d’Entreprenariat et de Métiers CITEM;ML;Bamako;Bamako-Djélibougou;Université;MLI-0149;Privé;2024-2025
+Centre d’Ingénierie et de Formation en Energie et Développement Durable CIFED;ML;Koulikoro;Kati-Kôkô-Plateau;Université;MLI-0150;Privé;2024-2025
+Centre Privé d’Etudes Supérieures des Techniques Comptables et Commerciales CPESTC;ML;Bamako;Kalabancoura - Bamako;Université;MLI-0151;Privé;2024-2025
+Centre Privé d’Enseignement Supérieur de Kalabancoro CPESK;ML;Bamako;Bamako-Kalabancoro Nèrè coro;Université;MLI-0152;Privé;2024-2025
+Centre Privé Vicenta Maria Sciences de la Santé CPVMSS;ML;Ségou;Ségou-Médine;Université;MLI-0153;Privé;2024-2025
+Centre Supérieur de Formation en Gestion CSFG;ML;Bamako;Bamako-Hamdallaye;Université;MLI-0154;Privé;2024-2025
+Centre Supérieur Privé de Formation Agropastorale Boubou SOW CSPFA-BS;ML;Kayes;Soutoucoulé - Kayes;Université;MLI-0155;Privé;2024-2025
+Centre Supérieur Privé de Formation des Infirmier de Kayes CPFIK-SUP;ML;Kayes;Khasso - Kayes ville;Université;MLI-0156;Privé;2024-2025
+Centre Technique de Formation Santé Plus CTFSP;ML;Bamako;Bamako-Kalaban-Coura;Université;MLI-0157;Privé;2024-2025
+Centre Universitaire Mandé Bukari CUMBU;ML;Bamako;Bamako-ACI 2000;Université;MLI-0158;Privé;2024-2025
+Complexe Scolaire et Universitaire privé BAZO CSUP-BAZO;ML;Bamako;Yirimadio ZERNY;Université;MLI-0159;Privé;2024-2025
+Complexe Scolaire et Universitaire privé Bazo Annexe CSUP-BAZO Annexe;ML;Bamako;Bamako-Sotuba;Université;MLI-0160;Privé;2024-2025
+Complexe Universitaire Polytechnique Privé Balla Traore CUPP-BALLAT;ML;Bamako;Bamako-Boulkassoumbougou;Université;MLI-0161;Privé;2024-2025
+Cours Jean d’Arc CJA;ML;Bamako;Bamako-Grand Marché;Université;MLI-0162;Privé;2024-2025
+Ecole de Business Bilingue ECOB;ML;Bamako;Bamako-Sotuba;Université;MLI-0163;Privé;2024-2025
+Ecole de Formation de Sages-femmes Bouctou;ML;Bamako;Bamako-Sebenikoro;Université;MLI-0164;Privé;2024-2025
+Ecole de Formation des infirmiers et Auxiliaires de Santé;ML;Sikasso;Wayerma I, Sikasso;Université;MLI-0165;Privé;2024-2025
+Ecole de Formation des Techniciens Socio-Sanitaire EFTSS-Annexe Sikasso;ML;Sikasso;Sikasso ville;Université;MLI-0166;Privé;2024-2025
+Ecole de Formation des Techniciens Socio-Sanitaires EFTSS;ML;Bamako;Bamako;Université;MLI-0167;Privé;2024-2025
+Ecole de Formation paramédicale et de Formation Continue EFPFC;ML;Mopti;Mopti ville;Université;MLI-0168;Privé;2024-2025
+Ecole de Formation Sanitaire EFS;ML;Bamako;Bamako-Faladiè;Université;MLI-0169;Privé;2024-2025
+Ecole de Santé Amadou Garba Koita de Mopti ESM-AGK;ML;Mopti;Mopti;Université;MLI-0170;Privé;2024-2025
+Ecole de Santé Banan Kokoun ESBK;ML;Bamako;Bamako-Baco-Djicoroni ACI;Université;MLI-0171;Privé;2024-2025
+Ecole de Santé Bazo BAZO;ML;Bamako;Bamako-Banankabougou;Université;MLI-0172;Privé;2024-2025
+Ecole de Santé Bazo Rive Gauche ESBRG;ML;Bamako;Bamako-Kalaban-Coura ACI;Université;MLI-0173;Privé;2024-2025
+Ecole de Santé BOUCTOU de Tombouctou BOUCTOU-Tombouctou;ML;Tombouctou;Tombouctou ville;Université;MLI-0174;Privé;2024-2025
+Ecole de Santé de Koutiala Espoir ESK-ESPOIR;ML;Koutiala;Koutiala;Université;MLI-0175;Privé;2024-2025
+Ecole de Santé Le Djenné Le Djenné;ML;Bamako;Banankabougou - Bamako;Université;MLI-0176;Privé;2024-2025
+Ecole Dentaire de Bamako EDB;ML;Bamako;Bamako-Bolibana;Université;MLI-0177;Privé;2024-2025
+Ecole Expert Génie Informatique Supérieure EGI-SUP;ML;Bamako;Bamako-Baco-Djicoroni ACI;Université;MLI-0178;Privé;2024-2025
+Ecole Paramédicale des 40 EP40;ML;Bamako;Bamako-Hippodrome;Université;MLI-0179;Privé;2024-2025
+Ecole Polytechnique Privée d’Excellence EPPE;ML;Bamako;Hippodrome-Bamako;Université;MLI-0180;Privé;2024-2025
+Ecole Pratique de Gestion EPG;ML;Bamako;Bamako-Daoudabougou;Université;MLI-0181;Privé;2024-2025
+Ecole Privée de Formation en Sciences de la Santé de Djitoumou EPFSSD;ML;Koulikoro;Ouélessébougou (cercle de Kati);Université;MLI-0182;Privé;2024-2025
+Ecole Privée de Médecine et de Pharmacie Fatou DIALLO EPMP-FD;ML;Bamako;Hamdallaye ACI 2000 - Bamako;Université;MLI-0183;Privé;2024-2025
+École Privée de Santé ANDAL EPSA;ML;Bamako;Bamako Faladiè;Université;MLI-0184;Privé;2024-2025
+Ecole Privée de Santé Félix Houphoët Boigny de Sikasso;ML;Sikasso;Wayerma II, Sikasso;Université;MLI-0185;Privé;2024-2025
+Ecole Privée de Santé Félix Houphouët Boigny EPSFé;ML;Bamako;Djélibougou - Bamako;Université;MLI-0186;Privé;2024-2025
+Ecole Privée de Santé Hippocrate de Kati EPSH-K;ML;Koulikoro;Kôkô - Kati ville;Université;MLI-0187;Privé;2024-2025
+Ecole Privée de Santé Kala Jata EPSKJ;ML;Bamako;Bamako-Kalabancoura;Université;MLI-0188;Privé;2024-2025
+Ecole Privée de Santé Kolomba EPSK;ML;Bamako;Bamako-Yirimadio;Université;MLI-0189;Privé;2024-2025
+École Privée de santé Koro de Niamana EPSKN;ML;Bamako;Niamana - Kati;Université;MLI-0190;Privé;2024-2025
+École Privée de Santé Mamadou Marouf KEITA – Kita EPSMK;ML;Kita;Kita Ville;Université;MLI-0191;Privé;2024-2025
+Ecole Privée de Santé Moderne EPSaM;ML;Bamako;Bamako-Sébénikoro;Université;MLI-0192;Privé;2024-2025
+Ecole Privée de Santé Safari de Magnambougou EPSSM;ML;Bamako;Magnambougou - Bamako;Université;MLI-0193;Privé;2024-2025
+Ecole Privée de Santé Salia TRAORE de Sikasso EPSST-SIK;ML;Bamako;Hamdallaye - Sikasso;Université;MLI-0194;Privé;2024-2025
+École Privée de Santé Sylla Yelli GOUNDO EPSSYG;ML;Kayes;Kayes;Université;MLI-0195;Privé;2024-2025
+Ecole Privée de Santé Dr Amadou Mountaga TALL EPS-TALL;ML;Bamako;Hamdallaye, Koutiala;Université;MLI-0196;Privé;2024-2025
+Ecole Privée des Hautes Etudes Comptables et Financières-Mali EPHECEF-MALI;ML;Bamako;Bamako-Kalabancoura;Université;MLI-0197;Privé;2024-2025
+Ecole Privée des Hautes Etudes en Santé Publique EPHESP;ML;Bamako;Bamako-Hamdallaye ACI 2000;Université;MLI-0198;Privé;2024-2025
+Ecole Privée des Hautes Etudes Pratiques EPHEP;ML;Bamako;Hamdallaye ACI 2000;Université;MLI-0199;Privé;2024-2025
+Ecole Privée des Techniciens Socio-Sanitaires EPTSS;ML;Bamako;Sikasso-Hamdallaye;Université;MLI-0200;Privé;2024-2025
+Ecole Rationnelle Privée d’Informatique et d’Electronique ERPIE;ML;Koulikoro;Sangarébougou - Kati;Université;MLI-0201;Privé;2024-2025
+Ecole Spéciale Privée de Commerce, d’Administration et de l’Entrepreneuriat ESCAE-P;ML;Bamako;Bamako-Hamdallaye ACI 2000;Université;MLI-0202;Privé;2024-2025
+Ecole Supérieure de Commerce du Mali ESC Mali;ML;Bamako;Bamako-Magnambougou Sokorodji;Université;MLI-0203;Privé;2024-2025
+École Supérieure de Gestion ESG;ML;Bamako;Bamako-Commune IV;Université;MLI-0204;Privé;2024-2025
+École Supérieure de Gestion d’Informatique et de Comptabilité ESGIC;ML;Bamako;Bamako-Badalabougou;Université;MLI-0205;Privé;2024-2025
+Ecole Supérieure d’Informatique et de Gestion ESIG;ML;Bamako;Bamako-Cité du Niger;Université;MLI-0206;Privé;2024-2025
+Ecole Supérieure d’Ingénierie d’Architecture et d’Urbanisme ESIAU;ML;Bamako;Bamako-Badialan;Université;MLI-0207;Privé;2024-2025
+Ecole Supérieure en Sciences de Gestion et de Management du développement Durable Appliqué ESUPEG-MDD;ML;Bamako;Banankabougou - Bamako;Université;MLI-0208;Privé;2024-2025
+École Supérieure Privée d’Agriculture et d’Elevage ESPAE;ML;Ségou;Pélengana - Ségou;Université;MLI-0209;Privé;2024-2025
+Ecole Supérieure Privée d’Ingénierie et de Management ESPIM;ML;;Non précisé;Université;MLI-0210;Privé;2024-2025
+Ecole Supérieure Privée de Commerce et de Gestion ESPCG;ML;Bamako;Bamako-Titibougou;Université;MLI-0211;Privé;2024-2025
+Ecole Supérieure Privée de Commerce et de Technologie ESPCT;ML;Bamako;Bamako-Torokorobougou;Université;MLI-0212;Privé;2024-2025
+Ecole Supérieure Privée de Géologie et des Mines ESPGM;ML;Bamako;Magnambougou - Bamako;Université;MLI-0213;Privé;2024-2025
+Ecole Supérieure Privée de Passation et de Gestion des Marchés Publics ESPGMP;ML;Bamako;Hamdallaye ACI 2000 - Bamako;Université;MLI-0214;Privé;2024-2025
+École Supérieure Privée de Santé de Bamako ESPSB;ML;Bamako;Bamako-Djélibougou;Université;MLI-0215;Privé;2024-2025
+Ecole Supérieure Privée de santé Kénédougou ESPS-KENE;ML;Bamako;Kalabancoro - Kati;Université;MLI-0216;Privé;2024-2025
+Ecole Supérieure Privée de Santé N’DOUANGA ESPSN;ML;Bamako;Bacodjicoroni - Bamako;Université;MLI-0217;Privé;2024-2025
+Ecole Supérieure Privée de Technologies Appliquées du Mali APTECH MALI;ML;Bamako;Bamako-Hippodrome;Université;MLI-0218;Privé;2024-2025
+Ecole Supérieure Privée des Techniques Industrielles et de Gestion Fako Konate ESPTIG-Fako KONATE;ML;Bamako;Bamako-Kalabancoura;Université;MLI-0219;Privé;2024-2025
+Ecole Supérieure Privée des Technologies Appliquées et de Management ECOSTAM-P;ML;Bamako;Boulkassoumbougou - Bamako;Université;MLI-0220;Privé;2024-2025
+Ecole Technique Privée d’Enseignement Professionnel ETPEP;ML;Bamako;Bamako-Baco-Djicoroni;Université;MLI-0221;Privé;2024-2025
+Ecole Technique Supérieure Privée de Gestion Soumatio Diamoutene ETSPG-SD;ML;Sikasso;Sikasso-Médine;Université;MLI-0222;Privé;2024-2025
+École Universitaire de Technologie et de Gestion EUTG;ML;Bamako;Bamako-Bacodjicoroni ACI;Université;MLI-0223;Privé;2024-2025
+Elite Internationale de Bamako EIB;ML;Bamako;Bamako-Magnambougou;Université;MLI-0224;Privé;2024-2025
+Faculté de Touba pour les Etudes Islamiques FTEI;ML;Bamako;Sotuba - Bamako;Université;MLI-0225;Privé;2024-2025
+Group Gemini Management International GGMI;ML;Bamako;Bamako-Baco Djicoroni ACI Golf;Université;MLI-0226;Privé;2024-2025
+Hautes Etudes Commerciales, Groupe HECI au Mali HEC;ML;Bamako;Bamako-cité du Niger;Université;MLI-0227;Privé;2024-2025
+INNOVA Academy Private School of Business IAPSB;ML;Bamako;Bamako - Baco Djicoroni Golf;Université;MLI-0228;Privé;2024-2025
+Institut Africain de Formation en Pédagogie, Recherche et Evaluation de la Santé IAFPRESS;ML;Bamako;Bamako;Université;MLI-0229;Privé;2024-2025
+Institut Africain de Management IAM;ML;Bamako;Bamako-Hamdallaye ACI 2000;Université;MLI-0230;Privé;2024-2025
+Institut Consulaire d’Etudes et de Formation INCEF;ML;Bamako;Bamako-Hamdallaye;Université;MLI-0231;Privé;2024-2025
+Institut de Formation aux Carrières du Travail Social IFCTS;ML;Bamako;Bamako-Hippodrome;Université;MLI-0232;Privé;2024-2025
+Institut de Formation en Sciences de la Santé IFSSA;ML;Bamako;Djélibougou - Bamako;Université;MLI-0233;Privé;2024-2025
+Institut de Formation pour le Développement Economique et Social;ML;Bamako;Bamako-ACI 2000;Université;MLI-0234;Privé;2024-2025
+Institut de Formation Technique Supérieure IFTS;ML;Bamako;Bamako- Baco-Djicoroni Zone ACI;Université;MLI-0235;Privé;2024-2025
+Institut de Gestion et de Langues Appliquées aux Métiers IGLAM;ML;Bamako;Bamako-Baco-Djicoroni;Université;MLI-0236;Privé;2024-2025
+Institut de Langues et de Commerce International ILCI;ML;Bamako;Bamako-Baco Djicororni ACI;Université;MLI-0237;Privé;2024-2025
+Institut de Management et de Technologie IMATEC;ML;Bamako;Bamako-Badalabougou;Université;MLI-0238;Privé;2024-2025
+Institut des Finances Samake Mohamed IF SAMAKE MOHAMED;ML;Bamako;Bamako-Magnambougou;Université;MLI-0239;Privé;2024-2025
+Institut Privé Africain de la Finance Islamique et du Management IPAFIM;ML;Bamako;Sénou - Bamako;Université;MLI-0240;Privé;2024-2025
+Institut Privé Africain de Technologies et de Management IPTMA;ML;Bamako;Bamako-Quartier Mali;Université;MLI-0241;Privé;2024-2025
+Institut Privé Africain de Technologies et de Management;ML;Bamako;Hamdallaye ACI 2000 - Bamako;Université;MLI-0242;Privé;2024-2025
+Institut Privé Africain pour les Energies Renouvelables, Climat et Innovations IPA-ERCI;ML;Bamako;Bamako - Sokorodji;Université;MLI-0243;Privé;2024-2025
+Institut Privé de Formation en Santé de Gao IPFSG;ML;Gao;Sossokoïra - Gao ville;Université;MLI-0244;Privé;2024-2025
+Institut Privé de Formation Sanitaire Bernard Kouchner IPFS-BK;ML;Bamako;Hippodrome-Bamako;Université;MLI-0245;Privé;2024-2025
+Institut Privé de Langues Appliquées Performance IPLAP;ML;Bamako;Kabala - Kalabancoro;Université;MLI-0246;Privé;2024-2025
+Institut Privé de Santé Publique MAIGA IPSPM;ML;Koulikoro;Kati-Sirakoro-Méguétana;Université;MLI-0247;Privé;2024-2025
+Institut Privé des Technologies de Bamako ITB-Privé;ML;Bamako;Bamako-Quartier Mali;Université;MLI-0248;Privé;2024-2025
+Institut Privé Kôrè des Arts et Métiers IPKAM;ML;Ségou;Sébougou (Ségou);Université;MLI-0249;Privé;2024-2025
+Institut Privé Simon Finance et Management International IPSFMI;ML;Bamako;Sotuba - Bamako;Université;MLI-0250;Privé;2024-2025
+Institut Privé SMART IP-SMART;ML;Bamako;Niamakoro;Université;MLI-0251;Privé;2024-2025
+Institut Spécial des Techniques Commerciales et Comptables ISTCC;ML;Bamako;Bamako-Bagadadji;Université;MLI-0252;Privé;2024-2025
+Institut Supérieur de Commerce ISC-BUSINESS SCHOOL;ML;Bamako;Bamako-Hamdallaye ACI 2000;Université;MLI-0253;Privé;2024-2025
+Institut Supérieur de Formation en Informatique et Commerce ISFIC;ML;Bamako;Bamako;Université;MLI-0254;Privé;2024-2025
+Institut Supérieur de Formation et de Gestion d’Entreprises ISFGE;ML;Bamako;Bamako-Kalaban Coro;Université;MLI-0255;Privé;2024-2025
+Institut Supérieur de l’Environnement ISE;ML;Bamako;Kalabancoura - Bamako;Université;MLI-0256;Privé;2024-2025
+Institut Supérieur de Management Appliquée ISMA;ML;Bamako;Bamako-Baco-Djikoroni ACI;Université;MLI-0257;Privé;2024-2025
+Institut Supérieur de Management de Tombouctou ISMT;ML;Tombouctou;Hammabangou - Tombouctou ville;Université;MLI-0258;Privé;2024-2025
+Institut Supérieur de Management et d’Entreprenariat ISM&E;ML;Bamako;Bamako-Faladiè Sema;Université;MLI-0259;Privé;2024-2025
+Institut Supérieur de Technologie Appliquée et de Gestion ISTAG;ML;Bamako;Bamako-Kalaban coura;Université;MLI-0260;Privé;2024-2025
+Institut Supérieur de Technologie et de Gestion ISTG;ML;Bamako;Bamako-Hamdallaye;Université;MLI-0261;Privé;2024-2025
+Institut Vito Saccomandi INSTITUT VITOS;ML;Bamako;Bamako-Kalabancoura;Université;MLI-0262;Privé;2024-2025
+Private Associates Universities of Mali PAUM;ML;Bamako;Bamako-Hamdallaye ACI 2000;Université;MLI-0263;Privé;2024-2025
+Sahel Business Private Scool SBPS;ML;Bamako;Bamako-Hamdallaye ACI 2000;Université;MLI-0264;Privé;2024-2025
+Techno’ Sup-Privée/BCG Techno'Sup-Privée/BCG;ML;;Non précisé;Université;MLI-0265;Privé;2024-2025
+Unité Privée de Formation en Télécommunications et Informatique UPFTI;ML;Bamako;Bamako-Kalabancoura;Université;MLI-0266;Privé;2024-2025
+Unité Supérieure Privée de Formation et de Gestion des Affaires UPFGA-Sup;ML;Bamako;Bamako-Sébénikoro;Université;MLI-0267;Privé;2024-2025
+Université Africaine de Management des Sciences Appliquées et de Télécommunications UAMSAT;ML;Bamako;Bamako-Kalabancoro;Université;MLI-0268;Privé;2024-2025
+Université Africaine des Sciences-Mali UAS-Mali;ML;Bamako;Bamako-Kalaban-Coura;Université;MLI-0269;Privé;2024-2025
+Université Catholique de l’Afrique de l’Ouest / Unité Universitaire de Bamako UCAO/UUBa;ML;Bamako;Bamako-Hamdallaye;Université;MLI-0270;Privé;2024-2025
+Université Internationale Privée d’Excellence UIPE;ML;Bamako;Bamako-Badalabougou;Université;MLI-0271;Privé;2024-2025
+Université Kankou Moussa UKM;ML;Bamako;Bamako-Hippodrome;Université;MLI-0272;Privé;2024-2025
+Université Lafia de Koutiala;ML;Bamako;Hamdallaye, Koutiala;Université;MLI-0273;Privé;2024-2025
+Université Polytechnique Privée Alfred Garçon UPAG;ML;Bamako;Bamako-Quinzambougou;Université;MLI-0274;Privé;2024-2025
+Université polytechnique Privée d’Excellence Toubacoro Alhassane DOUCOURE UPETAD;ML;Koulikoro;Dialakorodji Kognoumani -(Kati);Université;MLI-0275;Privé;2024-2025
+Université Privée Africaine Franco-Arabe UPAFA;ML;Koulikoro;Kati-Titibougou;Université;MLI-0276;Privé;2024-2025
+Université Privée Ahmed Baba UPAB;ML;Bamako;Bamako-Sotuba;Université;MLI-0277;Privé;2024-2025
+Université Privée Al-Moustapha du Mali UPAMM;ML;Bamako;Hamdallaye ACI 2000 - Bamako;Université;MLI-0278;Privé;2024-2025
+Université Privée Albakaye TRAORE UPAT;ML;Bamako;Kalabancoro - Kati;Université;MLI-0279;Privé;2024-2025
+Université Privée Alou KONE UPAK;ML;Bamako;Tièbani - Kalabancoro (Kati);Université;MLI-0280;Privé;2024-2025
+Université Privée Américano-Malienne UPAMA;ML;Bamako;Kalabancoura ACI Bamako;Université;MLI-0281;Privé;2024-2025
+Université Privée Att-Awoune UPA;ML;Bamako;Niamakoro - Bamako;Université;MLI-0282;Privé;2024-2025
+Université Privée Boubacar SAYE UPBS;ML;Bamako;Bamako-Commune VI;Université;MLI-0283;Privé;2024-2025
+Université Privée Cheickné DIALLO;ML;Koulikoro;Noumorila - Kati ville;Université;MLI-0284;Privé;2024-2025
+Université Privée de Balanzan de Ségou;ML;Ségou;Sékoro Sud - Ségou;Université;MLI-0285;Privé;2024-2025
+Université Privée de Gestion et du Développement Durable UniPGDD;ML;Bamako;Bamako Banankabougou SEMA;Université;MLI-0286;Privé;2024-2025
+Université Privée de Kayes UPK;ML;Kayes;Kayes - Diyala;Université;MLI-0287;Privé;2024-2025
+Université Privée de l’Excellence Yeah SAMAKE;ML;Bougouni;Ouélessebougou (Région de Bougouni);Université;MLI-0288;Privé;2024-2025
+Université Privée de Management et de Technologies Tropicales UPM2T;ML;Bamako;Bamako-Badalabougou;Université;MLI-0289;Privé;2024-2025
+Université Privée des Sciences Techniques et de Développement UPSTD;ML;Bamako;Bamako -Doumanzana, Commune I;Université;MLI-0290;Privé;2024-2025
+Université Privée du Kénédougou UP-KENEDOUGOU;ML;Sikasso;Ancien Aéroport - Sikasso ville;Université;MLI-0291;Privé;2024-2025
+Université Privée du Sahel UPS;ML;Bamako;Bamako-Hamdallaye ACI;Université;MLI-0292;Privé;2024-2025
+Université Privée Félix Houphouët BOIGNY du Mali UPFHOB-MALI;ML;Koulikoro;Moribabougou - Kati;Université;MLI-0293;Privé;2024-2025
+Université Privée Franco-Arabe Amadou CISSE UPFAC;ML;Bamako;Kalabancoro - Bamako;Université;MLI-0294;Privé;2024-2025
+Université Privée IDH International-Mali UP2IM;ML;Bamako;Bacodjicoroni - Bamako;Université;MLI-0295;Privé;2024-2025
+Université Privée Klevire UP-KLEV;ML;;Non précisé;Université;MLI-0296;Privé;2024-2025
+Université Privée La Mémoire Supérieure MEMO-SUP;ML;Bamako;Bamako-Djélibougou;Université;MLI-0297;Privé;2024-2025
+Université Privée LE VERDIER UPV;ML;Bamako;Bamako-Kalabancoura;Université;MLI-0298;Privé;2024-2025
+Université Privée les Grands Biasson UPGB;ML;;Non précisé;Université;MLI-0299;Privé;2024-2025
+Université Privée Mary Saint Claire UPMSC;ML;Bamako;Bamako-Hamdallaye;Université;MLI-0300;Privé;2024-2025
+Université Privée Modibo Kane Dilly UPMKD;ML;Bamako;Bamako-Baco-Djicoroni Golf;Université;MLI-0301;Privé;2024-2025
+Université Privée Mont plaisir Tunis à Bamako UPMT;ML;Bamako;Bamako-Hamdallaye ACI 2000;Université;MLI-0302;Privé;2024-2025
+Université Privée Roi Khaled Ben Abdoul Aziz UPRKBA;ML;Bamako;Bamako-Badialan I;Université;MLI-0303;Privé;2024-2025
+Université Privée Souleymane SACKO de Ségou UPSS;ML;Ségou;Sido-Soninkoura - Ségou;Université;MLI-0304;Privé;2024-2025
+Université Scientifique Libre de Bamako USLB;ML;Bamako;Bamako-Sébénikoro;Université;MLI-0305;Privé;2024-2025
+Ecole nationale d'Ingénieur - Abderhamane Baba Touré (ENI-ABT);ML;;Non précisé;Université;MLI-0306;Établissement supérieur référencé WHED;2024-2025
+Institut africain de Formation en Pédagogie, Recherche et Evaluation de la Santé (IAFPRESS);ML;;Non précisé;Université;MLI-0307;Établissement supérieur référencé WHED;2024-2025
+Institut africain de Management – Institut Africain de Management – IAM Bamako (IAM);ML;;Non précisé;Université;MLI-0308;Établissement supérieur référencé WHED;2024-2025
+Institut privé africain de Technologies et de Management (IPTMA);ML;;Non précisé;Université;MLI-0309;Établissement supérieur référencé WHED;2024-2025
+Université africaine de Management, des Sciences appliquées et de Télécommunications (UAMSAT);ML;;Non précisé;Université;MLI-0310;Établissement supérieur référencé WHED;2024-2025
+Complexe universitaire polytechnique privé Balla Traoré (CUPP-BALLAT);ML;;Non précisé;Université;MLI-0311;Établissement supérieur référencé WHED;2024-2025
+Complexe scolaire et universitaire privé Bazo (CSUP-BAZO);ML;;Non précisé;Université;MLI-0312;Établissement supérieur référencé WHED;2024-2025
+Université catholique de l’Afrique de l’Ouest - Unité universitaire de Bamako (UCAO-UUBa);ML;;Non précisé;Université;MLI-0313;Établissement supérieur référencé WHED;2024-2025
+Centre du Droit bancaire et des Affaires (CDBA);ML;;Non précisé;Université;MLI-0314;Établissement supérieur référencé WHED;2024-2025
+Centre d’Etudes et de Formation en Informatique et Bureautique (CEFIB);ML;;Non précisé;Université;MLI-0315;Établissement supérieur référencé WHED;2024-2025
