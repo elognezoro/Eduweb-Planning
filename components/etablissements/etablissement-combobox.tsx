@@ -8,6 +8,7 @@ import {
   searchCiEtablissements,
   type CiEtablissement,
 } from "@/lib/etablissements/ci-etablissements";
+import { loadCountryEtablissements } from "@/lib/etablissements/country-etablissements";
 
 /** Établissement sélectionné (réel ou saisi manuellement). */
 export interface EtablissementSelection {
@@ -54,6 +55,7 @@ export function EtablissementCombobox({
 }) {
   const isCI = (countryCode || "CI") === "CI";
   const [ciList, setCiList] = React.useState<CiEtablissement[]>([]);
+  const [fileList, setFileList] = React.useState<CiEtablissement[]>([]);
   const [loaded, setLoaded] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -62,24 +64,43 @@ export function EtablissementCombobox({
   const rootRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (!isCI) {
-      setLoaded(true);
-      return;
-    }
     let alive = true;
-    void loadCiEtablissements().then((l) => {
-      if (alive) {
-        setCiList(l);
-        setLoaded(true);
-      }
-    });
+    setLoaded(false);
+    if (isCI) {
+      void loadCiEtablissements().then((l) => {
+        if (alive) {
+          setCiList(l);
+          setLoaded(true);
+        }
+      });
+    } else {
+      // Référentiel embarqué du pays (fichier public), chargé automatiquement.
+      void loadCountryEtablissements(countryCode).then((l) => {
+        if (alive) {
+          setFileList(l);
+          setLoaded(true);
+        }
+      });
+    }
     return () => {
       alive = false;
     };
-  }, [isCI]);
+  }, [isCI, countryCode]);
 
-  // CI → référentiel officiel ; autre pays → la liste fournie par l'appelant.
-  const list = isCI ? ciList : customList ?? [];
+  // CI → référentiel officiel ; autre pays → référentiel embarqué du pays +
+  // établissements ajoutés à la main (customList), dédupliqués par nom.
+  const list = React.useMemo<CiEtablissement[]>(() => {
+    if (isCI) return ciList;
+    const seen = new Set<string>();
+    const merged: CiEtablissement[] = [];
+    for (const e of [...(customList ?? []), ...fileList]) {
+      const key = e.name.trim().toLowerCase();
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      merged.push(e);
+    }
+    return merged;
+  }, [isCI, ciList, fileList, customList]);
 
   // Fermeture au clic extérieur.
   React.useEffect(() => {
