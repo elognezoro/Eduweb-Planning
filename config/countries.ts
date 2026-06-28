@@ -210,6 +210,33 @@ export const COUNTRIES: CountryConfig[] = [
       { code: "TRA", name: "Trarza" },
     ],
   },
+  {
+    code: "TG",
+    iso3: "TGO",
+    nameFr: "Togo",
+    nameEn: "Togo",
+    flag: "🇹🇬",
+    currencyCode: "XOF",
+    currencySymbol: "FCFA",
+    timezone: "Africa/Lome",
+    defaultLocale: "fr",
+    academicRegionLabel: "Région (DRE)",
+    teacherTrainingCenterLabel: "ENI / ENS",
+    continuingTrainingAntennaLabel: "Inspection",
+    isActive: true,
+    // Régions = DRE (Directions Régionales de l'Éducation). Le répertoire officiel
+    // DPSSE/MEN ne fournit que des statistiques nationales (ni liste nominative ni
+    // découpage régional) → on pose les régions administratives standard, éditables
+    // via « Gérer les régions ».
+    academicRegions: [
+      { code: "GLO", name: "Grand Lomé" },
+      { code: "MAR", name: "Maritime" },
+      { code: "PLA", name: "Plateaux" },
+      { code: "CEN", name: "Centrale" },
+      { code: "KAR", name: "Kara" },
+      { code: "SAV", name: "Savanes" },
+    ],
+  },
 ];
 
 export const DEFAULT_COUNTRY_CODE = "CI";
