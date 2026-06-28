@@ -63,6 +63,19 @@ function maskEmail(email: string): string {
   return `${user.slice(0, 2)}***@${domain}`;
 }
 
+/**
+ * Normalise l'expéditeur au format exigé par Resend (« Nom <email> »).
+ * Tolère un RESEND_FROM mal formé : « <email> » nu (chevrons sans nom) ou
+ * « email » seul → réécrit en « EduWeb Planner <email> ».
+ */
+function normalizeFrom(raw: string): string {
+  const v = (raw || "").trim();
+  if (/^[^<>]+<[^<>@\s]+@[^<>@\s]+>$/.test(v)) return v; // déjà « Nom <email> »
+  const m = v.match(/([^<>@\s]+@[^<>@\s]+)/);
+  const email = m ? m[1] : "no-reply@planning.eduweb.ci";
+  return `EduWeb Planner <${email}>`;
+}
+
 export async function POST(request: Request) {
   const secret = process.env.SEND_EMAIL_HOOK_SECRET;
   const apiKey = process.env.RESEND_API_KEY;
@@ -117,16 +130,35 @@ export async function POST(request: Request) {
     );
   }
 
-  // Lien de confirmation → notre /auth/callback (verifyOtp côté serveur).
-  const siteUrl = (data.site_url || SITE_URL).replace(/\/+$/, "");
-  const url = `${siteUrl}/auth/callback?token_hash=${encodeURIComponent(
+  // Lien de confirmation : on passe par l'endpoint officiel GoTrue
+  // /auth/v1/verify, qui valide le jeton (OTP ou PKCE) PUIS redirige vers notre
+  // app via redirect_to. (Le champ site_url du hook n'est pas le domaine de
+  // l'app — ne pas l'utiliser comme base.)
+  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\/+$/, "");
+  if (!supabaseUrl) {
+    return NextResponse.json(
+      { error: { http_code: 500, message: "URL Supabase non configurée." } },
+      { status: 500 },
+    );
+  }
+  // redirect_to passe TOUJOURS par notre /auth/callback (échange du code PKCE →
+  // session), borné à notre domaine (anti open-redirect ; GoTrue revalide via
+  // l'allowlist des Redirect URLs).
+  const fallbackRedirect = `${SITE_URL}/auth/callback?next=${encodeURIComponent(conf.next)}`;
+  const redirectTo =
+    data.redirect_to && data.redirect_to.startsWith(SITE_URL)
+      ? data.redirect_to
+      : fallbackRedirect;
+  const url = `${supabaseUrl}/auth/v1/verify?token=${encodeURIComponent(
     tokenHash,
-  )}&type=${encodeURIComponent(conf.type)}&next=${encodeURIComponent(conf.next)}`;
+  )}&type=${encodeURIComponent(conf.type)}&redirect_to=${encodeURIComponent(redirectTo)}`;
 
   const { subject, html } = buildAuthEmail(conf.email, url, new Date().getFullYear());
 
   const resend = new Resend(apiKey);
-  const from = process.env.RESEND_FROM || "EduWeb Planner <no-reply@planning.eduweb.ci>";
+  const from = normalizeFrom(
+    process.env.RESEND_FROM || "EduWeb Planner <no-reply@planning.eduweb.ci>",
+  );
   const { error } = await resend.emails.send({ from, to, subject, html });
   if (error) {
     console.error(
