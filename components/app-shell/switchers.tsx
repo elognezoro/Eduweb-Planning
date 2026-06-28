@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useApp } from "./app-context";
+import { useAcademicRegions } from "./use-academic-regions";
 import { COUNTRIES } from "@/config/countries";
 import { UN_COUNTRIES, flagUrl } from "@/config/un-countries";
 import { ACADEMIC_YEARS } from "@/lib/countries";
@@ -68,6 +69,7 @@ export function CountrySwitcher() {
 
 export function AcademicRegionSwitcher() {
   const { country, regionCode, setRegionCode } = useApp();
+  const regions = useAcademicRegions(country.code);
   return (
     <Select value={regionCode ?? ""} onValueChange={setRegionCode}>
       <SelectTrigger className={triggerCls()} aria-label="Région académique">
@@ -75,7 +77,7 @@ export function AcademicRegionSwitcher() {
         <SelectValue placeholder="Région" />
       </SelectTrigger>
       <SelectContent>
-        {country.academicRegions.map((r) => (
+        {regions.map((r) => (
           <SelectItem key={r.code} value={r.code}>
             {r.name}
           </SelectItem>

@@ -25,6 +25,7 @@ import type {
   Etablissement,
   Inspection,
 } from "@/lib/types";
+import type { AcademicRegionSeed } from "@/config/countries";
 import {
   hasPermission,
   PERMISSION_LABELS,
@@ -285,6 +286,8 @@ export interface Subscription {
 interface StoreState {
   users: DirectoryUser[];
   etablissements: Etablissement[];
+  /** Régions académiques éditées par pays (override la config statique). */
+  customRegions: Record<string, AcademicRegionSeed[]>;
   lessonBook: LessonEntry[];
   announcements: Announcement[];
   appointments: Appointment[];
@@ -477,6 +480,8 @@ interface DataStore extends StoreState {
   updateEtablissement: (id: string, patch: Partial<Etablissement>) => void;
   removeEtablissement: (id: string) => void;
   removeEtablissements: (ids: string[]) => void;
+  /** Définit la liste des régions académiques d'un pays (édition wilayas/DREN). */
+  setCountryRegions: (countryCode: string, regions: AcademicRegionSeed[]) => void;
   addCafop: (c: Omit<Cafop, "id">) => void;
   addCafops: (list: Omit<Cafop, "id">[]) => void;
   removeCafop: (id: string) => void;
@@ -690,6 +695,7 @@ interface DataStore extends StoreState {
 const DEFAULTS: StoreState = {
   users: USER_DIRECTORY,
   etablissements: ETABLISSEMENTS,
+  customRegions: {},
   lessonBook: LESSON_BOOK_ENTRIES,
   announcements: ANNOUNCEMENTS,
   appointments: APPOINTMENTS,
@@ -891,6 +897,11 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       setState((s) => ({
         ...s,
         etablissements: s.etablissements.filter((x) => !ids.includes(x.id)),
+      })),
+    setCountryRegions: (countryCode, regions) =>
+      setState((s) => ({
+        ...s,
+        customRegions: { ...s.customRegions, [countryCode]: regions },
       })),
     addCafop: (c) =>
       setState((s) => ({

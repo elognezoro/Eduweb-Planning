@@ -176,6 +176,40 @@ export const COUNTRIES: CountryConfig[] = [
       { code: "REU", name: "Académie de La Réunion" },
     ],
   },
+  {
+    code: "MR",
+    iso3: "MRT",
+    nameFr: "Mauritanie",
+    nameEn: "Mauritania",
+    flag: "🇲🇷",
+    currencyCode: "MRU",
+    currencySymbol: "UM",
+    timezone: "Africa/Nouakchott",
+    defaultLocale: "fr",
+    academicRegionLabel: "Wilaya (DREN)",
+    teacherTrainingCenterLabel: "ENI / ENS",
+    continuingTrainingAntennaLabel: "Antenne régionale",
+    isActive: true,
+    // Les 15 wilayas (régions administratives = DREN, Directions Régionales de
+    // l'Éducation Nationale) — source : annuaires statistiques 2022-2023 du MEN.
+    academicRegions: [
+      { code: "ADR", name: "Adrar" },
+      { code: "ASS", name: "Assaba" },
+      { code: "BRA", name: "Brakna" },
+      { code: "DKN", name: "Dakhlet Nouadhibou" },
+      { code: "GOR", name: "Gorgol" },
+      { code: "GUI", name: "Guidimakha" },
+      { code: "HEC", name: "Hodh Ech Chargui" },
+      { code: "HEG", name: "Hodh El Gharbi" },
+      { code: "INC", name: "Inchiri" },
+      { code: "NKN", name: "Nouakchott-Nord" },
+      { code: "NKO", name: "Nouakchott-Ouest" },
+      { code: "NKS", name: "Nouakchott-Sud" },
+      { code: "TAG", name: "Tagant" },
+      { code: "TIZ", name: "Tiris Zemmour" },
+      { code: "TRA", name: "Trarza" },
+    ],
+  },
 ];
 
 export const DEFAULT_COUNTRY_CODE = "CI";

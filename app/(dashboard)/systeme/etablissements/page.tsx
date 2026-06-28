@@ -18,6 +18,8 @@ import {
   Globe,
   Download,
   Save,
+  MapPin,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ModulePage } from "@/components/modules/module-page";
@@ -55,8 +57,9 @@ import {
 } from "@/components/ui/select";
 import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
+import { useAcademicRegions } from "@/components/app-shell/use-academic-regions";
 import { InstalledEstablishmentsPanel } from "@/components/etablissements/installed-establishments-panel";
-import { COUNTRIES } from "@/config/countries";
+import { COUNTRIES, type AcademicRegionSeed } from "@/config/countries";
 import { getUnCountry } from "@/config/un-countries";
 import type { Etablissement } from "@/lib/types";
 import { formatNumber, formatPercent } from "@/lib/utils";
@@ -162,6 +165,7 @@ export default function EtablissementsPage() {
               });
             }}
           />
+          <ManageRegionsDialog />
           <CreateEtablissementDialog
             onCreate={(e) => {
               addEtablissement(e);
@@ -624,8 +628,8 @@ function CreateEtablissementDialog({ onCreate }: { onCreate: (e: Omit<Etablissem
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <FieldLabel>Région / DRENAET</FieldLabel>
-              <Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Ex : DRENAET Abidjan 1" />
+              <FieldLabel>Région académique</FieldLabel>
+              <RegionPicker countryCode={countryCode} value={region} onChange={setRegion} placeholder="Région / wilaya…" />
             </div>
             <div className="space-y-1.5">
               <FieldLabel>Localité</FieldLabel>
@@ -700,6 +704,7 @@ function EditEtabDialog({
   const [name, setName] = React.useState(etab.name);
   const [type, setType] = React.useState(etab.type);
   const [locality, setLocality] = React.useState(etab.locality);
+  const [region, setRegion] = React.useState(etab.academicRegionCode);
   const [status, setStatus] = React.useState(etab.status);
 
   React.useEffect(() => {
@@ -707,6 +712,7 @@ function EditEtabDialog({
       setName(etab.name);
       setType(etab.type);
       setLocality(etab.locality);
+      setRegion(etab.academicRegionCode);
       setStatus(etab.status);
     }
   }, [open, etab]);
@@ -716,7 +722,13 @@ function EditEtabDialog({
       toast.error("Le nom est requis");
       return;
     }
-    onSave({ name: name.trim(), type, locality: locality.trim(), status });
+    onSave({
+      name: name.trim(),
+      type,
+      locality: locality.trim(),
+      academicRegionCode: region.trim(),
+      status,
+    });
     onOpenChange(false);
   };
 
@@ -765,12 +777,177 @@ function EditEtabDialog({
             <Label>Localité</Label>
             <Input value={locality} onChange={(e) => setLocality(e.target.value)} />
           </div>
+          <div className="space-y-1.5">
+            <Label>Région académique (réaffectation)</Label>
+            <RegionPicker
+              countryCode={etab.countryCode}
+              value={region}
+              onChange={setRegion}
+              placeholder="Région / wilaya…"
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
           <Button onClick={save}>Enregistrer</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ----------------------- Sélecteur de région (wilaya / DREN / DRENA) ----------------------- */
+function RegionPicker({
+  countryCode,
+  value,
+  onChange,
+  placeholder = "Région…",
+}: {
+  countryCode: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  const regions = useAcademicRegions(countryCode || "");
+  const names = regions.map((r) => r.name);
+  const [freeMode, setFreeMode] = React.useState(false);
+
+  if (!countryCode) {
+    return <Input value={value} disabled placeholder="Choisissez d'abord un pays" />;
+  }
+  if (regions.length === 0 || freeMode) {
+    return (
+      <div className="flex items-center gap-1.5">
+        <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+        {regions.length > 0 && (
+          <Button type="button" variant="ghost" size="sm" onClick={() => setFreeMode(false)}>
+            Liste
+          </Button>
+        )}
+      </div>
+    );
+  }
+  return (
+    <Select
+      value={names.includes(value) ? value : ""}
+      onValueChange={(v) => {
+        if (v === "__free__") {
+          setFreeMode(true);
+          onChange("");
+        } else onChange(v);
+      }}
+    >
+      <SelectTrigger>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {regions.map((r) => (
+          <SelectItem key={r.code} value={r.name}>
+            {r.name}
+          </SelectItem>
+        ))}
+        <SelectItem value="__free__">✎ Saisie libre…</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
+/* ----------------------- Gérer les régions (wilayas / DREN) ----------------------- */
+function slugRegionCode(name: string): string {
+  return (
+    (name || "")
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 4) || "REG"
+  );
+}
+
+function ManageRegionsDialog() {
+  const { country } = useApp();
+  const regions = useAcademicRegions(country.code);
+  const { setCountryRegions } = useStore();
+  const [open, setOpen] = React.useState(false);
+  const [draft, setDraft] = React.useState<AcademicRegionSeed[]>(regions);
+
+  React.useEffect(() => {
+    if (open) setDraft(regions);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const rename = (i: number, name: string) =>
+    setDraft((d) => d.map((r, idx) => (idx === i ? { ...r, name } : r)));
+  const remove = (i: number) => setDraft((d) => d.filter((_, idx) => idx !== i));
+  const add = () => setDraft((d) => [...d, { code: "", name: "" }]);
+
+  const save = () => {
+    const seen = new Set<string>();
+    const final = draft
+      .map((r) => ({ name: r.name.trim(), code: (r.code || slugRegionCode(r.name)).toUpperCase() }))
+      .filter((r) => r.name.length > 0)
+      .map((r) => {
+        let code = r.code || slugRegionCode(r.name);
+        while (seen.has(code)) code = `${code}1`;
+        seen.add(code);
+        return { code, name: r.name };
+      });
+    setCountryRegions(country.code, final);
+    toast.success("Régions enregistrées", {
+      description: `${final.length} région(s) pour ${country.nameFr}.`,
+    });
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">
+          <MapPin className="h-4 w-4" /> Gérer les régions
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[92vh] max-w-lg overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Régions académiques — {country.nameFr}</DialogTitle>
+          <DialogDescription>
+            Ajoutez, renommez ou supprimez les régions ({country.academicRegionLabel}). Elles
+            alimentent le sélecteur de région et l&apos;affectation des établissements.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          {draft.map((r, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <Input
+                value={r.name}
+                onChange={(e) => rename(i, e.target.value)}
+                placeholder="Nom de la région"
+              />
+              <button
+                type="button"
+                aria-label="Supprimer la région"
+                onClick={() => remove(i)}
+                className="shrink-0 rounded p-1.5 text-red-500 transition-colors hover:bg-red-50"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+          {draft.length === 0 && (
+            <p className="text-sm text-muted-foreground">Aucune région — ajoutez-en une.</p>
+          )}
+        </div>
+        <Button variant="outline" size="sm" className="mt-2 w-fit" onClick={add}>
+          <Plus className="h-4 w-4" /> Ajouter une région
+        </Button>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Annuler
+          </Button>
+          <Button onClick={save}>
+            <Save className="h-4 w-4" /> Enregistrer
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
