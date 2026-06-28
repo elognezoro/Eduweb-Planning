@@ -409,6 +409,39 @@ export const COUNTRIES: CountryConfig[] = [
       { code: "ZOU", name: "Zou" },
     ],
   },
+  {
+    code: "BF",
+    iso3: "BFA",
+    nameFr: "Burkina Faso",
+    nameEn: "Burkina Faso",
+    flag: "🇧🇫",
+    currencyCode: "XOF",
+    currencySymbol: "FCFA",
+    timezone: "Africa/Ouagadougou",
+    defaultLocale: "fr",
+    academicRegionLabel: "Région (DRE)",
+    teacherTrainingCenterLabel: "ENEP / ENS",
+    continuingTrainingAntennaLabel: "Direction provinciale (DPE)",
+    isActive: true,
+    // Les 13 régions (= Directions Régionales de l'Éducation). Source : HDX/Open
+    // Data (écoles primaires publiques) + MENAPLN/MESFPT (privés reconnus) —
+    // 19 342 établissements (auto-chargés). Régions éditables.
+    academicRegions: [
+      { code: "BMH", name: "Boucle du Mouhoun" },
+      { code: "CAS", name: "Cascades" },
+      { code: "CEN", name: "Centre" },
+      { code: "CES", name: "Centre-Est" },
+      { code: "CNO", name: "Centre-Nord" },
+      { code: "COU", name: "Centre-Ouest" },
+      { code: "CSU", name: "Centre-Sud" },
+      { code: "EST", name: "Est" },
+      { code: "HBA", name: "Hauts-Bassins" },
+      { code: "NOR", name: "Nord" },
+      { code: "PLC", name: "Plateau-Central" },
+      { code: "SAH", name: "Sahel" },
+      { code: "SOU", name: "Sud-Ouest" },
+    ],
+  },
 ];
 
 export const DEFAULT_COUNTRY_CODE = "CI";
