@@ -87,6 +87,27 @@ function readInd(state: IndState, row: string[]): string {
   return state.mode === "column" ? (row[state.col] ?? "") : state.constant;
 }
 
+/**
+ * Nom de la COHORTE (= nom du fichier exporté), en MAJUSCULES. C'est l'identité
+ * commune des membres = la partie NON personnelle du nom d'utilisateur (pays +
+ * établissement + groupe), SANS aucun nom de personne. On agrège les parties
+ * tant qu'elles sont constantes sur tout le lot (ex. même pays + établissement
+ * mais groupes différents → « CILM »). « EXPORT » si aucune identité commune.
+ */
+function buildCohortName(parts: { c: string; e: string; g: string }[]): string {
+  if (parts.length === 0) return "EXPORT";
+  const same = (key: "c" | "e" | "g") => parts.every((p) => p[key] === parts[0][key]);
+  let name = "";
+  if (same("c")) {
+    name += parts[0].c;
+    if (same("e")) {
+      name += parts[0].e;
+      if (same("g")) name += parts[0].g;
+    }
+  }
+  return (name || "EXPORT").toUpperCase();
+}
+
 let _id = 0;
 const nextId = () => `c${++_id}`;
 
@@ -181,22 +202,26 @@ export default function ConvertisseurCsvPage() {
       const groupRaw = readInd(group, row);
       // Indicateur compact : pays(≤2) + établissement(≤3) + groupe(≤3). compact()
       // préserve la lettre de classe finale (Tle A vs Tle D restent distincts).
-      const indicator =
-        compact(countryRaw, IND_CAP.country) +
-        compact(estabRaw, IND_CAP.establishment) +
-        compact(groupRaw, IND_CAP.group);
-      return { lastname, firstname, countryRaw, estabRaw, groupRaw, indicator };
+      const parts = {
+        c: compact(countryRaw, IND_CAP.country),
+        e: compact(estabRaw, IND_CAP.establishment),
+        g: compact(groupRaw, IND_CAP.group),
+      };
+      const indicator = parts.c + parts.e + parts.g;
+      return { lastname, firstname, countryRaw, estabRaw, groupRaw, indicator, parts };
     },
     [nameMode, lastCol, firstCol, combinedCol, country, establishment, group],
   );
 
   /** Construit les lignes de sortie (username + e-mail uniques sur tout le lot). */
   const output = React.useMemo(() => {
-    if (!data) return { headers: [] as string[], rows: [] as string[][] };
+    if (!data) return { headers: [] as string[], rows: [] as string[][], cohort: "EXPORT" };
     const taken = new Set<string>();
+    const partsList: { c: string; e: string; g: string }[] = [];
     const headers = cols.map((c) => c.header || "colonne");
     const rows = data.rows.map((row) => {
-      const { lastname, firstname, countryRaw, estabRaw, groupRaw, indicator } = resolveRow(row);
+      const { lastname, firstname, countryRaw, estabRaw, groupRaw, indicator, parts } = resolveRow(row);
+      partsList.push(parts);
       const username = makeUsername(`${lastname}${firstname}`, indicator, taken);
       const email = eduwebEmail(username);
       const fullname = `${lastname} ${firstname}`.trim();
@@ -225,7 +250,7 @@ export default function ConvertisseurCsvPage() {
         }
       });
     });
-    return { headers, rows };
+    return { headers, rows, cohort: buildCohortName(partsList) };
   }, [data, cols, resolveRow]);
 
   function patchCol(id: string, patch: Partial<OutCol>) {
@@ -243,8 +268,9 @@ export default function ConvertisseurCsvPage() {
   }
 
   function exportCsv() {
-    download(toCsv(output.headers, output.rows), "export.csv", "text/csv;charset=utf-8");
-    toast.success("CSV généré", { description: `${output.rows.length} ligne(s).` });
+    const filename = `${output.cohort}.csv`;
+    download(toCsv(output.headers, output.rows), filename, "text/csv;charset=utf-8");
+    toast.success("CSV généré", { description: `${filename} — ${output.rows.length} ligne(s).` });
   }
 
   return (
@@ -437,7 +463,11 @@ export default function ConvertisseurCsvPage() {
                   </tbody>
                 </table>
               </div>
-              <div className="mt-3 flex justify-end">
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs text-muted-foreground">
+                  Cohorte / fichier :{" "}
+                  <b className="font-mono text-foreground">{output.cohort}.csv</b>
+                </span>
                 <Button onClick={exportCsv} disabled={output.rows.length === 0}>
                   <Wand2 className="h-4 w-4" /> Exporter le CSV
                 </Button>
