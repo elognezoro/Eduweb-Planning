@@ -442,6 +442,34 @@ export const COUNTRIES: CountryConfig[] = [
       { code: "SOU", name: "Sud-Ouest" },
     ],
   },
+  {
+    code: "NE",
+    iso3: "NER",
+    nameFr: "Niger",
+    nameEn: "Niger",
+    flag: "🇳🇪",
+    currencyCode: "XOF",
+    currencySymbol: "FCFA",
+    timezone: "Africa/Niamey",
+    defaultLocale: "fr",
+    academicRegionLabel: "Région (DRE)",
+    teacherTrainingCenterLabel: "ENI / ENS",
+    continuingTrainingAntennaLabel: "Inspection (IEB)",
+    isActive: true,
+    // Les 8 régions (= Directions Régionales de l'Éducation). Source : HDX/OCHA
+    // Niger (Base de Données des Établissements Scolaires) — 17 975 établissements
+    // (auto-chargés). Régions éditables.
+    academicRegions: [
+      { code: "AGA", name: "Agadez" },
+      { code: "DIF", name: "Diffa" },
+      { code: "DOS", name: "Dosso" },
+      { code: "MAR", name: "Maradi" },
+      { code: "NIA", name: "Niamey" },
+      { code: "TAH", name: "Tahoua" },
+      { code: "TIL", name: "Tillabéri" },
+      { code: "ZIN", name: "Zinder" },
+    ],
+  },
 ];
 
 export const DEFAULT_COUNTRY_CODE = "CI";
