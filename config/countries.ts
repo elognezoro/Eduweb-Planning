@@ -347,6 +347,36 @@ export const COUNTRIES: CountryConfig[] = [
       { code: "TSU", name: "Tshuapa" },
     ],
   },
+  {
+    code: "HT",
+    iso3: "HTI",
+    nameFr: "Haïti",
+    nameEn: "Haiti",
+    flag: "🇭🇹",
+    currencyCode: "HTG",
+    currencySymbol: "G",
+    timezone: "America/Port-au-Prince",
+    defaultLocale: "fr",
+    academicRegionLabel: "Département (DDE)",
+    teacherTrainingCenterLabel: "ENI / CFEF",
+    continuingTrainingAntennaLabel: "Bureau de district scolaire (BDS)",
+    isActive: true,
+    // Les 10 départements (= Directions Départementales d'Éducation). Source :
+    // listes MENFP (lycées de la République + EPT/PSUGO) — 567 établissements
+    // nominatifs fournis (CSV importable). Régions éditables.
+    academicRegions: [
+      { code: "ART", name: "Artibonite" },
+      { code: "CEN", name: "Centre" },
+      { code: "GRA", name: "Grand'Anse" },
+      { code: "NIP", name: "Nippes" },
+      { code: "NOR", name: "Nord" },
+      { code: "NES", name: "Nord-Est" },
+      { code: "NOU", name: "Nord-Ouest" },
+      { code: "OUE", name: "Ouest" },
+      { code: "SUD", name: "Sud" },
+      { code: "SES", name: "Sud-Est" },
+    ],
+  },
 ];
 
 export const DEFAULT_COUNTRY_CODE = "CI";
