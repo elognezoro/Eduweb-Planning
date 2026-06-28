@@ -11,6 +11,7 @@ import {
   SUPPORT_KINDS,
   SUPPORT_KIND_LABEL,
 } from "@/lib/formations/support-access";
+import { COUNTRIES } from "@/config/countries";
 
 /* ============================================================================
    Faits DÉRIVÉS pour les guides utilisateurs.
@@ -52,6 +53,14 @@ export function supportKindsInline(): string {
   return SUPPORT_KINDS.map((k) => SUPPORT_KIND_LABEL[k]).join(", ");
 }
 
+/** Pays opérationnels (multi-pays) de la plateforme. */
+export function activeCountries(): string[] {
+  return COUNTRIES.filter((c) => c.isActive).map((c) => c.nameFr);
+}
+export function activeCountriesInline(): string {
+  return activeCountries().join(", ");
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Jetons {{...}} résolus dans le texte des guides                            */
 /* -------------------------------------------------------------------------- */
@@ -60,6 +69,8 @@ const TOKEN_RESOLVERS: Record<string, () => string> = {
   FORMATIONS_LIST: () => seminaireFormationsInline(),
   FORMATION_ROLES: () => formationRolesInline(),
   SUPPORTS_LIST: () => supportKindsInline(),
+  COUNTRIES_COUNT: () => String(activeCountries().length),
+  COUNTRIES_LIST: () => activeCountriesInline(),
 };
 
 /** Remplace les jetons {{NOM}} d'une chaîne par leur valeur dérivée. */
@@ -90,6 +101,22 @@ function buildCatalogueSection(): GuideSection {
 
   return {
     title: "Catalogue à jour (généré automatiquement)",
+    body,
+  };
+}
+
+/** Bloc « plateforme à jour » : capacités transversales (multi-pays, profil…). */
+function buildPlatformSection(): GuideSection {
+  const countries = activeCountries();
+  const body = [
+    "Cette section est générée automatiquement : elle reflète les pays et les capacités transversales actuellement disponibles sur la plateforme.",
+    `EduWeb Planner est multi-pays (${countries.length}) : ${countries.join(", ")}. Choisissez votre pays via le sélecteur en haut de l'écran — un champ de recherche permet de le retrouver par nom ou par code.`,
+    "Votre pays est détecté automatiquement à l'inscription et reste modifiable à tout moment dans Système → Mon profil (l'administrateur peut aussi le corriger depuis Comptes utilisateurs).",
+    "Établissements : chaque pays possède son propre référentiel d'établissements et ses régions académiques (DRENA, wilaya, DRE, département…). La liste « Rattacher à un établissement » ne propose que les établissements du pays concerné.",
+    "Test de niveau CERTEL : un diagnostic gratuit de maturité numérique est accessible depuis la page d'accueil (bouton « Test de niveau »).",
+  ].join("\n\n");
+  return {
+    title: "Plateforme : multi-pays & profil (à jour)",
     body,
   };
 }
@@ -138,6 +165,7 @@ export function prepareGuide(guide: StoredGuide): StoredGuide {
       const sections = chapter.sections.map(prepareSection);
       if (chapter.id === "centre-formation") {
         sections.push(dynamicSection);
+        sections.push(buildPlatformSection());
       }
       return {
         ...chapter,

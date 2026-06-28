@@ -283,6 +283,33 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
           ],
           caveat: "Établissements, CAFOP et APFC sont des structures autonomes : ne tentez pas d'importer un CAFOP comme s'il s'agissait d'un établissement scolaire ordinaire.",
         },
+        {
+          title: "4.4 Multi-pays : régions académiques et référentiels d'établissements",
+          body: "La plateforme est multi-pays : chaque pays possède ses régions académiques et son propre référentiel d'établissements. Sélectionnez le pays à administrer via le sélecteur en haut de l'écran, puis gérez ses régions et ses établissements.",
+          steps: [
+            {
+              instruction: "Choisissez le pays depuis le sélecteur de pays (barre du haut). Tapez le nom ou le code dans le champ de recherche pour le retrouver rapidement.",
+            },
+            {
+              instruction: "Ouvrez la gestion des établissements.",
+              navigation: "Système → Établissements",
+            },
+            {
+              instruction: "À la création ou à l'édition d'un établissement, choisissez sa région dans la liste déroulante (DRENA, wilaya, DRE, département… selon le pays) ; vous pouvez aussi réaffecter la région d'un établissement existant.",
+            },
+            {
+              instruction: "Cliquez sur « Gérer les régions » pour ajouter, renommer ou supprimer les régions académiques du pays actif.",
+            },
+            {
+              instruction: "Pour charger une liste, utilisez « Importer CSV » (le modèle est pré-rempli avec les régions du pays). Les établissements officiels des pays couverts se chargent déjà automatiquement dans le sélecteur d'attribution.",
+            },
+          ],
+          bestPractices: [
+            "Le panneau « Établissements installés » n'affiche que les établissements du pays sélectionné, regroupés et repliés par région académique — dépliez une région pour voir ses établissements.",
+            "Pour rattacher un compte à un établissement (Comptes utilisateurs), seuls les établissements du pays de l'utilisateur sont proposés : vérifiez d'abord le pays du compte.",
+          ],
+          caveat: "Un établissement appartient à un pays. Si la liste paraît vide, vérifiez le pays sélectionné en haut de l'écran.",
+        },
       ],
     },
     {
@@ -329,6 +356,30 @@ export const guideAdmin: Omit<GuideContent, "icon"> = {
             },
           ],
           caveat: "Un import en masse modifie de nombreuses données en une opération. Conservez le fichier source : il est votre seule preuve en cas de litige.",
+        },
+        {
+          title: "5.3 Convertisseur CSV : Excel → CSV avec identifiants automatiques",
+          body: "Le Convertisseur CSV transforme un fichier Excel (ou CSV) d'élèves en un CSV prêt pour Moodle. Il génère automatiquement le nom d'utilisateur de connexion et l'adresse e-mail, et nomme le fichier d'après la cohorte.",
+          steps: [
+            {
+              instruction: "Déposez le fichier Excel (.xlsx) ou CSV source.",
+              navigation: "Système → Convertisseur CSV",
+            },
+            {
+              instruction: "Indiquez si les NOM et Prénoms sont dans une seule colonne ou dans deux, puis réglez les indicateurs Pays / Établissement / Groupe (valeur fixe ou colonne du fichier).",
+            },
+            {
+              instruction: "Configurez les colonnes de sortie : renommez-les, réordonnez-les, choisissez leur source (nom d'utilisateur auto, NOM, Prénoms, groupe, colonne du fichier, valeur fixe). Le modèle Moodle est proposé par défaut.",
+            },
+            {
+              instruction: "Vérifiez l'aperçu, puis cliquez sur « Exporter le CSV ».",
+            },
+          ],
+          bestPractices: [
+            "Le nom d'utilisateur est généré en 10 caractères maximum et intègre un indicatif de pays, d'établissement et de groupe-classe ; en cas de doublon, un chiffre est ajouté (…1, …2).",
+            "L'adresse e-mail est dérivée automatiquement du nom d'utilisateur : identifiant@eduweb.ci.",
+            "Le fichier exporté porte le nom de la cohorte en majuscules (ex. CILM6A.csv).",
+          ],
         },
       ],
     },

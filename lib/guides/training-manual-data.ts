@@ -45,6 +45,9 @@ export const TRAINING_SYLLABUS: ManuelSyllabus = {
       "Produire et interpréter des tableaux de bord statistiques au niveau classe, établissement, circonscription, direction régionale.",
       "Paramétrer un cycle scolaire, une période d'évaluation, une grille de coefficients selon le contexte de son établissement.",
       "Utiliser les fonctionnalités de communication interne (notifications, messagerie, diffusion d'avis) dans le respect du protocole.",
+      "Administrer le référentiel d'établissements et les régions académiques propres à chaque pays (création, réaffectation de région, « Gérer les régions », import CSV, regroupement par région).",
+      "Préparer des comptes en masse à l'aide du convertisseur Excel → CSV, dont les noms d'utilisateur (10 caractères maximum, intégrant les indicatifs pays / établissement / groupe-classe) et les adresses e-mail sont générés automatiquement.",
+      "Renseigner et corriger son pays de rattachement, détecté automatiquement à l'inscription et modifiable dans Système → Mon profil.",
     ],
     savoirEtre: [
       "Faire preuve de rigueur, de discrétion et de loyauté institutionnelle dans l'exercice quotidien de la plateforme.",
