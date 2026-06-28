@@ -34,6 +34,7 @@ import {
   eduwebEmail,
   toCsv,
   slugLower,
+  compact,
   type Tabular,
 } from "@/lib/imports/excel-convert";
 
@@ -178,11 +179,12 @@ export default function ConvertisseurCsvPage() {
       const countryRaw = readInd(country, row);
       const estabRaw = readInd(establishment, row);
       const groupRaw = readInd(group, row);
-      // Indicateur compact : pays(≤2) + établissement(≤3) + groupe(≤3).
+      // Indicateur compact : pays(≤2) + établissement(≤3) + groupe(≤3). compact()
+      // préserve la lettre de classe finale (Tle A vs Tle D restent distincts).
       const indicator =
-        slugLower(countryRaw).slice(0, IND_CAP.country) +
-        slugLower(estabRaw).slice(0, IND_CAP.establishment) +
-        slugLower(groupRaw).slice(0, IND_CAP.group);
+        compact(countryRaw, IND_CAP.country) +
+        compact(estabRaw, IND_CAP.establishment) +
+        compact(groupRaw, IND_CAP.group);
       return { lastname, firstname, countryRaw, estabRaw, groupRaw, indicator };
     },
     [nameMode, lastCol, firstCol, combinedCol, country, establishment, group],

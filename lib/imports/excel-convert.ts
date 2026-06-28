@@ -90,18 +90,37 @@ export function makeUsername(
 ): string {
   const ind = slugLower(indicator);
   const nm = slugLower(namePart);
+  // On réserve d'ABORD la place du suffixe de dédoublonnage, puis l'indicateur,
+  // puis le nom. Le suffixe n'est donc JAMAIS retronqué par le slice final →
+  // chaque numéro produit un candidat DISTINCT (terminaison garantie, pas de
+  // boucle infinie même si l'indicateur fait presque maxLen caractères).
   const compose = (suffix: string): string => {
-    const room = Math.max(0, maxLen - ind.length - suffix.length);
-    return (nm.slice(0, room) + ind + suffix).slice(0, maxLen) || "user";
+    const baseRoom = Math.max(0, maxLen - suffix.length);
+    const indFit = ind.slice(0, baseRoom); // l'indicateur n'est rogné qu'en dernier recours
+    const room = Math.max(0, baseRoom - indFit.length);
+    return (nm.slice(0, room) + indFit + suffix).slice(0, maxLen) || "user";
   };
   let candidate = compose("");
   let n = 1;
-  while (taken.has(candidate)) {
+  // Garde-fou défensif : borne jamais atteinte en pratique (maxLen >= 2).
+  while (taken.has(candidate) && n < 10_000_000) {
     candidate = compose(String(n));
     n += 1;
   }
   taken.add(candidate);
   return candidate;
+}
+
+/**
+ * Compacte un libellé en ≤ `max` caractères en préservant le DÉBUT (niveau) et la
+ * DERNIÈRE lettre/chiffre (classe). Ex. « Terminale D » → « ted », « Tle A » →
+ * « tla », « 6e B » → « 6eb » : la classe reste DISTINGUABLE entre groupes d'un
+ * même niveau (un simple slice(0,max) écraserait la lettre de classe finale).
+ */
+export function compact(raw: string, max: number): string {
+  const s = slugLower(raw);
+  if (s.length <= max || max <= 1) return s.slice(0, Math.max(0, max));
+  return s.slice(0, max - 1) + s.slice(-1);
 }
 
 /** Adresse e-mail dérivée du nom d'utilisateur : « username@eduweb.ci ». */
