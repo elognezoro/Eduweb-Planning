@@ -1,0 +1,546 @@
+﻿nom;pays;region;localite;type_etab;code_etab;regime;annee_scolaire
+AZOUE;BJ;;—;Non précisé;BEN-0001;Public;2024-2025
+CEG 1 ABOMEY;BJ;Zou;ABOMEY;Collège;BEN-0002;Public;2024-2025
+CEG 1 Abomey-Calavi;BJ;;—;Collège;BEN-0003;Public;2024-2025
+CEG 1 ALLADA;BJ;Atlantique;ALLADA;Collège;BEN-0004;Public;2024-2025
+CEG 1 APLAHOUE;BJ;Couffo;APLAHOUE;Collège;BEN-0005;Public;2024-2025
+CEG 1 AZOVE;BJ;Couffo;APLAHOUE;Collège;BEN-0006;Public;2024-2025
+CEG 1 BANTE;BJ;;—;Collège;BEN-0007;Public;2024-2025
+CEG 1 BOHICON;BJ;Zou;BOHICON;Collège;BEN-0008;Public;2024-2025
+CEG 1 COME;BJ;Mono;COME;Collège;BEN-0009;Public;2024-2025
+CEG 1 COVE;BJ;Zou;COVE;Collège;BEN-0010;Public;2024-2025
+CEG 1 DASSA;BJ;;—;Collège;BEN-0011;Public;2024-2025
+CEG 1 DOGBO;BJ;Couffo;DOGBO;Collège;BEN-0012;Public;2024-2025
+CEG 1 GLAZOUE;BJ;;—;Collège;BEN-0013;Public;2024-2025
+CEG 1 GODOMEY;BJ;;—;Collège;BEN-0014;Public;2024-2025
+CEG 1 GOLO-DJIGBE;BJ;;—;Collège;BEN-0015;Public;2024-2025
+CEG 1 IFANGNI;BJ;Plateau;IFANGNI;Collège;BEN-0016;Public;2024-2025
+CEG 1 KANDI;BJ;Alibori;KANDI;Collège;BEN-0017;Public;2024-2025
+CEG 1 KILIBO;BJ;;—;Collège;BEN-0018;Public;2024-2025
+CEG 1 LOKOSSA;BJ;Mono;LOKOSSA;Collège;BEN-0019;Public;2024-2025
+CEG 1 OUESSE;BJ;Collines;OUESSE;Collège;BEN-0020;Public;2024-2025
+CEG 1 OUIDAH;BJ;Atlantique;OUIDAH;Collège;BEN-0021;Public;2024-2025
+CEG 1 POBE;BJ;Plateau;POBE;Collège;BEN-0022;Public;2024-2025
+CEG 1 SAVALOU;BJ;;—;Collège;BEN-0023;Public;2024-2025
+CEG 1 SAVE;BJ;Collines;SAVE;Collège;BEN-0024;Public;2024-2025
+CEG 1 TCHAOUROU;BJ;Borgou;TCHAOUROU;Collège;BEN-0025;Public;2024-2025
+CEG 1 THIO;BJ;;—;Collège;BEN-0026;Public;2024-2025
+CEG 2 ABOMEY;BJ;Zou;ABOMEY;Collège;BEN-0027;Public;2024-2025
+CEG 2 ABOMEY-CALAVI;BJ;;—;Collège;BEN-0028;Public;2024-2025
+CEG 2 ALLADA;BJ;Atlantique;ALLADA;Collège;BEN-0029;Public;2024-2025
+CEG 2 BANTE;BJ;;—;Collège;BEN-0030;Public;2024-2025
+CEG 2 BOHICON;BJ;Zou;BOHICON;Collège;BEN-0031;Public;2024-2025
+CEG 2 COVE;BJ;Zou;COVE;Collège;BEN-0032;Public;2024-2025
+CEG 2 DASSA;BJ;;—;Collège;BEN-0033;Public;2024-2025
+CEG 2 DOGBO;BJ;Couffo;DOGBO;Collège;BEN-0034;Public;2024-2025
+CEG 2 GLAZOUE;BJ;;—;Collège;BEN-0035;Public;2024-2025
+CEG 2 GODOMEY;BJ;;—;Collège;BEN-0036;Public;2024-2025
+CEG 2 GOLO-DJIGBE;BJ;;—;Collège;BEN-0037;Public;2024-2025
+CEG 2 IFANGNI;BJ;Plateau;IFANGNI;Collège;BEN-0038;Public;2024-2025
+CEG 2 KANDI;BJ;Alibori;KANDI;Collège;BEN-0039;Public;2024-2025
+CEG 2 KILIBO;BJ;;—;Collège;BEN-0040;Public;2024-2025
+CEG 2 OUESSE;BJ;;—;Collège;BEN-0041;Public;2024-2025
+CEG 2 OUIDAH;BJ;Atlantique;OUIDAH;Collège;BEN-0042;Public;2024-2025
+CEG 2 PAHOU;BJ;;—;Collège;BEN-0043;Public;2024-2025
+CEG 2 POBE;BJ;Plateau;POBE;Collège;BEN-0044;Public;2024-2025
+CEG 2 SAKETE;BJ;Plateau;SAKETE;Collège;BEN-0045;Public;2024-2025
+CEG 2 SAVALOU;BJ;;—;Collège;BEN-0046;Public;2024-2025
+CEG 2 SAVE;BJ;;—;Collège;BEN-0047;Public;2024-2025
+CEG 2 TCHAOUROU;BJ;Borgou;TCHAOUROU;Collège;BEN-0048;Public;2024-2025
+CEG 2 THIO;BJ;;—;Collège;BEN-0049;Public;2024-2025
+CEG 2AKPKPA CENTRE;BJ;;—;Collège;BEN-0050;Public;2024-2025
+CEG 3 ABOMEY;BJ;Zou;ABOMEY;Collège;BEN-0051;Public;2024-2025
+CEG 3 ABOMEY-CALAVI;BJ;;—;Collège;BEN-0052;Public;2024-2025
+CEG 3 BOHICON;BJ;Zou;BOHICON;Collège;BEN-0053;Public;2024-2025
+CEG 3 COVE;BJ;Zou;COVE;Collège;BEN-0054;Public;2024-2025
+CEG 3 DASSA;BJ;;—;Collège;BEN-0055;Public;2024-2025
+CEG 3 GLAZOUE;BJ;;—;Collège;BEN-0056;Public;2024-2025
+CEG 3 GOLO DJIGBE;BJ;;—;Collège;BEN-0057;Public;2024-2025
+CEG 3 KANDI;BJ;Alibori;KANDI;Collège;BEN-0058;Public;2024-2025
+CEG 3 OUESSE;BJ;;—;Collège;BEN-0059;Public;2024-2025
+CEG 3 OUIDAH;BJ;;—;Collège;BEN-0060;Public;2024-2025
+CEG 3 SAVALOU;BJ;;—;Collège;BEN-0061;Public;2024-2025
+CEG 3 SAVE;BJ;;—;Collège;BEN-0062;Public;2024-2025
+CEG 5 BOHICON;BJ;Zou;BOHICON;Collège;BEN-0063;Public;2024-2025
+CEG 5 LOKOSSA;BJ;Mono;LOKOSSA;Collège;BEN-0064;Public;2024-2025
+CEG 6 LOKOSSA;BJ;Mono;LOKOSSA;Collège;BEN-0065;Public;2024-2025
+CEG ACADJAMEY ADJOVICODJI;BJ;Atlantique;OUIDAH;Collège;BEN-0066;Public;2024-2025
+CEG ADANHONDJIGON;BJ;Zou;AGBANGNIZOUN;Collège;BEN-0067;Public;2024-2025
+CEG ADINGNIGON;BJ;Zou;AGBANGNIZOUN;Collège;BEN-0068;Public;2024-2025
+CEG ADJAGBO;BJ;;—;Collège;BEN-0069;Public;2024-2025
+CEG ADJAHA;BJ;Mono;GRAND-POPO;Collège;BEN-0070;Public;2024-2025
+CEG ADJAN;BJ;;—;Collège;BEN-0071;Public;2024-2025
+CEG ADJARRA- ADOVIE;BJ;Atlantique;OUIDAH;Collège;BEN-0072;Public;2024-2025
+CEG ADJIGO;BJ;;—;Collège;BEN-0073;Public;2024-2025
+CEG ADJOVICODJI LES OLIVIERS;BJ;;—;Collège;BEN-0074;Public;2024-2025
+CEG ADOUGOU;BJ;;—;Collège;BEN-0075;Public;2024-2025
+CEG ADOUKANDJI;BJ;Couffo;LALO;Collège;BEN-0076;Public;2024-2025
+CEG ADOUNKO;BJ;;—;Collège;BEN-0077;Public;2024-2025
+CEG ADRIEN DEGBEY;BJ;Mono;HOUEYOGBE;Collège;BEN-0078;Public;2024-2025
+CEG AFFAME;BJ;Ouémé;BONOU;Collège;BEN-0079;Public;2024-2025
+CEG AGAME;BJ;Mono;LOKOSSA;Collège;BEN-0080;Public;2024-2025
+CEG AGANMALOME;BJ;;—;Collège;BEN-0081;Public;2024-2025
+CEG AGASSA-GODOMEY;BJ;;—;Collège;BEN-0082;Public;2024-2025
+CEG AGBANOU;BJ;;—;Collège;BEN-0083;Public;2024-2025
+CEG AGBANTO;BJ;;—;Collège;BEN-0084;Public;2024-2025
+CEG AGBOKPA;BJ;Zou;ABOMEY;Collège;BEN-0085;Public;2024-2025
+CEG AGBON;BJ;;—;Collège;BEN-0086;Public;2024-2025
+CEG AGBORO;BJ;;—;Collège;BEN-0087;Public;2024-2025
+CEG AGNANGNIZOUN;BJ;Zou;AGBANGNIZOUN;Collège;BEN-0088;Public;2024-2025
+CEG AGON;BJ;;—;Collège;BEN-0089;Public;2024-2025
+CEG AGONDJI;BJ;Zou;DJIDJA;Collège;BEN-0090;Public;2024-2025
+CEG AGONKANMEY;BJ;;—;Collège;BEN-0091;Public;2024-2025
+CEG AGOUA;BJ;Collines;BANTE;Collège;BEN-0092;Public;2024-2025
+CEG AGOUNA;BJ;Zou;DJIDJA;Collège;BEN-0093;Public;2024-2025
+CEG AGUE;BJ;;—;Collège;BEN-0094;Public;2024-2025
+CEG AGUE-KPOHOUE;BJ;;—;Collège;BEN-0095;Public;2024-2025
+CEG AHÉMÉ DE DEKANMEY;BJ;;—;Collège;BEN-0096;Public;2024-2025
+CEG AHOMADEGBE;BJ;Couffo;LALO;Collège;BEN-0097;Public;2024-2025
+CEG AHOMEY-LOKPO;BJ;;—;Collège;BEN-0098;Public;2024-2025
+CEG AHOSSOUGBETA;BJ;;—;Collège;BEN-0099;Public;2024-2025
+CEG AHOUANNONZOUN;BJ;Atlantique;ALLADA;Collège;BEN-0100;Public;2024-2025
+CEG AKASSATO;BJ;Atlantique;ABOMEY-CALAVI;Collège;BEN-0101;Public;2024-2025
+CEG AKLAMPA;BJ;Collines;GLAZOUE;Collège;BEN-0102;Public;2024-2025
+CEG AKOFODJOULE;BJ;;—;Collège;BEN-0103;Public;2024-2025
+CEG Akogbato;BJ;;—;Collège;BEN-0104;Public;2024-2025
+CEG AKPAKPA CENTRE;BJ;;—;Collège;BEN-0105;Public;2024-2025
+CEG AKPASSA;BJ;Ouémé;PORTO-NOVO;Collège;BEN-0106;Public;2024-2025
+CEG ALAFIA;BJ;Collines;SAVE;Collège;BEN-0107;Public;2024-2025
+CEG ALBARIKA;BJ;Borgou;PARAKOU;Collège;BEN-0108;Public;2024-2025
+CEG ALOBA;BJ;;—;Collège;BEN-0109;Public;2024-2025
+CEG ANAVIE;BJ;Ouémé;PORTO-NOVO;Collège;BEN-0110;Public;2024-2025
+CEG ANGARADEBOU;BJ;Alibori;KANDI;Collège;BEN-0111;Public;2024-2025
+CEG ANOUDE;BJ;;—;Collège;BEN-0112;Public;2024-2025
+CEG ASSANTE;BJ;Collines;GLAZOUE;Collège;BEN-0113;Public;2024-2025
+CEG ATCHAKANME;BJ;;—;Collège;BEN-0114;Public;2024-2025
+CEG ATCHONSA;BJ;Ouémé;BONOU;Collège;BEN-0115;Public;2024-2025
+CEG ATIAKE;BJ;;—;Collège;BEN-0116;Public;2024-2025
+CEG ATOKOLIBE;BJ;Collines;BANTE;Collège;BEN-0117;Public;2024-2025
+CEG ATOMEY;BJ;Couffo;APLAHOUE;Collège;BEN-0118;Public;2024-2025
+CEG ATROKPOCODJI;BJ;;—;Collège;BEN-0119;Public;2024-2025
+CEG ATTOGON;BJ;Atlantique;ALLADA;Collège;BEN-0120;Public;2024-2025
+CEG AVAGBODJI;BJ;Ouémé;AGUEGUES;Collège;BEN-0121;Public;2024-2025
+CEG AVEGANME;BJ;Couffo;KLOUEKANME;Collège;BEN-0122;Public;2024-2025
+CEG AVOGBANA;BJ;Zou;BOHICON;Collège;BEN-0123;Public;2024-2025
+CEG AWYA GBAFFO;BJ;;—;Collège;BEN-0124;Public;2024-2025
+CEG AYEWA;BJ;;—;Collège;BEN-0125;Public;2024-2025
+CEG AYOU;BJ;;—;Collège;BEN-0126;Public;2024-2025
+CEG AZOHOUE-ALIHO;BJ;;—;Collège;BEN-0127;Public;2024-2025
+CEG BAGOU;BJ;Alibori;GOGOUNOU;Collège;BEN-0128;Public;2024-2025
+CEG BANAME;BJ;Zou;ZAGNANADO;Collège;BEN-0129;Public;2024-2025
+CEG BANIGBE;BJ;Couffo;LALO;Collège;BEN-0130;Public;2024-2025
+CEG BANIKANNI;BJ;Borgou;PARAKOU;Collège;BEN-0131;Public;2024-2025
+CEG BANIKOARA;BJ;Alibori;BANIKOARA;Collège;BEN-0132;Public;2024-2025
+CEG BEMBEREKE;BJ;Borgou;BEMBEREKE;Collège;BEN-0133;Public;2024-2025
+CEG BEROUBOUAY;BJ;Borgou;BEMBEREKE;Collège;BEN-0134;Public;2024-2025
+CEG BETEROU;BJ;Borgou;TCHAOUROU;Collège;BEN-0135;Public;2024-2025
+CEG BIO GUERRA;BJ;Ouémé;PORTO-NOVO;Collège;BEN-0136;Public;2024-2025
+CEG BIRNI;BJ;Atacora;KOUANDE;Collège;BEN-0137;Public;2024-2025
+CEG BOB;BJ;;—;Collège;BEN-0138;Public;2024-2025
+CEG BONOU;BJ;Ouémé;BONOU;Collège;BEN-0139;Public;2024-2025
+CEG BORI;BJ;Borgou;N'DALI;Collège;BEN-0140;Public;2024-2025
+CEG BRIGNAMARO;BJ;Atacora;KEROU;Collège;BEN-0141;Public;2024-2025
+CEG CHABI KOUMA;BJ;Atacora;KOUANDE;Collège;BEN-0142;Public;2024-2025
+CEG CHALLA-OGOÏ;BJ;Collines;OUESSE;Collège;BEN-0143;Public;2024-2025
+CEG COCOTOMEY;BJ;;—;Collège;BEN-0144;Public;2024-2025
+CEG COLLI;BJ;;—;Collège;BEN-0145;Public;2024-2025
+CEG COUSSI;BJ;;—;Collège;BEN-0146;Public;2024-2025
+CEG DAAGBE;BJ;Plateau;IFANGNI;Collège;BEN-0147;Public;2024-2025
+CEG DADOHOUE;BJ;Couffo;DOGBO;Collège;BEN-0148;Public;2024-2025
+CEG DE DAME-WOGON;BJ;Ouémé;BONOU;Collège;BEN-0149;Public;2024-2025
+CEG DAN;BJ;Zou;DJIDJA;Collège;BEN-0150;Public;2024-2025
+CEG DANTOKPA;BJ;;—;Collège;BEN-0151;Public;2024-2025
+CEG DASSO;BJ;Zou;OUINHI;Collège;BEN-0152;Public;2024-2025
+CEG DAVIE;BJ;Ouémé;PORTO-NOVO;Collège;BEN-0153;Public;2024-2025
+CEG DEDOME;BJ;;—;Collège;BEN-0154;Public;2024-2025
+CEG DEKANMEY;BJ;;—;Collège;BEN-0155;Public;2024-2025
+CEG DEKPO;BJ;Couffo;APLAHOUE;Collège;BEN-0156;Public;2024-2025
+CEG DES SOURDS MUETS;BJ;;—;Collège;BEN-0157;Public;2024-2025
+CEG DIHO;BJ;;—;Collège;BEN-0158;Public;2024-2025
+CEG DILLY;BJ;Zou;ABOMEY;Collège;BEN-0159;Public;2024-2025
+CEG DJANGLANMÈ DE TOFFO;BJ;;—;Collège;BEN-0160;Public;2024-2025
+CEG DJANGLANMEY;BJ;Mono;GRAND-POPO;Collège;BEN-0161;Public;2024-2025
+CEG DJASSIN;BJ;Ouémé;PORTO-NOVO;Collège;BEN-0162;Public;2024-2025
+CEG DJEGBADJI;BJ;;—;Collège;BEN-0163;Public;2024-2025
+CEG DJEGBE;BJ;;—;Collège;BEN-0164;Public;2024-2025
+CEG DJIDJA;BJ;Zou;DJIDJA;Collège;BEN-0165;Public;2024-2025
+CEG DJIGBE DE ZE;BJ;;—;Collège;BEN-0166;Public;2024-2025
+CEG DJOTTO;BJ;Couffo;KLOUEKANME;Collège;BEN-0167;Public;2024-2025
+CEG DODJI-SÈHÈ;BJ;;—;Collège;BEN-0168;Public;2024-2025
+CEG DOMPAGO;BJ;Mono;LOKOSSA;Collège;BEN-0169;Public;2024-2025
+CEG DOUME;BJ;Collines;SAVALOU;Collège;BEN-0170;Public;2024-2025
+CEG DOVI-DOVE;BJ;Zou;ZAGNANADO;Collège;BEN-0171;Public;2024-2025
+CEG DRE;BJ;Mono;HOUEYOGBE;Collège;BEN-0172;Public;2024-2025
+CEG EKPA;BJ;;—;Collège;BEN-0173;Public;2024-2025
+CEG L' ENTENTE;BJ;;—;Collège;BEN-0174;Public;2024-2025
+CEG FIYEGNON;BJ;;—;Collège;BEN-0175;Public;2024-2025
+CEG FONKPAME;BJ;Zou;DJIDJA;Collège;BEN-0176;Public;2024-2025
+CEG FOUNOUGO;BJ;Alibori;BANIKOARA;Collège;BEN-0177;Public;2024-2025
+CEG GADOME;BJ;Mono;COME;Collège;BEN-0178;Public;2024-2025
+CEG GALATA;BJ;;—;Collège;BEN-0179;Public;2024-2025
+CEG GANVIE;BJ;;—;Collège;BEN-0180;Public;2024-2025
+CEG GBADAGUI;BJ;;—;Collège;BEN-0181;Public;2024-2025
+CEG GBANLIN;BJ;Collines;OUESSE;Collège;BEN-0182;Public;2024-2025
+CEG GBAOU;BJ;Mono;LOKOSSA;Collège;BEN-0183;Public;2024-2025
+CEG GBEDEGBE DE SEY;BJ;;—;Collège;BEN-0184;Public;2024-2025
+CEG GBEDODE HOUNDJAVA;BJ;;—;Collège;BEN-0185;Public;2024-2025
+CEG GBEGAMEY;BJ;;—;Collège;BEN-0186;Public;2024-2025
+CEG GBEGOUROU;BJ;Borgou;N'DALI;Collège;BEN-0187;Public;2024-2025
+CEG GBESSOU;BJ;;—;Collège;BEN-0188;Public;2024-2025
+CEG GBETAGBO;BJ;;—;Collège;BEN-0189;Public;2024-2025
+CEG GBETO;BJ;Atlantique;ZE;Collège;BEN-0190;Public;2024-2025
+CEG GBETO / ZE;BJ;;—;Collège;BEN-0191;Public;2024-2025
+CEG GBOZOUNME;BJ;Ouémé;AVRANKOU;Collège;BEN-0192;Public;2024-2025
+CEG GNIZOUNME;BJ;Couffo;LALO;Collège;BEN-0193;Public;2024-2025
+CEG GOBADA;BJ;;—;Collège;BEN-0194;Public;2024-2025
+CEG GODOHOU;BJ;Couffo;APLAHOUE;Collège;BEN-0195;Public;2024-2025
+CEG GODOMEY;BJ;Atlantique;ABOMEY-CALAVI;Collège;BEN-0196;Public;2024-2025
+CEG GOGOUNOU;BJ;Alibori;GOGOUNOU;Collège;BEN-0197;Public;2024-2025
+CEG GOHO;BJ;Zou;ABOMEY;Collège;BEN-0198;Public;2024-2025
+CEG GOMPAROU;BJ;Alibori;BANIKOARA;Collège;BEN-0199;Public;2024-2025
+CEG GOUKA;BJ;;—;Collège;BEN-0200;Public;2024-2025
+CEG GOUMORI;BJ;Alibori;BANIKOARA;Collège;BEN-0201;Public;2024-2025
+CEG GOUNSSOE;BJ;;—;Collège;BEN-0202;Public;2024-2025
+CEG GUEMA;BJ;Borgou;PARAKOU;Collège;BEN-0203;Public;2024-2025
+CEG GUESSOU-SUD;BJ;Borgou;BEMBEREKE;Collège;BEN-0204;Public;2024-2025
+CEG GUILMARO;BJ;Atacora;KOUANDE;Collège;BEN-0205;Public;2024-2025
+CEG HEKANME;BJ;;—;Collège;BEN-0206;Public;2024-2025
+CEG HEVIE;BJ;;—;Collège;BEN-0207;Public;2024-2025
+CEG HINVI;BJ;;—;Collège;BEN-0208;Public;2024-2025
+CEG HOCO;BJ;;—;Collège;BEN-0209;Public;2024-2025
+CEG HONHOUE;BJ;Mono;HOUEYOGBE;Collège;BEN-0210;Public;2024-2025
+CEG HONTON;BJ;Couffo;DOGBO;Collège;BEN-0211;Public;2024-2025
+CEG HOUAKPE DAHO;BJ;Atlantique;OUIDAH;Collège;BEN-0212;Public;2024-2025
+CEG HOUEGBO;BJ;;—;Collège;BEN-0213;Public;2024-2025
+CEG HOUETO;BJ;;—;Collège;BEN-0214;Public;2024-2025
+CEG HOUEYIHO;BJ;;—;Collège;BEN-0215;Public;2024-2025
+CEG HOUNKPOGON;BJ;;—;Collège;BEN-0216;Public;2024-2025
+CEG HUBERT C. MAGA;BJ;Borgou;PARAKOU;Collège;BEN-0217;Public;2024-2025
+CEG IGBO-OCHO;BJ;Plateau;POBE;Collège;BEN-0218;Public;2024-2025
+CEG IGBODJA;BJ;;—;Collège;BEN-0219;Public;2024-2025
+CEG IKEMON;BJ;;—;Collège;BEN-0220;Public;2024-2025
+CEG INA;BJ;Borgou;BEMBEREKE;Collège;BEN-0221;Public;2024-2025
+CEG KABOUA;BJ;;—;Collège;BEN-0222;Public;2024-2025
+CEG KANSOUNKPA;BJ;;—;Collège;BEN-0223;Public;2024-2025
+CEG KEMON;BJ;Collines;OUESSE;Collège;BEN-0224;Public;2024-2025
+CEG KERE;BJ;Collines;DASSA ZOUME;Collège;BEN-0225;Public;2024-2025
+CEG KIKA;BJ;Borgou;TCHAOUROU;Collège;BEN-0226;Public;2024-2025
+CEG KILIBO;BJ;Collines;OUESSE;Collège;BEN-0227;Public;2024-2025
+CEG KINTA;BJ;Zou;AGBANGNIZOUN;Collège;BEN-0228;Public;2024-2025
+CEG KISSAMEY;BJ;Couffo;APLAHOUE;Collège;BEN-0229;Public;2024-2025
+CEG KN EDOKO;BJ;;—;Collège;BEN-0230;Public;2024-2025
+CEG KO-KOUMOLOU;BJ;Plateau;IFANGNI;Collège;BEN-0231;Public;2024-2025
+CEG KOKO;BJ;;—;Collège;BEN-0232;Public;2024-2025
+CEG KOKORO;BJ;Collines;OUESSE;Collège;BEN-0233;Public;2024-2025
+CEG DE KOMIGUEA;BJ;Borgou;N'DALI;Collège;BEN-0234;Public;2024-2025
+CEG DE KOUANDE;BJ;Atacora;KOUANDE;Collège;BEN-0235;Public;2024-2025
+CEG KOUNDOKPOE;BJ;Atlantique;ZE;Collège;BEN-0236;Public;2024-2025
+CEG KOUTONGBE;BJ;Ouémé;PORTO-NOVO;Collège;BEN-0237;Public;2024-2025
+CEG KPAKPA;BJ;;—;Collège;BEN-0238;Public;2024-2025
+CEG KPAKPAME;BJ;Zou;ZAKPOTA;Collège;BEN-0239;Public;2024-2025
+CEG KPAKPAVISSA;BJ;;—;Collège;BEN-0240;Public;2024-2025
+CEG KPAKPAZA-YAWA;BJ;;—;Collège;BEN-0241;Public;2024-2025
+CEG KPANROUN;BJ;Atlantique;ABOMEY-CALAVI;Collège;BEN-0242;Public;2024-2025
+CEG KPATABA;BJ;Collines;SAVALOU;Collège;BEN-0243;Public;2024-2025
+CEG KPEDEKPO;BJ;Zou;ZAGNANADO;Collège;BEN-0244;Public;2024-2025
+CEG KPINGNI;BJ;;—;Collège;BEN-0245;Public;2024-2025
+CEG KPOMASSE;BJ;;—;Collège;BEN-0246;Public;2024-2025
+CEG KPOME;BJ;;—;Collège;BEN-0247;Public;2024-2025
+CEG KPOVIDJI;BJ;Mono;GRAND-POPO;Collège;BEN-0248;Public;2024-2025
+CEG LA VERDURE;BJ;Atlantique;ABOMEY-CALAVI;Collège;BEN-0249;Public;2024-2025
+CEG LAHOTAN;BJ;Collines;SAVALOU;Collège;BEN-0250;Public;2024-2025
+CEG LE LAC;BJ;;—;Collège;BEN-0251;Public;2024-2025
+CEG Le LITTORAL;BJ;;—;Collège;BEN-0252;Public;2024-2025
+CEG LE MERIDIEN;BJ;Atlantique;ABOMEY-CALAVI;Collège;BEN-0253;Public;2024-2025
+CEG Le NOKOUE;BJ;;—;Collège;BEN-0254;Public;2024-2025
+CEG LE PLATEAU;BJ;Atlantique;ABOMEY-CALAVI;Collège;BEN-0255;Public;2024-2025
+CEG LEMA;BJ;;—;Collège;BEN-0256;Public;2024-2025
+CEG Les Pylônes;BJ;;—;Collège;BEN-0257;Public;2024-2025
+CEG LISSAZOUNME;BJ;Zou;AGBANGNIZOUN;Collège;BEN-0258;Public;2024-2025
+CEG LISSEGAZOUN;BJ;;—;Collège;BEN-0259;Public;2024-2025
+CEG LOBOZOUNKPA;BJ;;—;Collège;BEN-0260;Public;2024-2025
+CEG LOGOZOHE;BJ;Collines;SAVALOU;Collège;BEN-0261;Public;2024-2025
+CEG LON-AGONMEY;BJ;Atlantique;ALLADA;Collège;BEN-0262;Public;2024-2025
+CEG LONKLY;BJ;Couffo;APLAHOUE;Collège;BEN-0263;Public;2024-2025
+CEG LOUGBA;BJ;;—;Collège;BEN-0264;Public;2024-2025
+CEG MADJRE;BJ;Couffo;DOGBO;Collège;BEN-0265;Public;2024-2025
+CEG MAGOUMI;BJ;;—;Collège;BEN-0266;Public;2024-2025
+CEG MAHOU;BJ;;—;Collège;BEN-0267;Public;2024-2025
+CEG MALANVILLE;BJ;Alibori;MALANVILLE;Collège;BEN-0268;Public;2024-2025
+CEG MALOMI;BJ;;—;Collège;BEN-0269;Public;2024-2025
+CEG MAOENGBE;BJ;;—;Collège;BEN-0270;Public;2024-2025
+CEG MAYAMON;BJ;;—;Collège;BEN-0271;Public;2024-2025
+CEG MINIFFI;BJ;;—;Collège;BEN-0272;Public;2024-2025
+CEG MONKPA;BJ;;—;Collège;BEN-0273;Public;2024-2025
+CEG N'DALI;BJ;Borgou;N'DALI;Collège;BEN-0274;Public;2024-2025
+CEG L'OCEAN;BJ;;—;Collège;BEN-0275;Public;2024-2025
+CEG ODOUGBA;BJ;;—;Collège;BEN-0276;Public;2024-2025
+CEG OFFE;BJ;;—;Collège;BEN-0277;Public;2024-2025
+CEG OJALLOUKOU;BJ;;—;Collège;BEN-0278;Public;2024-2025
+CEG OKE-OWO;BJ;Collines;SAVE;Collège;BEN-0279;Public;2024-2025
+CEG OKETAN;BJ;;—;Collège;BEN-0280;Public;2024-2025
+CEG OKOUNFO-GOGORO;BJ;;—;Collège;BEN-0281;Public;2024-2025
+CEG OKOUTA OSSE;BJ;;—;Collège;BEN-0282;Public;2024-2025
+CEG ONIGBOLO;BJ;Plateau;POBE;Collège;BEN-0283;Public;2024-2025
+CEG OROKOWARI;BJ;;—;Collège;BEN-0284;Public;2024-2025
+CEG OTTOLA;BJ;;—;Collège;BEN-0285;Public;2024-2025
+CEG OUAKE;BJ;Mono;LOKOSSA;Collège;BEN-0286;Public;2024-2025
+CEG OUANHO;BJ;Ouémé;AVRANKOU;Collège;BEN-0287;Public;2024-2025
+CEG OUEDEME;BJ;;—;Collège;BEN-0288;Public;2024-2025
+CEG OUEDO KPOSSIDJA;BJ;;—;Collège;BEN-0289;Public;2024-2025
+CEG OUENOU;BJ;Borgou;N'DALI;Collège;BEN-0290;Public;2024-2025
+CEG OUESSE (SAVI);BJ;;—;Collège;BEN-0291;Public;2024-2025
+CEG OUINHI;BJ;Zou;OUINHI;Collège;BEN-0292;Public;2024-2025
+CEG OUISSI;BJ;;—;Collège;BEN-0293;Public;2024-2025
+CEG OUMAKO;BJ;Mono;COME;Collège;BEN-0294;Public;2024-2025
+CEG OUMBEGAME;BJ;Zou;DJIDJA;Collège;BEN-0295;Public;2024-2025
+CEG OUOGHI;BJ;;—;Collège;BEN-0296;Public;2024-2025
+CEG PAHOU;BJ;;—;Collège;BEN-0297;Public;2024-2025
+CEG PANOUINGNAN;BJ;;—;Collège;BEN-0298;Public;2024-2025
+CEG PAOUIGNAN;BJ;Collines;DASSA ZOUME;Collège;BEN-0299;Public;2024-2025
+CEG PASSAGON;BJ;Zou;BOHICON;Collège;BEN-0300;Public;2024-2025
+CEG PIRA;BJ;;—;Collège;BEN-0301;Public;2024-2025
+CEG SAGON;BJ;Zou;OUINHI;Collège;BEN-0302;Public;2024-2025
+CEG SAKO;BJ;Collines;BANTE;Collège;BEN-0303;Public;2024-2025
+CEG SAVI-GAKPE;BJ;Atlantique;OUIDAH;Collège;BEN-0304;Public;2024-2025
+CEG SAZUE;BJ;Mono;GRAND-POPO;Collège;BEN-0305;Public;2024-2025
+CEG DE SE;BJ;Mono;HOUEYOGBE;Collège;BEN-0306;Public;2024-2025
+CEG SEDJE-DENOU;BJ;;—;Collège;BEN-0307;Public;2024-2025
+CEG SEDJE-HOUEGOUDO;BJ;;—;Collège;BEN-0308;Public;2024-2025
+CEG SEGBANA;BJ;Alibori;SEGBANA;Collège;BEN-0309;Public;2024-2025
+CEG SEGBEYA;BJ;;—;Collège;BEN-0310;Public;2024-2025
+CEG SEGBOHOUE;BJ;;—;Collège;BEN-0311;Public;2024-2025
+CEG SEHOUE;BJ;;—;Collège;BEN-0312;Public;2024-2025
+CEG SEKOU;BJ;Atlantique;ALLADA;Collège;BEN-0313;Public;2024-2025
+CEG SEMERE;BJ;Mono;LOKOSSA;Collège;BEN-0314;Public;2024-2025
+CEG SEREKALI;BJ;Borgou;NIKKI;Collège;BEN-0315;Public;2024-2025
+CEG SETTO;BJ;Zou;DJIDJA;Collège;BEN-0316;Public;2024-2025
+CEG SINWE;BJ;Zou;AGBANGNIZOUN;Collège;BEN-0317;Public;2024-2025
+CEG DE SIRAROU;BJ;Borgou;N'DALI;Collège;BEN-0318;Public;2024-2025
+CEG SÔ-AVA;BJ;;—;Collège;BEN-0319;Public;2024-2025
+CEG SOCLOGBO;BJ;;—;Collège;BEN-0320;Public;2024-2025
+CEG SODOHOME;BJ;Zou;BOHICON;Collège;BEN-0321;Public;2024-2025
+CEG SOHEDJI;BJ;;—;Collège;BEN-0322;Public;2024-2025
+CEG SOKPONTA- GOME;BJ;;—;Collège;BEN-0323;Public;2024-2025
+CEG SOMPEREKOU;BJ;Alibori;BANIKOARA;Collège;BEN-0324;Public;2024-2025
+CEG SONSORO;BJ;Alibori;KANDI;Collège;BEN-0325;Public;2024-2025
+CEG SORI;BJ;Alibori;GOGOUNOU;Collège;BEN-0326;Public;2024-2025
+CEG SOWE;BJ;;—;Collège;BEN-0327;Public;2024-2025
+CEG SOWIGNANOJI;BJ;;—;Collège;BEN-0328;Public;2024-2025
+CEG SOYO;BJ;;—;Collège;BEN-0329;Public;2024-2025
+CEG Ste RITA;BJ;;—;Collège;BEN-0330;Public;2024-2025
+CEG SURU-LERE;BJ;;—;Collège;BEN-0331;Public;2024-2025
+CEG TAKPA;BJ;;—;Collège;BEN-0332;Public;2024-2025
+CEG TANGBO-DJEVIE;BJ;;—;Collège;BEN-0333;Public;2024-2025
+CEG TANKPE;BJ;;—;Collège;BEN-0334;Public;2024-2025
+CEG TANVE;BJ;Zou;AGBANGNIZOUN;Collège;BEN-0335;Public;2024-2025
+CEG TCHAADA;BJ;Plateau;IFANGNI;Collège;BEN-0336;Public;2024-2025
+CEG TCHETII;BJ;;—;Collège;BEN-0337;Public;2024-2025
+CEG TCHIKPE;BJ;Couffo;KLOUEKANME;Collège;BEN-0338;Public;2024-2025
+CEG TCHITO;BJ;Couffo;LALO;Collège;BEN-0339;Public;2024-2025
+CEG TCHOGODO;BJ;;—;Collège;BEN-0340;Public;2024-2025
+CEG TINDJI;BJ;Zou;ZAKPOTA;Collège;BEN-0341;Public;2024-2025
+CEG TITIROU;BJ;Borgou;PARAKOU;Collège;BEN-0342;Public;2024-2025
+CEG TOFFO;BJ;;—;Collège;BEN-0343;Public;2024-2025
+CEG TOGOUDO D'ALLADA;BJ;;—;Collège;BEN-0344;Public;2024-2025
+CEG TOHOUE;BJ;Ouémé;SEME-PODJI;Collège;BEN-0345;Public;2024-2025
+CEG TOKPA DOME;BJ;;—;Collège;BEN-0346;Public;2024-2025
+CEG TORI-ACADJAME;BJ;;—;Collège;BEN-0347;Public;2024-2025
+CEG TORI- AGOUAKO;BJ;;—;Collège;BEN-0348;Public;2024-2025
+CEG TORI-AIDOHOUE;BJ;;—;Collège;BEN-0349;Public;2024-2025
+CEG TORI-AVAME;BJ;;—;Collège;BEN-0350;Public;2024-2025
+CEG TORI BOSSITO CENTRE;BJ;;—;Collège;BEN-0351;Public;2024-2025
+CEG TORI-CADA;BJ;;—;Collège;BEN-0352;Public;2024-2025
+CEG TOUI;BJ;Collines;OUESSE;Collège;BEN-0353;Public;2024-2025
+CEG TOURA;BJ;Alibori;BANIKOARA;Collège;BEN-0354;Public;2024-2025
+CEG UNION AVA-COUFFO;BJ;;—;Collège;BEN-0355;Public;2024-2025
+CEG UNION AZOHOUÈ-CADA;BJ;;—;Collège;BEN-0356;Public;2024-2025
+CEG DE L'UNITE;BJ;Ouémé;PORTO-NOVO;Collège;BEN-0357;Public;2024-2025
+CEG VEKKY;BJ;;—;Collège;BEN-0358;Public;2024-2025
+CEG YAGBE;BJ;;—;Collège;BEN-0359;Public;2024-2025
+CEG YAGBO;BJ;;—;Collège;BEN-0360;Public;2024-2025
+CEG YAOUI;BJ;;—;Collège;BEN-0361;Public;2024-2025
+CEG YOKPO;BJ;;—;Collège;BEN-0362;Public;2024-2025
+CEG ZAFFE;BJ;;—;Collège;BEN-0363;Public;2024-2025
+CEG ZAKPOTA;BJ;Zou;ZAKPOTA;Collège;BEN-0364;Public;2024-2025
+CEG ZALLI;BJ;Couffo;LALO;Collège;BEN-0365;Public;2024-2025
+CEG ZE;BJ;;—;Collège;BEN-0366;Public;2024-2025
+CEG ZIAN;BJ;Plateau;IFANGNI;Collège;BEN-0367;Public;2024-2025
+CEG ZINVIE;BJ;;—;Collège;BEN-0368;Public;2024-2025
+CEG ZOGBO;BJ;;—;Collège;BEN-0369;Public;2024-2025
+CEG ZONGO;BJ;Borgou;PARAKOU;Collège;BEN-0370;Public;2024-2025
+CEG ZOUGBONOU;BJ;Mono;HOUEYOGBE;Collège;BEN-0371;Public;2024-2025
+CENTRE NUMÉRIQUE DE FORMATIONS LE GÉNIE;BJ;Borgou;PARAKOU;Centre de formation;BEN-0372;Non précisé;2024-2025
+CEPA AGOUAGON;BJ;;—;Non précisé;BEN-0373;Public;2024-2025
+CEPEG Ste MÉLISSA;BJ;;—;Collège;BEN-0374;Privé;2024-2025
+CFG DJAGBALLO;BJ;;—;Collège;BEN-0375;Public;2024-2025
+CFPA/AGOUA;BJ;;—;Collège;BEN-0376;Public;2024-2025
+CFPA-PAHOU;BJ;;—;Collège;BEN-0377;Public;2024-2025
+CFPA-ZE;BJ;;—;Collège;BEN-0378;Public;2024-2025
+COLLÈGE CATHOLIQUE DASSA;BJ;;—;Collège;BEN-0379;Privé;2024-2025
+Collège Catholique Notre Dame de l'Assomption de Savalou;BJ;;—;Collège;BEN-0380;Privé;2024-2025
+Collège Catholique Saint Joseph de Savè;BJ;;—;Collège;BEN-0381;Privé;2024-2025
+COLLEGE CATHOLIQUE SAINT MICHEL DE DASSA-ZOUME;BJ;;—;Collège;BEN-0382;Privé;2024-2025
+COLLEGE CATHOLIQUE ST JOSEPH DE OUESSE;BJ;;—;Collège;BEN-0383;Privé;2024-2025
+College Christ roi kaboua;BJ;;—;Collège;BEN-0384;Privé;2024-2025
+Collège Jean Michel Le Faucon Calavi;BJ;;—;Collège;BEN-0385;Privé;2024-2025
+Collège Jean Michel Le Faucon de Parakou;BJ;;—;Collège;BEN-0386;Privé;2024-2025
+College Polytechnique d'Enseignement General La Lumiere d'akpassi;BJ;;—;Collège;BEN-0387;Privé;2024-2025
+Collège Privé d'enseignement Général Académie des élites;BJ;;—;Collège;BEN-0388;Privé;2024-2025
+Collège Privé d´Enseignement Général AKWAABA;BJ;;—;Collège;BEN-0389;Privé;2024-2025
+Collège Privé d'Enseignement Général AURORE D'AFRIQUE;BJ;;—;Collège;BEN-0390;Privé;2024-2025
+Collège Privé d'enseignement Général Bel Avenir;BJ;;—;Collège;BEN-0391;Privé;2024-2025
+Collège Privé d'Enseignement Général DAV-AMEN;BJ;;—;Collège;BEN-0392;Privé;2024-2025
+Collège Privé d'enseignement Général et Technique NOUKPO;BJ;;—;Collège;BEN-0393;Privé;2024-2025
+Collège Privé d'Enseignement Général G PENIEL;BJ;;—;Collège;BEN-0394;Privé;2024-2025
+Collège Privé D'enseignement Général Le Creuset de L'excellence;BJ;;—;Collège;BEN-0395;Privé;2024-2025
+Collège Privé d'enseignement Général Les Bâtisseurs;BJ;;—;Collège;BEN-0396;Privé;2024-2025
+Collège Privé d'Enseignement Général Saint Bertin;BJ;;—;Collège;BEN-0397;Privé;2024-2025
+College Privé Etoile de Sagesse;BJ;;—;Collège;BEN-0398;Privé;2024-2025
+Complexe d'Enseignement Technique et Général BETHESDA;BJ;;—;Collège;BEN-0399;Privé;2024-2025
+Complexe d'Enseignement Technique et Général de Dassa;BJ;;—;École primaire;BEN-0400;Privé;2024-2025
+Complexe d'Enseignement Technique et Général de Zoundja;BJ;;—;École primaire;BEN-0401;Privé;2024-2025
+COMPLEXE PRIMAIRE PRIVEE LES FAVEURS;BJ;;—;École primaire;BEN-0402;Privé;2024-2025
+Complexe Prive d'Enseignement Général SAGACEm;BJ;;—;Collège;BEN-0403;Privé;2024-2025
+Complexe Scolaire Abbé Florent NASCIMENTO;BJ;;—;Collège;BEN-0404;Privé;2024-2025
+Complexe Scolaire Académie des Elites;BJ;;—;École primaire;BEN-0405;Privé;2024-2025
+Complexe scolaire Africa perspectives;BJ;;—;Collège;BEN-0406;Privé;2024-2025
+Complexe scolaire Bilingue le Triomphe;BJ;;—;Collège;BEN-0407;Privé;2024-2025
+Complexe Scolaire Bilingue Saint Jean de Tangbo;BJ;;—;École primaire;BEN-0408;Privé;2024-2025
+COMPLEXE SCOLAIRE CATHOLIQUE CARDINAL BERNARDIN GANTIN;BJ;;—;Collège;BEN-0409;Privé;2024-2025
+COMPLEXE SCOLAIRE CATHOLIQUE LOUGBA;BJ;;—;École primaire;BEN-0410;Privé;2024-2025
+Complexe Scolaire Catholique Saint Joseph de Copertino;BJ;;—;Collège;BEN-0411;Privé;2024-2025
+COMPLEXE SCOLAIRE CATHOLIQUE SAINT JOSEPH DE GLAZOUE;BJ;;—;École primaire;BEN-0412;Privé;2024-2025
+COMPLEXE SCOLAIRE CHRIS INTERNATIONAL;BJ;;—;École primaire;BEN-0413;Privé;2024-2025
+Complexe Scolaire Coeur D'or;BJ;;—;Collège;BEN-0414;Privé;2024-2025
+Complexe Scolaire ELITES DE HEVIE;BJ;;—;Collège;BEN-0415;Privé;2024-2025
+Complexe scolaire la colombe;BJ;;—;Collège;BEN-0416;Privé;2024-2025
+Complexe scolaire LA CONFIANCE DIVINE;BJ;;—;École primaire;BEN-0417;Privé;2024-2025
+Complexe Scolaire La Fontaine du Savoir Annexe;BJ;;—;École primaire;BEN-0418;Privé;2024-2025
+COMPLEXE SCOLAIRE LA FORGE DES ELITES;BJ;;—;Collège;BEN-0419;Privé;2024-2025
+Complexe scolaire LA MANNE DES PRINCES;BJ;;—;Collège;BEN-0420;Privé;2024-2025
+Complexe Scolaire La Manne des Princes 1;BJ;;—;Collège;BEN-0421;Privé;2024-2025
+Complexe Scolaire La Manne des Princes 2;BJ;;—;École primaire;BEN-0422;Privé;2024-2025
+COMPLEXE SCOLAIRE LA SAGESSE DE DIEU;BJ;;—;École primaire;BEN-0423;Privé;2024-2025
+Complexe scolaire le berceau des merveilles;BJ;;—;Collège;BEN-0424;Privé;2024-2025
+Complexe Scolaire le Challenge;BJ;;—;Collège;BEN-0425;Privé;2024-2025
+Complexe Scolaire le JUBILE;BJ;;—;Collège;BEN-0426;Privé;2024-2025
+Complexe Scolaire Le Paraclet;BJ;;—;Collège;BEN-0427;Privé;2024-2025
+Complexe Scolaire le Regard;BJ;;—;Collège;BEN-0428;Privé;2024-2025
+Complexe Scolaire Le Soleil B;BJ;;—;École primaire;BEN-0429;Privé;2024-2025
+Complexe Scolaire LES CHAMPIONS DE LA CONNAISSANCE;BJ;;—;École primaire;BEN-0430;Privé;2024-2025
+Complexe Scolaire les Hirondelles NDA de Savè;BJ;;—;École primaire;BEN-0431;Privé;2024-2025
+Complexe scolaire LES MERVEILLES DU CHRIST;BJ;;—;École primaire;BEN-0432;Privé;2024-2025
+Complexe scolaire Les Premiers;BJ;;—;Collège;BEN-0433;Privé;2024-2025
+COMPLEXE SCOLAIRE LICA;BJ;;—;Collège;BEN-0434;Privé;2024-2025
+Complexe scolaire Marie Reine des Anges;BJ;;—;École primaire;BEN-0435;Privé;2024-2025
+Complexe Scolaire Martin;BJ;;—;Collège;BEN-0436;Privé;2024-2025
+Complexe Scolaire Notre Dame des Victoires;BJ;;—;École primaire;BEN-0437;Privé;2024-2025
+COMPLEXE SCOLAIRE PIERRE ANGULAIRE;BJ;;—;Collège;BEN-0438;Privé;2024-2025
+Complexe Scolaire Polytechnique et Sportif Sainte Luce des Tori;BJ;;—;Collège;BEN-0439;Privé;2024-2025
+Complexe Scolaire Polytechnique La Fontaine du Savoir;BJ;;—;Collège;BEN-0440;Privé;2024-2025
+Complexe Scolaire Polytechnique La Fontaine du Savoir Annexe;BJ;;—;Collège;BEN-0441;Privé;2024-2025
+Complexe Scolaire Privé l'Éternité;BJ;;—;Collège;BEN-0442;Privé;2024-2025
+Complexe Scolaire Privé LES CHAMPIONS DE LA CONNAISSANCE;BJ;;—;École primaire;BEN-0443;Privé;2024-2025
+Complexe Scolaire Privé Notre Dame des Anges;BJ;;—;École primaire;BEN-0444;Privé;2024-2025
+Complexe Scolaire Privé Orientation;BJ;;—;École primaire;BEN-0445;Privé;2024-2025
+Complexe Scolaire Privée Le Paraclet;BJ;;—;École primaire;BEN-0446;Privé;2024-2025
+Complexe Scolaire SAGACE;BJ;;—;École primaire;BEN-0447;Privé;2024-2025
+Complexe Scolaire Saint Fabien;BJ;;—;Collège;BEN-0448;Privé;2024-2025
+COMPLEXE SCOLAIRE SAINT JACQUES WILLIAM;BJ;;—;Collège;BEN-0449;Privé;2024-2025
+Complexe Scolaire Saint Joseph de Kaboua;BJ;;—;Collège;BEN-0450;Privé;2024-2025
+Complexe Scolaire Saint Michel de Dassa;BJ;;—;Collège;BEN-0451;Privé;2024-2025
+Complexe scolaire saint Romaric;BJ;;—;Collège;BEN-0452;Privé;2024-2025
+Complexe Scolaire Saint Victor;BJ;;—;École primaire;BEN-0453;Privé;2024-2025
+Complexe Scolaire Sainte Anne kowegbo;BJ;;—;Collège;BEN-0454;Privé;2024-2025
+Complexe Scolaire Sainte Daniella;BJ;;—;Collège;BEN-0455;Privé;2024-2025
+Complexe Scolaire Sainte Félicité Godomey;BJ;;—;Collège;BEN-0456;Privé;2024-2025
+Complexe Scolaire Ste Félicité Calavi;BJ;;—;Collège;BEN-0457;Privé;2024-2025
+Complexe Scolaire Ste Mireille;BJ;;—;École primaire;BEN-0458;Privé;2024-2025
+Complexe Scolaires Bilingue Le TRIOMPHE d'Adjarra Adovié;BJ;;—;École primaire;BEN-0459;Privé;2024-2025
+Complexe Scolaires Le TRIOMPHE d'Adjarra Adovié;BJ;;—;Collège;BEN-0460;Privé;2024-2025
+CP PENIEL;BJ;;—;École primaire;BEN-0461;Privé;2024-2025
+CPEG Catholique St. Georges de Kilibo;BJ;;—;Collège;BEN-0462;Privé;2024-2025
+CPEG Ferdinand OYONO;BJ;;—;Collège;BEN-0463;Privé;2024-2025
+CPEG KATOJO;BJ;;—;Collège;BEN-0464;Privé;2024-2025
+CPEG LA CLÉ DU SUCCÈS;BJ;;—;Collège;BEN-0465;Privé;2024-2025
+Cpeg la Marielle;BJ;;—;Collège;BEN-0466;Privé;2024-2025
+CPEG Le Creuset de L'excellence;BJ;;—;Collège;BEN-0467;Privé;2024-2025
+CPEG le Ferger;BJ;;—;École primaire;BEN-0468;Privé;2024-2025
+CPEG MAKANDJOU;BJ;;—;Collège;BEN-0469;Privé;2024-2025
+CPEG Mon Avenir Plus;BJ;;—;Collège;BEN-0470;Privé;2024-2025
+CPEG Protestant Déo Gratias de Kpoguidi;BJ;;—;Collège;BEN-0471;Privé;2024-2025
+CPEG SAINT BERTIN Primaire;BJ;;—;École primaire;BEN-0472;Privé;2024-2025
+CPEG SAINT JÉRIEL;BJ;;—;Collège;BEN-0473;Privé;2024-2025
+CPEG SAINT VICTOR DE GODOMEY;BJ;;—;Collège;BEN-0474;Privé;2024-2025
+CPEGT LA RECADE Annexe;BJ;;—;Collège;BEN-0475;Privé;2024-2025
+CPEGT LA RECADE SIEGE Siège;BJ;;—;Collège;BEN-0476;Privé;2024-2025
+CPET WELDIOS;BJ;;—;Collège;BEN-0477;Privé;2024-2025
+Cs berceau des merveilles;BJ;;—;Collège;BEN-0478;Privé;2024-2025
+CS LA GRACE DIVINE;BJ;;—;Collège;BEN-0479;Privé;2024-2025
+CS La Philadelphie;BJ;;—;École primaire;BEN-0480;Privé;2024-2025
+CS LE JUBILE;BJ;;—;École primaire;BEN-0481;Privé;2024-2025
+CSJM Faucon Calavi;BJ;;—;École primaire;BEN-0482;Privé;2024-2025
+CSJM le faucon;BJ;;—;Collège;BEN-0483;Privé;2024-2025
+CSP La Cité des Sages;BJ;;—;École primaire;BEN-0484;Privé;2024-2025
+CSP LA CLÉ DU SUCCÈS;BJ;;—;École primaire;BEN-0485;Privé;2024-2025
+CSP MONTAGNE DE SION DE DJEFFA;BJ;;—;École primaire;BEN-0486;Privé;2024-2025
+CSP Notre Dame des Anges;BJ;;—;École primaire;BEN-0487;Privé;2024-2025
+ECOLE CATHOLIQUE DE SOCLOGBO;BJ;;—;École primaire;BEN-0488;Privé;2024-2025
+ÉCOLE CHRÉTIENNE DANIEL;BJ;Littoral;COTONOU;École primaire;BEN-0489;Non précisé;2024-2025
+Ecole Matenelle et Primaire Bilingue Saint Louis de SAVE;BJ;;—;École primaire;BEN-0490;Privé;2024-2025
+ECOLE PRIMAIRE CATHOLIQUE D’AGBON;BJ;;—;École primaire;BEN-0491;Privé;2024-2025
+ECOLE PRIMAIRE CATHOLIQUE BANTE;BJ;;—;École primaire;BEN-0492;Privé;2024-2025
+Ecole Primaire Catholique Bon Pasteur de TCHETTI;BJ;;—;École primaire;BEN-0493;Privé;2024-2025
+Ecole Primaire Catholique de DASSA;BJ;;—;École primaire;BEN-0494;Privé;2024-2025
+ECOLE PRIMAIRE CATHOLIQUE KABOUA;BJ;;—;École primaire;BEN-0495;Privé;2024-2025
+ECOLE PRIMAIRE CATHOLIQUE KILIBO;BJ;;—;École primaire;BEN-0496;Privé;2024-2025
+Ecole Primaire Catholique de MONKPA;BJ;;—;École primaire;BEN-0497;Privé;2024-2025
+Ecole Primaire Catholique Notre Dame de l'Assomption de Savalou;BJ;;—;École primaire;BEN-0498;Privé;2024-2025
+Ecole Primaire Catholique Ouoghi;BJ;;—;École primaire;BEN-0499;Privé;2024-2025
+Ecole Primaire Catholique PIRA;BJ;;—;École primaire;BEN-0500;Privé;2024-2025
+ECOLE PRIMAIRE CATHOLIQUE SAINTE THERESE DE AKLAMPA;BJ;;—;École primaire;BEN-0501;Privé;2024-2025
+Ecole Primaire Catholique de SOKPONTA;BJ;;—;École primaire;BEN-0502;Privé;2024-2025
+Ecole Primaire Catholique St Michel Agoua;BJ;;—;École primaire;BEN-0503;Privé;2024-2025
+École primaire LE GLORIEUX;BJ;;—;École primaire;BEN-0504;Privé;2024-2025
+École primaire privée le soleil A;BJ;;—;École primaire;BEN-0505;Privé;2024-2025
+ECOLE PRIMAIRE PRIVEE LES BATISSEURS;BJ;;—;École primaire;BEN-0506;Privé;2024-2025
+Ecole Privé Etoile de Sagesse;BJ;;—;École primaire;BEN-0507;Privé;2024-2025
+EPP L'Arbre de Succès;BJ;;—;École primaire;BEN-0508;Privé;2024-2025
+EPP BON PASTEUR DE BOHICON;BJ;;—;École primaire;BEN-0509;Privé;2024-2025
+Green Leaf International school;BJ;;—;Collège;BEN-0510;Privé;2024-2025
+Green Leaf International School 1;BJ;;—;École primaire;BEN-0511;Privé;2024-2025
+Groupe Scolaire Privé Bilingue REGGIO;BJ;;—;Collège;BEN-0512;Privé;2024-2025
+GSPB REGGIO;BJ;;—;École primaire;BEN-0513;Privé;2024-2025
+GSPB REGGIO Primaire;BJ;;—;École primaire;BEN-0514;Privé;2024-2025
+HIMALAYA;BJ;;—;École primaire;BEN-0515;Privé;2024-2025
+HIMALAYA MERMOZ;BJ;;—;École primaire;BEN-0516;Privé;2024-2025
+INSTITUT DE MULTIMÉDIA APPLIQUÉ - IMA;BJ;Littoral;COTONOU;Centre de formation;BEN-0517;Non précisé;2024-2025
+La Confiance Divine;BJ;;—;École primaire;BEN-0518;Privé;2024-2025
+LA CONFIANCE DIVINE A;BJ;;—;Collège;BEN-0519;Privé;2024-2025
+La confiance Divine Adjarra;BJ;;—;École primaire;BEN-0520;Privé;2024-2025
+LA CONFIANCE DIVINE Al Amannan;BJ;;—;Collège;BEN-0521;Privé;2024-2025
+LA RECADE;BJ;;—;Collège;BEN-0522;Privé;2024-2025
+LAMS;BJ;;—;Collège;BEN-0523;Public;2024-2025
+LE SOLEIL / A;BJ;;—;École primaire;BEN-0524;Privé;2024-2025
+LE SOLEIL / B;BJ;;—;École primaire;BEN-0525;Privé;2024-2025
+LT-ASBA;BJ;;—;Collège;BEN-0526;Public;2024-2025
+LT-EFS Akassato;BJ;;—;Collège;BEN-0527;Public;2024-2025
+LTPII IFOSE;BJ;;—;Collège;BEN-0528;Privé;2024-2025
+Lycée des Jeunes Filles de Ouidah;BJ;;—;Collège;BEN-0529;Public;2024-2025
+LYCEE HOUFFON;BJ;Zou;ABOMEY;Collège;BEN-0530;Public;2024-2025
+LYCEE MAFRY BANGOURA;BJ;Zou;ABOMEY;Collège;BEN-0531;Public;2024-2025
+LYCEE MATHIEU BOUKE;BJ;Borgou;PARAKOU;Collège;BEN-0532;Public;2024-2025
+Lycée Technique Coulibaly;BJ;;—;Collège;BEN-0533;Public;2024-2025
+Lycée Technique et Professionnel de Kpondehou;BJ;;—;Collège;BEN-0534;Privé;2024-2025
+Lycée Technique K;BJ;;—;Collège;BEN-0535;Public;2024-2025
+Lycée Technique de Ouidah;BJ;;—;Collège;BEN-0536;Public;2024-2025
+Marie Reine des Anges;BJ;;—;École primaire;BEN-0537;Privé;2024-2025
+Marie Reine des Anges Garderie;BJ;;—;École primaire;BEN-0538;Privé;2024-2025
+Maternelle Triomphe d'Adjarra Adovié;BJ;;—;École primaire;BEN-0539;Privé;2024-2025
+MERMOZ HIMALAYA;BJ;;—;Collège;BEN-0540;Privé;2024-2025
+Monseigneur Melchior de Marion Brésillac;BJ;;—;Collège;BEN-0541;Privé;2024-2025
+REVELATEUR CATHO;BJ;;—;Collège;BEN-0542;Privé;2024-2025
+Successgate international school;BJ;;—;Collège;BEN-0543;Privé;2024-2025
+Tougloui Delphine;BJ;;—;Collège;BEN-0544;Privé;2024-2025
+Zoo la marielle;BJ;;—;École primaire;BEN-0545;Privé;2024-2025

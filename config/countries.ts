@@ -377,6 +377,38 @@ export const COUNTRIES: CountryConfig[] = [
       { code: "SES", name: "Sud-Est" },
     ],
   },
+  {
+    code: "BJ",
+    iso3: "BEN",
+    nameFr: "Bénin",
+    nameEn: "Benin",
+    flag: "🇧🇯",
+    currencyCode: "XOF",
+    currencySymbol: "FCFA",
+    timezone: "Africa/Porto-Novo",
+    defaultLocale: "fr",
+    academicRegionLabel: "Département (DDE)",
+    teacherTrainingCenterLabel: "ENI / ENS",
+    continuingTrainingAntennaLabel: "Circonscription scolaire",
+    isActive: true,
+    // Les 12 départements (= Directions Départementales des Enseignements).
+    // Source : SuccessCo + OSM/WikiProject CEG — 545 établissements (auto-chargés).
+    // Régions éditables.
+    academicRegions: [
+      { code: "ALI", name: "Alibori" },
+      { code: "ATA", name: "Atacora" },
+      { code: "ATL", name: "Atlantique" },
+      { code: "BOR", name: "Borgou" },
+      { code: "COL", name: "Collines" },
+      { code: "COU", name: "Couffo" },
+      { code: "DON", name: "Donga" },
+      { code: "LIT", name: "Littoral" },
+      { code: "MON", name: "Mono" },
+      { code: "OUE", name: "Ouémé" },
+      { code: "PLA", name: "Plateau" },
+      { code: "ZOU", name: "Zou" },
+    ],
+  },
 ];
 
 export const DEFAULT_COUNTRY_CODE = "CI";

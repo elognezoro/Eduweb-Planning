@@ -16,6 +16,7 @@ const FILES: Record<string, string> = {
   CM: "/data/cameroun-etablissements.csv",
   CD: "/data/rdc-etablissements.csv",
   HT: "/data/haiti-etablissements.csv",
+  BJ: "/data/benin-etablissements.csv",
 };
 
 const cache: Record<string, CiEtablissement[]> = {};
