@@ -237,6 +237,40 @@ export const COUNTRIES: CountryConfig[] = [
       { code: "SAV", name: "Savanes" },
     ],
   },
+  {
+    code: "SN",
+    iso3: "SEN",
+    nameFr: "Sénégal",
+    nameEn: "Senegal",
+    flag: "🇸🇳",
+    currencyCode: "XOF",
+    currencySymbol: "FCFA",
+    timezone: "Africa/Dakar",
+    defaultLocale: "fr",
+    academicRegionLabel: "Région (IA)",
+    teacherTrainingCenterLabel: "CRFPE / FASTEF",
+    continuingTrainingAntennaLabel: "IEF",
+    isActive: true,
+    // 14 régions (= Inspections d'Académie). Le fichier source (annuaire public
+    // SenegalEcoles) ne fournit que des extraits nominatifs + des totaux ; la base
+    // nominative complète (9947 écoles) reste à exporter du MEN. Régions éditables.
+    academicRegions: [
+      { code: "DKR", name: "Dakar" },
+      { code: "DBL", name: "Diourbel" },
+      { code: "FTK", name: "Fatick" },
+      { code: "KFN", name: "Kaffrine" },
+      { code: "KLK", name: "Kaolack" },
+      { code: "KGU", name: "Kédougou" },
+      { code: "KLD", name: "Kolda" },
+      { code: "LGA", name: "Louga" },
+      { code: "MTM", name: "Matam" },
+      { code: "STL", name: "Saint-Louis" },
+      { code: "SDH", name: "Sédhiou" },
+      { code: "TBC", name: "Tambacounda" },
+      { code: "THS", name: "Thiès" },
+      { code: "ZIG", name: "Ziguinchor" },
+    ],
+  },
 ];
 
 export const DEFAULT_COUNTRY_CODE = "CI";
