@@ -470,6 +470,46 @@ export const COUNTRIES: CountryConfig[] = [
       { code: "ZIN", name: "Zinder" },
     ],
   },
+  {
+    code: "ML",
+    iso3: "MLI",
+    nameFr: "Mali",
+    nameEn: "Mali",
+    flag: "🇲🇱",
+    currencyCode: "XOF",
+    currencySymbol: "FCFA",
+    timezone: "Africa/Bamako",
+    defaultLocale: "fr",
+    academicRegionLabel: "Académie d'enseignement (AE)",
+    teacherTrainingCenterLabel: "IFM / ENSup",
+    continuingTrainingAntennaLabel: "Centre d'animation pédagogique (CAP)",
+    isActive: true,
+    // Les 19 régions + district de Bamako (découpage 2023). Source : annuaire
+    // public ecoles-mali.com — 63 établissements extraits (auto-chargés ;
+    // annuaire complet 2 763 à consolider). Régions éditables.
+    academicRegions: [
+      { code: "BMK", name: "Bamako" },
+      { code: "BDG", name: "Bandiagara" },
+      { code: "BGN", name: "Bougouni" },
+      { code: "DIO", name: "Dioïla" },
+      { code: "DOU", name: "Douentza" },
+      { code: "GAO", name: "Gao" },
+      { code: "KAY", name: "Kayes" },
+      { code: "KID", name: "Kidal" },
+      { code: "KIT", name: "Kita" },
+      { code: "KOU", name: "Koulikoro" },
+      { code: "KTL", name: "Koutiala" },
+      { code: "MEN", name: "Ménaka" },
+      { code: "MOP", name: "Mopti" },
+      { code: "NAR", name: "Nara" },
+      { code: "NIO", name: "Nioro" },
+      { code: "SAN", name: "San" },
+      { code: "SEG", name: "Ségou" },
+      { code: "SIK", name: "Sikasso" },
+      { code: "TAO", name: "Taoudénit" },
+      { code: "TBT", name: "Tombouctou" },
+    ],
+  },
 ];
 
 export const DEFAULT_COUNTRY_CODE = "CI";
