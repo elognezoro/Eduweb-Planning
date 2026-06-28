@@ -52,7 +52,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             onClick={() => setMobileOpen(false)}
             aria-hidden
           />
-          <div className="absolute left-0 top-0 h-full w-[280px] shadow-2xl ew-fade-in">
+          <div className="absolute left-0 top-0 h-full w-[280px] max-w-[85vw] shadow-2xl ew-fade-in">
             <SidebarContent onNavigate={() => setMobileOpen(false)} />
           </div>
         </div>
@@ -71,7 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {children}
           </div>
         </main>
-        <footer className="border-t border-border px-6 py-4 text-center text-xs text-muted-foreground">
+        <footer className="border-t border-border px-4 py-4 text-center text-xs text-muted-foreground sm:px-6">
           {t("footer.tagline")} · © {new Date().getFullYear()}
         </footer>
       </div>

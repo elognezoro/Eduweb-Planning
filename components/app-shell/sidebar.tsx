@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfilePhoto } from "@/lib/profile-photo";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Logo } from "./logo";
+import { CountrySwitcher, AcademicYearSwitcher, LocaleSwitcher } from "./switchers";
 import { cn, initials } from "@/lib/utils";
 
 interface SidebarContentProps {
@@ -55,6 +56,21 @@ export function SidebarContent({ collapsed = false, onNavigate }: SidebarContent
         <div className={cn("flex h-16 items-center border-b border-white/10 px-4", collapsed && "justify-center px-0")}>
           <Logo collapsed={collapsed} />
         </div>
+
+        {/* Contexte (pays / année / langue) — visible uniquement dans le tiroir
+            mobile : sur desktop ces sélecteurs vivent dans la barre du haut. */}
+        {!collapsed && (
+          <div className="border-b border-white/10 px-3 py-3 lg:hidden">
+            <p className="mb-2 px-1 text-[10.5px] font-bold uppercase tracking-[0.13em] text-white/40">
+              Contexte
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <CountrySwitcher />
+              <AcademicYearSwitcher />
+              <LocaleSwitcher />
+            </div>
+          </div>
+        )}
 
         {/* Navigation */}
         <TooltipProvider delayDuration={100}>
