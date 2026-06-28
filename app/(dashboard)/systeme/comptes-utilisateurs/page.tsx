@@ -67,6 +67,8 @@ import {
   type EtablissementSelection,
 } from "@/components/etablissements/etablissement-combobox";
 import { ensureEstablishment } from "@/lib/etablissements/etablissements-server";
+import { useStore } from "@/components/app-shell/data-store";
+import type { CiEtablissement } from "@/lib/etablissements/ci-etablissements";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ROLE_LIST, ROLE_FAMILY_LABELS } from "@/lib/roles";
@@ -845,6 +847,29 @@ function ChangeRoleDialog({
 }) {
   const t = useTranslations();
   const realMode = isSupabaseConfigured();
+  const { etablissements } = useStore();
+  // Établissements proposés = ceux du PAYS de l'utilisateur. CI → référentiel
+  // officiel (géré par le combobox) ; autre pays → les établissements de ce pays
+  // enregistrés (référentiel/imports), mappés au format du combobox.
+  const userCountry = (user.country ?? "CI").toUpperCase();
+  const countryEtabs = React.useMemo<CiEtablissement[]>(
+    () =>
+      userCountry === "CI"
+        ? []
+        : etablissements
+            .filter((e) => (e.countryCode ?? "").toUpperCase() === userCountry)
+            .map((e) => ({
+              eduwebCode: e.code,
+              dspsCode: null,
+              name: e.name,
+              drena: e.academicRegionCode || null,
+              commune: e.locality || null,
+              region: e.academicRegionCode || null,
+              statut: e.regime || e.type || null,
+              milieu: null,
+            })),
+    [etablissements, userCountry],
+  );
   const [role, setRole] = React.useState<UserRole>(user.role);
   const initialSel = React.useMemo<EtablissementSelection | null>(
     () =>
@@ -929,10 +954,14 @@ function ChangeRoleDialog({
               value={sel}
               onChange={setSel}
               placeholder={t("pages.systemeComptesUtilisateurs.changeRole.choosePlaceholder")}
+              countryCode={userCountry}
+              customList={countryEtabs}
             />
             <p className="text-[11px] text-muted-foreground">
-              Le rattachement à un établissement (Côte d&apos;Ivoire) active la
-              gestion déléguée pour un <strong>chef d&apos;établissement</strong>.
+              Seuls les établissements de{" "}
+              <strong>{getUnCountry(userCountry)?.name ?? userCountry}</strong> sont proposés. Le
+              rattachement active la gestion déléguée pour un{" "}
+              <strong>chef d&apos;établissement</strong>.
             </p>
           </div>
         </div>

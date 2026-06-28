@@ -36,6 +36,8 @@ export function EtablissementCombobox({
   disabled = false,
   id,
   className,
+  countryCode = "CI",
+  customList,
 }: {
   value: EtablissementSelection | null;
   onChange: (sel: EtablissementSelection | null) => void;
@@ -44,8 +46,14 @@ export function EtablissementCombobox({
   disabled?: boolean;
   id?: string;
   className?: string;
+  /** Pays dont on liste les établissements. « CI » → référentiel officiel
+   *  (2921, chargé du JSON) ; tout autre code → la liste `customList` fournie
+   *  par l'appelant (établissements du pays). */
+  countryCode?: string;
+  customList?: CiEtablissement[];
 }) {
-  const [list, setList] = React.useState<CiEtablissement[]>([]);
+  const isCI = (countryCode || "CI") === "CI";
+  const [ciList, setCiList] = React.useState<CiEtablissement[]>([]);
   const [loaded, setLoaded] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -54,17 +62,24 @@ export function EtablissementCombobox({
   const rootRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
+    if (!isCI) {
+      setLoaded(true);
+      return;
+    }
     let alive = true;
     void loadCiEtablissements().then((l) => {
       if (alive) {
-        setList(l);
+        setCiList(l);
         setLoaded(true);
       }
     });
     return () => {
       alive = false;
     };
-  }, []);
+  }, [isCI]);
+
+  // CI → référentiel officiel ; autre pays → la liste fournie par l'appelant.
+  const list = isCI ? ciList : customList ?? [];
 
   // Fermeture au clic extérieur.
   React.useEffect(() => {
