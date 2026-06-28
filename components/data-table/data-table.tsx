@@ -12,7 +12,14 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import {
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Search,
+} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -21,10 +28,33 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/layout/states";
 import { cn } from "@/lib/utils";
+
+const PAGE_SIZES = [10, 25, 50, 100] as const;
+
+/** Liste compacte de numéros de page avec ellipses (1 … 4 5 [6] 7 8 … 20). */
+function pageList(pageIndex: number, pageCount: number): (number | "ellipsis")[] {
+  const cur = pageIndex + 1;
+  if (pageCount <= 7) return Array.from({ length: pageCount }, (_, i) => i + 1);
+  const pages: (number | "ellipsis")[] = [1];
+  const start = Math.max(2, cur - 1);
+  const end = Math.min(pageCount - 1, cur + 1);
+  if (start > 2) pages.push("ellipsis");
+  for (let p = start; p <= end; p++) pages.push(p);
+  if (end < pageCount - 1) pages.push("ellipsis");
+  pages.push(pageCount);
+  return pages;
+}
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -49,7 +79,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   searchPlaceholder = "Rechercher…",
-  pageSize = 8,
+  pageSize = 10,
   toolbar,
   enableSelection = false,
   getRowId,
@@ -184,22 +214,81 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      {table.getPageCount() > 1 && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            Page {table.getState().pagination.pageIndex + 1} sur {table.getPageCount()} —{" "}
-            {table.getFilteredRowModel().rows.length} élément(s)
-          </span>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-              <ChevronLeft className="h-4 w-4" /> Précédent
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-              Suivant <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      {table.getFilteredRowModel().rows.length > 0 &&
+        (() => {
+          const pageIndex = table.getState().pagination.pageIndex;
+          const pageCount = table.getPageCount();
+          const totalRows = table.getFilteredRowModel().rows.length;
+          const size = table.getState().pagination.pageSize;
+          const isAll = size >= 100000;
+          const sizeOptions = isAll
+            ? [...PAGE_SIZES]
+            : [...new Set<number>([...PAGE_SIZES, size])].sort((a, b) => a - b);
+          return (
+            <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
+              {/* Nombre d'éléments par page (avec « Tous ») */}
+              <div className="flex items-center gap-2">
+                <span>Afficher</span>
+                <Select
+                  value={isAll ? "all" : String(size)}
+                  onValueChange={(v) => {
+                    table.setPageIndex(0);
+                    table.setPageSize(v === "all" ? 100000 : Number(v));
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[88px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sizeOptions.map((s) => (
+                      <SelectItem key={s} value={String(s)}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="all">Tous</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="whitespace-nowrap">par page · {totalRows} élément(s)</span>
+              </div>
+
+              {/* Navigation libre entre les pages */}
+              {pageCount > 1 && (
+                <div className="flex items-center gap-1">
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()} aria-label="Première page">
+                    <ChevronsLeft className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} aria-label="Page précédente">
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  {pageList(pageIndex, pageCount).map((p, i) =>
+                    p === "ellipsis" ? (
+                      <span key={`e${i}`} className="px-1.5">
+                        …
+                      </span>
+                    ) : (
+                      <Button
+                        key={p}
+                        variant={p - 1 === pageIndex ? "default" : "outline"}
+                        size="icon"
+                        className="h-8 min-w-8 px-2"
+                        onClick={() => table.setPageIndex(p - 1)}
+                        aria-current={p - 1 === pageIndex ? "page" : undefined}
+                      >
+                        {p}
+                      </Button>
+                    ),
+                  )}
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} aria-label="Page suivante">
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => table.setPageIndex(pageCount - 1)} disabled={!table.getCanNextPage()} aria-label="Dernière page">
+                    <ChevronsRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          );
+        })()}
     </div>
   );
 }
