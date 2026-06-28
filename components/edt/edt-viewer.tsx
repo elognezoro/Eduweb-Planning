@@ -82,6 +82,51 @@ function Grid({ jours, heures, cells }: { jours: string[]; heures: string[]; cel
   );
 }
 
+/** Vue MOBILE de l'EDT : empilée par jour (uniquement les créneaux occupés). */
+function GridMobile({ jours, heures, cells }: { jours: string[]; heures: string[]; cells: Record<string, Cell> }) {
+  return (
+    <div className="space-y-3">
+      {jours.map((j) => {
+        const slots = heures.map((h) => ({ h, c: cells[`${j}-${h}`] })).filter((x) => x.c);
+        return (
+          <div key={j} className="overflow-hidden rounded-xl border border-border bg-card">
+            <div className="bg-ew-green-900 px-3 py-1.5 text-sm font-bold text-white">{j}</div>
+            {slots.length === 0 ? (
+              <p className="px-3 py-2 text-xs text-muted-foreground">Aucun cours.</p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {slots.map(({ h, c }) => (
+                  <li key={h} className="flex items-center gap-3 px-3 py-2">
+                    <span className="w-16 shrink-0 text-[11px] font-bold tabular-nums text-muted-foreground">{h}</span>
+                    <span className={cn("flex-1 rounded-md px-2 py-1", SUBJECT_COLOR[c!.subject] ?? "bg-muted text-foreground")}>
+                      <span className="block text-xs font-bold leading-tight">{c!.primary}</span>
+                      <span className="block truncate text-[10px] opacity-80">{c!.secondary}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Grille (desktop, défilante) + repli en liste empilée par jour (mobile). */
+function ResponsiveGrid(props: { jours: string[]; heures: string[]; cells: Record<string, Cell> }) {
+  return (
+    <>
+      <div className="hidden overflow-x-auto md:block">
+        <Grid {...props} />
+      </div>
+      <div className="md:hidden">
+        <GridMobile {...props} />
+      </div>
+    </>
+  );
+}
+
 /** Visualiseur d'EDT généré : bascule « Par classe » / « Par enseignant ». */
 export function EdtViewer({ data }: { data: EdtViewData }) {
   const [mode, setMode] = React.useState<"classe" | "prof">("classe");
@@ -199,9 +244,7 @@ export function EdtViewer({ data }: { data: EdtViewData }) {
                 Salle de base {cls.salle} · {cls.flux === "Apres-midi" ? "après-midi" : cls.flux === "Matin" ? "matin" : "journée"}
               </span>
             </div>
-            <div className="overflow-x-auto">
-              <Grid jours={data.jours} heures={data.heuresByFlux[cls.flux]} cells={classCells} />
-            </div>
+            <ResponsiveGrid jours={data.jours} heures={data.heuresByFlux[cls.flux]} cells={classCells} />
           </>
         ) : (
           <p className="text-sm text-muted-foreground">Aucune classe.</p>
@@ -214,9 +257,7 @@ export function EdtViewer({ data }: { data: EdtViewData }) {
             <Badge tone={teacher.charge >= 18 ? "gold" : "slate"}>Charge : {teacher.charge} h / semaine</Badge>
             <span className="text-xs text-muted-foreground">{Object.keys(teacherGrid).length} cours placés</span>
           </div>
-          <div className="overflow-x-auto">
-            <Grid jours={data.jours} heures={teacherHeures} cells={teacherCells} />
-          </div>
+          <ResponsiveGrid jours={data.jours} heures={teacherHeures} cells={teacherCells} />
         </>
       ) : (
         <p className="text-sm text-muted-foreground">Aucun enseignant.</p>

@@ -194,6 +194,8 @@ export function DirectoryUsersProvider({ children }: { children: React.ReactNode
           if (patch.etablissementId !== undefined) {
             dbPatch.etablissement_id = patch.etablissementId;
           }
+          // Pays du profil (ISO2, colonne country_code — migration 034).
+          if (patch.country) dbPatch.country_code = patch.country.toUpperCase();
           if (Object.keys(dbPatch).length === 0) return;
           void patchProfile([id], dbPatch, patch);
         },

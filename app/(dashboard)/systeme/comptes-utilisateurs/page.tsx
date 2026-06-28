@@ -848,16 +848,17 @@ function ChangeRoleDialog({
   const t = useTranslations();
   const realMode = isSupabaseConfigured();
   const { etablissements } = useStore();
-  // Établissements proposés = ceux du PAYS de l'utilisateur. CI → référentiel
-  // officiel (géré par le combobox) ; autre pays → les établissements de ce pays
-  // enregistrés (référentiel/imports), mappés au format du combobox.
-  const userCountry = (user.country ?? "CI").toUpperCase();
+  const initialCountry = (user.country ?? "CI").toUpperCase();
+  // Pays du profil — modifiable par l'admin (persisté dans profiles.country_code).
+  const [countryCode, setCountryCode] = React.useState(initialCountry);
+  // Établissements proposés = ceux du PAYS choisi. CI → référentiel officiel (géré
+  // par le combobox) ; autre pays → établissements de ce pays enregistrés, mappés.
   const countryEtabs = React.useMemo<CiEtablissement[]>(
     () =>
-      userCountry === "CI"
+      countryCode === "CI"
         ? []
         : etablissements
-            .filter((e) => (e.countryCode ?? "").toUpperCase() === userCountry)
+            .filter((e) => (e.countryCode ?? "").toUpperCase() === countryCode)
             .map((e) => ({
               eduwebCode: e.code,
               dspsCode: null,
@@ -868,7 +869,7 @@ function ChangeRoleDialog({
               statut: e.regime || e.type || null,
               milieu: null,
             })),
-    [etablissements, userCountry],
+    [etablissements, countryCode],
   );
   const [role, setRole] = React.useState<UserRole>(user.role);
   const initialSel = React.useMemo<EtablissementSelection | null>(
@@ -885,11 +886,13 @@ function ChangeRoleDialog({
     if (open) {
       setRole(user.role);
       setSel(initialSel);
+      setCountryCode(initialCountry);
     }
-  }, [open, user, initialSel]);
+  }, [open, user, initialSel, initialCountry]);
 
   async function handleSave() {
     const patch: Partial<DirectoryUser> = { role };
+    if (countryCode !== initialCountry) patch.country = countryCode;
     const changed = (sel?.name ?? "") !== (user.etablissement ?? "");
     if (changed) {
       if (!sel) {
@@ -949,17 +952,28 @@ function ChangeRoleDialog({
           </div>
 
           <div className="space-y-1.5">
+            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Pays</p>
+            <CountrySearchSelect
+              value={countryCode}
+              onChange={(c) => {
+                setCountryCode(c.toUpperCase());
+                setSel(null); // l'établissement dépend du pays → réinitialiser
+              }}
+            />
+          </div>
+
+          <div className="space-y-1.5">
             <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t("pages.systemeComptesUtilisateurs.changeRole.attachInstitution")}</p>
             <EtablissementCombobox
               value={sel}
               onChange={setSel}
               placeholder={t("pages.systemeComptesUtilisateurs.changeRole.choosePlaceholder")}
-              countryCode={userCountry}
+              countryCode={countryCode}
               customList={countryEtabs}
             />
             <p className="text-[11px] text-muted-foreground">
               Seuls les établissements de{" "}
-              <strong>{getUnCountry(userCountry)?.name ?? userCountry}</strong> sont proposés. Le
+              <strong>{getUnCountry(countryCode)?.name ?? countryCode}</strong> sont proposés. Le
               rattachement active la gestion déléguée pour un{" "}
               <strong>chef d&apos;établissement</strong>.
             </p>

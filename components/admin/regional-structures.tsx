@@ -134,8 +134,8 @@ export function RegionalStructures() {
         </Button>
       </div>
 
-      {/* Tableau */}
-      <div className="mt-4 overflow-x-auto">
+      {/* Tableau (desktop) */}
+      <div className="mt-4 hidden overflow-x-auto md:block">
         <table className="w-full min-w-[760px] text-sm">
           <thead className="border-b border-border">
             <tr className="text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -199,6 +199,69 @@ export function RegionalStructures() {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Cartes (mobile) */}
+      <div className="mt-4 space-y-2.5 md:hidden">
+        {list.map((s) => {
+          const editing = editingId === s.id;
+          return (
+            <div key={s.id} className="rounded-xl border border-border bg-card p-3">
+              {editing ? (
+                <div className="space-y-2">
+                  <Input className="h-9" value={draft.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} placeholder="Nom" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-[10px]">Établ.</Label>
+                      <Input className="h-9" type="number" value={draft.etablissements} onChange={(e) => setDraft((d) => ({ ...d, etablissements: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px]">Élèves</Label>
+                      <Input className="h-9" type="number" value={draft.eleves} onChange={(e) => setDraft((d) => ({ ...d, eleves: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px]">Enseign.</Label>
+                      <Input className="h-9" type="number" value={draft.enseignants} onChange={(e) => setDraft((d) => ({ ...d, enseignants: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px]">Réussite (%)</Label>
+                      <Input className="h-9" value={draft.reussite} onChange={(e) => setDraft((d) => ({ ...d, reussite: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>
+                      <X className="h-4 w-4" /> Annuler
+                    </Button>
+                    <Button size="sm" onClick={saveEdit}>
+                      <Check className="h-4 w-4" /> Enregistrer
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-semibold text-foreground">{s.name}</p>
+                    <div className="flex shrink-0 gap-1.5">
+                      <button onClick={() => startEdit(s)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Modifier">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => remove(s)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-red-50 hover:text-red-600" aria-label="Supprimer">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                    <div className="flex justify-between gap-2"><dt className="text-muted-foreground">Établ.</dt><dd className="font-medium text-foreground">{s.etablissements}</dd></div>
+                    <div className="flex justify-between gap-2"><dt className="text-muted-foreground">Élèves</dt><dd className="font-medium text-foreground">{num(s.eleves)}</dd></div>
+                    <div className="flex justify-between gap-2"><dt className="text-muted-foreground">Enseign.</dt><dd className="font-medium text-foreground">{s.enseignants}</dd></div>
+                    <div className="flex justify-between gap-2"><dt className="text-muted-foreground">Ratio</dt><dd className="font-medium text-foreground">{ratio(s)}</dd></div>
+                    <div className="flex justify-between gap-2"><dt className="text-muted-foreground">Réussite</dt><dd className={cn("font-bold", s.reussite >= 75 ? "text-ew-green-700" : "text-ew-orange")}>{s.reussite.toFixed(1).replace(".", ",")}%</dd></div>
+                  </dl>
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

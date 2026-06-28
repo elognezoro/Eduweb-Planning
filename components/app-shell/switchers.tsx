@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { MapPin, CalendarRange, Building2, Languages } from "lucide-react";
+import { MapPin, CalendarRange, Building2, Languages, Search, Check, ChevronsUpDown } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -17,6 +17,7 @@ import { UN_COUNTRIES, flagUrl } from "@/config/un-countries";
 import { ACADEMIC_YEARS } from "@/lib/countries";
 import { ETABLISSEMENTS } from "@/lib/mock-data";
 import { LOCALES } from "@/i18n/routing";
+import { cn } from "@/lib/utils";
 
 function triggerCls() {
   return "h-9 w-auto min-w-[140px] border-transparent bg-muted/60 hover:bg-muted";
@@ -47,23 +48,95 @@ export function CountrySwitcher() {
     [active],
   );
   const selectable = (code: string) => isAdmin || active.has(code);
+
+  const [open, setOpen] = React.useState(false);
+  const [query, setQuery] = React.useState("");
+  const rootRef = React.useRef<HTMLDivElement>(null);
+
+  // Fermeture au clic extérieur.
+  React.useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const filtered = React.useMemo(() => {
+    const q = norm(query.trim());
+    if (!q) return ordered;
+    return ordered.filter((c) => norm(c.name).includes(q) || c.code.toLowerCase().includes(q));
+  }, [ordered, query]);
+
   return (
-    <Select value={country.code} onValueChange={setCountryCode}>
-      <SelectTrigger className={triggerCls()} aria-label="Pays">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {ordered.map((c) => (
-          <SelectItem key={c.code} value={c.code} disabled={!selectable(c.code)}>
-            <span className="flex items-center gap-2">
-              <CountryFlag code={c.code} />
-              {c.name}
-              {!selectable(c.code) && " (bientôt)"}
-            </span>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label="Pays"
+        className={cn(triggerCls(), "flex items-center justify-between gap-2 rounded-md px-3")}
+      >
+        <span className="flex items-center gap-2 truncate">
+          <CountryFlag code={country.code} />
+          <span className="truncate">{country.nameFr}</span>
+        </span>
+        <ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+      </button>
+
+      {open && (
+        <div className="absolute z-50 mt-1 w-64 overflow-hidden rounded-lg border border-border bg-popover shadow-lg">
+          <div className="flex items-center gap-2 border-b border-border px-3 py-2">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <input
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Rechercher un pays…"
+              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            />
+          </div>
+          <ul className="max-h-72 overflow-y-auto py-1" role="listbox">
+            {filtered.length === 0 ? (
+              <li className="px-3 py-3 text-center text-sm text-muted-foreground">Aucun pays.</li>
+            ) : (
+              filtered.map((c) => {
+                const ok = selectable(c.code);
+                const current = c.code === country.code;
+                return (
+                  <li key={c.code}>
+                    <button
+                      type="button"
+                      disabled={!ok}
+                      role="option"
+                      aria-selected={current}
+                      onClick={() => {
+                        setCountryCode(c.code);
+                        setOpen(false);
+                        setQuery("");
+                      }}
+                      className={cn(
+                        "flex w-full items-center gap-2 px-3 py-2 text-left text-sm",
+                        ok ? "hover:bg-muted/50" : "cursor-not-allowed opacity-50",
+                        current && "bg-ew-green-50",
+                      )}
+                    >
+                      <Check className={cn("h-4 w-4 shrink-0 text-ew-green-700", current ? "opacity-100" : "opacity-0")} />
+                      <CountryFlag code={c.code} />
+                      <span className="truncate">{c.name}</span>
+                      {!ok && <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">bientôt</span>}
+                    </button>
+                  </li>
+                );
+              })
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
 

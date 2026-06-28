@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +23,9 @@ import {
 } from "@/components/ui/select";
 import { useApp } from "@/components/app-shell/app-context";
 import { PhoneInput } from "@/components/forms/phone-input";
+import { CountrySearchSelect } from "@/components/forms/country-select";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
 import { profileSchema, type ProfileInput } from "@/lib/schemas/auth";
 import { toNomCase, toPrenomCase } from "@/lib/format-name";
 import { initials } from "@/lib/utils";
@@ -35,7 +39,9 @@ const NOTIFS = [
 
 export default function MonProfilPage() {
   const t = useTranslations();
-  const { user, country } = useApp();
+  const { user } = useApp();
+  // Pays de l'utilisateur (profiles.country_code), modifiable ici.
+  const [profileCountry, setProfileCountry] = React.useState((user.countryCode || "CI").toUpperCase());
   const {
     register,
     handleSubmit,
@@ -55,9 +61,46 @@ export default function MonProfilPage() {
     },
   });
 
-  const onSubmit = async (_data: ProfileInput) => {
-    await new Promise((r) => setTimeout(r, 500));
-    toast.success("Profil mis à jour", { description: "Les modifications ont été enregistrées avec succès." });
+  const onSubmit = async (data: ProfileInput) => {
+    if (isSupabaseConfigured()) {
+      try {
+        const supabase = createClient();
+        const { data: auth } = await supabase.auth.getUser();
+        const uid = auth.user?.id;
+        if (!uid) {
+          toast.error("Session introuvable", { description: "Reconnectez-vous puis réessayez." });
+          return;
+        }
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            first_name: data.firstName,
+            last_name: data.lastName,
+            display_name: `${data.firstName} ${data.lastName}`.trim() || null,
+            phone: data.phone || null,
+            job_title: data.jobTitle || null,
+            bio: data.bio || null,
+            preferred_locale: data.preferredLocale,
+            country_code: profileCountry,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", uid);
+        if (error) {
+          toast.error("Enregistrement refusé", { description: error.message });
+          return;
+        }
+        toast.success("Profil mis à jour", { description: "Vos modifications ont été enregistrées." });
+        return;
+      } catch (e) {
+        toast.error("Enregistrement impossible", {
+          description: e instanceof Error ? e.message : undefined,
+        });
+        return;
+      }
+    }
+    // Mode démo : pas de backend.
+    await new Promise((r) => setTimeout(r, 400));
+    toast.success("Profil mis à jour", { description: "Les modifications ont été enregistrées." });
   };
 
   // Normalisation de la casse à la saisie (NOM majuscules / Prénom title-case)
@@ -113,10 +156,17 @@ export default function MonProfilPage() {
               <Input type="email" {...register("email")} />
             </div>
             <div className="space-y-1.5">
+              <Label>Pays</Label>
+              <CountrySearchSelect
+                value={profileCountry}
+                onChange={(c) => setProfileCountry(c.toUpperCase())}
+              />
+            </div>
+            <div className="space-y-1.5">
               <Label>Téléphone</Label>
               <PhoneInput
                 variant="field"
-                countryCode={country.code}
+                countryCode={profileCountry}
                 value={watch("phone") ?? ""}
                 onChange={(v) => setValue("phone", v, { shouldDirty: true })}
               />
