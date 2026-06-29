@@ -11,6 +11,7 @@ import { EnrollmentIntentClaimer } from "@/components/formations/enrollment-inte
 import { CourseEnrollmentsSync } from "@/components/formations/course-enrollments-sync";
 import { CohortsSync } from "@/components/formations/cohorts-sync";
 import { LivretSync } from "@/components/livret/livret-sync";
+import { ProgressionSync } from "@/components/formations/progression-sync";
 import { EtabConfigSync } from "./etab-config-sync";
 import { AppSettingsSync } from "./app-settings-sync";
 import { cn } from "@/lib/utils";
@@ -91,6 +92,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <CourseEnrollmentsSync />
       <CohortsSync />
       <LivretSync />
+      {/* Progression apprenant (paiements + complétions) persistée par utilisateur. */}
+      <ProgressionSync />
       {/* Hydrate la config d'établissement (Supabase → cache local) pour les
           bulletins/livret/certificats, partagée et visible cross-appareil. */}
       <EtabConfigSync />

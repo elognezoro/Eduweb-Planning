@@ -3687,7 +3687,19 @@ function PaymentPanel({
               <PaymentRow
                 key={p.id}
                 payment={p}
-                onConfirm={() => store.confirmCoursePayment(p.id, actor)}
+                onConfirm={() => {
+                  store.confirmCoursePayment(p.id, actor);
+                  // Cascade : persiste aussi l'inscription créée par la
+                  // confirmation, pour un accès visible sur tout poste (idempotent).
+                  void insertCourseEnrollments(createClient(), [
+                    {
+                      userId: p.userId,
+                      courseId: p.courseId,
+                      source: "individual",
+                      enrolledBy: "Paiement Mobile Money",
+                    },
+                  ]);
+                }}
                 onReject={(reason) =>
                   store.rejectCoursePayment(p.id, actor, reason)
                 }

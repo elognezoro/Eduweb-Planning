@@ -584,6 +584,10 @@ interface DataStore extends StoreState {
   ) => void;
   /** Fusionne des inscriptions venues du serveur (dédoublonné par user+cours). */
   mergeCourseEnrollments: (rows: CourseEnrollment[]) => void;
+  /** Fusionne paiements / complétions venus du serveur (dédoublonnés par id). */
+  mergeCoursePayments: (rows: CoursePayment[]) => void;
+  mergeModuleCompletions: (rows: ModuleCompletion[]) => void;
+  mergeCourseCompletions: (rows: CourseCompletion[]) => void;
   /**
    * Normalise les inscriptions sans année (héritées) vers l'année courante puis
    * dédoublonne par (utilisateur, cours, année) en gardant la plus ancienne.
@@ -731,6 +735,13 @@ interface DataStore extends StoreState {
   /** Fusionne des overrides de livret venus du serveur (élève+année ; serveur prioritaire). */
   mergeLivretRecords: (rows: LivretRecord[]) => void;
   reset: () => void;
+}
+
+/** Fusionne deux listes d'objets `{id}` : l'entrant (serveur) écrase le local. */
+function mergeRowsById<T extends { id: string }>(local: T[], incoming: T[]): T[] {
+  const map = new Map(local.map((x) => [x.id, x]));
+  for (const r of incoming) map.set(r.id, r);
+  return [...map.values()];
 }
 
 const DEFAULTS: StoreState = {
@@ -1116,6 +1127,12 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       })),
     setPartners: (list) => setState((s) => ({ ...s, partners: list })),
     applyServerSettings: (partial) => setState((s) => ({ ...s, ...partial })),
+    mergeCoursePayments: (rows) =>
+      setState((s) => (rows.length === 0 ? s : { ...s, coursePayments: mergeRowsById(s.coursePayments, rows) })),
+    mergeModuleCompletions: (rows) =>
+      setState((s) => (rows.length === 0 ? s : { ...s, moduleCompletions: mergeRowsById(s.moduleCompletions, rows) })),
+    mergeCourseCompletions: (rows) =>
+      setState((s) => (rows.length === 0 ? s : { ...s, courseCompletions: mergeRowsById(s.courseCompletions, rows) })),
     addPromoRequest: (r) =>
       setState((s) => ({
         ...s,
