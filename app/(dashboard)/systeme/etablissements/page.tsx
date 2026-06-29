@@ -61,7 +61,11 @@ import { useAcademicRegions } from "@/components/app-shell/use-academic-regions"
 import { InstalledEstablishmentsPanel } from "@/components/etablissements/installed-establishments-panel";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
-import { upsertEstablishment, establishmentCodeFromName } from "@/lib/etablissements/etablissements-server";
+import {
+  upsertEstablishment,
+  establishmentCodeFromName,
+  deleteInstalledEstablishment,
+} from "@/lib/etablissements/etablissements-server";
 import { COUNTRIES, type AcademicRegionSeed } from "@/config/countries";
 import { getUnCountry } from "@/config/un-countries";
 import type { Etablissement } from "@/lib/types";
@@ -310,9 +314,31 @@ function EtabRowActions({ etab }: { etab: Etablissement }) {
         etab={etab}
         open={editOpen}
         onOpenChange={setEditOpen}
-        onSave={(patch) => {
+        onSave={async (patch) => {
           updateEtablissement(etab.id, patch);
-          toast.success("Établissement modifié");
+          // Persiste la modification côté Supabase (upsert idempotent par pays+code)
+          // → région/localité/type corrigés visibles sur tous les postes.
+          if (isSupabaseConfigured()) {
+            const res = await upsertEstablishment(createClient(), {
+              countryCode: etab.countryCode,
+              code: etab.code,
+              name: patch.name ?? etab.name,
+              regionName: patch.academicRegionCode ?? etab.academicRegionCode,
+              locality: patch.locality ?? etab.locality,
+              type: patch.type ?? etab.type,
+              regime: etab.regime,
+              schoolYear: etab.schoolYear,
+            });
+            if (res.id) {
+              toast.success("Établissement modifié", { description: "Enregistré en ligne." });
+            } else {
+              toast.error("Modifié localement — enregistrement en ligne impossible", {
+                description: res.error,
+              });
+            }
+          } else {
+            toast.success("Établissement modifié");
+          }
         }}
       />
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
@@ -329,7 +355,23 @@ function EtabRowActions({ etab }: { etab: Etablissement }) {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => {
+              onClick={async () => {
+                // Supprime aussi la ligne Supabase (sinon elle réapparaît à la
+                // prochaine synchro). Bloqué par la base si l'établissement est
+                // référencé (un chef y est rattaché, transport…).
+                if (isSupabaseConfigured()) {
+                  const res = await deleteInstalledEstablishment(createClient(), etab.id);
+                  if (!res.ok) {
+                    toast.error("Suppression impossible", {
+                      description:
+                        res.error?.includes("foreign key") || res.error?.includes("violates")
+                          ? "Établissement utilisé (comptes rattachés, transport…) — détachez-le d'abord."
+                          : res.error,
+                    });
+                    setDeleteOpen(false);
+                    return;
+                  }
+                }
                 removeEtablissement(etab.id);
                 toast.success("Établissement supprimé", { description: etab.name });
                 setDeleteOpen(false);
