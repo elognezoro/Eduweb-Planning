@@ -361,7 +361,41 @@ interface StoreState {
   livretGrades: LivretGradeEntry[];
   /** Overrides éditables du livret scolaire (par élève + année). */
   livretRecords: LivretRecord[];
+  /** Partenaires affichés sur l'accueil (logo téléversé + description, éditables par l'admin). */
+  partners: Partner[];
 }
+
+/** Partenaire institutionnel affiché sur la page d'accueil. */
+export interface Partner {
+  id: string;
+  name: string;
+  /** Texte court affiché dans le placeholder dégradé (à défaut de logo). */
+  short: string;
+  description: string;
+  /** Dégradé CSS du placeholder (utilisé tant qu'aucun logo n'est téléversé). */
+  accent: string;
+  /** Logo téléversé (data-URL) ou chemin public ; remplace le placeholder. */
+  logoUrl?: string;
+}
+
+const DEFAULT_PARTNERS: Partner[] = [
+  {
+    id: "ong-vie-damour",
+    name: "ONG Vie d'Amour",
+    short: "Vie d'Amour",
+    description:
+      "Organisation non gouvernementale engagée pour l'éducation, la protection et l'épanouissement des enfants.",
+    accent: "linear-gradient(135deg, #7c3aed 0%, #dc2626 38%, #ea580c 68%, #16a34a 100%)",
+  },
+  {
+    id: "fondation-izen",
+    name: "Fondation iZEN",
+    short: "iZEN",
+    description:
+      "Fondation dédiée à la promotion de l'éducation numérique et de l'innovation pédagogique.",
+    accent: "linear-gradient(135deg, #062c1b 0%, #176b45 55%, #d99a1e 100%)",
+  },
+];
 
 /** Réponse à un sondage d'activité (par ex. « 0.1 Sondage d'entrée »). */
 export interface PollResponse {
@@ -534,6 +568,8 @@ interface DataStore extends StoreState {
   ) => void;
   /** Supprime une entrée du journal des certificats. */
   removeCertificate: (id: string) => void;
+  /** Remplace la liste des partenaires affichés sur l'accueil (admin). */
+  setPartners: (list: Partner[]) => void;
   /** Inscrit un utilisateur à un cours (méthode nominative ou cohorte). */
   enrollUser: (input: Omit<CourseEnrollment, "id" | "enrolledAt">) => void;
   /** Inscrit plusieurs utilisateurs à un cours en une seule opération. */
@@ -715,6 +751,7 @@ const DEFAULTS: StoreState = {
   cafopFormationYears: {},
   apfcs: APFCS_SEED,
   apfcActivities: APFC_ACTIVITIES_SEED,
+  partners: DEFAULT_PARTNERS,
   certificates: [],
   courseEnrollments: [],
   courseCohorts: [],
@@ -1072,6 +1109,7 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         ...s,
         certificates: s.certificates.filter((x) => x.id !== id),
       })),
+    setPartners: (list) => setState((s) => ({ ...s, partners: list })),
     addPromoRequest: (r) =>
       setState((s) => ({
         ...s,

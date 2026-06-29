@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import {
   ShieldCheck,
@@ -35,6 +36,8 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useApp } from "@/components/app-shell/app-context";
+import { useStore } from "@/components/app-shell/data-store";
+import { ManagePartnersDialog } from "@/components/dashboard/manage-partners-dialog";
 import { getRole, USER_ROLES, type UserRole } from "@/lib/roles";
 import { hasPermission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
@@ -99,30 +102,14 @@ const ROLE_SPACES: { id: UserRole; icon: LucideIcon; description: string }[] = [
   { id: "admin", icon: Settings, description: "Gestion des utilisateurs, permissions, journal d'activité, sauvegardes." },
 ];
 
-/**
- * Partenaires affichés sur l'accueil.
- * Pour un vrai logo : déposer l'image dans `public/partners/` et renseigner `logoUrl`
- * (ex. logoUrl: "/partners/ong-vie-damour.png"). Sinon, un logo provisoire est affiché.
- */
-const PARTNERS: { name: string; short: string; description: string; accent: string; logoUrl?: string }[] = [
-  {
-    name: "ONG Vie d'Amour",
-    short: "Vie d'Amour",
-    description:
-      "Organisation non gouvernementale engagée pour l'éducation, la protection et l'épanouissement des enfants.",
-    accent: "linear-gradient(135deg, #7c3aed 0%, #dc2626 38%, #ea580c 68%, #16a34a 100%)",
-  },
-  {
-    name: "Fondation iZEN",
-    short: "iZEN",
-    description: "Fondation dédiée à la promotion de l'éducation numérique et de l'innovation pédagogique.",
-    accent: "linear-gradient(135deg, #062c1b 0%, #176b45 55%, #d99a1e 100%)",
-  },
-];
+// Les partenaires sont désormais éditables par l'admin et persistés dans le store
+// (data-store : slice `partners` + `setPartners`). Cf. ManagePartnersDialog.
 
 export default function DashboardPage() {
   const t = useTranslations();
-  const { user, effectiveRole, country, academicYear, regionCode } = useApp();
+  const { user, effectiveRole, country, academicYear, regionCode, isReadOnlyPreview } = useApp();
+  const store = useStore();
+  const [partnersOpen, setPartnersOpen] = React.useState(false);
   const role = getRole(effectiveRole);
   const isAdminLike = hasPermission(effectiveRole, "role_preview:use");
   const plannedInspections = INSPECTIONS.filter((i) => i.status === "planned").length;
@@ -313,16 +300,26 @@ export default function DashboardPage() {
 
       {/* Partenariats */}
       <section className="ew-fade-in rounded-xl border border-border bg-card p-5 shadow-sm">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-ew-green-100 text-ew-green-700">
-            <Star className="h-5 w-5" />
-          </span>
-          <h2 className="text-base font-bold text-foreground">Partenariats</h2>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-ew-green-100 text-ew-green-700">
+              <Star className="h-5 w-5" />
+            </span>
+            <h2 className="text-base font-bold text-foreground">Partenariats</h2>
+          </div>
+          {isAdminLike && !isReadOnlyPreview && (
+            <Button variant="outline" size="sm" onClick={() => setPartnersOpen(true)}>
+              <Pencil className="h-4 w-4" /> Gérer
+            </Button>
+          )}
         </div>
         <p className="mt-2 text-sm text-muted-foreground">Survolez le logo d&apos;un partenaire pour en savoir plus.</p>
         <TooltipProvider delayDuration={100}>
           <div className="mt-4 flex flex-wrap gap-5">
-            {PARTNERS.map((p) => (
+            {store.partners.length === 0 && (
+              <p className="text-sm text-muted-foreground">Aucun partenaire pour le moment.</p>
+            )}
+            {store.partners.map((p) => (
               <div key={p.name} className="flex flex-col items-center gap-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -364,6 +361,15 @@ export default function DashboardPage() {
           </Link>
         </Button>
       </section>
+
+      {isAdminLike && (
+        <ManagePartnersDialog
+          open={partnersOpen}
+          onOpenChange={setPartnersOpen}
+          partners={store.partners}
+          onSave={store.setPartners}
+        />
+      )}
     </div>
   );
 }
