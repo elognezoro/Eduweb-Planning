@@ -537,6 +537,8 @@ interface DataStore extends StoreState {
   addAppointment: (a: Omit<Appointment, "id">) => void;
   addInspection: (i: Omit<Inspection, "id">) => void;
   setAttendance: (key: string, row: AttendanceRow) => void;
+  /** Fusionne le registre serveur (AttendanceSync) — serveur prioritaire au chargement. */
+  mergeAttendance: (rows: Record<string, AttendanceRow>) => void;
   subscribe: (sub: Omit<Subscription, "active">) => void;
   cancelSubscription: () => void;
   setSmsAlerts: (on: boolean) => void;
@@ -1055,6 +1057,8 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
       })),
     setAttendance: (key, row) =>
       setState((s) => ({ ...s, attendance: { ...s.attendance, [key]: row } })),
+    mergeAttendance: (rows) =>
+      setState((s) => ({ ...s, attendance: { ...s.attendance, ...rows } })),
     subscribe: (sub) =>
       setState((s) => ({ ...s, subscription: { ...sub, active: true } })),
     cancelSubscription: () => setState((s) => ({ ...s, subscription: null })),

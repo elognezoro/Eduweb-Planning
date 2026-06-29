@@ -14,6 +14,7 @@ import { LivretSync } from "@/components/livret/livret-sync";
 import { ProgressionSync } from "@/components/formations/progression-sync";
 import { EtabConfigSync } from "./etab-config-sync";
 import { EtablissementsSync } from "./etablissements-sync";
+import { AttendanceSync } from "./attendance-sync";
 import { AppSettingsSync } from "./app-settings-sync";
 import { cn } from "@/lib/utils";
 
@@ -101,6 +102,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Répertoire des établissements : source UNIQUE = Supabase (mode réel) →
           tableau + KPIs + accordéon identiques d'un poste/navigateur à l'autre. */}
       <EtablissementsSync />
+      {/* Registre d'appel (présences) persisté par établissement → repris sur
+          tous les postes de l'établissement (plus seulement le navigateur). */}
+      <AttendanceSync />
       {/* Gouvernance des formations (tarifs, certificats, règles, paiement) :
           réglages globaux admin chargés du serveur + write-through admin. */}
       <AppSettingsSync />
