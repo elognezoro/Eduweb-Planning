@@ -24,6 +24,9 @@ import {
   consumeNextCertificateNumber,
   peekNextCertificateNumber,
 } from "@/lib/cert-sequence";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
+import { nextCertificateNumber } from "@/lib/certificates/certificates-server";
 import { getCourse } from "@/lib/formations/catalog";
 import { CourseCertificate } from "@/components/formations/course-certificate";
 import {
@@ -151,7 +154,7 @@ function GenericTrainingCertificate() {
     }
   }
 
-  function saveToJournal() {
+  async function saveToJournal() {
     if (!name.trim()) {
       window.alert(
         "Renseignez au minimum le nom du bénéficiaire avant d'enregistrer.",
@@ -160,11 +163,15 @@ function GenericTrainingCertificate() {
     }
     setSaving(true);
     try {
-      // Consomme un numéro frais (différent de la simple suggestion à l'affichage).
-      const sequencedNumber = consumeNextCertificateNumber(
-        meta.code,
-        currentYear,
-      );
+      // Numéro ATOMIQUE serveur (unicité cross-poste) ; repli local en mode démo
+      // ou si la RPC échoue (la séquence locale reste cohérente côté navigateur).
+      let sequencedNumber: string | null = null;
+      if (isSupabaseConfigured()) {
+        sequencedNumber = await nextCertificateNumber(createClient(), meta.code, currentYear);
+      }
+      if (!sequencedNumber) {
+        sequencedNumber = consumeNextCertificateNumber(meta.code, currentYear);
+      }
       store.addCertificate({
         number: sequencedNumber,
         beneficiaryName: name.trim(),

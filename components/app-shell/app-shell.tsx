@@ -16,6 +16,7 @@ import { EtabConfigSync } from "./etab-config-sync";
 import { EtablissementsSync } from "./etablissements-sync";
 import { AttendanceSync } from "./attendance-sync";
 import { PromoRequestsSync } from "./promo-requests-sync";
+import { CertificatesSync } from "./certificates-sync";
 import { AppSettingsSync } from "./app-settings-sync";
 import { cn } from "@/lib/utils";
 
@@ -109,6 +110,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Demandes de code promo (per-utilisateur) : dépôt apprenant → admin, et
           décision admin → demandeur, quel que soit le poste. */}
       <PromoRequestsSync />
+      {/* Journal des certificats délivrés persisté par établissement (traçabilité
+          partagée cross-poste ; numéro atomique via RPC côté page). */}
+      <CertificatesSync />
       {/* Gouvernance des formations (tarifs, certificats, règles, paiement) :
           réglages globaux admin chargés du serveur + write-through admin. */}
       <AppSettingsSync />

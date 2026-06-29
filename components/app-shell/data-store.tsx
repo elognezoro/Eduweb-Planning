@@ -576,6 +576,8 @@ interface DataStore extends StoreState {
   ) => void;
   /** Supprime une entrée du journal des certificats. */
   removeCertificate: (id: string) => void;
+  /** Remplace le journal des certificats par la liste serveur (CertificatesSync). */
+  setCertificatesFromServer: (list: DeliveredCertificate[]) => void;
   /** Remplace la liste des partenaires affichés sur l'accueil (admin). */
   setPartners: (list: Partner[]) => void;
   /**
@@ -1143,6 +1145,7 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         ...s,
         certificates: s.certificates.filter((x) => x.id !== id),
       })),
+    setCertificatesFromServer: (list) => setState((s) => ({ ...s, certificates: list })),
     setPartners: (list) => setState((s) => ({ ...s, partners: list })),
     applyServerSettings: (partial) => setState((s) => ({ ...s, ...partial })),
     mergeCoursePayments: (rows) =>
