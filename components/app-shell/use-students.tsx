@@ -3,6 +3,7 @@
 import * as React from "react";
 import { toast } from "sonner";
 import { useApp } from "./app-context";
+import { useScopedEstablishmentId } from "./use-scoped-establishment";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
 import { ELEVES } from "@/lib/mock-data";
@@ -54,12 +55,33 @@ export interface UseStudentsValue {
 
 export function useStudents(): UseStudentsValue {
   const app = useApp();
-  const etabId = app.user.etablissementId ?? null;
+  // Portée d'affichage : établissement réel de l'admin, OU celui de l'utilisateur
+  // simulé pendant un aperçu. Pilote la lecture (masque) ET les créations.
+  const etabId = useScopedEstablishmentId();
   const [students, setStudents] = React.useState<Student[]>(() => (REAL_MODE ? [] : mockStudents()));
   const [loading, setLoading] = React.useState(REAL_MODE);
 
   const refresh = React.useCallback(async () => {
     if (!REAL_MODE) return;
+    // Masque de lecture appliqué UNIQUEMENT en aperçu (hors aperçu : statu quo,
+    // le RLS sert déjà la bonne portée à l'admin et aux vrais rôles).
+    if (app.isImpersonating) {
+      if (etabId === null) {
+        // Aperçu d'un utilisateur sans établissement → vue volontairement vide.
+        setStudents([]);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        setStudents(await fetchStudents(createClient(), etabId));
+      } catch {
+        toast.error("Chargement des élèves impossible");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
     setLoading(true);
     try {
       setStudents(await fetchStudents(createClient()));
@@ -68,7 +90,7 @@ export function useStudents(): UseStudentsValue {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [etabId, app.isImpersonating]);
 
   React.useEffect(() => {
     void refresh();

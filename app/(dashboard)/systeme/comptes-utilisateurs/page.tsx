@@ -62,6 +62,7 @@ import {
 } from "@/components/ui/select";
 import { DirectoryUsersProvider, useDirectoryUsers } from "@/components/app-shell/use-directory-users";
 import { useApp } from "@/components/app-shell/app-context";
+import { useScopeByEstablishment, useScopedCohort } from "@/components/app-shell/use-scoped-establishment";
 import { isSuperAdminEmail } from "@/lib/super-admins";
 import type { DirectoryUser } from "@/lib/mock-data";
 import {
@@ -183,13 +184,22 @@ function ComptesUtilisateursContent() {
   const [etab, setEtab] = React.useState("all");
   const [cohorte, setCohorte] = React.useState("all");
 
-  const etabs = React.useMemo(() => [...new Set(users.map((u) => u.etablissement).filter(Boolean))], [users]);
-  const cohortes = React.useMemo(
-    () => [...new Set(users.map((u) => u.cohorte).filter(Boolean))] as string[],
-    [users],
+  // Portée d'aperçu : en « voir en tant que », on ne montre que les comptes de
+  // l'établissement (et au besoin de la cohorte) de l'utilisateur simulé.
+  const scopedCohort = useScopedCohort();
+  const baseScoped = useScopeByEstablishment(users, (u) => u.etablissementId);
+  const scopedUsers = React.useMemo(
+    () => (scopedCohort ? baseScoped.filter((u) => u.cohorte === scopedCohort) : baseScoped),
+    [baseScoped, scopedCohort],
   );
 
-  const data = users.filter(
+  const etabs = React.useMemo(() => [...new Set(scopedUsers.map((u) => u.etablissement).filter(Boolean))], [scopedUsers]);
+  const cohortes = React.useMemo(
+    () => [...new Set(scopedUsers.map((u) => u.cohorte).filter(Boolean))] as string[],
+    [scopedUsers],
+  );
+
+  const data = scopedUsers.filter(
     (u) =>
       (role === "all" || u.role === role) &&
       (status === "all" || u.status === status) &&
@@ -199,10 +209,10 @@ function ComptesUtilisateursContent() {
   );
 
   const counts = {
-    total: users.length,
-    active: users.filter((u) => u.status === "active").length,
-    pending: users.filter((u) => u.status === "pending").length,
-    suspended: users.filter((u) => u.status === "suspended").length,
+    total: scopedUsers.length,
+    active: scopedUsers.filter((u) => u.status === "active").length,
+    pending: scopedUsers.filter((u) => u.status === "pending").length,
+    suspended: scopedUsers.filter((u) => u.status === "suspended").length,
   };
 
   return (

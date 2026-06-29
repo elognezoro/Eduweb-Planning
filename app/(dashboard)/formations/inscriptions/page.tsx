@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useApp } from "@/components/app-shell/app-context";
+import { useScopeByEstablishment, useScopedCohort } from "@/components/app-shell/use-scoped-establishment";
 import { useStore } from "@/components/app-shell/data-store";
 import {
   DirectoryUsersProvider,
@@ -60,7 +61,16 @@ export default function InscriptionsCoursPage() {
 function InscriptionsCours() {
   const app = useApp();
   const store = useStore();
-  const { users: dirUsers, loading } = useDirectoryUsers();
+  const { users: allDirUsers, loading } = useDirectoryUsers();
+  // Portée d'aperçu : en « voir en tant que », on ne propose/inscrit que les
+  // utilisateurs de l'établissement (et cohorte) de l'utilisateur simulé. Hors
+  // aperçu, l'admin garde la liste complète (dirUsers === allDirUsers).
+  const scopedCohort = useScopedCohort();
+  const baseScoped = useScopeByEstablishment(allDirUsers, (u) => u.etablissementId);
+  const dirUsers = React.useMemo(
+    () => (scopedCohort ? baseScoped.filter((u) => u.cohorte === scopedCohort) : baseScoped),
+    [baseScoped, scopedCohort],
+  );
 
   const courses = React.useMemo(() => sortedCourses(), []);
   const [courseId, setCourseId] = React.useState(courses[0]?.id ?? "");

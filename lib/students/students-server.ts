@@ -72,12 +72,18 @@ function toDbRow(input: StudentInput, etablissementId: string | null) {
   };
 }
 
-/** Charge les élèves visibles (RLS = établissement de l'appelant). [] si erreur. */
-export async function fetchStudents(supabase: SupabaseClient): Promise<Student[]> {
-  const { data, error } = await supabase
-    .from("eleves")
-    .select("*")
-    .order("last_name", { ascending: true });
+/**
+ * Charge les élèves visibles (RLS = établissement de l'appelant). [] si erreur.
+ * `etablissementId` (optionnel) restreint EN PLUS la requête à un établissement
+ * précis — utilisé comme masque d'affichage pendant un aperçu utilisateur.
+ */
+export async function fetchStudents(
+  supabase: SupabaseClient,
+  etablissementId: string | null = null,
+): Promise<Student[]> {
+  let query = supabase.from("eleves").select("*").order("last_name", { ascending: true });
+  if (etablissementId) query = query.eq("etablissement_id", etablissementId);
+  const { data, error } = await query;
   if (error || !data) return [];
   return (data as DbEleveRow[]).map(mapEleveRow);
 }
