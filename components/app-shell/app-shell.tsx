@@ -13,6 +13,7 @@ import { CohortsSync } from "@/components/formations/cohorts-sync";
 import { LivretSync } from "@/components/livret/livret-sync";
 import { ProgressionSync } from "@/components/formations/progression-sync";
 import { EtabConfigSync } from "./etab-config-sync";
+import { EtablissementsSync } from "./etablissements-sync";
 import { AppSettingsSync } from "./app-settings-sync";
 import { cn } from "@/lib/utils";
 
@@ -97,6 +98,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Hydrate la config d'établissement (Supabase → cache local) pour les
           bulletins/livret/certificats, partagée et visible cross-appareil. */}
       <EtabConfigSync />
+      {/* Répertoire des établissements : source UNIQUE = Supabase (mode réel) →
+          tableau + KPIs + accordéon identiques d'un poste/navigateur à l'autre. */}
+      <EtablissementsSync />
       {/* Gouvernance des formations (tarifs, certificats, règles, paiement) :
           réglages globaux admin chargés du serveur + write-through admin. */}
       <AppSettingsSync />

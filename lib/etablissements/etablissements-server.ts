@@ -43,6 +43,10 @@ export interface UpsertEstablishmentInput {
   regionName?: string | null;
   /** Localité en texte libre (migration 041). */
   locality?: string | null;
+  /** Type d'établissement, régime, année scolaire en texte (migration 042). */
+  type?: string | null;
+  regime?: string | null;
+  schoolYear?: string | null;
 }
 
 /**
@@ -85,6 +89,9 @@ export async function upsertEstablishment(
     ...baseRow,
     region_name: input.regionName?.trim() || null,
     locality: input.locality?.trim() || null,
+    institution_type: input.type?.trim() || null,
+    regime: input.regime?.trim() || null,
+    school_year: input.schoolYear?.trim() || null,
   };
   let { data, error } = await supabase
     .from("etablissements")
@@ -128,6 +135,9 @@ function isMissingColumnError(error: { code?: string; message?: string }): boole
     error.code === "42703" ||
     msg.includes("region_name") ||
     msg.includes("locality") ||
+    msg.includes("institution_type") ||
+    msg.includes("regime") ||
+    msg.includes("school_year") ||
     (msg.includes("column") && msg.includes("does not exist"))
   );
 }
@@ -159,6 +169,10 @@ export interface InstalledEstablishment {
   /** Région en texte (migration 041), null si non renseignée. */
   regionName: string | null;
   locality: string | null;
+  /** Type / régime / année scolaire en texte (migration 042). */
+  type: string | null;
+  regime: string | null;
+  schoolYear: string | null;
 }
 
 /** Extrait l'iso2 d'un embed Supabase `countries(iso2)` (objet ou tableau). */
@@ -175,10 +189,12 @@ export async function fetchInstalledEstablishments(
 ): Promise<InstalledEstablishment[]> {
   const full = await supabase
     .from("etablissements")
-    .select("id, name, code, dsps_code, region_name, locality, countries(iso2)")
+    .select(
+      "id, name, code, dsps_code, region_name, locality, institution_type, regime, school_year, countries(iso2)",
+    )
     .order("name", { ascending: true });
   let rows = (full.data ?? []) as unknown as Record<string, unknown>[];
-  // Repli pré-migration 041 : sans region_name/locality.
+  // Repli pré-migration 041/042 : sans les colonnes texte additionnelles.
   if (full.error && isMissingColumnError(full.error)) {
     const fb = await supabase
       .from("etablissements")
@@ -195,6 +211,9 @@ export async function fetchInstalledEstablishments(
       countryCode: readIso2(row.countries),
       regionName: (row.region_name as string | null) ?? null,
       locality: (row.locality as string | null) ?? null,
+      type: (row.institution_type as string | null) ?? null,
+      regime: (row.regime as string | null) ?? null,
+      schoolYear: (row.school_year as string | null) ?? null,
     };
   });
 }

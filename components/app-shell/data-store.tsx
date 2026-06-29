@@ -511,6 +511,8 @@ interface DataStore extends StoreState {
   removeUsers: (ids: string[]) => void;
   addEtablissement: (e: Omit<Etablissement, "id"> & { id?: string }) => void;
   addEtablissements: (list: (Omit<Etablissement, "id"> & { id?: string })[]) => void;
+  /** Remplace le répertoire par la liste serveur (source unique, EtablissementsSync, mode réel). */
+  setEtablissementsFromServer: (list: Etablissement[]) => void;
   updateEtablissement: (id: string, patch: Partial<Etablissement>) => void;
   removeEtablissement: (id: string) => void;
   removeEtablissements: (ids: string[]) => void;
@@ -940,6 +942,8 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
           etablissements: [...incoming, ...s.etablissements.filter((x) => !incomingIds.has(x.id))],
         };
       }),
+    setEtablissementsFromServer: (list) =>
+      setState((s) => ({ ...s, etablissements: list })),
     updateEtablissement: (id, patch) =>
       setState((s) => ({
         ...s,

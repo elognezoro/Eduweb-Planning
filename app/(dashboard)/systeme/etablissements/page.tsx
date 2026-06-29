@@ -182,6 +182,9 @@ export default function EtablissementsPage() {
                   name: e.name,
                   regionName: e.academicRegionCode,
                   locality: e.locality,
+                  type: e.type,
+                  regime: e.regime,
+                  schoolYear: e.schoolYear,
                 });
                 if (res.id) withIds.push({ ...e, id: res.id });
                 else failed++;
@@ -215,6 +218,9 @@ export default function EtablissementsPage() {
                 name: e.name,
                 regionName: e.academicRegionCode,
                 locality: e.locality,
+                type: e.type,
+                regime: e.regime,
+                schoolYear: e.schoolYear,
               });
               if (!res.id) {
                 toast.error("Création en ligne impossible", {
