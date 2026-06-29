@@ -50,6 +50,10 @@ import { ImportCsvDialog } from "@/components/forms/import-csv-dialog";
 import { buildCsvTemplate } from "@/lib/imports/csv";
 import { UN_COUNTRIES, getUnCountry, flagUrl } from "@/config/un-countries";
 import { defaultNationalEmblem, REPORT_PLAN_OPTIONS, REPORT_FORMAT_OPTIONS } from "@/lib/etab-config";
+import { useApp } from "@/components/app-shell/app-context";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
+import { fetchEtabConfig, saveEtabConfig } from "@/lib/etab-config-server";
 import { COUNTRIES } from "@/config/countries";
 import { toFullNameCase } from "@/lib/format-name";
 import { cn, initials } from "@/lib/utils";
@@ -220,23 +224,44 @@ function defaultConfig(): EtabConfig {
 }
 
 const STORAGE_KEY = "eduweb.etab-config.v1";
+const REAL_MODE = isSupabaseConfigured();
 const genId = () => `f-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`;
 
 export default function ConfigurationPage() {
   const t = useTranslations();
+  const app = useApp();
+  const etabId = app.user.etablissementId ?? null;
   const [config, setConfig] = React.useState<EtabConfig>(defaultConfig);
   const [hydrated, setHydrated] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
   const importRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setConfig({ ...defaultConfig(), ...(JSON.parse(raw) as Partial<EtabConfig>) });
-    } catch {
-      /* ignore */
-    }
-    setHydrated(true);
-  }, []);
+    let active = true;
+    (async () => {
+      // 1) Cache localStorage instantané (hors-ligne / mode démo).
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) setConfig({ ...defaultConfig(), ...(JSON.parse(raw) as Partial<EtabConfig>) });
+      } catch {
+        /* ignore */
+      }
+      // 2) Serveur = AUTORITÉ (mode réel + établissement rattaché) → config
+      //    partagée et visible sur n'importe quel poste.
+      if (REAL_MODE && etabId) {
+        try {
+          const remote = await fetchEtabConfig(createClient(), etabId);
+          if (active && remote) setConfig({ ...defaultConfig(), ...(remote as Partial<EtabConfig>) });
+        } catch {
+          /* best effort : on garde le cache local */
+        }
+      }
+      if (active) setHydrated(true);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [etabId]);
 
   React.useEffect(() => {
     if (hydrated) {
@@ -250,6 +275,31 @@ export default function ConfigurationPage() {
 
   const set = <K extends keyof EtabConfig>(key: K, value: EtabConfig[K]) =>
     setConfig((c) => ({ ...c, [key]: value }));
+
+  // Enregistrement : localStorage (autosave, déjà fait) + PERSISTANCE SERVEUR en
+  // mode réel pour un établissement rattaché → partage cross-poste.
+  const save = async () => {
+    if (!REAL_MODE || !etabId) {
+      toast.success(t("pages.parametrageConfiguration.toasts.saved"), {
+        description: t("pages.parametrageConfiguration.toasts.savedDescription"),
+      });
+      return;
+    }
+    if (app.isReadOnlyPreview) {
+      toast.info("Écritures désactivées pendant l'aperçu.");
+      return;
+    }
+    setSaving(true);
+    const { ok, error } = await saveEtabConfig(createClient(), etabId, config);
+    setSaving(false);
+    if (ok) {
+      toast.success(t("pages.parametrageConfiguration.toasts.saved"), {
+        description: t("pages.parametrageConfiguration.toasts.savedDescription"),
+      });
+    } else {
+      toast.error("Échec de l'enregistrement en ligne." + (error ? ` (${error})` : ""));
+    }
+  };
 
   const selectCountry = (code: string) => {
     const c = getUnCountry(code);
@@ -582,8 +632,8 @@ export default function ConfigurationPage() {
         >
           <RotateCcw className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.resetAll")}
         </Button>
-        <Button size="lg" onClick={() => toast.success(t("pages.parametrageConfiguration.toasts.saved"), { description: t("pages.parametrageConfiguration.toasts.savedDescription") })}>
-          <Save className="h-4 w-4" /> {t("pages.parametrageConfiguration.actions.save")}
+        <Button size="lg" disabled={saving} onClick={() => void save()}>
+          <Save className="h-4 w-4" /> {saving ? "Enregistrement…" : t("pages.parametrageConfiguration.actions.save")}
         </Button>
       </div>
     </ModulePage>

@@ -11,6 +11,7 @@ import { EnrollmentIntentClaimer } from "@/components/formations/enrollment-inte
 import { CourseEnrollmentsSync } from "@/components/formations/course-enrollments-sync";
 import { CohortsSync } from "@/components/formations/cohorts-sync";
 import { LivretSync } from "@/components/livret/livret-sync";
+import { EtabConfigSync } from "./etab-config-sync";
 import { cn } from "@/lib/utils";
 
 const LS_COLLAPSED = "eduweb.sidebar.collapsed";
@@ -89,6 +90,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <CourseEnrollmentsSync />
       <CohortsSync />
       <LivretSync />
+      {/* Hydrate la config d'établissement (Supabase → cache local) pour les
+          bulletins/livret/certificats, partagée et visible cross-appareil. */}
+      <EtabConfigSync />
     </div>
   );
 }
