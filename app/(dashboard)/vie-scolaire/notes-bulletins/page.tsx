@@ -94,6 +94,7 @@ export default function NotesBulletinsPage() {
   const t = useTranslations();
   const store = useStore();
   const app = useApp();
+  const readOnly = app.isReadOnlyPreview; // écritures désactivées pendant un aperçu
   const { students } = useStudents();
   const classOptions = React.useMemo(
     () => [...new Set(students.map((e) => e.className).filter(Boolean))].sort(),
@@ -162,6 +163,10 @@ export default function NotesBulletinsPage() {
   // Ajout d'une note : optimiste en mémoire, puis persistance en ligne (réel).
   // L'id temporaire est remplacé par l'id serveur au retour de l'insert.
   const addNote = (n: NoteEntry) => {
+    if (readOnly) {
+      toast.info("Écritures désactivées pendant l'aperçu.");
+      return;
+    }
     setNotes((ns) => [n, ...ns]);
     if (!isSupabaseConfigured()) return;
     void insertNoteEntry(
@@ -187,6 +192,7 @@ export default function NotesBulletinsPage() {
   };
 
   const removeNote = (id: string) => {
+    if (readOnly) return;
     setNotes((ns) => ns.filter((n) => n.id !== id));
     if (isSupabaseConfigured()) void deleteNoteEntry(createClient(), id);
   };
@@ -198,6 +204,10 @@ export default function NotesBulletinsPage() {
    * l'index de période à 2 (T1/T2/T3).
    */
   const pushToLivret = async () => {
+    if (readOnly) {
+      toast.info("Écritures désactivées pendant l'aperçu.");
+      return;
+    }
     const p = Math.min(Math.max(Number(period), 0), 2) as TermIndex;
     const online = isSupabaseConfigured();
     const client = online ? createClient() : null;
@@ -279,14 +289,14 @@ export default function NotesBulletinsPage() {
           <p className="text-xs text-muted-foreground">
             Reporter les moyennes saisies vers le livret scolaire de chaque élève (matière par matière, pour {periodLabel}).
           </p>
-          <Button variant="outline" size="sm" onClick={() => void pushToLivret()} className="shrink-0">
+          <Button variant="outline" size="sm" onClick={() => void pushToLivret()} disabled={readOnly} className="shrink-0">
             <UploadCloud className="h-4 w-4" /> Reporter au livret
           </Button>
         </div>
       </div>
 
       <div id="saisie" className="scroll-mt-24">
-        <NoteForm classStudents={classStudents} onAdd={addNote} />
+        <NoteForm classStudents={classStudents} onAdd={addNote} readOnly={readOnly} />
       </div>
 
       <SectionCard id="notes" title={t("pages.vieScolaireNotesBulletins.notesSection.title", { class: cls, period: periodLabel })} contentClassName="p-0 overflow-x-auto">
@@ -315,7 +325,7 @@ export default function NotesBulletinsPage() {
                     <td className="px-4 py-2 text-center text-muted-foreground">/{n.bareme}</td>
                     <td className="px-4 py-2 text-center">{n.coeff}</td>
                     <td className="px-4 py-2 text-center">
-                      <button onClick={() => removeNote(n.id)} className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-600" aria-label={t("pages.vieScolaireNotesBulletins.tableActions.delete")}>
+                      <button onClick={() => removeNote(n.id)} disabled={readOnly} className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-600 disabled:opacity-40" aria-label={t("pages.vieScolaireNotesBulletins.tableActions.delete")}>
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </td>
@@ -389,7 +399,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 /* ------------------------------- Ajouter une note ------------------------------- */
-function NoteForm({ classStudents, onAdd }: { classStudents: Eleve[]; onAdd: (n: NoteEntry) => void }) {
+function NoteForm({ classStudents, onAdd, readOnly }: { classStudents: Eleve[]; onAdd: (n: NoteEntry) => void; readOnly?: boolean }) {
   const t = useTranslations();
   const [studentId, setStudentId] = React.useState("");
   const [discipline, setDiscipline] = React.useState(DISCIPLINES[0].name);
@@ -476,7 +486,7 @@ function NoteForm({ classStudents, onAdd }: { classStudents: Eleve[]; onAdd: (n:
         <p className="font-mono">{t("pages.vieScolaireNotesBulletins.noteForm.csvExample")}</p>
       </div>
       <div className="mt-3 flex justify-end">
-        <Button onClick={save}>
+        <Button onClick={save} disabled={readOnly}>
           <Plus className="h-4 w-4" /> {t("pages.vieScolaireNotesBulletins.noteForm.save")}
         </Button>
       </div>

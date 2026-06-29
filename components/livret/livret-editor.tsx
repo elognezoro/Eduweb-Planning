@@ -382,8 +382,10 @@ export function LivretEditor({
 }) {
   const store = useStore();
   const app = useApp();
-  const canWrite = app.can("school_record:write");
-  const canManage = app.can("school_record:manage");
+  // En aperçu (rôle OU utilisateur précis), le livret passe en LECTURE SEULE :
+  // champs désactivés, bouton de réinitialisation masqué, badge « Lecture seule ».
+  const canWrite = app.can("school_record:write") && !app.isReadOnlyPreview;
+  const canManage = app.can("school_record:manage") && !app.isReadOnlyPreview;
   const actor = app.user.displayName;
   const etabId = app.user.etablissementId ?? null;
 
@@ -408,6 +410,7 @@ export function LivretEditor({
 
   const save = React.useCallback(
     (patch: LivretOverrides) => {
+      if (app.isReadOnlyPreview) return; // garde-fou : aucune écriture en aperçu
       store.upsertLivretOverrides(student.id, schoolYear, patch, actor);
       // Write-through Supabase (mode réel) : persiste les overrides COMPLETS
       // fusionnés (depuis l'accumulateur frais), pour un partage durable.
@@ -423,7 +426,7 @@ export function LivretEditor({
         });
       }
     },
-    [store, student.id, schoolYear, actor, etabId],
+    [store, student.id, schoolYear, actor, etabId, app.isReadOnlyPreview],
   );
 
   const cur = PAGES.find((p) => p.num === page) ?? PAGES[0];

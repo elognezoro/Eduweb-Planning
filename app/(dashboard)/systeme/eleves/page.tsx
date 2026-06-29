@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ImportCsvDialog } from "@/components/forms/import-csv-dialog";
+import { useApp } from "@/components/app-shell/app-context";
 import { useStudents } from "@/components/app-shell/use-students";
 import { toNomCase, toPrenomCase } from "@/lib/format-name";
 import type { StudentInput } from "@/lib/students/students-server";
@@ -54,6 +55,7 @@ const CSV_COLUMNS = ["Matricule", "Nom", "Prénoms", "Sexe", "Date de naissance"
 
 export default function ElevesPage() {
   const { students, loading, realMode, addStudent, updateStudent, setStatus, importStudents } = useStudents();
+  const readOnly = useApp().isReadOnlyPreview; // aperçu (rôle ou utilisateur) = lecture seule
 
   const [search, setSearch] = React.useState("");
   const [cls, setCls] = React.useState<string>("");
@@ -129,6 +131,8 @@ export default function ElevesPage() {
       permission="students:manage"
       actions={
         <div className="flex gap-2">
+          {!readOnly && (
+            <>
           <ImportCsvDialog
             title="Importer des élèves (CSV)"
             description="Une ligne par élève. Les élèves seront rattachés à votre établissement."
@@ -165,6 +169,8 @@ export default function ElevesPage() {
           <Button onClick={openAdd}>
             <Plus className="h-4 w-4" /> Ajouter un élève
           </Button>
+            </>
+          )}
         </div>
       }
     >
@@ -236,15 +242,15 @@ export default function ElevesPage() {
                     </td>
                     <td className="px-3 py-1.5">
                       <div className="flex justify-end gap-1">
-                        <button onClick={() => openEdit(s.id)} className="rounded p-1 text-muted-foreground hover:bg-muted/40 hover:text-foreground" aria-label="Modifier">
+                        <button onClick={() => openEdit(s.id)} disabled={readOnly} className="rounded p-1 text-muted-foreground hover:bg-muted/40 hover:text-foreground disabled:opacity-40" aria-label="Modifier">
                           <Pencil className="h-4 w-4" />
                         </button>
                         {s.status === "archived" ? (
-                          <button onClick={() => void setStatus(s.id, "active")} className="rounded p-1 text-ew-green-700 hover:bg-ew-green-50" aria-label="Réactiver">
+                          <button onClick={() => void setStatus(s.id, "active")} disabled={readOnly} className="rounded p-1 text-ew-green-700 hover:bg-ew-green-50 disabled:opacity-40" aria-label="Réactiver">
                             <ArchiveRestore className="h-4 w-4" />
                           </button>
                         ) : (
-                          <button onClick={() => void setStatus(s.id, "archived")} className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-600" aria-label="Archiver">
+                          <button onClick={() => void setStatus(s.id, "archived")} disabled={readOnly} className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-600 disabled:opacity-40" aria-label="Archiver">
                             <Archive className="h-4 w-4" />
                           </button>
                         )}
