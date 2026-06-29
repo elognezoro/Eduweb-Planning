@@ -59,6 +59,9 @@ import { useApp } from "@/components/app-shell/app-context";
 import { useStore } from "@/components/app-shell/data-store";
 import { useAcademicRegions } from "@/components/app-shell/use-academic-regions";
 import { InstalledEstablishmentsPanel } from "@/components/etablissements/installed-establishments-panel";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
+import { upsertEstablishment, establishmentCodeFromName } from "@/lib/etablissements/etablissements-server";
 import { COUNTRIES, type AcademicRegionSeed } from "@/config/countries";
 import { getUnCountry } from "@/config/un-countries";
 import type { Etablissement } from "@/lib/types";
@@ -158,18 +161,72 @@ export default function EtablissementsPage() {
             })}
           />
           <ImportEtabDialog
-            onImport={(list, dest) => {
-              addEtablissements(list);
-              toast.success(`${list.length} établissement(s) importé(s)`, {
-                description: `Cohorte rattachée à ${getUnCountry(dest)?.name ?? dest}.`,
-              });
+            onImport={async (list, dest) => {
+              // Mode démo : ajout local uniquement.
+              if (!isSupabaseConfigured()) {
+                addEtablissements(list);
+                toast.success(`${list.length} établissement(s) importé(s)`, {
+                  description: `Cohorte rattachée à ${getUnCountry(dest)?.name ?? dest}.`,
+                });
+                return;
+              }
+              // Mode réel : matérialise chaque ligne en base (UUID référençable),
+              // upsert idempotent par (pays, code) → réimport = mise à jour.
+              const sb = createClient();
+              const withIds: (Omit<Etablissement, "id"> & { id?: string })[] = [];
+              let failed = 0;
+              for (const e of list) {
+                const res = await upsertEstablishment(sb, {
+                  countryCode: e.countryCode,
+                  code: e.code,
+                  name: e.name,
+                  regionName: e.academicRegionCode,
+                  locality: e.locality,
+                });
+                if (res.id) withIds.push({ ...e, id: res.id });
+                else failed++;
+              }
+              if (withIds.length) addEtablissements(withIds);
+              if (failed === 0) {
+                toast.success(`${withIds.length} établissement(s) importé(s) en ligne`, {
+                  description: `Visibles sur tous les postes (${getUnCountry(dest)?.name ?? dest}).`,
+                });
+              } else {
+                toast.warning(`${withIds.length} importé(s), ${failed} échec(s)`, {
+                  description: "Vérifiez vos droits (admin) et le format du fichier.",
+                });
+              }
             }}
           />
           <ManageRegionsDialog />
           <CreateEtablissementDialog
-            onCreate={(e) => {
-              addEtablissement(e);
-              toast.success("Établissement créé", { description: `${e.name} a été ajouté.` });
+            onCreate={async (e) => {
+              // Mode démo : ajout local uniquement.
+              if (!isSupabaseConfigured()) {
+                addEtablissement(e);
+                toast.success("Établissement créé", { description: `${e.name} a été ajouté.` });
+                return true;
+              }
+              // Mode réel : crée une VRAIE ligne Supabase (UUID référençable par
+              // profiles.etablissement_id) et porte cet UUID dans le répertoire local.
+              const res = await upsertEstablishment(createClient(), {
+                countryCode: e.countryCode,
+                code: e.code,
+                name: e.name,
+                regionName: e.academicRegionCode,
+                locality: e.locality,
+              });
+              if (!res.id) {
+                toast.error("Création en ligne impossible", {
+                  description: res.error ?? "Droits insuffisants ou problème réseau.",
+                });
+                return false;
+              }
+              addEtablissement({ ...e, id: res.id });
+              toast.success("Établissement créé", {
+                description: `${e.name} — enregistré en ligne (visible sur tous les postes).`,
+              });
+              return true;
             }}
           />
         </div>
@@ -342,7 +399,7 @@ function buildTemplate(code: string): string {
 function ImportEtabDialog({
   onImport,
 }: {
-  onImport: (list: Omit<Etablissement, "id">[], destCountry: string) => void;
+  onImport: (list: Omit<Etablissement, "id">[], destCountry: string) => void | Promise<void>;
 }) {
   const [open, setOpen] = React.useState(false);
   const [dest, setDest] = React.useState("");
@@ -403,9 +460,11 @@ function ImportEtabDialog({
     }
     const list: Omit<Etablissement, "id">[] = parsed.map((r, i) => {
       const [nom, , region, localite, typeEtab, codeEtab, regime, annee] = r;
+      const fallbackName = nom || `Établissement ${i + 1}`;
       return {
-        code: (codeEtab || `${dest}-${String(i + 1).padStart(3, "0")}`).toUpperCase(),
-        name: nom || `Établissement ${i + 1}`,
+        // Code DÉTERMINISTE (saisi ou dérivé du nom) → réimport = mise à jour, pas de doublon.
+        code: codeEtab ? codeEtab.toUpperCase() : establishmentCodeFromName(fallbackName),
+        name: fallbackName,
         shortName: (nom || `Étab. ${i + 1}`).split(/\s+/).slice(0, 2).join(" "),
         type: typeEtab || "Autre",
         countryCode: dest,
@@ -547,7 +606,11 @@ function FieldLabel({ children, required }: { children: React.ReactNode; require
   );
 }
 
-function CreateEtablissementDialog({ onCreate }: { onCreate: (e: Omit<Etablissement, "id">) => void }) {
+function CreateEtablissementDialog({
+  onCreate,
+}: {
+  onCreate: (e: Omit<Etablissement, "id">) => boolean | void | Promise<boolean | void>;
+}) {
   const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState("");
   const [countryCode, setCountryCode] = React.useState("");
@@ -571,9 +634,14 @@ function CreateEtablissementDialog({ onCreate }: { onCreate: (e: Omit<Etablissem
 
   const canSubmit = name.trim().length > 1 && countryCode.length === 2;
 
-  const submit = () => {
-    onCreate({
-      code: (code.trim() || `${countryCode}-${Date.now().toString(36).slice(-4).toUpperCase()}`).toUpperCase(),
+  const [saving, setSaving] = React.useState(false);
+
+  const submit = async () => {
+    setSaving(true);
+    const ok = await onCreate({
+      // Code DÉTERMINISTE : saisi (normalisé) ou dérivé du nom (règle trigger 020) —
+      // jamais d'horodatage, pour que l'upsert (pays,code) fusionne au lieu de doublonner.
+      code: code.trim() ? code.trim().toUpperCase() : establishmentCodeFromName(name.trim()),
       name: name.trim(),
       shortName: name.trim().split(/\s+/).slice(0, 2).join(" "),
       type,
@@ -590,6 +658,9 @@ function CreateEtablissementDialog({ onCreate }: { onCreate: (e: Omit<Etablissem
       regime: regime || undefined,
       schoolYear,
     });
+    setSaving(false);
+    // Échec serveur (ok === false) → on garde le formulaire ouvert pour réessayer.
+    if (ok === false) return;
     reset();
     setOpen(false);
   };
@@ -680,8 +751,8 @@ function CreateEtablissementDialog({ onCreate }: { onCreate: (e: Omit<Etablissem
           <Button variant="outline" onClick={() => setOpen(false)}>
             Annuler
           </Button>
-          <Button disabled={!canSubmit} onClick={submit}>
-            <Save className="h-4 w-4" /> Créer l&apos;établissement
+          <Button disabled={!canSubmit || saving} onClick={() => void submit()}>
+            <Save className="h-4 w-4" /> {saving ? "Enregistrement…" : "Créer l'établissement"}
           </Button>
         </DialogFooter>
       </DialogContent>

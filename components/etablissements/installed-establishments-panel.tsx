@@ -125,21 +125,28 @@ export function InstalledEstablishmentsPanel() {
         source: "store",
       });
     }
-    // 2) Installés Supabase non déjà présents (région = référentiel du pays).
+    // 2) Installés Supabase non déjà présents — filtrés sur le PAYS ACTIF via
+    //    l'iso2 réel (jointure countries). Repli référentiel/saisie libre pour
+    //    d'anciennes lignes sans pays résolu. Région = texte stocké (migr. 041),
+    //    sinon référentiel. C'est ce qui rend un établissement custom (créé sur
+    //    un autre poste) visible ici, groupé sous sa vraie région.
     for (const it of installed) {
       const code = it.code ?? "";
       const key = (code || it.id).toLowerCase();
       if (seen.has(key)) continue;
-      // On limite au pays actif : appartenance déduite du référentiel / saisie libre.
-      if (!(refMap.has(code) || code.startsWith("LIBRE-"))) continue;
+      const belongs =
+        it.countryCode != null
+          ? it.countryCode === cc
+          : refMap.has(code) || code.startsWith("LIBRE-");
+      if (!belongs) continue;
       seen.add(key);
       out.push({
         key,
         id: it.id,
         name: it.name,
         code: it.code ?? null,
-        sub: it.dspsCode ? `DSPS ${it.dspsCode}` : "",
-        region: refMap.get(code)?.drena || NO_REGION,
+        sub: it.locality || (it.dspsCode ? `DSPS ${it.dspsCode}` : ""),
+        region: it.regionName ? regionName(it.regionName) : refMap.get(code)?.drena || NO_REGION,
         source: "supabase",
       });
     }

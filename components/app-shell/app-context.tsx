@@ -196,6 +196,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             ? "active"
             : (profile.status as UserProfile["status"]) || prev.status,
           jobTitle: (profile.job_title as string) ?? prev.jobTitle,
+          // Établissement RÉEL de rattachement (UUID) — indispensable au cloisonnement
+          // par établissement (useScopedEstablishmentId) et au partage de la config
+          // d'établissement (EtabConfigSync). Sans cette relecture, l'établissement
+          // restait celui du profil démo (null) et le rattachement réel était ignoré.
+          // Un admin garde TOUJOURS null (il « voit tout ») : un etablissement_id
+          // résiduel sur sa ligne ne doit jamais le cloisonner sur un seul établissement.
+          etablissementId:
+            resolvedRole === "admin" ? null : ((profile.etablissement_id as string | null) ?? null),
         }));
         setProfileState("ready");
       } catch {

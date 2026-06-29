@@ -509,8 +509,8 @@ interface DataStore extends StoreState {
   setUserStatus: (id: string, status: DirectoryUser["status"]) => void;
   removeUser: (id: string) => void;
   removeUsers: (ids: string[]) => void;
-  addEtablissement: (e: Omit<Etablissement, "id">) => void;
-  addEtablissements: (list: Omit<Etablissement, "id">[]) => void;
+  addEtablissement: (e: Omit<Etablissement, "id"> & { id?: string }) => void;
+  addEtablissements: (list: (Omit<Etablissement, "id"> & { id?: string })[]) => void;
   updateEtablissement: (id: string, patch: Partial<Etablissement>) => void;
   removeEtablissement: (id: string) => void;
   removeEtablissements: (ids: string[]) => void;
@@ -922,18 +922,24 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         users: s.users.filter((x) => !ids.includes(x.id)),
       })),
     addEtablissement: (e) =>
-      setState((s) => ({
-        ...s,
-        etablissements: [{ ...e, id: genId("et") }, ...s.etablissements],
-      })),
+      setState((s) => {
+        // Porte l'UUID Supabase imposé (mode réel) ou génère un id local (démo).
+        const id = e.id ?? genId("et");
+        return {
+          ...s,
+          // Dédoublonnage : si l'id existe déjà (réimport, double-clic), on remplace.
+          etablissements: [{ ...e, id }, ...s.etablissements.filter((x) => x.id !== id)],
+        };
+      }),
     addEtablissements: (list) =>
-      setState((s) => ({
-        ...s,
-        etablissements: [
-          ...list.map((e) => ({ ...e, id: genId("et") })),
-          ...s.etablissements,
-        ],
-      })),
+      setState((s) => {
+        const incoming = list.map((e) => ({ ...e, id: e.id ?? genId("et") }));
+        const incomingIds = new Set(incoming.map((e) => e.id));
+        return {
+          ...s,
+          etablissements: [...incoming, ...s.etablissements.filter((x) => !incomingIds.has(x.id))],
+        };
+      }),
     updateEtablissement: (id, patch) =>
       setState((s) => ({
         ...s,
