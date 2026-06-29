@@ -11,10 +11,14 @@ import { fetchAppSettings, saveAppSetting } from "@/lib/app-settings-server";
 const REAL_MODE = isSupabaseConfigured();
 
 /**
- * Slices de GOUVERNANCE DES FORMATIONS persistées dans app_settings (réglages
- * globaux admin). La clé app_settings = le nom du champ de la slice du store.
+ * Réglages GLOBAUX admin persistés dans app_settings (clé = nom du champ de la
+ * slice du store) : gouvernance des formations (Lot 2) + registres admin (Lot 5).
+ * Tous sont en écriture admin-only (RLS) et lecture authentifiée.
+ * EXCLUS volontairement : apfcs/apfcActivities (table dédiée, migr. 021),
+ * promoRequests (écriture apprenant), certificates/grantLog (journal/PII).
  */
 const GOV_KEYS: readonly (keyof StoreState)[] = [
+  // Gouvernance des formations (Lot 2)
   "coursePrices",
   "certificateConfigs",
   "moduleAccessRules",
@@ -22,6 +26,15 @@ const GOV_KEYS: readonly (keyof StoreState)[] = [
   "courseScheduleRules",
   "courseCompletionRules",
   "paymentSettings",
+  // Registres globaux admin (Lot 5)
+  "partners",
+  "customRegions",
+  "roleOverrides",
+  "regionalStructures",
+  "cafops",
+  "cafopModules",
+  "cafopFormationYears",
+  "userGrants",
 ];
 
 /**
@@ -105,6 +118,14 @@ export function AppSettingsSync() {
     store.courseScheduleRules,
     store.courseCompletionRules,
     store.paymentSettings,
+    store.partners,
+    store.customRegions,
+    store.roleOverrides,
+    store.regionalStructures,
+    store.cafops,
+    store.cafopModules,
+    store.cafopFormationYears,
+    store.userGrants,
   ]);
 
   // Nettoyage des minuteurs au démontage.
