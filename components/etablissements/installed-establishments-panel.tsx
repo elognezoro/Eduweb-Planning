@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
 import { useApp } from "@/components/app-shell/app-context";
+import { useStore } from "@/components/app-shell/data-store";
+import { useAcademicRegions } from "@/components/app-shell/use-academic-regions";
 import {
   EtablissementCombobox,
   type EtablissementSelection,
@@ -27,19 +29,33 @@ import { cn } from "@/lib/utils";
  * Panneau « Établissements installés » — limité au PAYS ACTIF et REGROUPÉ par
  * région académique (replié par défaut).
  *
- * L'appartenance à un pays se déduit du référentiel : un établissement installé
- * n'est affiché que si son code figure dans le référentiel du pays courant (CI =
- * 2921 ; autres pays = fichiers embarqués) — ou s'il s'agit d'une saisie libre.
- * Sa région provient du même référentiel (DRENA / wilaya / DRE…). Inerte hors réel.
+ * Il affiche l'UNION de deux sources, dédoublonnée par code :
+ *   - le RÉPERTOIRE (slice store) : les établissements que vous créez/importez
+ *     (leur région provient de leur champ `academicRegionCode`, qui peut être un
+ *     code de démo ou un nom de saisie → on normalise vers le nom canonique) ;
+ *   - les établissements INSTALLÉS en base (Supabase, mode réel) pour les
+ *     fonctionnalités par établissement (région issue du référentiel du pays).
  */
 const REAL = isSupabaseConfigured();
 const NO_REGION = "Sans région académique";
 
+interface PanelRow {
+  key: string;
+  id: string;
+  name: string;
+  code: string | null;
+  sub: string;
+  region: string;
+  source: "store" | "supabase";
+}
+
 export function InstalledEstablishmentsPanel() {
   const { country } = useApp();
   const cc = country.code;
+  const regions = useAcademicRegions(cc);
+  const { etablissements, removeEtablissements } = useStore();
 
-  const [items, setItems] = React.useState<InstalledEstablishment[]>([]);
+  const [installed, setInstalled] = React.useState<InstalledEstablishment[]>([]);
   const [loading, setLoading] = React.useState(REAL);
   const [refMap, setRefMap] = React.useState<Map<string, CiEtablissement>>(new Map());
   const [refLoaded, setRefLoaded] = React.useState(false);
@@ -53,7 +69,7 @@ export function InstalledEstablishmentsPanel() {
       return;
     }
     setLoading(true);
-    setItems(await fetchInstalledEstablishments(createClient()));
+    setInstalled(await fetchInstalledEstablishments(createClient()));
     setLoading(false);
   }, []);
 
@@ -61,7 +77,7 @@ export function InstalledEstablishmentsPanel() {
     void load();
   }, [load]);
 
-  // Référentiel du pays actif → carte code → établissement (membership + région).
+  // Référentiel du pays actif → carte code → établissement (région du référentiel).
   React.useEffect(() => {
     let alive = true;
     setRefLoaded(false);
@@ -76,31 +92,71 @@ export function InstalledEstablishmentsPanel() {
     };
   }, [cc]);
 
-  // Établissements installés appartenant au pays actif (réf. ou saisie libre).
-  const filtered = React.useMemo(
-    () =>
-      items.filter((it) => {
-        const code = it.code ?? "";
-        return refMap.has(code) || code.startsWith("LIBRE-");
-      }),
-    [items, refMap],
+  // Résout une région stockée (code OU nom) vers le NOM canonique de la région.
+  const regionName = React.useCallback(
+    (raw: string | null | undefined): string => {
+      const v = (raw ?? "").trim();
+      if (!v) return NO_REGION;
+      const byCode = regions.find((r) => r.code === v);
+      if (byCode) return byCode.name;
+      const byName = regions.find((r) => r.name.toLowerCase() === v.toLowerCase());
+      if (byName) return byName.name;
+      return v; // saisie libre
+    },
+    [regions],
   );
 
-  // Regroupement par région académique (triées).
+  // Union répertoire (store) + installés (Supabase), dédoublonnée par code.
+  const rows = React.useMemo<PanelRow[]>(() => {
+    const out: PanelRow[] = [];
+    const seen = new Set<string>();
+    // 1) Répertoire du pays actif.
+    for (const e of etablissements) {
+      if (e.countryCode !== cc) continue;
+      const key = (e.code || e.id).toLowerCase();
+      seen.add(key);
+      out.push({
+        key,
+        id: e.id,
+        name: e.name,
+        code: e.code || null,
+        sub: e.locality || "",
+        region: regionName(e.academicRegionCode),
+        source: "store",
+      });
+    }
+    // 2) Installés Supabase non déjà présents (région = référentiel du pays).
+    for (const it of installed) {
+      const code = it.code ?? "";
+      const key = (code || it.id).toLowerCase();
+      if (seen.has(key)) continue;
+      // On limite au pays actif : appartenance déduite du référentiel / saisie libre.
+      if (!(refMap.has(code) || code.startsWith("LIBRE-"))) continue;
+      seen.add(key);
+      out.push({
+        key,
+        id: it.id,
+        name: it.name,
+        code: it.code ?? null,
+        sub: it.dspsCode ? `DSPS ${it.dspsCode}` : "",
+        region: refMap.get(code)?.drena || NO_REGION,
+        source: "supabase",
+      });
+    }
+    return out;
+  }, [etablissements, installed, cc, refMap, regionName]);
+
   const groups = React.useMemo(() => {
-    const map = new Map<string, InstalledEstablishment[]>();
-    for (const it of filtered) {
-      const region = refMap.get(it.code ?? "")?.drena || NO_REGION;
-      const arr = map.get(region);
-      if (arr) arr.push(it);
-      else map.set(region, [it]);
+    const map = new Map<string, PanelRow[]>();
+    for (const r of rows) {
+      const arr = map.get(r.region);
+      if (arr) arr.push(r);
+      else map.set(r.region, [r]);
     }
     return [...map.entries()].sort((a, b) =>
       a[0] === NO_REGION ? 1 : b[0] === NO_REGION ? -1 : a[0].localeCompare(b[0], "fr"),
     );
-  }, [filtered, refMap]);
-
-  if (!REAL) return null;
+  }, [rows]);
 
   const toggle = (region: string) =>
     setOpen((s) => {
@@ -111,12 +167,12 @@ export function InstalledEstablishmentsPanel() {
     });
 
   async function add() {
-    if (!sel) return;
+    if (!sel || !REAL) return;
     setAdding(true);
     const res = await ensureEstablishment(createClient(), sel);
     setAdding(false);
     if (res.id) {
-      toast.success("Établissement ajouté", { description: sel.name });
+      toast.success("Établissement installé", { description: sel.name });
       setSel(null);
       await load();
     } else {
@@ -124,10 +180,14 @@ export function InstalledEstablishmentsPanel() {
     }
   }
 
-  async function remove(it: InstalledEstablishment) {
-    const res = await deleteInstalledEstablishment(createClient(), it.id);
+  async function remove(r: PanelRow) {
+    if (r.source === "store") {
+      removeEtablissements([r.id]);
+      return;
+    }
+    const res = await deleteInstalledEstablishment(createClient(), r.id);
     if (res.ok) {
-      setItems((xs) => xs.filter((x) => x.id !== it.id));
+      setInstalled((xs) => xs.filter((x) => x.id !== r.id));
     } else {
       toast.error("Suppression impossible", {
         description:
@@ -138,47 +198,51 @@ export function InstalledEstablishmentsPanel() {
     }
   }
 
+  const busy = loading || (REAL && !refLoaded);
+
   return (
     <div className="space-y-3 rounded-2xl border border-ew-green-200 bg-ew-green-50/30 p-5">
       <div className="flex items-center gap-2">
         <Building2 className="h-5 w-5 text-ew-green-700" />
         <h3 className="font-display text-sm font-bold uppercase tracking-wide text-ew-green-700">
-          Établissements installés ({country.nameFr}) — {filtered.length}
+          Établissements installés ({country.nameFr}) — {rows.length}
         </h3>
       </div>
       <p className="text-xs text-muted-foreground">
-        Ajoutez les établissements que vous exploitez : ils deviennent disponibles pour les
-        fonctionnalités par établissement (transport, délégation chef d&apos;établissement…).
-        La liste est limitée au pays sélectionné et regroupée par région académique.
+        Vos établissements du pays sélectionné, regroupés par région académique
+        ({country.academicRegionLabel}). Créez-en via « Créer », ou installez-en un du
+        référentiel ci-dessous.
       </p>
 
-      {/* Ajout depuis le référentiel du pays actif */}
-      <div className="flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-ew-green-300 bg-background/60 p-3">
-        <div className="min-w-0 flex-1">
-          <EtablissementCombobox
-            value={sel}
-            onChange={setSel}
-            countryCode={cc}
-            placeholder={`Rechercher un établissement (${country.nameFr})…`}
-          />
+      {/* Installation rapide depuis le référentiel du pays actif (mode réel). */}
+      {REAL && (
+        <div className="flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-ew-green-300 bg-background/60 p-3">
+          <div className="min-w-0 flex-1">
+            <EtablissementCombobox
+              value={sel}
+              onChange={setSel}
+              countryCode={cc}
+              placeholder={`Rechercher un établissement (${country.nameFr})…`}
+            />
+          </div>
+          <button
+            type="button"
+            disabled={!sel || adding}
+            onClick={() => void add()}
+            className="inline-flex h-10 items-center gap-1.5 rounded-md bg-ew-green-700 px-3 text-sm font-semibold text-white hover:bg-ew-green-800 disabled:opacity-50"
+          >
+            {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            Installer
+          </button>
         </div>
-        <button
-          type="button"
-          disabled={!sel || adding}
-          onClick={() => void add()}
-          className="inline-flex h-10 items-center gap-1.5 rounded-md bg-ew-green-700 px-3 text-sm font-semibold text-white hover:bg-ew-green-800 disabled:opacity-50"
-        >
-          {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-          Installer
-        </button>
-      </div>
+      )}
 
       {/* Liste repliée par région */}
-      {loading || !refLoaded ? (
+      {busy ? (
         <p className="px-1 py-3 text-sm text-muted-foreground">Chargement…</p>
-      ) : filtered.length === 0 ? (
+      ) : rows.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border bg-background/60 p-3 text-center text-sm text-muted-foreground">
-          Aucun établissement installé pour {country.nameFr}. Ajoutez-en depuis le référentiel ci-dessus.
+          Aucun établissement pour {country.nameFr}. Créez-en via « Créer ».
         </p>
       ) : (
         <div className="space-y-1.5">
@@ -202,18 +266,18 @@ export function InstalledEstablishmentsPanel() {
                 </button>
                 {isOpen && (
                   <ul className="divide-y divide-border border-t border-border">
-                    {list.map((it) => (
-                      <li key={it.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
+                    {list.map((r) => (
+                      <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
                         <span className="min-w-0">
-                          <span className="block truncate font-medium text-foreground">{it.name}</span>
+                          <span className="block truncate font-medium text-foreground">{r.name}</span>
                           <span className="block truncate text-[11px] text-muted-foreground">
-                            {it.code ? `EduWeb ${it.code}` : "—"}
-                            {it.dspsCode ? ` · DSPS ${it.dspsCode}` : ""}
+                            {r.code ? `EduWeb ${r.code}` : "—"}
+                            {r.sub ? ` · ${r.sub}` : ""}
                           </span>
                         </span>
                         <button
                           type="button"
-                          onClick={() => void remove(it)}
+                          onClick={() => void remove(r)}
                           className="rounded-md border border-border px-2 py-1 text-red-600 hover:bg-red-50 hover:text-red-700"
                           title="Retirer"
                         >
