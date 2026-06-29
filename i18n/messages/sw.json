@@ -151,7 +151,9 @@
     "rolePreview": "Hakiki ya jukumu",
     "rolePreviewSubtitle": "Angalia kiolesura kama…",
     "exitPreview": "Toka kwenye hakiki",
-    "previewBanner": "Hali ya hakiki: unaona kiolesura kama \"{role}\". Vitendo nyeti vimezimwa."
+    "previewBanner": "Hali ya hakiki: unaona kiolesura kama \"{role}\". Vitendo nyeti vimezimwa.",
+    "impersonationBanner": "Unaona jukwaa kama {name} ({role}). Hakiki ya muonekano pekee.",
+    "viewAsUser": "Ona jukwaa kama {name}"
   },
   "footer": {
     "tagline": "EduWeb Planner — Jukwaa la kimataifa la usimamizi wa shule",

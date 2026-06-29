@@ -48,17 +48,19 @@ export function RolePreviewMenu() {
   );
 }
 
-/** Bandeau visible signalant le mode aperçu. */
+/** Bandeau visible signalant le mode aperçu (rôle pur OU utilisateur précis). */
 export function RolePreviewBanner() {
-  const { isPreview, effectiveRole, exitPreview } = useApp();
+  const { isPreview, isImpersonating, impersonatedUser, effectiveRole, exitPreview } = useApp();
   const t = useTranslations();
-  if (!isPreview) return null;
+  if (!isPreview && !isImpersonating) return null;
   const role = getRole(effectiveRole);
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-ew-gold-500/40 bg-ew-gold-100 px-4 py-2.5 text-sm">
       <span className="flex items-center gap-2 font-semibold text-ew-gold-600">
         <Eye className="h-4 w-4" />
-        {t("topbar.previewBanner", { role: role.label })}
+        {isImpersonating && impersonatedUser
+          ? t("topbar.impersonationBanner", { name: impersonatedUser.name, role: role.label })
+          : t("topbar.previewBanner", { role: role.label })}
       </span>
       <Button variant="outline" size="sm" onClick={exitPreview}>
         <X className="h-4 w-4" />

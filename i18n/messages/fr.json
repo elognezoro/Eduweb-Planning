@@ -151,7 +151,9 @@
     "rolePreview": "Aperçu de rôle",
     "rolePreviewSubtitle": "Consulter l'interface en tant que…",
     "exitPreview": "Quitter l'aperçu",
-    "previewBanner": "Mode aperçu : vous consultez l'interface en tant que « {role} ». Les actions sensibles sont désactivées."
+    "previewBanner": "Mode aperçu : vous consultez l'interface en tant que « {role} ». Les actions sensibles sont désactivées.",
+    "impersonationBanner": "Vous consultez la plateforme en tant que {name} ({role}). Aperçu d'affichage uniquement.",
+    "viewAsUser": "Voir la plateforme en tant que {name}"
   },
   "footer": {
     "tagline": "EduWeb Planner — Plateforme internationale de pilotage scolaire",

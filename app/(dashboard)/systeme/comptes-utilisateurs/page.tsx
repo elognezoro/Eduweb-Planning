@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
@@ -15,6 +16,7 @@ import {
   ShieldCheck,
   CheckCircle2,
   Eye,
+  ScanEye,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -173,6 +175,7 @@ export default function ComptesUtilisateursPage() {
 
 function ComptesUtilisateursContent() {
   const t = useTranslations();
+  const app = useApp();
   const { users, createAccount, loading, realMode, refresh } = useDirectoryUsers();
   const [role, setRole] = React.useState("all");
   const [status, setStatus] = React.useState("all");
@@ -213,19 +216,23 @@ function ComptesUtilisateursContent() {
               <RotateCcw className={cn("h-4 w-4", loading && "animate-spin")} /> {t("pages.systemeComptesUtilisateurs.actions.refresh")}
             </Button>
           )}
-          <ImportCsvDialog
-            title={t("pages.systemeComptesUtilisateurs.actions.importTitle")}
-            description={t("pages.systemeComptesUtilisateurs.actions.importDescription")}
-            expectedColumns={["prenom", "nom", "email", "role", "etablissement"]}
-            sampleRow={["Koffi", "Kouamé", "kkouame@eduweb.ci", "enseignant", "Lycée Moderne de Cocody"]}
-            templateFilename="modele-utilisateurs.csv"
-            trigger={(open) => (
-              <Button variant="outline" onClick={open}>
-                <UploadCloud className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.actions.importCsv")}
-              </Button>
-            )}
-          />
-          <CreateUserDialog onCreate={createAccount} />
+          {!app.isReadOnlyPreview && (
+            <>
+              <ImportCsvDialog
+                title={t("pages.systemeComptesUtilisateurs.actions.importTitle")}
+                description={t("pages.systemeComptesUtilisateurs.actions.importDescription")}
+                expectedColumns={["prenom", "nom", "email", "role", "etablissement"]}
+                sampleRow={["Koffi", "Kouamé", "kkouame@eduweb.ci", "enseignant", "Lycée Moderne de Cocody"]}
+                templateFilename="modele-utilisateurs.csv"
+                trigger={(open) => (
+                  <Button variant="outline" onClick={open}>
+                    <UploadCloud className="h-4 w-4" /> {t("pages.systemeComptesUtilisateurs.actions.importCsv")}
+                  </Button>
+                )}
+              />
+              <CreateUserDialog onCreate={createAccount} />
+            </>
+          )}
         </div>
       }
       kpis={[
@@ -351,6 +358,15 @@ function RowActions({ user }: { user: DirectoryUser }) {
   // (la garde est aussi appliquée côté serveur ; ici c'est l'UX).
   const canPermaDelete = app.user.id !== user.id && !isSuperAdminEmail(user.email);
 
+  const router = useRouter();
+  // « Voir en tant que » : réservé à l'admin système (et super-administrateur),
+  // jamais sur soi-même. APERÇU D'AFFICHAGE — n'altère ni la session ni le RLS.
+  const canImpersonate =
+    (app.realRole === "admin" || isSuperAdminEmail(app.user.email)) && user.id !== app.user.id;
+  // En mode aperçu (rôle ou utilisateur), les écritures sont désactivées : on
+  // CONSULTE la plateforme, on ne mute pas les comptes au nom de l'admin réel.
+  const readOnly = app.isReadOnlyPreview;
+
   return (
     <>
       <div className="flex items-center justify-end gap-0.5">
@@ -358,6 +374,7 @@ function RowActions({ user }: { user: DirectoryUser }) {
           <IconBtn
             title={t("pages.systemeComptesUtilisateurs.actions.validateAccount")}
             tone="green"
+            disabled={readOnly}
             onClick={() => {
               setUserStatus(user.id, "active");
               toast.success(t("pages.systemeComptesUtilisateurs.toasts.userActivated", { name: user.name }), { description: t("pages.systemeComptesUtilisateurs.toasts.userActivatedDesc") });
@@ -366,7 +383,7 @@ function RowActions({ user }: { user: DirectoryUser }) {
             <CheckCircle2 className="h-4 w-4" />
           </IconBtn>
         )}
-        <IconBtn title={t("pages.systemeComptesUtilisateurs.actions.changeRoleTitle")} tone="green" onClick={() => setRoleOpen(true)}>
+        <IconBtn title={t("pages.systemeComptesUtilisateurs.actions.changeRoleTitle")} tone="green" disabled={readOnly} onClick={() => setRoleOpen(true)}>
           <ShieldCheck className="h-4 w-4" />
         </IconBtn>
 
@@ -374,7 +391,29 @@ function RowActions({ user }: { user: DirectoryUser }) {
           <Eye className="h-4 w-4" />
         </IconBtn>
 
-        <IconBtn title={t("pages.systemeComptesUtilisateurs.actions.edit")} onClick={() => setEditOpen(true)}>
+        {canImpersonate && (
+          <IconBtn
+            title={t("topbar.viewAsUser", { name: user.name })}
+            onClick={() => {
+              app.impersonateUser({
+                id: user.id,
+                name: user.name,
+                role: user.role,
+                countryCode: user.country || app.country.code,
+                regionCode: user.region || null,
+                establishmentId: user.etablissementId ?? null,
+                establishmentName: user.etablissement || null,
+                cohort: user.cohorte ?? null,
+              });
+              toast.success(t("topbar.viewAsUser", { name: user.name }));
+              router.push("/");
+            }}
+          >
+            <ScanEye className="h-4 w-4 text-indigo-600" />
+          </IconBtn>
+        )}
+
+        <IconBtn title={t("pages.systemeComptesUtilisateurs.actions.edit")} disabled={readOnly} onClick={() => setEditOpen(true)}>
           <Pencil className="h-4 w-4" />
         </IconBtn>
 
@@ -385,12 +424,13 @@ function RowActions({ user }: { user: DirectoryUser }) {
               : "Compte protégé — suppression impossible"
           }
           tone="red"
-          disabled={!canPermaDelete}
+          disabled={!canPermaDelete || readOnly}
           onClick={() => setPermaOpen(true)}
         >
           <Trash2 className="h-4 w-4" />
         </IconBtn>
 
+        {!readOnly && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={t("pages.systemeComptesUtilisateurs.actions.moreActions")}>
@@ -437,6 +477,7 @@ function RowActions({ user }: { user: DirectoryUser }) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        )}
       </div>
 
       <ChangeRoleDialog

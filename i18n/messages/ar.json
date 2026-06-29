@@ -151,7 +151,9 @@
     "rolePreview": "معاينة الدور",
     "rolePreviewSubtitle": "عرض الواجهة بصفة…",
     "exitPreview": "الخروج من المعاينة",
-    "previewBanner": "وضع المعاينة: أنت تستعرض الواجهة بصفة «{role}». الإجراءات الحساسة معطلة."
+    "previewBanner": "وضع المعاينة: أنت تستعرض الواجهة بصفة «{role}». الإجراءات الحساسة معطلة.",
+    "impersonationBanner": "أنت تستعرض المنصّة بصفة {name} ({role}). معاينة عرض فقط.",
+    "viewAsUser": "عرض المنصّة بصفة {name}"
   },
   "footer": {
     "tagline": "EduWeb Planner — منصة دولية للإدارة المدرسية",

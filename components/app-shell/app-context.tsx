@@ -15,6 +15,24 @@ import type { UserProfile } from "@/lib/types";
 import { COUNTRIES, getCountry, type CountryConfig } from "@/config/countries";
 import { ACADEMIC_YEARS, CURRENT_ACADEMIC_YEAR, type AcademicYear } from "@/lib/countries";
 
+/**
+ * Cible d'un aperçu « en tant qu'utilisateur précis ». L'admin adopte le rôle, le
+ * pays/région et (pour l'affichage) l'établissement/cohorte de cet utilisateur.
+ * APERÇU D'AFFICHAGE UNIQUEMENT : on ne change jamais l'identité Supabase ni le
+ * RLS serveur — les données restent servies sous les droits réels de l'admin ;
+ * on ne fait que simuler l'interface vue par l'utilisateur ciblé.
+ */
+export interface ImpersonatedUser {
+  id: string;
+  name: string;
+  role: UserRole;
+  countryCode: string;
+  regionCode: string | null;
+  establishmentId: string | null;
+  establishmentName: string | null;
+  cohort: string | null;
+}
+
 interface AppContextValue {
   user: UserProfile;
   realRole: UserRole;
@@ -22,6 +40,16 @@ interface AppContextValue {
   isPreview: boolean;
   setPreviewRole: (role: UserRole) => void;
   exitPreview: () => void;
+  /** Aperçu « en tant qu'utilisateur précis » (null si inactif). */
+  impersonatedUser: ImpersonatedUser | null;
+  isImpersonating: boolean;
+  impersonateUser: (target: ImpersonatedUser) => void;
+  exitImpersonation: () => void;
+  /** Vrai dès qu'un aperçu (rôle OU utilisateur) est actif → écritures à désactiver. */
+  isReadOnlyPreview: boolean;
+  /** Portée d'affichage adoptée pendant l'aperçu utilisateur (null = portée admin). */
+  currentEstablishmentId: string | null;
+  currentCohort: string | null;
   country: CountryConfig;
   setCountryCode: (code: string) => void;
   regionCode: string | null;
@@ -67,6 +95,7 @@ interface PersistedState {
   countryCode: string;
   regionCode: string | null;
   academicYearId: string;
+  impersonatedUser: ImpersonatedUser | null;
 }
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -180,6 +209,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const [previewRole, setPreviewRoleState] = React.useState<UserRole | null>(null);
+  const [impersonatedUser, setImpersonatedUserState] = React.useState<ImpersonatedUser | null>(null);
   const [countryCode, setCountryCodeState] = React.useState<string>(user.countryCode);
   const [regionCode, setRegionCodeState] = React.useState<string | null>(user.academicRegionCode ?? null);
   const [academicYearId, setAcademicYearIdState] = React.useState<string>(CURRENT_ACADEMIC_YEAR.id);
@@ -191,6 +221,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (raw) {
         const parsed = JSON.parse(raw) as PersistedState;
         if (parsed.previewRole) setPreviewRoleState(parsed.previewRole);
+        if (parsed.impersonatedUser) setImpersonatedUserState(parsed.impersonatedUser);
         if (parsed.countryCode) setCountryCodeState(parsed.countryCode);
         setRegionCodeState(parsed.regionCode ?? null);
         if (parsed.academicYearId) setAcademicYearIdState(parsed.academicYearId);
@@ -207,6 +238,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         countryCode,
         regionCode,
         academicYearId,
+        impersonatedUser,
         ...next,
       };
       try {
@@ -215,7 +247,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         /* ignore */
       }
     },
-    [previewRole, countryCode, regionCode, academicYearId],
+    [previewRole, countryCode, regionCode, academicYearId, impersonatedUser],
   );
 
   // L'aperçu de rôle n'est appliqué QUE si le rôle réel y est habilité — un éventuel
@@ -223,8 +255,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const canPreviewRoles = hasPermission(realRole, "role_preview:use");
   const effectiveRole: UserRole = canPreviewRoles && previewRole ? previewRole : realRole;
   const isPreview = canPreviewRoles && previewRole !== null;
+  const isImpersonating = canPreviewRoles && impersonatedUser !== null;
+  const currentEstablishmentId = impersonatedUser?.establishmentId ?? null;
+  const currentCohort = impersonatedUser?.cohort ?? null;
   // Accès verrouillé tant que le profil réel n'est pas confirmé (mode réel uniquement).
   const accessReady = !REAL_MODE || profileState === "ready";
+
+  // Sortie d'aperçu (rôle pur OU utilisateur précis) : on efface l'aperçu et, si un
+  // utilisateur était simulé, on rétablit le contexte réel de l'admin (pays/région
+  // de son profil) — sinon l'admin resterait coincé sur le pays de l'utilisateur.
+  const exitAll = () => {
+    const wasImpersonating = impersonatedUser !== null;
+    setPreviewRoleState(null);
+    setImpersonatedUserState(null);
+    if (wasImpersonating) {
+      const baseCountry = user.countryCode;
+      const baseConfig = getCountry(baseCountry);
+      // Fallback cohérent avec impersonateUser : à défaut de région réelle, on prend
+      // la première région du pays (évite un sélecteur de région vide en sortie).
+      const baseRegion = user.academicRegionCode ?? baseConfig.academicRegions[0]?.code ?? null;
+      setCountryCodeState(baseCountry);
+      setRegionCodeState(baseRegion);
+      persist({
+        previewRole: null,
+        impersonatedUser: null,
+        countryCode: baseCountry,
+        regionCode: baseRegion,
+      });
+    } else {
+      persist({ previewRole: null, impersonatedUser: null });
+    }
+  };
+
+  // Purge fail-closed : si le rôle réel n'est pas (ou plus) habilité à l'aperçu —
+  // autre utilisateur connecté, profil rétrogradé — on efface tout aperçu résiduel
+  // (localStorage compris). canPreviewRoles dépend uniquement du rôle réel.
+  React.useEffect(() => {
+    if (!accessReady) return;
+    if (!canPreviewRoles && (previewRole !== null || impersonatedUser !== null)) {
+      setPreviewRoleState(null);
+      setImpersonatedUserState(null);
+      persist({ previewRole: null, impersonatedUser: null });
+    }
+  }, [accessReady, canPreviewRoles, previewRole, impersonatedUser, persist]);
 
   const value: AppContextValue = {
     user,
@@ -234,12 +307,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setPreviewRole: (role) => {
       if (!canPreviewRoles) return; // garde-fou : rôle non habilité à l'aperçu
       setPreviewRoleState(role);
-      persist({ previewRole: role });
+      setImpersonatedUserState(null); // aperçu de RÔLE pur : on quitte l'aperçu utilisateur
+      persist({ previewRole: role, impersonatedUser: null });
     },
-    exitPreview: () => {
-      setPreviewRoleState(null);
-      persist({ previewRole: null });
+    exitPreview: exitAll,
+    impersonatedUser,
+    isImpersonating,
+    impersonateUser: (target) => {
+      if (!canPreviewRoles) return; // réservé aux rôles habilités (admin / super-admin)
+      setImpersonatedUserState(target);
+      setPreviewRoleState(target.role);
+      setCountryCodeState(target.countryCode);
+      const c = getCountry(target.countryCode);
+      const region = target.regionCode ?? c.academicRegions[0]?.code ?? null;
+      setRegionCodeState(region);
+      persist({
+        previewRole: target.role,
+        impersonatedUser: target,
+        countryCode: target.countryCode,
+        regionCode: region,
+      });
     },
+    exitImpersonation: exitAll,
+    isReadOnlyPreview: isPreview || isImpersonating,
+    currentEstablishmentId,
+    currentCohort,
     country: getCountry(countryCode),
     setCountryCode: (code) => {
       setCountryCodeState(code);

@@ -151,7 +151,9 @@
     "rolePreview": "角色预览",
     "rolePreviewSubtitle": "以…身份查看界面",
     "exitPreview": "退出预览",
-    "previewBanner": "预览模式：您正在以「{role}」身份查看界面。敏感操作已禁用。"
+    "previewBanner": "预览模式：您正在以「{role}」身份查看界面。敏感操作已禁用。",
+    "impersonationBanner": "您正在以 {name}（{role}）的身份查看平台。仅为显示预览。",
+    "viewAsUser": "以 {name} 的身份查看平台"
   },
   "footer": {
     "tagline": "EduWeb Planner — 国际学校管理平台",

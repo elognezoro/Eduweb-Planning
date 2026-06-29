@@ -151,7 +151,9 @@
     "rolePreview": "Rollenvorschau",
     "rolePreviewSubtitle": "Oberfläche anzeigen als…",
     "exitPreview": "Vorschau beenden",
-    "previewBanner": "Vorschaumodus: Sie betrachten die Oberfläche als „{role}\". Sensible Aktionen sind deaktiviert."
+    "previewBanner": "Vorschaumodus: Sie betrachten die Oberfläche als „{role}\". Sensible Aktionen sind deaktiviert.",
+    "impersonationBanner": "Sie betrachten die Plattform als {name} ({role}). Nur Anzeigevorschau.",
+    "viewAsUser": "Plattform als {name} ansehen"
   },
   "footer": {
     "tagline": "EduWeb Planner — Internationale Schulverwaltungsplattform",

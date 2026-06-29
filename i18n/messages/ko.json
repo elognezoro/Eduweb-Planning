@@ -151,7 +151,9 @@
     "rolePreview": "역할 미리보기",
     "rolePreviewSubtitle": "다음으로 인터페이스 보기…",
     "exitPreview": "미리보기 종료",
-    "previewBanner": "미리보기 모드: \"{role}\"(으)로 인터페이스를 보고 있습니다. 민감한 작업은 비활성화되었습니다."
+    "previewBanner": "미리보기 모드: \"{role}\"(으)로 인터페이스를 보고 있습니다. 민감한 작업은 비활성화되었습니다.",
+    "impersonationBanner": "{name}({role}) 사용자로 플랫폼을 보고 있습니다. 표시 미리보기 전용입니다.",
+    "viewAsUser": "{name} 사용자로 플랫폼 보기"
   },
   "footer": {
     "tagline": "EduWeb Planner — 국제 학교 관리 플랫폼",

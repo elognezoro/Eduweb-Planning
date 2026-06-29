@@ -151,7 +151,9 @@
     "rolePreview": "Role preview",
     "rolePreviewSubtitle": "View the interface as…",
     "exitPreview": "Exit preview",
-    "previewBanner": "Preview mode: you are viewing the interface as \"{role}\". Sensitive actions are disabled."
+    "previewBanner": "Preview mode: you are viewing the interface as \"{role}\". Sensitive actions are disabled.",
+    "impersonationBanner": "You are viewing the platform as {name} ({role}). Display preview only.",
+    "viewAsUser": "View the platform as {name}"
   },
   "footer": {
     "tagline": "EduWeb Planner — International school management platform",
