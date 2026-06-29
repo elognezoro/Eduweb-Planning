@@ -230,7 +230,9 @@ const genId = () => `f-${Date.now().toString(36)}-${Math.random().toString(36).s
 export default function ConfigurationPage() {
   const t = useTranslations();
   const app = useApp();
-  const etabId = app.user.etablissementId ?? null;
+  // Repli sur l'id utilisateur quand le chef n'a pas (encore) d'établissement
+  // rattaché → la config persiste tout de même pour lui, cross-poste (migr. 040).
+  const etabId = app.user.etablissementId || app.user.id || null;
   const [config, setConfig] = React.useState<EtabConfig>(defaultConfig);
   const [hydrated, setHydrated] = React.useState(false);
   const [saving, setSaving] = React.useState(false);

@@ -21,7 +21,8 @@ const REAL_MODE = isSupabaseConfigured();
  */
 export function EtabConfigSync() {
   const app = useApp();
-  const etabId = app.user.etablissementId ?? null;
+  // Repli sur l'id utilisateur si pas d'établissement rattaché (cf. migration 040).
+  const etabId = app.user.etablissementId || app.user.id || null;
   const syncedRef = React.useRef<string | null>(null);
 
   React.useEffect(() => {
