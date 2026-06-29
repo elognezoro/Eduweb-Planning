@@ -342,6 +342,11 @@ export default function DashboardPage() {
                   </TooltipContent>
                 </Tooltip>
                 <span className="text-sm font-semibold text-foreground">{p.name}</span>
+                {p.description ? (
+                  <p className="line-clamp-2 max-w-48 text-center text-xs leading-snug text-muted-foreground">
+                    {p.description}
+                  </p>
+                ) : null}
               </div>
             ))}
           </div>
