@@ -147,6 +147,7 @@ export default function AcademiePremiumPage() {
   const myRequests = promoRequests.filter((r) => r.requester === me.displayName || r.etablissement === etabName);
   const submitRequest = (type: string, typePct: number, justification: string) => {
     addPromoRequest({
+      userId: me.id,
       requester: me.displayName,
       requesterRole: getRoleLabel(effectiveRole),
       etablissement: etabName,

@@ -15,6 +15,7 @@ import { ProgressionSync } from "@/components/formations/progression-sync";
 import { EtabConfigSync } from "./etab-config-sync";
 import { EtablissementsSync } from "./etablissements-sync";
 import { AttendanceSync } from "./attendance-sync";
+import { PromoRequestsSync } from "./promo-requests-sync";
 import { AppSettingsSync } from "./app-settings-sync";
 import { cn } from "@/lib/utils";
 
@@ -105,6 +106,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Registre d'appel (présences) persisté par établissement → repris sur
           tous les postes de l'établissement (plus seulement le navigateur). */}
       <AttendanceSync />
+      {/* Demandes de code promo (per-utilisateur) : dépôt apprenant → admin, et
+          décision admin → demandeur, quel que soit le poste. */}
+      <PromoRequestsSync />
       {/* Gouvernance des formations (tarifs, certificats, règles, paiement) :
           réglages globaux admin chargés du serveur + write-through admin. */}
       <AppSettingsSync />

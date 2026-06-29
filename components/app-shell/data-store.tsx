@@ -150,6 +150,8 @@ const GRANT_LOG_SEED: GrantLogEntry[] = [
 /** Demande de code promo de réduction (Académie Premium). */
 export interface PromoRequest {
   id: string;
+  /** UUID Supabase du demandeur (auth.uid) — clé du cloisonnement per-user (RLS). */
+  userId?: string;
   requester: string;
   requesterRole: string;
   etablissement: string;
@@ -565,6 +567,8 @@ interface DataStore extends StoreState {
   approvePromoRequest: (id: string, actor: string) => void;
   /** Refuse une demande de code promo avec motif. */
   rejectPromoRequest: (id: string, actor: string, reason: string) => void;
+  /** Remplace les demandes promo par la liste serveur (PromoRequestsSync, mode réel). */
+  setPromoRequestsFromServer: (list: PromoRequest[]) => void;
   setRegionalStructures: (list: RegionalStructure[] | null) => void;
   /** Enregistre un certificat de fin de formation délivré dans le journal. */
   addCertificate: (
@@ -1190,6 +1194,8 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
             : r,
         ),
       })),
+    setPromoRequestsFromServer: (list) =>
+      setState((s) => ({ ...s, promoRequests: list })),
     enrollUser: (input) =>
       setState((s) => ({
         ...s,
