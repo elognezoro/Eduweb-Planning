@@ -283,7 +283,7 @@ export interface Subscription {
   expiresAt: string;
 }
 
-interface StoreState {
+export interface StoreState {
   users: DirectoryUser[];
   etablissements: Etablissement[];
   /** Régions académiques éditées par pays (override la config statique). */
@@ -570,6 +570,11 @@ interface DataStore extends StoreState {
   removeCertificate: (id: string) => void;
   /** Remplace la liste des partenaires affichés sur l'accueil (admin). */
   setPartners: (list: Partner[]) => void;
+  /**
+   * Fusionne des slices chargées depuis le serveur (Supabase) dans le store —
+   * le serveur fait autorité. Utilisé par les composants Sync (app_settings…).
+   */
+  applyServerSettings: (partial: Partial<StoreState>) => void;
   /** Inscrit un utilisateur à un cours (méthode nominative ou cohorte). */
   enrollUser: (input: Omit<CourseEnrollment, "id" | "enrolledAt">) => void;
   /** Inscrit plusieurs utilisateurs à un cours en une seule opération. */
@@ -1110,6 +1115,7 @@ export function DataStoreProvider({ children }: { children: React.ReactNode }) {
         certificates: s.certificates.filter((x) => x.id !== id),
       })),
     setPartners: (list) => setState((s) => ({ ...s, partners: list })),
+    applyServerSettings: (partial) => setState((s) => ({ ...s, ...partial })),
     addPromoRequest: (r) =>
       setState((s) => ({
         ...s,

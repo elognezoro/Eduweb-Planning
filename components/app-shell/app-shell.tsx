@@ -12,6 +12,7 @@ import { CourseEnrollmentsSync } from "@/components/formations/course-enrollment
 import { CohortsSync } from "@/components/formations/cohorts-sync";
 import { LivretSync } from "@/components/livret/livret-sync";
 import { EtabConfigSync } from "./etab-config-sync";
+import { AppSettingsSync } from "./app-settings-sync";
 import { cn } from "@/lib/utils";
 
 const LS_COLLAPSED = "eduweb.sidebar.collapsed";
@@ -93,6 +94,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Hydrate la config d'établissement (Supabase → cache local) pour les
           bulletins/livret/certificats, partagée et visible cross-appareil. */}
       <EtabConfigSync />
+      {/* Gouvernance des formations (tarifs, certificats, règles, paiement) :
+          réglages globaux admin chargés du serveur + write-through admin. */}
+      <AppSettingsSync />
     </div>
   );
 }
