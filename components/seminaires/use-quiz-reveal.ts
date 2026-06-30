@@ -23,7 +23,9 @@ export function useQuizReveal(total: number) {
     () => Object.keys(revealed).filter((k) => revealed[Number(k)]).length,
     [revealed],
   );
-  const allRevealed = total > 0 && revealedCount >= total;
+  // total === 0 (quiz sans question) → considéré « tout vérifié » pour ne pas
+  // laisser tourner un chronomètre indéfiniment.
+  const allRevealed = total === 0 ? true : revealedCount >= total;
 
   const isRevealed = React.useCallback((i: number) => Boolean(revealed[i]), [revealed]);
   const revealOne = React.useCallback(

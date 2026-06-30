@@ -901,8 +901,11 @@ function InteractiveQcm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refl.loaded, refl.own]);
   const saveTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  // N'enregistre QUE sur action utilisateur réelle — jamais sur l'hydratation
+  // (sinon une production validée serait momentanément réécrite en checked:false).
+  const userInteracted = React.useRef(false);
   React.useEffect(() => {
-    if (Object.keys(answers).length === 0) return;
+    if (!userInteracted.current) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     const snapshot = { answers, checked: reveal.allRevealed };
     saveTimer.current = setTimeout(() => refl.save(snapshot), 800);
@@ -912,6 +915,10 @@ function InteractiveQcm({
   }, [answers, reveal.allRevealed, refl.save]);
 
   const restart = () => {
+    // Action utilisateur → l'effet de sauvegarde persiste l'état VIDE (answers:{},
+    // checked:false), purgeant la production serveur : la tentative précédente ne
+    // ressuscite plus (ni côté apprenant, ni dans le panneau formateur).
+    userInteracted.current = true;
     setAnswers({});
     reveal.reset();
     setResetCount((c) => c + 1);
@@ -954,7 +961,10 @@ function InteractiveQcm({
                       type="radio"
                       name={`${idPrefix}-q${i}`}
                       checked={isPicked}
-                      onChange={() => setAnswers((a) => ({ ...a, [i]: j }))}
+                      onChange={() => {
+                        userInteracted.current = true;
+                        setAnswers((a) => ({ ...a, [i]: j }));
+                      }}
                       disabled={shown}
                       className="accent-ew-green-700"
                     />
@@ -984,7 +994,10 @@ function InteractiveQcm({
               {!shown ? (
                 <button
                   type="button"
-                  onClick={() => reveal.revealOne(i)}
+                  onClick={() => {
+                    userInteracted.current = true;
+                    reveal.revealOne(i);
+                  }}
                   disabled={answers[i] == null}
                   className="rounded-md border border-ew-green-400 bg-ew-green-50 px-2.5 py-1 text-xs font-bold text-ew-green-800 hover:bg-ew-green-100 disabled:opacity-40"
                   title={answers[i] == null ? "Choisissez une réponse pour vérifier." : "Vérifier cette question"}
@@ -1023,7 +1036,10 @@ function InteractiveQcm({
           </button>
         ) : (
           <button
-            onClick={reveal.revealAll}
+            onClick={() => {
+              userInteracted.current = true;
+              reveal.revealAll();
+            }}
             disabled={answered < questions.length}
             aria-describedby={helpId}
             title={answered < questions.length ? "Répondez à toutes les questions pour tout vérifier." : undefined}
