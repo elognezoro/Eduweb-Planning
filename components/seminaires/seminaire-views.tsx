@@ -817,30 +817,43 @@ function InteractiveTruefalse({
   idPrefix: string;
 }) {
   const [picks, setPicks] = React.useState<Record<number, "Vrai" | "Faux" | null>>({});
-  const [checked, setChecked] = React.useState(false);
+  const reveal = useQuizReveal(items.length);
+  const [resetCount, setResetCount] = React.useState(0);
   const helpId = `${idPrefix}-help`;
   const answered = Object.keys(picks).length;
   const score = React.useMemo(
     () => items.reduce((acc, it, i) => (picks[i] === it.answer ? acc + 1 : acc), 0),
     [picks, items],
   );
+  const restart = () => {
+    setPicks({});
+    reveal.reset();
+    setResetCount((c) => c + 1);
+  };
 
   return (
     <div className="space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          Test — {reveal.revealedCount}/{items.length} vérifiées
+        </p>
+        <TestTimer running={!reveal.allRevealed} resetKey={resetCount} />
+      </div>
       {items.map((it, i) => {
-        const good = checked && picks[i] === it.answer;
-        const bad = checked && picks[i] && picks[i] !== it.answer;
+        const shown = reveal.isRevealed(i);
+        const good = shown && picks[i] === it.answer;
+        const bad = shown && picks[i] && picks[i] !== it.answer;
         return (
           <div key={i} className="rounded-md border border-border p-3">
             <p className="text-sm">{it.statement}</p>
-            <div className="mt-2 flex gap-2">
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               {(["Vrai", "Faux"] as const).map((v) => {
                 const picked = picks[i] === v;
                 return (
                   <button
                     key={v}
-                    onClick={() => !checked && setPicks((p) => ({ ...p, [i]: v }))}
-                    disabled={checked}
+                    onClick={() => !shown && setPicks((p) => ({ ...p, [i]: v }))}
+                    disabled={shown}
                     aria-pressed={picked}
                     aria-label={`Réponse ${v} pour l'affirmation ${i + 1} de ${idPrefix}`}
                     className={cn(
@@ -861,9 +874,19 @@ function InteractiveTruefalse({
                 <span className="ml-auto inline-flex items-center gap-1 text-xs text-red-600">
                   <XCircle aria-hidden className="h-4 w-4" /> Réponse attendue : {it.answer}
                 </span>
+              ) : !shown ? (
+                <button
+                  type="button"
+                  onClick={() => reveal.revealOne(i)}
+                  disabled={picks[i] == null}
+                  className="ml-auto rounded-md border border-ew-green-400 bg-ew-green-50 px-2.5 py-1 text-xs font-bold text-ew-green-800 hover:bg-ew-green-100 disabled:opacity-40"
+                  title={picks[i] == null ? "Choisissez Vrai ou Faux pour vérifier." : "Vérifier cette affirmation"}
+                >
+                  Vérifier
+                </button>
               ) : null}
             </div>
-            {checked && it.explanation ? (
+            {shown && it.explanation ? (
               <p className="mt-2 rounded-md bg-muted/40 px-2 py-1 text-xs italic">{it.explanation}</p>
             ) : null}
           </div>
@@ -871,16 +894,13 @@ function InteractiveTruefalse({
       })}
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground" id={helpId}>
-          {checked
+          {reveal.allRevealed
             ? `Score : ${score}/${items.length}`
-            : `${answered}/${items.length} affirmations classées.`}
+            : `${answered}/${items.length} affirmations classées — vérifiez chacune, ou tout d'un coup.`}
         </p>
-        {checked ? (
+        {reveal.allRevealed ? (
           <button
-            onClick={() => {
-              setChecked(false);
-              setPicks({});
-            }}
+            onClick={restart}
             aria-label={`Recommencer l'activité ${idPrefix}`}
             className="rounded-md border border-border bg-card px-3 py-1 text-xs font-bold hover:bg-muted/20"
           >
@@ -888,18 +908,18 @@ function InteractiveTruefalse({
           </button>
         ) : (
           <button
-            onClick={() => setChecked(true)}
+            onClick={reveal.revealAll}
             disabled={answered < items.length}
-            aria-label={`Vérifier les réponses de ${idPrefix}`}
+            aria-label={`Tout vérifier — ${idPrefix}`}
             aria-describedby={helpId}
             title={
               answered < items.length
-                ? "Répondez à chaque affirmation pour vérifier."
+                ? "Répondez à chaque affirmation pour tout vérifier."
                 : undefined
             }
             className="rounded-md bg-ew-green-700 px-3 py-1 text-xs font-bold text-white disabled:opacity-50"
           >
-            Vérifier
+            Tout vérifier
           </button>
         )}
       </div>
@@ -921,15 +941,27 @@ function DragDropTable({
   }, [matchings]);
 
   const [picks, setPicks] = React.useState<Record<number, string>>({});
-  const [revealed, setRevealed] = React.useState(false);
+  const reveal = useQuizReveal(matchings.length);
+  const [resetCount, setResetCount] = React.useState(0);
   const allAnswered = matchings.every((_, i) => picks[i]);
   const correctCount = React.useMemo(
     () => matchings.reduce((acc, m, i) => (picks[i] === m.principle ? acc + 1 : acc), 0),
     [picks, matchings],
   );
+  const restart = () => {
+    setPicks({});
+    reveal.reset();
+    setResetCount((c) => c + 1);
+  };
 
   return (
     <div className="space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          Test — {reveal.revealedCount}/{matchings.length} vérifiées
+        </p>
+        <TestTimer running={!reveal.allRevealed} resetKey={resetCount} />
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead className="bg-muted/40 uppercase tracking-wide text-muted-foreground">
@@ -940,35 +972,53 @@ function DragDropTable({
           </thead>
           <tbody>
             {matchings.map((m, i) => {
+              const shown = reveal.isRevealed(i);
               const picked = picks[i] ?? "";
-              const good = revealed && picked === m.principle;
-              const bad = revealed && picked && picked !== m.principle;
+              const good = shown && picked === m.principle;
+              const bad = shown && picked && picked !== m.principle;
               return (
                 <tr key={i} className="border-t border-border align-top">
                   <td className="px-2 py-1.5">{m.situation}</td>
                   <td className="px-2 py-1.5">
-                    <select
-                      aria-label={`Principe à associer à la situation ${i + 1}`}
-                      value={picked}
-                      onChange={(e) =>
-                        !revealed && setPicks((p) => ({ ...p, [i]: e.target.value }))
-                      }
-                      disabled={revealed}
-                      className={cn(
-                        "w-full rounded border bg-background px-2 py-1 text-xs",
-                        good && "border-ew-green-600 bg-ew-green-100",
-                        bad && "border-red-500 bg-red-50",
-                        !good && !bad && "border-border",
+                    <div className="flex items-start gap-2">
+                      <select
+                        aria-label={`Principe à associer à la situation ${i + 1}`}
+                        value={picked}
+                        onChange={(e) =>
+                          !shown && setPicks((p) => ({ ...p, [i]: e.target.value }))
+                        }
+                        disabled={shown}
+                        className={cn(
+                          "w-full rounded border bg-background px-2 py-1 text-xs",
+                          good && "border-ew-green-600 bg-ew-green-100",
+                          bad && "border-red-500 bg-red-50",
+                          !good && !bad && "border-border",
+                        )}
+                      >
+                        <option value="">— Choisir —</option>
+                        {principles.map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
+                      </select>
+                      {!shown ? (
+                        <button
+                          type="button"
+                          onClick={() => reveal.revealOne(i)}
+                          disabled={!picked}
+                          className="shrink-0 rounded-md border border-ew-green-400 bg-ew-green-50 px-2 py-1 text-xs font-bold text-ew-green-800 hover:bg-ew-green-100 disabled:opacity-40"
+                          title={!picked ? "Associez un principe pour vérifier." : "Vérifier cette association"}
+                        >
+                          Vérifier
+                        </button>
+                      ) : good ? (
+                        <CheckCircle2 aria-hidden className="mt-1 h-4 w-4 shrink-0 text-ew-green-600" />
+                      ) : (
+                        <XCircle aria-hidden className="mt-1 h-4 w-4 shrink-0 text-red-600" />
                       )}
-                    >
-                      <option value="">— Choisir —</option>
-                      {principles.map((p) => (
-                        <option key={p} value={p}>
-                          {p}
-                        </option>
-                      ))}
-                    </select>
-                    {revealed && bad ? (
+                    </div>
+                    {shown && bad ? (
                       <p className="mt-1 text-[10px] italic text-red-600">
                         Réponse attendue : <strong>{m.principle}</strong>
                       </p>
@@ -982,22 +1032,19 @@ function DragDropTable({
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">
-          {revealed ? (
+          {reveal.allRevealed ? (
             <>
               Score : <strong>{correctCount}/{matchings.length}</strong>
             </>
           ) : (
             <>
-              {Object.keys(picks).length}/{matchings.length} associations
+              {Object.keys(picks).length}/{matchings.length} associations — vérifiez chacune, ou tout d&apos;un coup.
             </>
           )}
         </p>
-        {revealed ? (
+        {reveal.allRevealed ? (
           <button
-            onClick={() => {
-              setRevealed(false);
-              setPicks({});
-            }}
+            onClick={restart}
             className="rounded-md border border-border bg-card px-3 py-1 text-xs font-bold hover:bg-muted/20"
             id={`${activityId}-reset`}
           >
@@ -1005,13 +1052,13 @@ function DragDropTable({
           </button>
         ) : (
           <button
-            onClick={() => setRevealed(true)}
+            onClick={reveal.revealAll}
             disabled={!allAnswered}
-            aria-label={`Vérifier les associations de l'activité ${activityId}`}
-            title={!allAnswered ? "Associez chaque situation à un principe pour vérifier." : undefined}
+            aria-label={`Tout vérifier — activité ${activityId}`}
+            title={!allAnswered ? "Associez chaque situation à un principe pour tout vérifier." : undefined}
             className="rounded-md bg-ew-green-700 px-3 py-1 text-xs font-bold text-white disabled:opacity-50"
           >
-            Afficher la correction
+            Tout vérifier
           </button>
         )}
       </div>
@@ -1027,54 +1074,93 @@ function InteractiveScenario({
   idPrefix: string;
 }) {
   const [picks, setPicks] = React.useState<Record<number, number | null>>({});
-  const [checked, setChecked] = React.useState(false);
+  const reveal = useQuizReveal(steps.length);
+  const [resetCount, setResetCount] = React.useState(0);
   const helpId = `${idPrefix}-help`;
   const answered = Object.keys(picks).length;
+  const restart = () => {
+    setPicks({});
+    reveal.reset();
+    setResetCount((c) => c + 1);
+  };
 
   return (
     <div className="space-y-3">
-      {steps.map((s, i) => (
-        <div key={i} className="rounded-md border border-border p-3">
-          <p className="text-sm font-bold">Étape {s.num}</p>
-          <p className="mt-1 text-sm">{s.description}</p>
-          <div className="mt-2 space-y-1" role="radiogroup" aria-label={`Étape ${s.num} — ${idPrefix}`}>
-            {s.choices.map((c, j) => {
-              const picked = picks[i] === j;
-              const good = checked && j === s.bestIdx;
-              const bad = checked && picked && j !== s.bestIdx;
-              return (
-                <button
-                  key={j}
-                  onClick={() => !checked && setPicks((p) => ({ ...p, [i]: j }))}
-                  disabled={checked}
-                  aria-pressed={picked}
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          Test — {reveal.revealedCount}/{steps.length} vérifiées
+        </p>
+        <TestTimer running={!reveal.allRevealed} resetKey={resetCount} />
+      </div>
+      {steps.map((s, i) => {
+        const shown = reveal.isRevealed(i);
+        return (
+          <div key={i} className="rounded-md border border-border p-3">
+            <p className="text-sm font-bold">Étape {s.num}</p>
+            <p className="mt-1 text-sm">{s.description}</p>
+            <div className="mt-2 space-y-1" role="radiogroup" aria-label={`Étape ${s.num} — ${idPrefix}`}>
+              {s.choices.map((c, j) => {
+                const picked = picks[i] === j;
+                const good = shown && j === s.bestIdx;
+                const bad = shown && picked && j !== s.bestIdx;
+                return (
+                  <button
+                    key={j}
+                    onClick={() => !shown && setPicks((p) => ({ ...p, [i]: j }))}
+                    disabled={shown}
+                    aria-pressed={picked}
+                    className={cn(
+                      "block w-full rounded-md border px-2 py-1.5 text-left text-xs",
+                      picked && !shown && "border-ew-green-500 bg-ew-green-50",
+                      good && "border-ew-green-600 bg-ew-green-100",
+                      bad && "border-red-500 bg-red-50",
+                      !picked && !good && !bad && "border-border bg-card",
+                    )}
+                  >
+                    {String.fromCharCode(65 + j)}. {c}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-2 flex items-center justify-between gap-2">
+              {shown ? (
+                <p
                   className={cn(
-                    "block w-full rounded-md border px-2 py-1.5 text-left text-xs",
-                    picked && !checked && "border-ew-green-500 bg-ew-green-50",
-                    good && "border-ew-green-600 bg-ew-green-100",
-                    bad && "border-red-500 bg-red-50",
-                    !picked && !good && !bad && "border-border bg-card",
+                    "text-xs font-bold",
+                    picks[i] === s.bestIdx ? "text-ew-green-700" : "text-red-600",
                   )}
                 >
-                  {String.fromCharCode(65 + j)}. {c}
+                  {picks[i] === s.bestIdx
+                    ? "✓ Choix le plus responsable"
+                    : `✗ Le plus responsable : ${String.fromCharCode(65 + s.bestIdx)}. ${s.choices[s.bestIdx]}`}
+                </p>
+              ) : (
+                <span aria-hidden />
+              )}
+              {!shown ? (
+                <button
+                  type="button"
+                  onClick={() => reveal.revealOne(i)}
+                  disabled={picks[i] == null}
+                  className="rounded-md border border-ew-green-400 bg-ew-green-50 px-2.5 py-1 text-xs font-bold text-ew-green-800 hover:bg-ew-green-100 disabled:opacity-40"
+                  title={picks[i] == null ? "Décidez de cette étape pour vérifier." : "Vérifier cette étape"}
+                >
+                  Vérifier
                 </button>
-              );
-            })}
+              ) : null}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
       <div className="flex items-center justify-between">
         <p className="text-xs italic text-muted-foreground" id={helpId}>
-          {checked
+          {reveal.allRevealed
             ? "Comparez vos choix avec la décision la plus responsable."
-            : `${answered}/${steps.length} étapes décidées — choisissez à chaque étape l'action la plus responsable.`}
+            : `${answered}/${steps.length} étapes décidées — vérifiez chacune, ou tout d'un coup.`}
         </p>
-        {checked ? (
+        {reveal.allRevealed ? (
           <button
-            onClick={() => {
-              setChecked(false);
-              setPicks({});
-            }}
+            onClick={restart}
             aria-label={`Recommencer le scénario ${idPrefix}`}
             className="rounded-md border border-border bg-card px-3 py-1 text-xs font-bold hover:bg-muted/20"
           >
@@ -1082,18 +1168,18 @@ function InteractiveScenario({
           </button>
         ) : (
           <button
-            onClick={() => setChecked(true)}
+            onClick={reveal.revealAll}
             disabled={answered < steps.length}
-            aria-label={`Vérifier le scénario ${idPrefix}`}
+            aria-label={`Tout vérifier — scénario ${idPrefix}`}
             aria-describedby={helpId}
             title={
               answered < steps.length
-                ? "Décidez de chaque étape pour vérifier."
+                ? "Décidez de chaque étape pour tout vérifier."
                 : undefined
             }
             className="rounded-md bg-ew-green-700 px-3 py-1 text-xs font-bold text-white disabled:opacity-50"
           >
-            Vérifier
+            Tout vérifier
           </button>
         )}
       </div>
