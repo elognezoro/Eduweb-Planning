@@ -83,6 +83,14 @@ export function NarrationButton({
   );
   const [supported, setSupported] = React.useState(true);
   const [voicesReady, setVoicesReady] = React.useState(false);
+  // Vitesse de lecture (×). Lue via une ref pour que la valeur courante
+  // s'applique au prochain segment sans recréer speakNext (évite cancel/relance
+  // fragile de SpeechSynthesis). Le changement prend effet à la phrase suivante.
+  const [rate, setRate] = React.useState(1);
+  const rateRef = React.useRef(rate);
+  React.useEffect(() => {
+    rateRef.current = rate;
+  }, [rate]);
   // File des segments restants à dire (chunking anti-bug Chromium 15s).
   const queueRef = React.useRef<string[]>([]);
   // Message annoncé via aria-live pour les lecteurs d'écran.
@@ -154,7 +162,7 @@ export function NarrationButton({
     } else {
       u.lang = "fr-FR";
     }
-    u.rate = 0.95;
+    u.rate = rateRef.current;
     u.pitch = 1;
     u.onend = () => {
       if (queueRef.current.length > 0) {
@@ -329,6 +337,33 @@ export function NarrationButton({
             <Square aria-hidden className="h-3 w-3" />
           </button>
         </>
+      ) : null}
+
+      {/* Sélecteur de vitesse de lecture (masqué en mode compact). */}
+      {!compact ? (
+        <div
+          className="inline-flex items-center gap-0.5 rounded-md border border-border bg-card/60 px-1 py-0.5"
+          role="group"
+          aria-label="Vitesse de lecture"
+        >
+          {[0.75, 1, 1.25, 1.5].map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setRate(r)}
+              aria-pressed={rate === r}
+              className={cn(
+                "rounded px-1.5 py-0.5 text-[11px] font-bold tabular-nums transition-colors",
+                rate === r
+                  ? "bg-ew-purple-100 text-ew-purple-800"
+                  : "text-muted-foreground hover:bg-muted/50",
+              )}
+              title={`Vitesse de lecture ${r}×`}
+            >
+              {r}×
+            </button>
+          ))}
+        </div>
       ) : null}
     </div>
   );

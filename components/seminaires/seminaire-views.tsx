@@ -28,6 +28,8 @@ import {
   SeminaireActivityProvider,
   useSeminaireActivityContext,
 } from "./activity-context";
+import { useQuizReveal } from "./use-quiz-reveal";
+import { TestTimer } from "./test-timer";
 import { InteractivePoll } from "./activities/interactive-poll";
 import { InteractiveForum } from "./activities/interactive-forum";
 import { InteractiveMindMap } from "./activities/interactive-mindmap";
@@ -655,7 +657,8 @@ function InteractiveQcm({
   onScored?: (percent: number, raw: number, total: number) => void;
 }) {
   const [answers, setAnswers] = React.useState<Record<number, number | null>>({});
-  const [checked, setChecked] = React.useState(false);
+  const reveal = useQuizReveal(questions.length);
+  const [resetCount, setResetCount] = React.useState(0);
   const helpId = `${idPrefix}-help`;
   const answered = Object.keys(answers).length;
   const score = React.useMemo(
@@ -664,10 +667,11 @@ function InteractiveQcm({
     [answers, questions],
   );
 
-  // Notifier le parent du score lors de la vérification.
+  // Notifier le parent du score UNIQUEMENT quand TOUTES les questions sont
+  // vérifiées (le test est terminé) — préserve la sémantique de validation.
   const scoredRef = React.useRef<number | null>(null);
   React.useEffect(() => {
-    if (!checked) {
+    if (!reveal.allRevealed) {
       scoredRef.current = null;
       return;
     }
@@ -675,70 +679,110 @@ function InteractiveQcm({
     scoredRef.current = score;
     const pct = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
     onScored?.(pct, score, questions.length);
-  }, [checked, score, questions.length, onScored]);
+  }, [reveal.allRevealed, score, questions.length, onScored]);
+
+  const restart = () => {
+    setAnswers({});
+    reveal.reset();
+    setResetCount((c) => c + 1);
+  };
 
   return (
     <div className="space-y-3">
-      {questions.map((q, i) => (
-        <div key={i} className="rounded-md border border-border p-3">
-          <p className="text-sm font-bold" id={`${idPrefix}-q${i}-label`}>
-            Q{i + 1}. {q.question}
-          </p>
-          <div className="mt-2 space-y-1" role="radiogroup" aria-labelledby={`${idPrefix}-q${i}-label`}>
-            {q.options.map((o, j) => {
-              const isPicked = answers[i] === j;
-              const isCorrect = checked && j === q.correctIdx;
-              const isWrong = checked && isPicked && j !== q.correctIdx;
-              return (
-                <label
-                  key={j}
+      {/* En-tête : chronomètre démarré dès l'ouverture du test, figé à la fin. */}
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          Test — {reveal.revealedCount}/{questions.length} vérifiées
+        </p>
+        <TestTimer running={!reveal.allRevealed} resetKey={resetCount} />
+      </div>
+      {questions.map((q, i) => {
+        const shown = reveal.isRevealed(i);
+        const good = answers[i] === q.correctIdx;
+        return (
+          <div key={i} className="rounded-md border border-border p-3">
+            <p className="text-sm font-bold" id={`${idPrefix}-q${i}-label`}>
+              Q{i + 1}. {q.question}
+            </p>
+            <div className="mt-2 space-y-1" role="radiogroup" aria-labelledby={`${idPrefix}-q${i}-label`}>
+              {q.options.map((o, j) => {
+                const isPicked = answers[i] === j;
+                const isCorrect = shown && j === q.correctIdx;
+                const isWrong = shown && isPicked && j !== q.correctIdx;
+                return (
+                  <label
+                    key={j}
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 text-xs",
+                      !shown && isPicked && "border-ew-green-500 bg-ew-green-50",
+                      isCorrect && "border-ew-green-600 bg-ew-green-100",
+                      isWrong && "border-red-500 bg-red-50",
+                      !shown && !isPicked && "border-border",
+                      shown && !isCorrect && !isWrong && "border-border",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name={`${idPrefix}-q${i}`}
+                      checked={isPicked}
+                      onChange={() => setAnswers((a) => ({ ...a, [i]: j }))}
+                      disabled={shown}
+                      className="accent-ew-green-700"
+                    />
+                    <span>{o}</span>
+                    {isCorrect ? (
+                      <CheckCircle2 aria-hidden className="ml-auto h-4 w-4 text-ew-green-600" />
+                    ) : null}
+                    {isWrong ? <XCircle aria-hidden className="ml-auto h-4 w-4 text-red-600" /> : null}
+                  </label>
+                );
+              })}
+            </div>
+            {/* Vérification IMMÉDIATE de cette question. */}
+            <div className="mt-2 flex items-center justify-between gap-2">
+              {shown ? (
+                <p
                   className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 text-xs",
-                    !checked && isPicked && "border-ew-green-500 bg-ew-green-50",
-                    isCorrect && "border-ew-green-600 bg-ew-green-100",
-                    isWrong && "border-red-500 bg-red-50",
-                    !checked && !isPicked && "border-border",
-                    checked && !isCorrect && !isWrong && "border-border",
+                    "text-xs font-bold",
+                    good ? "text-ew-green-700" : "text-red-600",
                   )}
                 >
-                  <input
-                    type="radio"
-                    name={`${idPrefix}-q${i}`}
-                    checked={isPicked}
-                    onChange={() => setAnswers((a) => ({ ...a, [i]: j }))}
-                    disabled={checked}
-                    className="accent-ew-green-700"
-                  />
-                  <span>{o}</span>
-                  {isCorrect ? (
-                    <CheckCircle2 aria-hidden className="ml-auto h-4 w-4 text-ew-green-600" />
-                  ) : null}
-                  {isWrong ? <XCircle aria-hidden className="ml-auto h-4 w-4 text-red-600" /> : null}
-                </label>
-              );
-            })}
+                  {good ? "✓ Bonne réponse" : `✗ Réponse exacte : ${q.options[q.correctIdx]}`}
+                </p>
+              ) : (
+                <span aria-hidden />
+              )}
+              {!shown ? (
+                <button
+                  type="button"
+                  onClick={() => reveal.revealOne(i)}
+                  disabled={answers[i] == null}
+                  className="rounded-md border border-ew-green-400 bg-ew-green-50 px-2.5 py-1 text-xs font-bold text-ew-green-800 hover:bg-ew-green-100 disabled:opacity-40"
+                  title={answers[i] == null ? "Choisissez une réponse pour vérifier." : "Vérifier cette question"}
+                >
+                  Vérifier
+                </button>
+              ) : null}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground" id={helpId}>
-          {checked ? (
+          {reveal.allRevealed ? (
             <>
               Score : <strong>{score}/{questions.length}</strong> (
               {Math.round((score / questions.length) * 100)} %)
             </>
           ) : (
             <>
-              {answered}/{questions.length} questions répondues — cliquez sur « Vérifier » quand tout est coché.
+              {answered}/{questions.length} répondues — vérifiez chaque question, ou tout d&apos;un coup.
             </>
           )}
         </p>
-        {checked ? (
+        {reveal.allRevealed ? (
           <button
-            onClick={() => {
-              setChecked(false);
-              setAnswers({});
-            }}
+            onClick={restart}
             aria-label={`Recommencer le quiz ${idPrefix}`}
             className="rounded-md border border-border bg-card px-3 py-1 text-xs font-bold hover:bg-muted/20"
           >
@@ -746,18 +790,18 @@ function InteractiveQcm({
           </button>
         ) : (
           <button
-            onClick={() => setChecked(true)}
+            onClick={reveal.revealAll}
             disabled={answered < questions.length}
-            aria-label={`Vérifier les réponses du quiz ${idPrefix}`}
+            aria-label={`Tout vérifier — quiz ${idPrefix}`}
             aria-describedby={helpId}
             title={
               answered < questions.length
-                ? "Répondez à toutes les questions pour vérifier."
+                ? "Répondez à toutes les questions pour tout vérifier."
                 : undefined
             }
             className="rounded-md bg-ew-green-700 px-3 py-1 text-xs font-bold text-white disabled:opacity-50"
           >
-            Vérifier
+            Tout vérifier
           </button>
         )}
       </div>

@@ -505,6 +505,12 @@ input::-ms-clear {
    Limités à l'écran : à l'impression, les livrets A4 conservent leurs
    tailles d'origine pour préserver la mise en page paginée. */
 @media screen {
+  /* Plancher de lisibilité : aucune police sous 13px à l'écran dans le lecteur.
+     Les classes text-[9px]/[9.5px] des aperçus A4 imprimables (livrets/manuel)
+     ne sont pas couvertes par les bumps ci-dessous → on les remonte à 13px
+     (0.8125rem). À l'impression, @media print garde leurs tailles d'origine. */
+  .formation-reader .text-\[9px\] { font-size: 0.8125rem; line-height: 1.5; }
+  .formation-reader .text-\[9\.5px\] { font-size: 0.8125rem; line-height: 1.5; }
   .formation-reader .text-xs { font-size: 1.05rem; line-height: 1.6; }
   .formation-reader .text-\[10px\] { font-size: 0.95rem; line-height: 1.55; }
   .formation-reader .text-\[10\.5px\] { font-size: 0.95rem; line-height: 1.55; }
